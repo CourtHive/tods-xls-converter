@@ -1,0 +1,15 @@
+*.log
+.DS_Store
+coverage
+node_modules
+scratch
+dist
+*.un~
+.*.un~
+*.code-workspace
+*.VSCodeCounter
+.nvim*
+documentation/.docusaurus
+documentation/build
+package-lock.json
+*decoy*
