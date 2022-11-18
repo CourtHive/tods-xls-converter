@@ -68,6 +68,7 @@
     "vitest": "^0.25.2"
   },
   "dependencies": {
+    "hash-sum": "^2.0.0",
     "node-xlsx": "^0.21.0",
     "normalize-text": "^2.4.1",
     "tods-competition-factory": "^0.393.0",

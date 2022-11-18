@@ -1,273 +1,258 @@
-import { HEADER, FOOTER } from "../constants/sheetElements";
-import {
-  KNOCKOUT,
-  ROUND_ROBIN,
-  PARTICIPANTS,
-  INFORMATION,
-} from "../constants/sheetTypes";
+import { postProcessors } from '../functions/postProcessors';
+import { isNumeric } from '../utilities/convenience';
+
+import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
+import { HEADER, FOOTER } from '../constants/sheetElements';
 
 export const config = {
-  organization: "IND",
+  organization: 'IND',
   mustContainSheetNames: [],
   profile: {
-    providerId: "IND-0123",
-    skipWords: ["winner"],
-    skipExpressions: ["[0-9,/, ]+pont", "umpire"],
+    providerId: 'IND-0123',
+    skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none'],
+    skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
+    considerAlpha: ['0'], // '0' is the participantName given to BYE positions
+    considerNumeric: ['-'], // '-' is a placeholder when no ranking
     matchOutcomes: [
-      "ret.",
-      "RET",
-      "DEF.",
-      "Def.",
-      "def.",
-      "BYE",
-      "w.o",
-      "w.o.",
-      "W.O",
-      "W.O.",
-      "W/O",
-      "W/O.",
-      "W/O,",
-      "wo.",
-      "WO",
-      "Abandoned",
+      'ret.',
+      'RET',
+      'DEF.',
+      'Def.',
+      'def.',
+      'BYE',
+      'w.o',
+      'w.o.',
+      'W.O',
+      'W.O.',
+      'W/O',
+      'W/O.',
+      'W/O,',
+      'wo.',
+      'WO',
+      'Abandoned'
     ],
     doubles: {
       drawPosition: {
-        rowOffset: -1, // missing drawPosition for doubles partner is no previous line
-      },
+        rowOffset: -1 // missing drawPosition for doubles partner is no previous line
+      }
     },
     identification: {
       includes: [],
-      sub_includes: [],
+      sub_includes: []
     },
+    /*
     columnsMap: {
-      position: "A",
-      rank: "C",
-      id: "H",
-      seed: "D",
-      lastName: "E",
-      firstName: "F",
-      club: "",
-      rounds: "J",
+      position: 'A',
+      rank: 'C',
+      id: 'H',
+      seed: 'D',
+      lastName: 'E',
+      firstName: 'F',
+      club: '',
+      rounds: 'J'
     },
+    */
     rowDefinitions: [
       {
         type: HEADER,
-        id: "knockoutParticipants",
+        id: 'knockoutParticipants',
         elements: [
-          "rank",
-          "seed",
-          "family name",
-          "first name",
-          "reg.no",
-          "2nd round",
-          "quarterfinals",
-          "semifinals",
-          "final",
+          'rank',
+          'seed',
+          'family name',
+          'first name',
+          'reg.no',
+          '2nd round',
+          '3rd round',
+          'quarterfinals',
+          'semifinals',
+          'final'
         ],
         rows: 1,
-        minimumElements: 5,
-      },
-      {
-        type: HEADER,
-        id: "roundRobinParticipants",
-        elements: [
-          "kiem",
-          "kódszám",
-          "rangsor",
-          "vezetéknév",
-          "keresztnév",
-          "egyesület",
-          "helyezés",
-          "pontszám",
-          "bónusz",
-        ],
-        rows: 1,
-        minimumElements: 7,
-      },
-      {
-        type: HEADER,
-        id: "singlesParticipants",
-        elements: [
-          "sor",
-          "családi név",
-          "keresztnév",
-          "egyesület",
-          "kódszám",
-          "aláírás",
-          "nevezési rangsor",
-          "elfogadási státusz",
-          "sorsolási rangsor",
-          "kiemelés",
-        ],
-        rows: 1,
-        minimumElements: 8,
-      },
-      {
-        type: HEADER,
-        id: "doublesParticipants",
-        elements: [
-          "ssz.",
-          "családi név",
-          "keresztnév",
-          "egyesületi",
-          "kódszám",
-          "1. játékos ranglista",
-          "aláírás",
-          "2. játékos ranglista",
-          "páros egyesített rangsora",
-          "kIemelés",
-        ],
-        rows: 1,
-        minimumElements: 8,
+        minimumElements: 5
       },
       {
         type: FOOTER,
-        id: "drawFooter",
-        elements: [
-          "acc. ranking",
-          "seeded players",
-          "luck losers",
-          "replacing",
-          "draw date/time",
-        ],
+        id: 'drawFooter',
+        elements: ['acc. ranking', 'seeded players', 'luck losers', 'replacing', 'draw date/time'],
         rows: 9,
-        minimumElements: 3,
-      },
-      {
-        type: HEADER,
-        id: "tournamentInfo",
-        elements: ["a verseny dátuma (éééé.hh.nn)", "város", "versenybíró"],
-        rows: 1,
-        minimumElements: 2,
-      },
-      {
-        type: HEADER,
-        id: "tournamentOrganization",
-        elements: ["orvos neve", "verseny rendezője", "versenyigazgató"],
-        rows: 1,
-        minimumElements: 2,
-      },
+        minimumElements: 3
+      }
+    ],
+    headerColumns: [
+      { attr: 'entryStatus', header: 'st.' },
+      { attr: 'ranking', header: 'rank' },
+      { attr: 'seedValue', header: 'seed' },
+      { attr: 'lastName', header: 'family name' },
+      { attr: 'firstName', header: 'first name' },
+      { attr: 'personId', header: 'reg.no' },
+      { attr: 'round', header: ['2nd round', 'quarterfinals', 'semifinals', 'final'] }
     ],
     sheetDefinitions: [
       {
         type: INFORMATION,
-        rowIds: ["tournamentInfo", "tournamentOrganization"],
+        rowIds: ['tournamentInfo', 'tournamentOrganization']
       },
       {
         type: KNOCKOUT,
-        rowIds: ["knockoutParticipants", "drawFooter"],
+        rowIds: ['knockoutParticipants', 'drawFooter']
       },
       {
         type: ROUND_ROBIN,
-        rowIds: ["roundRobinParticipants", "drawFooter"],
+        rowIds: ['roundRobinParticipants', 'drawFooter']
       },
       {
         type: PARTICIPANTS,
-        rowIds: ["singlesParticipants"],
+        rowIds: ['singlesParticipants']
       },
       {
         type: PARTICIPANTS,
-        rowIds: ["doublesParticipants"],
-      },
+        rowIds: ['doublesParticipants']
+      }
     ],
-    gaps: { draw: { term: "Round 1", gap: 0 } },
-    headerColumns: [
-      { attr: "rank", header: "Rangs" },
-      { attr: "rank", header: "Rangsor" },
-      { attr: "id", header: "kód" },
-      { attr: "id", header: "Kódszám" },
-      { attr: "seed", header: "Kiem" },
-      { attr: "lastName", header: "Családi név" },
-      { attr: "lastName", header: "Vezetéknév" },
-      { attr: "firstName", header: "Keresztnév" },
-      { attr: "club", header: "Egyesület" },
-      { attr: "rounds", header: "Döntő" },
-      { attr: "rounds", header: "2. forduló" },
-    ],
+    gaps: { draw: { term: 'Round 1', gap: 0 } },
     playerRows: { playerNames: true, lastName: true, firstName: true },
     tournamentInfo: [
       {
-        attribute: "tournamentName",
-        searchText: "A verseny neve",
-        rowOffset: 1,
+        attribute: 'tournamentName',
+        searchText: 'A verseny neve',
+        rowOffset: 1
       },
       {
-        attribute: "dates",
-        searchText: "A verseny dátuma (éééé.hh.nn)",
+        attribute: 'dates',
+        searchText: 'A verseny dátuma (éééé.hh.nn)',
         rowOffset: 1,
-        postProcessor: "dateParser",
+        postProcessor: 'dateParser'
       },
-      { attribute: "city", searchText: "Város", rowOffset: 1 },
-      { attribute: "referee", searchText: "Versenybíró:", rowOffset: 1 },
-      { attribute: "doctor", searchText: "Orvos neve:", rowOffset: 1 },
+      { attribute: 'city', searchText: 'Város', rowOffset: 1 },
+      { attribute: 'referee', searchText: 'Versenybíró:', rowOffset: 1 },
+      { attribute: 'doctor', searchText: 'Orvos neve:', rowOffset: 1 },
       {
-        attribute: "organizer",
-        searchText: "Verseny rendezője:",
-        rowOffset: 1,
+        attribute: 'organizer',
+        searchText: 'Verseny rendezője:',
+        rowOffset: 1
       },
-      { attribute: "director", searchText: "Versenyigazgató", rowOffset: 1 },
+      { attribute: 'director', searchText: 'Versenyigazgató', rowOffset: 1 },
       {
-        attribute: "categories",
-        searchText: "Versenyszám 1",
+        attribute: 'categories',
+        searchText: 'Versenyszám 1',
         rowOffset: 1,
-        columnOffsets: [0, 1, 2, 3, 4],
-      },
+        columnOffsets: [0, 1, 2, 3, 4]
+      }
     ],
     drawInfo: [
       {
-        attribute: "event",
-        searchText: "Versenyszám",
-        rowOffset: 0,
-        columnOffset: 5,
+        attribute: 'tournamentName',
+        cellRef: 'A1' // function to look at A1, A2 and select the longest value or the value which includes 'tournament'
       },
       {
-        attribute: "event",
-        searchText: "Versenyszám",
-        rowOffset: 0,
-        columnOffset: 4,
+        attribute: 'tournamentId',
+        searchText: 'tourn. id',
+        rowOffset: 1
       },
       {
-        attribute: "gender",
-        searchText: "Versenyszám",
-        rowOffset: 0,
-        columnOffset: 5,
-        postProcessor: "genderParser",
+        attribute: 'level',
+        searchText: 'grade',
+        rowOffset: 1
       },
       {
-        attribute: "gender",
-        searchText: "Versenyszám",
-        rowOffset: 0,
-        columnOffset: 4,
-        postProcessor: "genderParser",
-      },
-      {
-        attribute: "dates",
-        searchText: "Dátum",
+        attribute: 'startDate',
+        searchText: 'week of',
         rowOffset: 1,
-        postProcessor: "dateParser",
+        postProcessor: 'dateParser'
       },
-      { attribute: "city", searchText: "Város", rowOffset: 1 },
-      { attribute: "category", searchText: "Kategória", rowOffset: 1 },
-      { attribute: "referee", searchText: "Versenybíró", rowOffset: 1 },
+      {
+        attribute: 'city',
+        searchText: 'city',
+        options: { startsWith: true },
+        rowOffset: 1,
+        postProcessor: 'cityParser'
+      },
+      {
+        attribute: 'state',
+        searchText: 'city',
+        options: { startsWith: true },
+        rowOffset: 1,
+        postProcessor: 'stateParser'
+      },
+      {
+        attribute: 'referee',
+        searchText: ['referee', 'refree'],
+        options: { includes: true },
+        rowOffset: 1,
+        columnOffset: 1
+      },
+      {
+        attribute: 'eventName',
+        searchText: 'main draw',
+        options: { startsWith: true },
+        rowOffset: -1
+      },
+      {
+        attribute: 'category',
+        searchText: 'main draw',
+        options: { startsWith: true },
+        columnOffset: 4,
+        postProcessor: 'categoryParser'
+      },
+      {
+        attribute: 'gender',
+        searchText: 'main draw',
+        options: { startsWith: true },
+        rowOffset: -1,
+        postProcessor: 'genderParser'
+      },
+      { attribute: 'drawCreationDate', searchText: 'Draw date/time', columnOffset: 2, postProcessor: 'dateTimeParser' },
+      { attribute: 'representatives', searchText: 'Player representatives', rowOffset: 1, rowCount: 2 },
+      { attribute: 'topDirectAcceptance', searchText: 'Top DA', columnOffset: 2, postProcessor: 'parseInt' },
+      { attribute: 'lastDirectAcceptance', searchText: 'Last DA', columnOffset: 2, postProcessor: 'parseInt' },
+      {
+        attribute: 'rankingDate',
+        searchText: 'Acc. ranking',
+        rowOffset: 1,
+        columnOffset: 2,
+        postProcessor: 'dateParser'
+      },
+      { attribute: 'topSeed', searchText: 'Top seed', columnOffset: 2, postProcessor: 'parseInt' },
+      { attribute: 'lastSeed', searchText: 'Last seed', columnOffset: 2, postProcessor: 'parseInt' },
+      {
+        attribute: 'seedingDate',
+        searchText: 'Seed ranking',
+        rowOffset: 1,
+        columnOffset: 2,
+        postProcessor: 'dateParser'
+      },
+      { attribute: 'seededPlayerNames', searchText: 'Seeded players', rowOffset: 1, rowCount: 8 },
+      { attribute: 'luckyLoserPlayerNames', searchText: 'Lucky losers', rowOffset: 1, rowCount: 8 }
     ],
-    dateParser: (date) => {
-      const splitDate = date.split("-");
-      const startDate = splitDate[0].split(".").join("-");
-      let result = { startDate };
-      if (splitDate[1]) {
-        const endSplit = splitDate[1].split(".").filter(Boolean);
-        const yearMonth = startDate.split("-").slice(0, 3 - endSplit.length);
-        const endDate = [].concat(...yearMonth, ...endSplit).join("-");
-        result.endDate = endDate;
-      }
-      return result;
+    dateTimeParser: (dateTimeString) => {
+      const [iDate, time] = dateTimeString.split(' ');
+      const date = postProcessors.dateParser(iDate);
+      return { date, time };
+    },
+    categoryParser: (value) => {
+      value = value
+        .split(' ')
+        .filter((c) => !['-'].includes(c))
+        .join('');
+      return value.includes('U') ? [...value.split('U'), 'U'].join('') : value;
     },
     genderParser: (value) => {
-      const male = /^F/.test(value);
-      const female = /^L/.test(value);
-      return { gender: male ? "M" : female ? "W" : "X" };
+      const male = /^BOYS/.test(value);
+      const female = /^GIRLS/.test(value);
+      return { gender: male ? 'M' : female ? 'W' : 'X' };
     },
+    cityParser: (value) => {
+      const splitChar = [',', '/'].find((char) => value.includes(char));
+      return value.split(splitChar)[0];
+    },
+    stateParser: (value) => {
+      const splitChar = [',', '/'].find((char) => value.includes(char));
+      const splitValue = value.split(splitChar);
+      const state = splitValue.length > 1 ? splitValue[1].trim() : '';
+      return state?.toLowerCase() === 'india' ? '' : state;
+    },
+    isProviderId: (value) => isNumeric(value) && (value === 0 || value.toString().length === 6)
   },
   sheetNameMatcher: (sheetNames) => {
     const potentials = sheetNames.some((sheetName) => {
@@ -275,5 +260,5 @@ export const config = {
       return mTest;
     });
     return potentials;
-  },
+  }
 };

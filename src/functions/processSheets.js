@@ -2,20 +2,33 @@ import { processRoundRobin } from './processRoundRobin';
 import { processKnockOut } from './processKnockout';
 import { identifySheet } from './identifySheet';
 import { extractInfo } from './extractInfo';
+import { getWorkbook } from '..';
 
 import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN } from '../constants/sheetTypes';
-import { MISSING_SHEET_DEFINITION, UNKNOWN_SHEET_TYPE } from '../constants/errorConditions';
+import { SUCCESS } from '../constants/resultConstants';
+import {
+  MISSING_SHEET_DEFINITION,
+  MISSING_WORKBOOK,
+  UNKNOWN_SHEET_TYPE,
+  UNKNOWN_WORKBOOK_TYPE
+} from '../constants/errorConditions';
 
-/*
-const pushData = ({ drawInfo, playersMap, participantsMap }) => {
-  Object.assign(allParticipants, participantsMap || {});
-  Object.assign(allPlayers, playersMap || {});
-  draws.push(drawInfo);
-};
-*/
+export function processSheets() {
+  const { workbook, workbookType } = getWorkbook();
+  if (!workbook) return { error: MISSING_WORKBOOK };
+  if (!workbookType) return { error: UNKNOWN_WORKBOOK_TYPE };
+
+  const { profile } = workbookType;
+  for (const sheetName of workbook.SheetNames) {
+    processSheet(workbook, profile, sheetName);
+  }
+
+  return { ...SUCCESS };
+}
 
 export function processSheet(workbook, profile, sheetName) {
   const sheet = workbook.Sheets[sheetName];
+
   const sheetDefinition = identifySheet({ sheetName, sheet, profile });
 
   if (!sheetDefinition) {

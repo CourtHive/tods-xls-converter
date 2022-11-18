@@ -1,4 +1,6 @@
 import { identifyWorkbook } from './functions/identifyWorkbook';
+import { processSheets } from './functions/processSheets';
+import { printGlobalLog } from './utilities/globalLog';
 import { read } from 'xlsx';
 
 import { SUCCESS } from './constants/resultConstants';
@@ -17,12 +19,24 @@ export function loadWorkbook(buf) {
 
   workbookType = result.workbookType;
 
-  return { workbookType, xls, ...SUCCESS };
+  return { workbookType, ...xlsTODS, ...SUCCESS };
 }
 
-export const xls = {
-  loadWorkbook,
+export function getWorkbook() {
+  return { workbook, workbookType };
+}
+
+export function getWorkbookProps() {
+  return workbook;
+}
+
+export const xlsTODS = {
+  getWorkbook,
+  getWorkbookProps,
   identifyWorkbook,
+  loadWorkbook,
+  printGlobalLog,
+  processSheets
 };
 
-export default xls;
+export default xlsTODS;

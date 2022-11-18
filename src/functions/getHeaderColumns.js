@@ -7,13 +7,29 @@ export function getHeaderColumns({ sheet, profile, headerRow }) {
   const columnsMap = Object.assign({}, profile.columnsMap);
   if (profile.headerColumns) {
     profile.headerColumns.forEach((obj) => {
+      const getRef = (text) => {
+        const ref = findValueRefs(text, sheet).reduce((p, c) => (getRow(c) === parseInt(headerRow) ? c : p), undefined);
+        const col = ref && getCol(ref);
+
+        if (col) {
+          if (Array.isArray(columnsMap[obj.attr])) {
+            columnsMap[obj.attr].push(col);
+          } else {
+            if (columnsMap[obj.attr]) {
+              columnsMap[obj.attr] = [columnsMap[obj.attr], col];
+            } else {
+              columnsMap[obj.attr] = col;
+            }
+          }
+        }
+      };
+
       const searchText = obj.header;
-      const ref = findValueRefs(searchText, sheet).reduce(
-        (p, c) => (getRow(c) === parseInt(headerRow) ? c : p),
-        undefined
-      );
-      const col = ref && getCol(ref);
-      if (col) columnsMap[obj.attr] = col;
+      if (Array.isArray(searchText)) {
+        searchText.forEach(getRef);
+      } else {
+        getRef(searchText);
+      }
     });
   }
   return columnsMap;

@@ -1,5 +1,7 @@
 import { normalizeDiacritics, normalizeWhiteSpaces } from 'normalize-text';
-import { unique, instanceCount } from 'functions/utilities';
+import { utilities } from 'tods-competition-factory';
+
+const { unique, instanceCount } = utilities;
 
 export function numberValue(sheet, reference) {
   return !isNaN(parseInt(getCellValue(sheet[reference]))) ? parseInt(getCellValue(sheet[reference])) : '';
@@ -46,36 +48,90 @@ export function getCol(reference) {
 }
 
 export function findValueRefs(searchText, sheet, options) {
-  const lowercaseSearchText = (searchText || '').toLowerCase();
-  return Object.keys(sheet).filter(
-    (ref) => transformValue(getCellValue(sheet[ref])) === normalizeDiacritics(lowercaseSearchText)
-  );
+  const normalizedLowerCase = (text) => normalizeDiacritics((text || '').toLowerCase());
+  const isArray = Array.isArray(searchText);
+
+  const lowercaseSearchText = isArray ? searchText.map(normalizedLowerCase) : normalizedLowerCase(searchText);
+
+  const refs = Object.keys(sheet).filter((ref) => {
+    const transformedValue = transformValue(getCellValue(sheet[ref]));
+    if (options?.startsWith) {
+      return isArray
+        ? lowercaseSearchText.some((text) => transformedValue.startsWith(text))
+        : transformedValue.startsWith(lowercaseSearchText);
+    } else if (options?.includes) {
+      const result = isArray
+        ? lowercaseSearchText.some((text) => transformedValue.indexOf(text) > 0)
+        : transformedValue.indexOf(lowercaseSearchText) > 0;
+      return result;
+    } else {
+      return isArray
+        ? lowercaseSearchText.some((text) => transformedValue === text)
+        : transformedValue === lowercaseSearchText;
+    }
+  });
+
+  return refs;
 
   function transformValue(value) {
     value = value.toLowerCase();
     value = normalizeDiacritics(value);
-    if (options) {
-      if (options.remove && Array.isArray(options.remove)) {
-        options.remove.forEach((replace) => {
-          const re = new RegExp(replace, 'g');
-          value = value.replace(re, '');
-        });
-      }
+
+    if (options?.remove && Array.isArray(options.remove)) {
+      options.remove.forEach((replace) => {
+        const re = new RegExp(replace, 'g');
+        value = value.replace(re, '');
+      });
     }
+
     return value;
   }
 }
 
-export function getTargetValue({ searchText, sheet, rowOffset = 0, columnOffset = 0, options }) {
+// instance allows specification of which encountered match to extract
+export function getTargetValue({ searchText, sheet, rowOffset = 0, columnOffset = 0, options, instance = 1 }) {
   const nameRefs = findValueRefs(searchText, sheet, options);
   if (!Array.isArray(nameRefs) || nameRefs.length < 1) return '';
   const row = getRow(nameRefs);
   const targetRow = row + rowOffset;
-  const column = getCol(nameRefs[0]);
+  const column = getCol(nameRefs[instance - 1]);
   const targetColumn = String.fromCharCode(((column && column.charCodeAt()) || 0) + columnOffset);
   const targetRef = `${targetColumn}${targetRow}`;
   const value = getCellValue(sheet[targetRef]);
-  return value;
+  return value?.trim();
+}
+
+export function getValueRange({
+  columnOffset = 0,
+  columnCount = 0,
+  rowOffset = 0,
+  rowCount = 0,
+  searchText,
+  options,
+  sheet
+}) {
+  const nameRefs = findValueRefs(searchText, sheet, options);
+  if (!Array.isArray(nameRefs) || nameRefs.length < 1) return '';
+  const row = getRow(nameRefs);
+
+  // cannot have both rowCount and columnCount; must have one
+  if ((rowCount && columnCount) || (rowCount && columnCount)) return [];
+
+  const range = utilities.generateRange(0, rowCount || columnCount);
+
+  const values = [];
+  for (const increment of range) {
+    const targetRow = row + rowOffset + (rowCount ? increment : 0);
+    const column = getCol(nameRefs[0]);
+    const targetColumn = String.fromCharCode(
+      ((column && column.charCodeAt()) || 0) + columnOffset + (columnCount ? increment : 0)
+    );
+    const targetRef = `${targetColumn}${targetRow}`;
+    const value = getCellValue(sheet[targetRef]);
+    values.push(value);
+  }
+
+  return values;
 }
 
 export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet }) {
