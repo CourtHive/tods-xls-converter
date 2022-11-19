@@ -7,17 +7,28 @@ import { SUCCESS } from '../constants/resultConstants';
 export function processKnockOut({ sheetDefinition, sheetName, profile, sheet }) {
   pushGlobalLog({ method: 'processKnockout', sheetName, type: sheetDefinition.type });
 
+  const { cellRefs, info: drawInfo } = extractInfo({ profile, sheet, infoClass: 'drawInfo' });
+  console.log({ drawInfo });
+
   const analyzer = getSheetAnalysis({
+    ignoreCellRefs: cellRefs,
     sheetDefinition,
     profile,
     sheet
   });
-  console.log(analyzer.rowGroupings, analyzer.columns, analyzer.attributeMap);
 
-  const { info: drawInfo } = extractInfo({ profile, sheet, infoClass: 'drawInfo' });
-
-  console.log({ drawInfo });
+  analyzer.rowGroupings.forEach((grouping) => {
+    const { columns, attributes, rowCount } = grouping;
+    pushGlobalLog({ columns, attributes, rowCount });
+  });
+  console.log(
+    // analyzer.rowGroupings
+    analyzer.columnProfiles.map((v) => v.values)
+    // analyzer.columns,
+    // analyzer.attributeMap
+  );
   /*
+
   const result = getParticipantRows({
     headerRow,
     footerRow,

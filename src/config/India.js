@@ -31,27 +31,17 @@ export const config = {
       'WO',
       'Abandoned'
     ],
+    /*
     doubles: {
       drawPosition: {
-        rowOffset: -1 // missing drawPosition for doubles partner is no previous line
+        rowOffset: -1 // missing drawPosition for doubles partner is on previous line
       }
     },
+    */
     identification: {
       includes: [],
       sub_includes: []
     },
-    /*
-    columnsMap: {
-      position: 'A',
-      rank: 'C',
-      id: 'H',
-      seed: 'D',
-      lastName: 'E',
-      firstName: 'F',
-      club: '',
-      rounds: 'J'
-    },
-    */
     rowDefinitions: [
       {
         type: HEADER,

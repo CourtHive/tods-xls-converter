@@ -6,7 +6,7 @@ import { isNumeric } from '../utilities/convenience';
 
 import { FOOTER, HEADER } from '../constants/sheetElements';
 
-export const getSheetAnalysis = ({ sheet, sheetDefinition, /* columns, headerRow, footerRow,*/ profile }) => {
+export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, profile }) => {
   const rowDefinitions = profile.rowDefinitions;
   const headerRowDefinition = findRowDefinition({
     rowIds: sheetDefinition.rowIds,
@@ -87,8 +87,14 @@ export const getSheetAnalysis = ({ sheet, sheetDefinition, /* columns, headerRow
     const value = getCellValue(sheet[key]);
     return !isSkipWord(value);
   };
+  const isNotIgnored = (key) => !ignoreCellRefs.includes(key);
 
-  const filteredKeys = Object.keys(sheet).filter(inRowBand).filter(isSingleAlpha).filter(isNotSkipExpression);
+  const filteredKeys = Object.keys(sheet)
+    .filter(isNotIgnored)
+    .filter(inRowBand)
+    .filter(isSingleAlpha)
+    .filter(isNotSkipExpression);
+
   const assessColumn = (column) => {
     const isColumnKey = (key) => getCol(key) === column;
     const prospectColumnKeys = filteredKeys.filter(isColumnKey);
@@ -100,7 +106,7 @@ export const getSheetAnalysis = ({ sheet, sheetDefinition, /* columns, headerRow
         const rawValue = getValue(key).split('.').join('');
         const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
 
-        const skip = profile.skipContains?.some((sv) => value.toLowerCase().includes(sv)) || isSkipWord(rawValue);
+        const skip = profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) || isSkipWord(rawValue);
 
         if (!skip) {
           if (onlyAlpha(rawValue)) {
@@ -115,7 +121,7 @@ export const getSheetAnalysis = ({ sheet, sheetDefinition, /* columns, headerRow
             }
             assessment.lastNumericValue = value;
             if (assessment.allProviderId) {
-              assessment.allProviderId = profile.isProviderId(value);
+              assessment.allProviderId = profile?.isProviderId?.(value);
             }
           } else if (value) {
             assessment.consecutiveNumbers = false;
@@ -156,7 +162,7 @@ export const getSheetAnalysis = ({ sheet, sheetDefinition, /* columns, headerRow
   );
 
   const getColumnCharacter = (columnProfile) => {
-    const { consecutiveNumbers, values, lastNumericValue, column } = columnProfile;
+    const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column } = columnProfile;
     if (
       consecutiveNumbers &&
       lastNumericValue > 0 &&
@@ -166,6 +172,16 @@ export const getSheetAnalysis = ({ sheet, sheetDefinition, /* columns, headerRow
       const character = 'position';
       columnProfile.character = character;
       if (!attributeMap[column]) attributeMap[column] = character;
+    }
+
+    if (containsNumeric && containsAlpha) {
+      // check whether there is clear separation between numeric and alpha values
+      // and whether numeric values occur before alpha values
+      const numericMap = values.map(isNumeric);
+      const lastNumeric = numericMap.lastIndexOf(true);
+      const firstAlpha = numericMap.indexOf(false);
+      console.log({ lastNumeric, firstAlpha });
+      if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
     }
   };
 

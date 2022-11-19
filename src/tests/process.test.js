@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'fs-extra';
 
 import xlsTODS from '..';
 
-import { generateMatchUpId } from '../utilities/hashing';
+// import { generateMatchUpId } from '../utilities/hashing';
 
 import { expect, it } from 'vitest';
 
@@ -17,7 +17,8 @@ it('can log factory version', () => {
 
   for (const filename of filenames) {
     const buf = readFileSync(`${rootDir}/${filename}`);
-    let result = xlsTODS.loadWorkbook(buf).processSheets();
+    // let result = xlsTODS.loadWorkbook(buf).processSheets({ sheetLimit: 1 });
+    let result = xlsTODS.loadWorkbook(buf).processSheets({ sheetNumbers: [5] });
     expect(result.success).toEqual(true);
 
     /*

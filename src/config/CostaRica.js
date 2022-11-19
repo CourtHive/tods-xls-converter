@@ -1,11 +1,11 @@
-import { HEADER, FOOTER } from '../constants/sheetElements';
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
+import { HEADER, FOOTER } from '../constants/sheetElements';
 
 export const config = {
   organization: 'CR',
   mustContainSheetNames: [],
   profile: {
-    skipWords: [],
+    skipWords: ['final'],
     skipContains: ['página', 'pagina'],
     skipExpressions: [],
     matchOutcomes: [
@@ -23,11 +23,6 @@ export const config = {
       'WO',
       'Abandoned'
     ],
-    doubles: {
-      drawPosition: {
-        rowOffset: -1 // missing drawPosition for doubles partner is on previous line
-      }
-    },
     identification: {
       includes: [],
       sub_includes: []
@@ -41,7 +36,7 @@ export const config = {
       'SEMIFINAL',
       'SEMIFINALES',
       'FINAL',
-      'CAMPEÓN',
+      'CAMPEON',
       'GANADOR',
       'GANADORA'
     ],
@@ -57,7 +52,7 @@ export const config = {
           'SEMIFINAL',
           'SEMIFINALES',
           'FINAL',
-          'CAMPEÓN',
+          'CAMPEON',
           'GANADOR',
           'GANADORA'
         ],
@@ -74,7 +69,7 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        elements: ['TORNEO'],
+        elements: [{ text: 'FORMATO', options: { startsWith: true } }],
         rows: 8,
         minimumElements: 1
       }
@@ -102,72 +97,80 @@ export const config = {
       }
     ],
     gaps: { draw: { term: 'Round 1', gap: 0 } },
-    headerColumns: [],
+    headerColumns: [
+      {
+        attr: 'round',
+        header: [
+          'PRIMERA RONDA',
+          'SEGUNDA RONDA',
+          'OCTAVOS',
+          'CUARTOS',
+          'SEMIFINAL',
+          'SEMIFINALES',
+          'FINAL',
+          'CAMPEÓN',
+          'GANADOR',
+          'GANADORA'
+        ]
+      }
+    ],
     playerRows: { playerNames: true, lastName: true, firstName: true },
     tournamentInfo: [
-      {
-        attribute: 'tournamentName',
-        searchText: 'TORNEO',
-        columnOffset: 1
-      },
-      {
-        attribute: 'dates',
-        searchText: 'A verseny dátuma (éééé.hh.nn)',
-        rowOffset: 1,
-        postProcessor: 'dateParser'
-      },
-      { attribute: 'city', searchText: 'Város', rowOffset: 1 },
-      { attribute: 'referee', searchText: 'Versenybíró:', rowOffset: 1 },
-      { attribute: 'doctor', searchText: 'Orvos neve:', rowOffset: 1 },
-      {
-        attribute: 'organizer',
-        searchText: 'Verseny rendezője:',
-        rowOffset: 1
-      },
-      { attribute: 'director', searchText: 'Versenyigazgató', rowOffset: 1 },
+      /*
       {
         attribute: 'categories',
         searchText: 'Versenyszám 1',
         rowOffset: 1,
         columnOffsets: [0, 1, 2, 3, 4]
       }
+      */
     ],
     drawInfo: [
       {
-        attribute: 'event',
-        searchText: 'Versenyszám',
-        rowOffset: 0,
-        columnOffset: 5
+        attribute: 'tournamentName',
+        searchText: 'torneo',
+        columnOffset: 1
       },
       {
-        attribute: 'event',
-        searchText: 'Versenyszám',
-        rowOffset: 0,
-        columnOffset: 4
+        attribute: 'category',
+        searchText: 'categoria',
+        columnOffset: 1
+        // postProcessor: 'categoryParser'
       },
       {
-        attribute: 'gender',
-        searchText: 'Versenyszám',
-        rowOffset: 0,
-        columnOffset: 5,
-        postProcessor: 'genderParser'
+        attribute: 'venue',
+        searchText: 'lugar',
+        columnOffset: 1
+        // postProcessor: 'venueParser'
       },
       {
-        attribute: 'gender',
-        searchText: 'Versenyszám',
-        rowOffset: 0,
-        columnOffset: 4,
-        postProcessor: 'genderParser'
+        attribute: 'dateRange',
+        searchText: 'fecha',
+        columnOffset: 1
+        // postProcessor: 'textDateParser'
       },
       {
-        attribute: 'dates',
-        searchText: 'Dátum',
-        rowOffset: 1,
-        postProcessor: 'dateParser'
+        attribute: 'director',
+        searchText: 'director',
+        columnOffset: 1
+        // postProcessor: 'officialParser'
       },
-      { attribute: 'city', searchText: 'Város', rowOffset: 1 },
-      { attribute: 'category', searchText: 'Kategória', rowOffset: 1 },
-      { attribute: 'referee', searchText: 'Versenybíró', rowOffset: 1 }
+      {
+        attribute: 'referee',
+        searchText: 'supervisor',
+        options: { startsWith: true },
+        columnOffset: 1
+        // postProcessor: 'officialParser'
+      },
+      {
+        attribute: 'representatives',
+        searchText: 'testigos',
+        columnOffset: 1,
+        postProcessor: (value) => value.split(',')
+      },
+      { attribute: 'financial', searchText: 'fiscales', columnOffset: 1 },
+      { attribute: 'seededPlayerNames', searchText: 'sembrados', rowOffset: 1, rowCount: 16 },
+      { attribute: 'seedNumbers', searchText: 'sembrados', rowOffset: 1, columnOffset: -1, rowCount: 8 }
     ],
     dateParser: (date) => {
       const splitDate = date.split('-');

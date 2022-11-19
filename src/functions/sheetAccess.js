@@ -23,7 +23,15 @@ export function extractNameField(cellRef) {
   return onlyNameChars(value);
 }
 
+const containsAlpha = (value) => /[a-zA-Z- ]+/.test(value);
+
+export function isDateCell(cell) {
+  return cell?.t === 'n' && containsAlpha(cell.w);
+}
+
 export function getCellValue(cell) {
+  if (cell?.t === 'n' && containsAlpha(cell.w)) return '';
+
   let val = cell ? cell.v + '' : '';
   val = typeof val === 'string' ? val.trim() : val;
   val = normalizeWhiteSpaces(val);
@@ -47,27 +55,54 @@ export function getCol(reference) {
   return reference ? reference[0] : undefined;
 }
 
-export function findValueRefs(searchText, sheet, options) {
-  const normalizedLowerCase = (text) => normalizeDiacritics((text || '').toLowerCase());
-  const isArray = Array.isArray(searchText);
+const isObject = (value) => typeof value === 'object';
 
-  const lowercaseSearchText = isArray ? searchText.map(normalizedLowerCase) : normalizedLowerCase(searchText);
+export function findValueRefs(searchDetails, sheet, options) {
+  const normalizedLowerCase = (value) => {
+    const text = isObject(value) ? value.text : value;
+    const normalizedText = normalizeDiacritics((text || '').toLowerCase());
+    return isObject(value) ? { text: normalizedText, options: value.options } : normalizedText;
+  };
+
+  const isArray = Array.isArray(searchDetails);
+  const lowercaseSearchDetails = isArray
+    ? searchDetails.map(normalizedLowerCase)
+    : [normalizedLowerCase(searchDetails)];
+
+  const objectSearchDetails = [];
+  const textSearchDetails = [];
+
+  for (const detail of lowercaseSearchDetails) {
+    if (isObject(detail)) {
+      objectSearchDetails.push(detail);
+    } else {
+      textSearchDetails.push(detail);
+    }
+  }
 
   const refs = Object.keys(sheet).filter((ref) => {
     const transformedValue = transformValue(getCellValue(sheet[ref]));
+
+    const startsWith = (text) => transformedValue.startsWith(text);
+    const includes = (text) => transformedValue.includes(text);
+    const equals = (text) => transformedValue === text;
+
+    const checkObjectDetail = ({ text, options }) => {
+      if (options?.startsWith) {
+        return startsWith(text);
+      } else if (options?.includes) {
+        return includes(text);
+      }
+    };
+
+    if (objectSearchDetails.some(checkObjectDetail)) return true;
+
     if (options?.startsWith) {
-      return isArray
-        ? lowercaseSearchText.some((text) => transformedValue.startsWith(text))
-        : transformedValue.startsWith(lowercaseSearchText);
+      return textSearchDetails.some(startsWith);
     } else if (options?.includes) {
-      const result = isArray
-        ? lowercaseSearchText.some((text) => transformedValue.indexOf(text) > 0)
-        : transformedValue.indexOf(lowercaseSearchText) > 0;
-      return result;
+      return textSearchDetails.some(includes);
     } else {
-      return isArray
-        ? lowercaseSearchText.some((text) => transformedValue === text)
-        : transformedValue === lowercaseSearchText;
+      return textSearchDetails.some(equals);
     }
   });
 
@@ -92,13 +127,17 @@ export function findValueRefs(searchText, sheet, options) {
 export function getTargetValue({ searchText, sheet, rowOffset = 0, columnOffset = 0, options, instance = 1 }) {
   const nameRefs = findValueRefs(searchText, sheet, options);
   if (!Array.isArray(nameRefs) || nameRefs.length < 1) return '';
-  const row = getRow(nameRefs);
+
+  const row = getRow(nameRefs[instance - 1]);
   const targetRow = row + rowOffset;
   const column = getCol(nameRefs[instance - 1]);
   const targetColumn = String.fromCharCode(((column && column.charCodeAt()) || 0) + columnOffset);
   const targetRef = `${targetColumn}${targetRow}`;
   const value = getCellValue(sheet[targetRef]);
-  return value?.trim();
+
+  const cellRefs = [targetRef, `${column}${row}`];
+
+  return { cellRefs, value: value?.trim() };
 }
 
 export function getValueRange({
@@ -106,13 +145,18 @@ export function getValueRange({
   columnCount = 0,
   rowOffset = 0,
   rowCount = 0,
+  instance = 1,
   searchText,
   options,
   sheet
 }) {
   const nameRefs = findValueRefs(searchText, sheet, options);
   if (!Array.isArray(nameRefs) || nameRefs.length < 1) return '';
-  const row = getRow(nameRefs);
+
+  const column = getCol(nameRefs[instance - 1]);
+  const row = getRow(nameRefs[instance - 1]);
+
+  const cellRefs = [`${column}${row}`];
 
   // cannot have both rowCount and columnCount; must have one
   if ((rowCount && columnCount) || (rowCount && columnCount)) return [];
@@ -122,28 +166,39 @@ export function getValueRange({
   const values = [];
   for (const increment of range) {
     const targetRow = row + rowOffset + (rowCount ? increment : 0);
-    const column = getCol(nameRefs[0]);
+    const column = getCol(nameRefs[instance - 1]);
     const targetColumn = String.fromCharCode(
       ((column && column.charCodeAt()) || 0) + columnOffset + (columnCount ? increment : 0)
     );
     const targetRef = `${targetColumn}${targetRow}`;
+    cellRefs.push(targetRef);
     const value = getCellValue(sheet[targetRef]);
     values.push(value);
   }
 
-  return values;
+  return { values, cellRefs };
 }
 
 export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet }) {
   const rowElements = rowDefinition && rowDefinition.elements;
   if (!rowElements) return;
+
+  const toLower = (e) => (typeof e === 'object' ? { text: e.text.toLowerCase(), options: e.options } : e.toLowerCase());
+  const toLowerCase = (element) => (Array.isArray(element) ? element.map(toLower) : toLower(element));
+
+  const normal = (e) =>
+    typeof e === 'object' ? { text: normalizeDiacritics(e.text), options: e.options } : normalizeDiacritics(e);
+  const toNormal = (element) => (Array.isArray(element) ? element.map(normal) : normal(element));
+
   const options = { lowerCase: true, normalize: true, remove: [':'] };
   const elementRows = [].concat(
     ...rowElements
-      .map((element) => (options.lowerCase ? element.toLowerCase() : element))
-      .map((element) => (options.normalize ? normalizeDiacritics(element) : element))
+      .map((element) => (options.lowerCase ? toLowerCase(element) : element))
+      .map((element) => (options.normalize ? toNormal(element) : element))
       .map((element) => {
-        const valueRefs = findValueRefs(element, sheet, options);
+        const valueRefs = Array.isArray(element)
+          ? element.flatMap((e) => findValueRefs(e, sheet, options))
+          : findValueRefs(element, sheet, options);
         // remove duplicate instances on the same row
         return unique(valueRefs.map(getRow));
       })

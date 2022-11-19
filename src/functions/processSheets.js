@@ -13,13 +13,20 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export function processSheets() {
+export function processSheets({ sheetLimit, sheetNumbers = [] }) {
   const { workbook, workbookType } = getWorkbook();
   if (!workbook) return { error: MISSING_WORKBOOK };
   if (!workbookType) return { error: UNKNOWN_WORKBOOK_TYPE };
 
   const { profile } = workbookType;
+
+  let sheetNumber = 0;
   for (const sheetName of workbook.SheetNames) {
+    sheetNumber += 1;
+    console.log({ sheetNumber });
+    if (sheetLimit && sheetNumber > sheetLimit) break;
+
+    if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
     processSheet(workbook, profile, sheetName);
   }
 

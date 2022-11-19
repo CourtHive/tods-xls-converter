@@ -4,9 +4,11 @@ import { postProcessors } from './postProcessors';
 import { SUCCESS } from '../constants/resultConstants';
 
 export function extractInfo({ profile, sheet, infoClass }) {
-  const extractObject = {};
-  const options = { remove: [':'] };
   const accessors = profile[infoClass];
+  const options = { remove: [':'] };
+  const extractObject = {};
+  const cellRefs = [];
+
   if (infoClass && accessors) {
     accessors.forEach((accessor) => {
       if (accessor.cellRef) {
@@ -18,26 +20,33 @@ export function extractInfo({ profile, sheet, infoClass }) {
         } else {
           Object.assign(accessor, { options });
         }
+
         if (accessor.rowCount || accessor.columnCount) {
           const props = Object.assign({}, accessor, { sheet });
-          const value = getValueRange(props)?.filter(Boolean);
-          extractObject[accessor.attribute] = processValue({ accessor, value });
+          const { values, cellRefs: refs } = getValueRange(props);
+          const value = values?.filter(Boolean);
+          if (value) {
+            extractObject[accessor.attribute] = processValue({ accessor, value });
+            cellRefs.push(...refs);
+          }
         } else if (accessor.columnOffsets && Array.isArray(accessor.columnOffsets)) {
           let values = [];
           accessor.columnOffsets.forEach((columnOffset) => {
             const props = Object.assign({}, accessor, { sheet, columnOffset });
-            const value = getTargetValue(props);
+            const { value, cellRefs: refs } = getTargetValue(props);
             if (value) {
               values.push(processValue({ accessor, value }));
+              cellRefs.push(...refs);
             }
           });
           if (values?.length) extractObject[accessor.attribute] = values;
         } else {
           const props = Object.assign({}, accessor, { sheet });
-          const value = getTargetValue(props);
+          const { value, cellRefs: refs } = getTargetValue(props);
           if (value) {
             const result = processValue({ accessor, value });
             extractObject[accessor.attribute] = result;
+            cellRefs.push(...refs);
           }
         }
       }
@@ -60,5 +69,5 @@ export function extractInfo({ profile, sheet, infoClass }) {
     }
   }
 
-  return { info: extractObject, ...SUCCESS };
+  return { cellRefs, info: extractObject, ...SUCCESS };
 }
