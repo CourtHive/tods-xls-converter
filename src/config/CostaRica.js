@@ -1,15 +1,20 @@
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
 import { HEADER, FOOTER } from '../constants/sheetElements';
 
+// NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
+// however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
+// provided that a player advanced!
+
 export const config = {
   organization: 'CR',
   mustContainSheetNames: [],
   profile: {
     skipWords: [
       'final',
+      'sencillos',
       { startsWithEndsWith: { startsWith: [1, 2, 3, 4, 5, 6, 7, 8, 9], endsWith: 'm' }, remove: ['"."'] }
     ],
-    skipContains: ['página', 'pagina'],
+    skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
     matchOutcomes: ['doble w.o.', 'ret.', 'def.', 'bye', 'w.o', 'w.o.', 'wo.', 'wo', 'abandoned'],
     identification: {
@@ -58,7 +63,7 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        elements: [{ text: 'FORMATO', options: { startsWith: true } }],
+        elements: [{ text: 'FORMATO', options: { startsWith: true } }, 'TESTIGOS'],
         rows: 8,
         minimumElements: 1
       }

@@ -1,8 +1,8 @@
+import { isNumeric, isObject, keySort, removeBits } from '../utilities/convenience';
 import { findRow, getCellValue, getCol, getRow } from './sheetAccess';
 import { findRowDefinition } from './findRowDefinition';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
-import { isNumeric, isObject, removeBits } from '../utilities/convenience';
 
 import { FOOTER, HEADER } from '../constants/sheetElements';
 
@@ -125,18 +125,13 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
 
   const assessColumn = (column) => {
     const isColumnKey = (key) => getCol(key) === column;
-    const prospectColumnKeys = filteredKeys.filter(isColumnKey);
+    const prospectColumnKeys = filteredKeys.filter(isColumnKey).sort(keySort);
     const truthiness = !!prospectColumnKeys.length;
 
     const assessment = prospectColumnKeys.reduce(
       (assessment, key) => {
-        // remove '.'
-        const rawValue = getValue(key).split('.').join('');
+        const rawValue = getValue(key).split('.').join(''); // remove '.'
         const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
-
-        if (isSkipWord(rawValue)) {
-          console.log({ skipped: rawValue });
-        }
 
         const skip = profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) || isSkipWord(rawValue);
 
@@ -144,7 +139,6 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
           if (onlyAlpha(rawValue)) {
             assessment.containsAlpha = true;
             assessment.allNumeric = false;
-            assessment.consecutiveNumbers = false;
           } else if (onlyNumeric(rawValue)) {
             assessment.containsNumeric = true;
             assessment.allAlpha = false;
@@ -156,7 +150,6 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
               assessment.allProviderId = profile?.isProviderId?.(value);
             }
           } else if (value) {
-            assessment.consecutiveNumbers = false;
             assessment.allNumeric = false;
             assessment.allAlpha = false;
           }
@@ -193,15 +186,16 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     []
   );
 
-  const getColumnCharacter = (columnProfile) => {
+  const columnCharacter = (columnProfile) => {
     const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column } = columnProfile;
+
     if (
       consecutiveNumbers &&
       lastNumericValue > 0 &&
       (utilities.isPowerOf2(lastNumericValue) ||
         (lastNumericValue < values.length && utilities.isPowerOf2(values.length)))
     ) {
-      const character = 'position';
+      const character = containsAlpha ? 'preRound' : 'position';
       columnProfile.character = character;
       if (!attributeMap[column]) attributeMap[column] = character;
     }
@@ -212,7 +206,6 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
       const numericMap = values.map(isNumeric);
       const lastNumeric = numericMap.lastIndexOf(true);
       const firstAlpha = numericMap.indexOf(false);
-      console.log({ lastNumeric, firstAlpha });
       if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
     }
   };
@@ -222,10 +215,11 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     .map(assessColumn)
     .filter(({ values }) => values?.length);
 
-  columnProfiles.forEach(getColumnCharacter);
+  columnProfiles.forEach(columnCharacter);
+  if (profile.columnCharacter) columnProfiles.forEach(profile.columnCharacter);
 
   const commonRows = columnProfiles.reduce((commonRows, columnProfile) => {
-    const rowsString = columnProfile.rows.sort().join('|');
+    const rowsString = columnProfile.rows.join('|');
     if (!commonRows[rowsString]) {
       commonRows[rowsString] = [columnProfile.column];
     } else {

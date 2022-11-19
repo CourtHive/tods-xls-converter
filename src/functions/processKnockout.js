@@ -1,34 +1,23 @@
 import { pushGlobalLog } from '../utilities/globalLog';
-import { getSheetAnalysis } from './getSheetAnalysis';
-import { extractInfo } from './extractInfo';
 
 import { SUCCESS } from '../constants/resultConstants';
 
-export function processKnockOut({ sheetDefinition, sheetName, profile, sheet }) {
-  pushGlobalLog({ method: 'processKnockout', sheetName, type: sheetDefinition.type });
+export function processKnockOut({ sheetDefinition, profile, analysis, sheet }) {
+  if (sheetDefinition && profile && sheet);
 
-  const { cellRefs, info: drawInfo } = extractInfo({ profile, sheet, infoClass: 'drawInfo' });
-  console.log({ drawInfo });
-
-  const analyzer = getSheetAnalysis({
-    ignoreCellRefs: cellRefs,
-    sheetDefinition,
-    profile,
-    sheet
-  });
-
-  analyzer.rowGroupings.forEach((grouping) => {
+  analysis.rowGroupings.forEach((grouping) => {
     const { columns, attributes, rowCount } = grouping;
     pushGlobalLog({ columns, attributes, rowCount });
   });
   console.log(
     // analyzer.rowGroupings
-    analyzer.columnProfiles.map((v) => v.values)
+    // analysis.columnProfiles.map((v) => v.values)
+    analysis.columnProfiles
     // analyzer.columns,
     // analyzer.attributeMap
   );
-  /*
 
+  /*
   const result = getParticipantRows({
     headerRow,
     footerRow,

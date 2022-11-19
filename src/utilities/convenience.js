@@ -1,4 +1,5 @@
 import { utilities } from 'tods-competition-factory';
+import { getRow } from '../functions/sheetAccess';
 
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
@@ -15,3 +16,5 @@ export const removeBits = (value, remove = []) => {
   });
   return value;
 };
+
+export const keySort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));

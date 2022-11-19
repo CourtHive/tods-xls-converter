@@ -112,13 +112,7 @@ export function findValueRefs(searchDetails, sheet, options) {
     value = normalizeDiacritics(value);
 
     if (options?.remove && Array.isArray(options.remove)) {
-      removeBits(value, options.remove);
-      /*
-      options.remove.forEach((replace) => {
-        const re = new RegExp(replace, 'g');
-        value = value.replace(re, '');
-      });
-      */
+      value = removeBits(value, options.remove);
     }
 
     return value;
@@ -186,7 +180,7 @@ export function getValueRange({
   return { values, cellRefs };
 }
 
-export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet }) {
+export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet, options: additionalOptions }) {
   const rowElements = rowDefinition && rowDefinition.elements;
   if (!rowElements) return;
 
@@ -197,7 +191,7 @@ export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet })
     typeof e === 'object' ? { text: normalizeDiacritics(e.text), options: e.options } : normalizeDiacritics(e);
   const toNormal = (element) => (Array.isArray(element) ? element.map(normal) : normal(element));
 
-  const options = { lowerCase: true, normalize: true, remove: [':'] };
+  const options = { lowerCase: true, normalize: true, remove: [':'], ...additionalOptions };
   const elementRows = [].concat(
     ...rowElements
       .map((element) => (options.lowerCase ? toLowerCase(element) : element))

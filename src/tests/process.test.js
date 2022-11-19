@@ -17,8 +17,9 @@ it('can log factory version', () => {
 
   for (const filename of filenames) {
     const buf = readFileSync(`${rootDir}/${filename}`);
-    let result = xlsTODS.loadWorkbook(buf).processSheets({ sheetLimit: 1 });
-    // let result = xlsTODS.loadWorkbook(buf).processSheets({ sheetNumbers: [5] });
+    let result = xlsTODS.loadWorkbook(buf).processSheets();
+    // let result = xlsTODS.loadWorkbook(buf).processSheets({ sheetLimit: 1 });
+    // let result = xlsTODS.loadWorkbook(buf).processSheets({ sheetNumbers: [2] });
     expect(result.success).toEqual(true);
 
     /*
