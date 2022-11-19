@@ -13,3 +13,4 @@ documentation/.docusaurus
 documentation/build
 package-lock.json
 *decoy*
+*.xls*
