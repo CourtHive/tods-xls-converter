@@ -169,8 +169,8 @@ export const config = {
         postProcessor: (value) => value.split(',')
       },
       { attribute: 'financial', searchText: 'fiscales', columnOffset: 1 },
-      { attribute: 'seededPlayerNames', searchText: 'sembrados', rowOffset: 1, rowCount: 16 },
-      { attribute: 'seedNumbers', searchText: 'sembrados', rowOffset: 1, columnOffset: -1, rowCount: 8 }
+      { attribute: 'seededPlayerNames', searchText: ['sembrados', 'sembradas'], rowOffset: 1, rowCount: 16 },
+      { attribute: 'seedNumbers', searchText: ['sembrados', 'sembradas'], rowOffset: 1, columnOffset: -1, rowCount: 8 }
     ],
     dateParser: (date) => {
       const splitDate = date.split('-');
