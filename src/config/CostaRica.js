@@ -5,24 +5,13 @@ export const config = {
   organization: 'CR',
   mustContainSheetNames: [],
   profile: {
-    skipWords: ['final'],
+    skipWords: [
+      'final',
+      { startsWithEndsWith: { startsWith: [1, 2, 3, 4, 5, 6, 7, 8, 9], endsWith: 'm' }, remove: ['"."'] }
+    ],
     skipContains: ['página', 'pagina'],
     skipExpressions: [],
-    matchOutcomes: [
-      'ret.',
-      'RET',
-      'DEF.',
-      'Def.',
-      'def.',
-      'BYE',
-      'w.o',
-      'w.o.',
-      'W.O',
-      'W.O.',
-      'wo.',
-      'WO',
-      'Abandoned'
-    ],
+    matchOutcomes: ['doble w.o.', 'ret.', 'def.', 'bye', 'w.o', 'w.o.', 'wo.', 'wo', 'abandoned'],
     identification: {
       includes: [],
       sub_includes: []
@@ -169,8 +158,21 @@ export const config = {
         postProcessor: (value) => value.split(',')
       },
       { attribute: 'financial', searchText: 'fiscales', columnOffset: 1 },
-      { attribute: 'seededPlayerNames', searchText: ['sembrados', 'sembradas'], rowOffset: 1, rowCount: 16 },
-      { attribute: 'seedNumbers', searchText: ['sembrados', 'sembradas'], rowOffset: 1, columnOffset: -1, rowCount: 8 }
+      {
+        attribute: 'seedNumbers',
+        searchText: ['sembrados', 'sembradas'],
+        stopOnEmpty: true,
+        columnOffset: -1,
+        rowOffset: 1,
+        rowCount: 16
+      },
+      {
+        attribute: 'seededPlayerNames',
+        searchText: ['sembrados', 'sembradas'],
+        stopOnEmpty: true,
+        rowOffset: 1,
+        rowCount: 16
+      }
     ],
     dateParser: (date) => {
       const splitDate = date.split('-');

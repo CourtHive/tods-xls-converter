@@ -2,7 +2,7 @@ import { findRow, getCellValue, getCol, getRow } from './sheetAccess';
 import { findRowDefinition } from './findRowDefinition';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
-import { isNumeric } from '../utilities/convenience';
+import { isNumeric, isObject, removeBits } from '../utilities/convenience';
 
 import { FOOTER, HEADER } from '../constants/sheetElements';
 
@@ -80,8 +80,36 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     const row = key && getRow(key);
     return row && row > headerRow && row < footerRow;
   };
-  const isSkipWord = (value) =>
-    (profile.skipWords || []).map((skipWord) => skipWord.toLowerCase()).includes(value.toLowerCase());
+
+  const getSkipOptions = (skipObj) => {
+    const { text, ...options } = skipObj;
+    if (text);
+    return options;
+  };
+  const processSkipWord = (skipWord, value) => {
+    const text = (isObject(skipWord) ? skipWord?.text || '' : skipWord).toLowerCase();
+    const options = isObject(skipWord) ? getSkipOptions(skipWord) : { includes: true };
+    const lowerValue = value.toLowerCase();
+
+    const { includes, startsWith, startsWithEndsWith, remove } = options;
+    const modifiedValue = remove ? removeBits(lowerValue, remove) : lowerValue;
+
+    if (includes) {
+      return modifiedValue.includes(text);
+    } else if (startsWith) {
+      return modifiedValue.startsWith(text);
+    } else if (startsWithEndsWith) {
+      const { startsWith, endsWith } = startsWithEndsWith;
+      const goodStart = Array.isArray(startsWith)
+        ? startsWith.some((start) => modifiedValue.startsWith(start.toString()))
+        : modifiedValue.startsWith(startsWith);
+      const goodEnd = Array.isArray(endsWith)
+        ? endsWith.some((end) => modifiedValue.startsWith(end))
+        : modifiedValue.endsWith(endsWith);
+      return goodStart && goodEnd;
+    }
+  };
+  const isSkipWord = (value) => (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));
   const getValue = (key) => getCellValue(sheet[key]);
   const isNotSkipWord = (key) => {
     const value = getCellValue(sheet[key]);
@@ -105,6 +133,10 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
         // remove '.'
         const rawValue = getValue(key).split('.').join('');
         const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
+
+        if (isSkipWord(rawValue)) {
+          console.log({ skipped: rawValue });
+        }
 
         const skip = profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) || isSkipWord(rawValue);
 

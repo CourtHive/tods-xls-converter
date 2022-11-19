@@ -1,5 +1,6 @@
 import { normalizeDiacritics, normalizeWhiteSpaces } from 'normalize-text';
 import { utilities } from 'tods-competition-factory';
+import { isObject, removeBits } from '../utilities/convenience';
 
 const { unique, instanceCount } = utilities;
 
@@ -54,8 +55,6 @@ export function getRow(reference) {
 export function getCol(reference) {
   return reference ? reference[0] : undefined;
 }
-
-const isObject = (value) => typeof value === 'object';
 
 export function findValueRefs(searchDetails, sheet, options) {
   const normalizedLowerCase = (value) => {
@@ -113,10 +112,13 @@ export function findValueRefs(searchDetails, sheet, options) {
     value = normalizeDiacritics(value);
 
     if (options?.remove && Array.isArray(options.remove)) {
+      removeBits(value, options.remove);
+      /*
       options.remove.forEach((replace) => {
         const re = new RegExp(replace, 'g');
         value = value.replace(re, '');
       });
+      */
     }
 
     return value;
@@ -144,8 +146,9 @@ export function getValueRange({
   columnOffset = 0,
   columnCount = 0,
   rowOffset = 0,
-  rowCount = 0,
   instance = 1,
+  rowCount = 0,
+  stopOnEmpty,
   searchText,
   options,
   sheet
@@ -164,6 +167,7 @@ export function getValueRange({
   const range = utilities.generateRange(0, rowCount || columnCount);
 
   const values = [];
+
   for (const increment of range) {
     const targetRow = row + rowOffset + (rowCount ? increment : 0);
     const column = getCol(nameRefs[instance - 1]);
@@ -173,6 +177,9 @@ export function getValueRange({
     const targetRef = `${targetColumn}${targetRow}`;
     cellRefs.push(targetRef);
     const value = getCellValue(sheet[targetRef]);
+
+    if (!value && stopOnEmpty) break;
+
     values.push(value);
   }
 

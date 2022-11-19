@@ -7,3 +7,11 @@ export function maxInstance(values) {
 }
 
 export const isNumeric = (value) => /^\d+(a)?$/.test(value);
+export const isObject = (value) => typeof value === 'object';
+export const removeBits = (value, remove = []) => {
+  remove.forEach((replace) => {
+    const re = new RegExp(replace, 'g');
+    value = value.replace(re, '');
+  });
+  return value;
+};
