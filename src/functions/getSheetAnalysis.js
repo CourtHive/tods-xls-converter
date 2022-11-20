@@ -16,6 +16,8 @@ import {
   tidyValue
 } from '../utilities/convenience';
 
+import { POSITION, PRE_ROUND } from '../constants/columnConstants';
+
 export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, profile }) => {
   const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition });
   const columns = getHeaderColumns({ sheet, profile, headerRow });
@@ -116,8 +118,9 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     .reverse()
     .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
 
-  const preRoundColumn = columnProfiles.find(({ character }) => character === 'preRound')?.column;
-  const positionColumn = columnProfiles.find(({ attribute }) => attribute === 'position')?.column;
+  const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
+
+  const positionColumn = columnProfiles.find(({ attribute }) => attribute === POSITION)?.column;
   const targetColumns = Object.keys(multiColumnFrequency).filter(
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );

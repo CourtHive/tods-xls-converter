@@ -1,3 +1,4 @@
+import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 import { HEADER, FOOTER } from '../constants/sheetElements';
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
 
@@ -193,7 +194,7 @@ export const config = {
     playerRows: { playerNames: true, lastName: true, firstName: true },
     tournamentInfo: [
       {
-        attribute: 'tournamentName',
+        attribute: [TOURNAMENT_NAME],
         searchText: 'A verseny neve',
         rowOffset: 1
       },

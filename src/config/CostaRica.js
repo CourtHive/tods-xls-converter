@@ -2,6 +2,7 @@ import { isString } from '../utilities/convenience';
 
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
 import { HEADER, FOOTER } from '../constants/sheetElements';
+import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
@@ -143,7 +144,7 @@ export const config = {
     ],
     drawInfo: [
       {
-        attribute: 'tournamentName',
+        attribute: [TOURNAMENT_NAME],
         searchText: 'torneo',
         columnOffset: 1
       },

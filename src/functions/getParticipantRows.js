@@ -1,6 +1,7 @@
 import { getRow, getCol, cellsContaining, numberValue, getCellValue } from './sheetAccess';
 import { validRanking } from '../utilities/validators';
 import { maxInstance } from '../utilities/convenience';
+import { POSITION } from '../constants/columnConstants';
 // import { sheetAnalyzer } from './sheetAnalyzer';
 
 export function getParticipantRows(props) {
@@ -147,7 +148,7 @@ export function getParticipantRows(props) {
     .filter((key) => targetColumn(key, 'seed'))
     .filter(isNumericValue)
     .map(getRow);
-  let drawPositions = filteredKeys.filter((key) => targetColumn(key, 'position')).map(getRow);
+  let drawPositions = filteredKeys.filter((key) => targetColumn(key, POSITION)).map(getRow);
   let rankings = filteredKeys
     .filter((key) => targetColumn(key, 'rank') && validRanking(getCellValue(sheet[key])))
     .map(getRow);

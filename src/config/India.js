@@ -3,6 +3,7 @@ import { isNumeric } from '../utilities/convenience';
 
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
 import { HEADER, FOOTER } from '../constants/sheetElements';
+import { TOURNAMENT_ID, TOURNAMENT_NAME } from '../constants/attributeConstants';
 
 export const config = {
   organization: 'IND',
@@ -90,7 +91,7 @@ export const config = {
     playerRows: { playerNames: true, lastName: true, firstName: true },
     tournamentInfo: [
       {
-        attribute: 'tournamentName',
+        attribute: [TOURNAMENT_NAME],
         searchText: 'A verseny neve',
         rowOffset: 1
       },
@@ -118,11 +119,11 @@ export const config = {
     ],
     drawInfo: [
       {
-        attribute: 'tournamentName',
+        attribute: [TOURNAMENT_NAME],
         cellRef: 'A1' // function to look at A1, A2 and select the longest value or the value which includes 'tournament'
       },
       {
-        attribute: 'tournamentId',
+        attribute: [TOURNAMENT_ID],
         searchText: 'tourn. id',
         rowOffset: 1
       },

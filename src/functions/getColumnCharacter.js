@@ -1,6 +1,8 @@
 import { utilities } from 'tods-competition-factory';
 import { isNumeric } from '../utilities/convenience';
 
+import { POSITION, PRE_ROUND } from '../constants/columnConstants';
+
 export function getColumnCharacter({ columnProfile, attributeMap }) {
   const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column } = columnProfile;
 
@@ -10,7 +12,7 @@ export function getColumnCharacter({ columnProfile, attributeMap }) {
     (utilities.isPowerOf2(lastNumericValue) ||
       (lastNumericValue < values.length && utilities.isPowerOf2(values.length)))
   ) {
-    const character = containsAlpha ? 'preRound' : 'position';
+    const character = containsAlpha ? PRE_ROUND : POSITION;
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;
   }
