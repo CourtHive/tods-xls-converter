@@ -26,3 +26,14 @@ export function generateMatchUpId({
 
   return ['m', ...[Author, CreatedDate].map(hashSum), hashSum(attributes.join(':'))].join('-');
 }
+
+export function generateTournamentId({ attributes = [] } = {}) {
+  // original author and createdDate are assumed to be stable
+  const { Author, CreatedDate, workbookType } = getWorkbookProps();
+  const { organization } = workbookType;
+
+  const filteredAttributes = attributes.filter(Boolean);
+  const consideredAttributes = filteredAttributes.length ? filteredAttributes : ['tournament'];
+
+  return ['t', ...[organization, Author, CreatedDate].map(hashSum), hashSum(consideredAttributes.join(':'))].join('-');
+}

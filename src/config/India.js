@@ -13,24 +13,7 @@ export const config = {
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
-    matchOutcomes: [
-      'ret.',
-      'RET',
-      'DEF.',
-      'Def.',
-      'def.',
-      'BYE',
-      'w.o',
-      'w.o.',
-      'W.O',
-      'W.O.',
-      'W/O',
-      'W/O.',
-      'W/O,',
-      'wo.',
-      'WO',
-      'Abandoned'
-    ],
+    matchOutcomes: ['ret.', 'RET', 'DEF.', 'Def.', 'def.', 'bye', 'w.o', 'w.o.', 'w/o', 'w/o.', 'wo.', 'abandoned'],
     /*
     doubles: {
       drawPosition: {
@@ -242,7 +225,14 @@ export const config = {
       const state = splitValue.length > 1 ? splitValue[1].trim() : '';
       return state?.toLowerCase() === 'india' ? '' : state;
     },
-    isProviderId: (value) => isNumeric(value) && (value === 0 || value.toString().length === 6)
+    isProviderId: (value) => isNumeric(value) && (value === 0 || value.toString().length === 6),
+    columnCharacter: (columnProfile) => {
+      const { values } = columnProfile;
+      const allProgressionKeys = values.every(
+        (value) => typeof value === 'string' && ['a', 'b', 'as', 'bs'].includes(value.toLowerCase())
+      );
+      if (allProgressionKeys) columnProfile.values = [];
+    }
   },
   sheetNameMatcher: (sheetNames) => {
     const potentials = sheetNames.some((sheetName) => {

@@ -27,7 +27,7 @@ export function getWorkbook() {
 }
 
 export function getWorkbookProps() {
-  return workbook;
+  return { ...workbook, workbookType };
 }
 
 export const xlsTODS = {

@@ -10,11 +10,15 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet }) {
     pushGlobalLog({ columns, attributes, rowCount });
   });
   console.log(
-    // analyzer.rowGroupings
+    analysis.multiColumnFrequency,
+    analysis.multiColumnValues,
+    analysis.columnFrequency
+    // analysis.valuesMap
+    // analysis.rowGroupings
     // analysis.columnProfiles.map((v) => v.values)
-    analysis.columnProfiles
-    // analyzer.columns,
-    // analyzer.attributeMap
+    // analysis.columnProfiles
+    // analysis.columns,
+    // analysis.attributeMap
   );
 
   /*

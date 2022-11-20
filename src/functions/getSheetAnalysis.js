@@ -1,4 +1,4 @@
-import { isNumeric, isObject, keySort, removeBits } from '../utilities/convenience';
+import { isNumeric, isObject, keyRowSort, removeBits, removeSeeding } from '../utilities/convenience';
 import { findRow, getCellValue, getCol, getRow } from './sheetAccess';
 import { findRowDefinition } from './findRowDefinition';
 import { getHeaderColumns } from './getHeaderColumns';
@@ -125,7 +125,7 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
 
   const assessColumn = (column) => {
     const isColumnKey = (key) => getCol(key) === column;
-    const prospectColumnKeys = filteredKeys.filter(isColumnKey).sort(keySort);
+    const prospectColumnKeys = filteredKeys.filter(isColumnKey).sort(keyRowSort);
     const truthiness = !!prospectColumnKeys.length;
 
     const assessment = prospectColumnKeys.reduce(
@@ -210,13 +210,15 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     }
   };
 
-  const columnProfiles = columnKeys
+  let columnProfiles = columnKeys
     .sort()
     .map(assessColumn)
     .filter(({ values }) => values?.length);
 
   columnProfiles.forEach(columnCharacter);
   if (profile.columnCharacter) columnProfiles.forEach(profile.columnCharacter);
+
+  columnProfiles = columnProfiles.filter(({ values }) => values.length);
 
   const commonRows = columnProfiles.reduce((commonRows, columnProfile) => {
     const rowsString = columnProfile.rows.join('|');
@@ -239,17 +241,39 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     return { columns, attributes, rowCount: rows?.length, rows };
   });
 
+  const valuesMap = {};
+  for (const columnProfile of columnProfiles) {
+    const { values, column } = columnProfile;
+    for (const uniqueValue of utilities.unique(values.map(removeSeeding))) {
+      if (onlyAlpha(uniqueValue) && !profile.matchOutcomes.includes(uniqueValue.toLowerCase())) {
+        if (!valuesMap[uniqueValue]) {
+          valuesMap[uniqueValue] = [column];
+        } else {
+          valuesMap[uniqueValue].push(column);
+        }
+      }
+    }
+  }
+
+  const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
+  const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
+  const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
+
   return {
-    columns,
-    avoidRows,
-    columnKeys,
-    filteredKeys,
+    multiColumnFrequency,
+    multiColumnValues,
+    columnFrequency,
     columnProfiles,
-    attributeMap,
     rowGroupings,
+    filteredKeys,
+    attributeMap,
+    columnKeys,
     commonRows,
-    headerRow,
+    valuesMap,
+    avoidRows,
     footerRow,
+    headerRow,
+    columns,
     isStringValue: (key) => {
       const value = getCellValue(sheet[key]);
       return value && typeof value === 'string';
