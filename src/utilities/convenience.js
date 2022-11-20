@@ -14,8 +14,12 @@ export const isNumeric = (value) => /^\d+(a)?$/.test(value);
 export const isObject = (value) => typeof value === 'object';
 export const removeBits = (value, remove = []) => {
   remove.forEach((replace) => {
-    const re = new RegExp(replace, 'g');
-    value = value.replace(re, '');
+    if (['(', ')'].includes(replace)) {
+      value = isString(value) ? value.split(replace).join('') : value;
+    } else {
+      const re = new RegExp(replace, 'g');
+      value = isString(value) ? value.replace(re, '') : value;
+    }
   });
   return value;
 };
@@ -27,7 +31,9 @@ export const tidyValue = (value) => (isString(value) ? removeTrailing(value.trim
 
 export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
 
-export const onlyAlpha = (value, profile) => profile?.considerAlpha?.includes(value) || /^[a-zA-Z- ]+$/.test(value);
+const isAlpha = (value) => /^[a-zA-Z- ]+$/.test(value);
+export const onlyAlpha = (value, profile) =>
+  Array.isArray(profile.considerAlpha) ? isAlpha(removeBits(value, profile.considerAlpha)) : isAlpha(value);
 export const onlyNumeric = (value, profile) => profile.considerNumeric?.includes(value) || isNumeric(value);
 export const isSkipWord = (value, profile) =>
   (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));
@@ -60,16 +66,18 @@ function getSkipOptions(skipObj) {
 }
 export function processSkipWord(skipWord, value) {
   const text = (isObject(skipWord) ? skipWord?.text || '' : skipWord).toLowerCase();
-  const options = isObject(skipWord) ? getSkipOptions(skipWord) : { includes: true };
+  const options = isObject(skipWord) ? getSkipOptions(skipWord) : { startsWith: true };
   const lowerValue = value.toLowerCase();
 
-  const { includes, startsWith, startsWithEndsWith, remove } = options;
+  const { includes, startsWith, endsWith, startsWithEndsWith, remove } = options;
   const modifiedValue = remove ? removeBits(lowerValue, remove) : lowerValue;
 
   if (includes) {
     return modifiedValue.includes(text);
   } else if (startsWith) {
     return modifiedValue.startsWith(text);
+  } else if (endsWith) {
+    return modifiedValue.endsWith(text);
   } else if (startsWithEndsWith) {
     const { startsWith, endsWith } = startsWithEndsWith;
     const goodStart = Array.isArray(startsWith)
