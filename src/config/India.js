@@ -13,7 +13,8 @@ export const config = {
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
-    matchOutcomes: ['ret.', 'RET', 'DEF.', 'Def.', 'def.', 'bye', 'w.o', 'w.o.', 'w/o', 'w/o.', 'wo.', 'abandoned'],
+    matchStatuses: ['def', 'ret', 'bye', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
+    matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
     /*
     doubles: {
       drawPosition: {

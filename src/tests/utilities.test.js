@@ -1,5 +1,5 @@
-import { getNonBracketedValue, getSeeding, hasBracketedValue } from '../utilities/convenience';
-import { expect, it } from 'vitest';
+import { getNonBracketedValue, getSeeding, hasBracketedValue, hasNumeric } from '../utilities/convenience';
+import { expect, it, test } from 'vitest';
 
 const scenarios = [
   { value: '3-6, 6-3, 7-6(1)', bracketValue: true, seedValue: undefined, nonBracketedValue: '3-6, 6-3, 7-6' },
@@ -12,4 +12,9 @@ it.each(scenarios)('can recognize and extract seedValues', ({ value, bracketValu
   expect(getNonBracketedValue(value)).toEqual(nonBracketedValue);
   expect(hasBracketedValue(value)).toEqual(bracketValue);
   expect(getSeeding(value)).toEqual(seedValue);
+});
+
+test('can identify strings containing numeric values', () => {
+  expect(hasNumeric('abc123')).toEqual(true);
+  expect(hasNumeric('abc')).toEqual(false);
 });

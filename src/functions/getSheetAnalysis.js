@@ -1,4 +1,12 @@
-import { containsExpression, keyHasSingleAlpha, keyRowSort } from '../utilities/convenience';
+import {
+  containsExpression,
+  getNonBracketedValue,
+  hasNumeric,
+  isString,
+  keyHasSingleAlpha,
+  keyRowSort,
+  tidyValue
+} from '../utilities/convenience';
 import { getCellValue, getCol, getRow } from './sheetAccess';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getColumnCharacter } from './getColumnCharacter';
@@ -99,7 +107,21 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
   const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
 
+  const targetColumns = Object.keys(multiColumnFrequency);
+  const potentialScoreValues = columnProfiles
+    .filter(({ column }) => targetColumns.includes(column))
+    .flatMap(({ values }) =>
+      values
+        .map(tidyValue)
+        .filter(
+          (value) =>
+            (hasNumeric(value) || (isString(value) && profile.matchOutcomes.includes(value.toLowerCase()))) &&
+            !multiColumnValues.includes(getNonBracketedValue(value))
+        )
+    );
+
   return {
+    potentialScoreValues,
     multiColumnFrequency,
     multiColumnValues,
     columnFrequency,

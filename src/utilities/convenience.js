@@ -8,6 +8,7 @@ export function maxInstance(values) {
   return Object.keys(valueCounts).reduce((p, c) => (valueCounts[c] === valueInstances ? c : p), undefined);
 }
 
+export const hasNumeric = (value) => /\d+/.test(value);
 export const isString = (value) => typeof value === 'string';
 export const isNumeric = (value) => /^\d+(a)?$/.test(value);
 export const isObject = (value) => typeof value === 'object';
@@ -18,6 +19,11 @@ export const removeBits = (value, remove = []) => {
   });
   return value;
 };
+export const removeTrailing = (value, remove = ['.', ':', ',']) => {
+  if (remove.some((r) => value.endsWith(r))) return value.slice(0, value.length - 1);
+  return value;
+};
+export const tidyValue = (value) => (isString(value) ? removeTrailing(value.trim()) : value);
 
 export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
 

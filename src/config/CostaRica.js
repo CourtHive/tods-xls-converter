@@ -16,7 +16,8 @@ export const config = {
     ],
     skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
-    matchOutcomes: ['doble w.o.', 'ret.', 'def.', 'bye', 'w.o', 'w.o.', 'wo.', 'wo', 'abandoned'],
+    matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
+    matchOutcomes: ['doble w.o', 'ret', 'def', 'w.o', 'w/o', 'wo', 'abandoned'],
     identification: {
       includes: [],
       sub_includes: []
