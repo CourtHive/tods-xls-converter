@@ -1,56 +1,17 @@
 import { containsExpression, keyHasSingleAlpha, keyRowSort } from '../utilities/convenience';
-import { findRow, getCellValue, getCol, getRow } from './sheetAccess';
+import { getCellValue, getCol, getRow } from './sheetAccess';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getColumnCharacter } from './getColumnCharacter';
-import { findRowDefinition } from './findRowDefinition';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getValuesMap } from './getValuesMap';
 
-import { FOOTER, HEADER } from '../constants/sheetElements';
+import { getContentFrame } from './getContentFrame';
 
 export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, profile }) => {
-  const rowDefinitions = profile.rowDefinitions;
-  const headerRowDefinition = findRowDefinition({
-    rowIds: sheetDefinition.rowIds,
-    rowDefinitions,
-    type: HEADER
-  });
-
-  const footerRowDefinition = findRowDefinition({
-    rowIds: sheetDefinition.rowIds,
-    rowDefinitions,
-    type: FOOTER
-  });
-
-  const headerRows = findRow({
-    rowDefinition: headerRowDefinition,
-    allTargetRows: true,
-    sheet
-  });
-  const headerRow = headerRows[0];
-  const headerAvoidRows = headerRows.map((headerRow) => {
-    const startRange = +headerRow;
-    const endRange = +headerRow + (headerRowDefinition.rows || 0);
-    return utilities.generateRange(startRange, endRange);
-  });
-
-  const footerRows =
-    findRow({
-      rowDefinition: footerRowDefinition,
-      allTargetRows: true,
-      sheet
-    }) || [];
-  const footerRow = footerRows[footerRows.length - 1];
-  const footerAvoidRows = footerRows.map((footerRow) => {
-    const startRange = +footerRow;
-    const endRange = +footerRow + (footerRowDefinition.rows || 0);
-    return utilities.generateRange(startRange, endRange);
-  });
-
-  const avoidRows = [].concat(...headerAvoidRows, ...footerAvoidRows);
-
+  const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition });
   const columns = getHeaderColumns({ sheet, profile, headerRow });
+
   const attributeMap = Object.assign(
     {},
     ...Object.keys(columns).flatMap((key) => {
