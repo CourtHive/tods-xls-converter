@@ -1,12 +1,27 @@
 import { isString } from '../utilities/convenience';
 
-import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
-import { HEADER, FOOTER } from '../constants/sheetElements';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
+import { KNOCKOUT, ROUND_ROBIN } from '../constants/sheetTypes';
+import { HEADER, FOOTER } from '../constants/sheetElements';
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
 // provided that a player advanced!
+
+const knockOutRounds = [
+  'PRIMERA RONDA',
+  'SEGUNDA RONDA',
+  'TERCERA RONDA',
+  'OCTAVOS',
+  'CUARTOS',
+  'SEMIFINAL',
+  'SEMIFINALES',
+  'FINAL',
+  'FINALES',
+  'CAMPEON',
+  'GANADOR',
+  'GANADORA'
+];
 
 export const config = {
   organization: 'CR',
@@ -40,37 +55,12 @@ export const config = {
       sub_includes: []
     },
     columnsMap: {},
-    knockOutRounds: [
-      'PRIMERA RONDA',
-      'SEGUNDA RONDA',
-      'TERCERA RONDA',
-      'OCTAVOS',
-      'CUARTOS',
-      'SEMIFINAL',
-      'SEMIFINALES',
-      'FINAL',
-      'FINALES',
-      'CAMPEON',
-      'GANADOR',
-      'GANADORA'
-    ],
+    knockOutRounds,
     rowDefinitions: [
       {
         type: HEADER,
         id: 'knockoutParticipants',
-        elements: [
-          'PRIMERA RONDA',
-          'SEGUNDA RONDA',
-          'TERCERA RONDA',
-          'OCTAVOS',
-          'CUARTOS',
-          'SEMIFINAL',
-          'SEMIFINALES',
-          'FINAL',
-          'CAMPEON',
-          'GANADOR',
-          'GANADORA'
-        ],
+        elements: [...knockOutRounds],
         rows: 1,
         minimumElements: 3
       },
@@ -91,10 +81,6 @@ export const config = {
     ],
     sheetDefinitions: [
       {
-        type: INFORMATION,
-        rowIds: ['tournamentInfo', 'tournamentOrganization']
-      },
-      {
         type: KNOCKOUT,
         infoClass: 'drawInfo',
         rowIds: ['knockoutParticipants', 'drawFooter']
@@ -103,14 +89,6 @@ export const config = {
         type: ROUND_ROBIN,
         infoClass: 'drawInfo',
         rowIds: ['roundRobinParticipants', 'drawFooter']
-      },
-      {
-        type: PARTICIPANTS,
-        rowIds: ['singlesParticipants']
-      },
-      {
-        type: PARTICIPANTS,
-        rowIds: ['doublesParticipants']
       }
     ],
     gaps: { draw: { term: 'Round 1', gap: 0 } },
