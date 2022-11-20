@@ -4,7 +4,7 @@ import { getCellValue, getRow } from './sheetAccess';
 export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column }) {
   const truthiness = !!prospectColumnKeys.length;
 
-  return prospectColumnKeys.reduce(
+  const assessment = prospectColumnKeys.reduce(
     (assessment, key) => {
       const rawValue = getCellValue(sheet[key]).split('.').join(''); // remove '.'
       const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
@@ -54,4 +54,11 @@ export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, p
       column
     }
   );
+
+  const containsNumeric = assessment.values.some(isNumeric);
+  if (assessment.consecutiveNumbers && !containsNumeric) {
+    assessment.consecutiveNumbers = false;
+  }
+
+  return assessment;
 }
