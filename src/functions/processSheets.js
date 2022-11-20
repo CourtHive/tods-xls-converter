@@ -15,7 +15,7 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export function processSheets({ sheetLimit, sheetNumbers = [], filename } = {}) {
+export function processSheets({ sheetLimit, sheetNumbers = [], filename, types } = {}) {
   const { workbook, workbookType } = getWorkbook();
   if (!workbook) return { error: MISSING_WORKBOOK };
   if (!workbookType) return { error: UNKNOWN_WORKBOOK_TYPE };
@@ -29,14 +29,14 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename } = {}) 
   for (const sheetName of workbook.SheetNames) {
     sheetNumber += 1;
     if (sheetLimit && sheetNumber > sheetLimit) break;
-
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
-    const result = processSheet({ workbook, profile, sheetName, sheetNumber, filename });
-    if (result.error) {
-      pushGlobalLog({ method: 'processSheet', sheetName, error: result.error });
+
+    const { error, analysis } = processSheet({ workbook, profile, sheetName, sheetNumber, filename, types });
+
+    if (error) {
+      pushGlobalLog({ method: 'processSheet', sheetName, error: error });
     }
 
-    const { analysis } = result;
     if (analysis) {
       if (analysis.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
       if (analysis.skippedResults) skippedResults.push(...Object.keys(analysis.skippedResults));
@@ -64,10 +64,12 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename } = {}) 
   return { resultValues, skippedResults, ...SUCCESS };
 }
 
-export function processSheet({ workbook, profile, sheetName, sheetNumber, filename }) {
+export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, types = [] }) {
   const sheet = workbook.Sheets[sheetName];
 
   const sheetDefinition = identifySheet({ sheetName, sheet, profile });
+
+  if (types.length && !types.includes(sheetDefinition.type)) return { ...SUCCESS };
 
   if (sheetDefinition) {
     pushGlobalLog({
