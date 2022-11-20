@@ -1,6 +1,7 @@
+import { isString } from '../utilities/convenience';
+
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
 import { HEADER, FOOTER } from '../constants/sheetElements';
-import { isString } from '../utilities/convenience';
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
@@ -12,18 +13,25 @@ export const config = {
   profile: {
     skipWords: [
       'final',
-      'sencillos',
-      'nacionales',
       'principal',
       'valores',
       'nuevos',
-      'sede',
       'medalla',
-      'club',
+      { text: ' pm', endsWith: true },
+      { text: ' dobles', endsWith: true },
+      { text: 'varones', endsWith: true },
+      { text: 'damas', endsWith: true },
+      { text: 'club', startsWith: true },
+      { text: 'sede', startsWith: true },
+      { text: 'ano', startsWith: true },
+      { text: 'lluvia', includes: true },
+      { text: 'sencillos', includes: true },
+      { text: 'nacionales', includes: true },
       { startsWithEndsWith: { startsWith: [1, 2, 3, 4, 5, 6, 7, 8, 9], endsWith: 'm' }, remove: ['"."'] }
     ],
     skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
+    considerAlpha: [',', '(', ')', '/'],
     matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
     matchOutcomes: ['doble w.o', 'ret', 'def', 'w.o', 'w/o', 'wo', 'abandoned', 'gana x w.o', 'pierde x w.o'],
     identification: {

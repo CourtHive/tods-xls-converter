@@ -9,7 +9,7 @@ export const config = {
   mustContainSheetNames: [],
   profile: {
     providerId: 'IND-0123',
-    skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none'],
+    skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist'],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
