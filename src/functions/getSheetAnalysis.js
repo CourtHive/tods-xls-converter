@@ -1,3 +1,10 @@
+import { getCellValue, getCol, getRow } from './sheetAccess';
+import { getColumnAssessment } from './getColumnAssessment';
+import { getColumnCharacter } from './getColumnCharacter';
+import { getHeaderColumns } from './getHeaderColumns';
+import { utilities } from 'tods-competition-factory';
+import { getContentFrame } from './getContentFrame';
+import { getValuesMap } from './getValuesMap';
 import {
   containsExpression,
   getNonBracketedValue,
@@ -8,14 +15,6 @@ import {
   keyRowSort,
   tidyValue
 } from '../utilities/convenience';
-import { getCellValue, getCol, getRow } from './sheetAccess';
-import { getColumnAssessment } from './getColumnAssessment';
-import { getColumnCharacter } from './getColumnCharacter';
-import { getHeaderColumns } from './getHeaderColumns';
-import { utilities } from 'tods-competition-factory';
-import { getValuesMap } from './getValuesMap';
-
-import { getContentFrame } from './getContentFrame';
 
 export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, profile }) => {
   const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition });
@@ -117,7 +116,12 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     .reverse()
     .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
 
-  const targetColumns = Object.keys(multiColumnFrequency);
+  const preRoundColumn = columnProfiles.find(({ character }) => character === 'preRound')?.column;
+  const positionColumn = columnProfiles.find(({ attribute }) => attribute === 'position')?.column;
+  const targetColumns = Object.keys(multiColumnFrequency).filter(
+    (column) => ![preRoundColumn, positionColumn].includes(column)
+  );
+
   const potentialScoreValues = columnProfiles
     .filter(({ column }) => targetColumns.includes(column))
     .flatMap(({ values }) =>
@@ -127,6 +131,8 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
           // if there is a bracketed value, ensure nonbracketed value has a numeric component
           (!hasBracketedValue(value) || hasNumeric(getNonBracketedValue(value))) &&
           !multiColumnValues.includes(getNonBracketedValue(value)) &&
+          !value.toString().toLowerCase().includes(' am ') &&
+          !value.toString().toLowerCase().includes(' pm ') &&
           value.toString().length !== 1
       )
     );
