@@ -2,24 +2,13 @@ import { pushGlobalLog } from '../utilities/globalLog';
 
 import { SUCCESS } from '../constants/resultConstants';
 
-export function processKnockOut({ sheetDefinition, profile, analysis, sheet }) {
+export function processKnockOut({ sheetDefinition, profile, analysis, sheet, info }) {
   if (sheetDefinition && profile && sheet);
 
   analysis.rowGroupings.forEach((grouping) => {
     const { columns, attributes, rowCount } = grouping;
     pushGlobalLog({ columns, attributes, rowCount });
   });
-  console.log(
-    analysis.multiColumnFrequency,
-    analysis.multiColumnValues,
-    analysis.columnFrequency
-    // analysis.valuesMap
-    // analysis.rowGroupings
-    // analysis.columnProfiles.map((v) => v.values)
-    // analysis.columnProfiles
-    // analysis.columns,
-    // analysis.attributeMap
-  );
 
   /*
   const result = getParticipantRows({
@@ -110,5 +99,5 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet }) {
   return { drawInfo, playersMap, participantsMap, ...SUCCESS };
   */
 
-  return { ...SUCCESS };
+  return { analysis, info, ...SUCCESS };
 }

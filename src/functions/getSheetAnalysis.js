@@ -1,6 +1,7 @@
 import {
   containsExpression,
   getNonBracketedValue,
+  hasBracketedValue,
   hasNumeric,
   isString,
   keyHasSingleAlpha,
@@ -107,24 +108,36 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
   const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
 
+  const greatestFrequency = Object.keys(columnFrequency).reduce(
+    (greatest, column) => (columnFrequency[column] > greatest ? columnFrequency[column] : greatest),
+    0
+  );
+  const frequencyOrder = utilities
+    .unique(Object.values(columnFrequency).sort(utilities.numericSort))
+    .reverse()
+    .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
+
   const targetColumns = Object.keys(multiColumnFrequency);
   const potentialScoreValues = columnProfiles
     .filter(({ column }) => targetColumns.includes(column))
     .flatMap(({ values }) =>
-      values
-        .map(tidyValue)
-        .filter(
-          (value) =>
-            (hasNumeric(value) || (isString(value) && profile.matchOutcomes.includes(value.toLowerCase()))) &&
-            !multiColumnValues.includes(getNonBracketedValue(value))
-        )
+      values.map(tidyValue).filter(
+        (value) =>
+          (hasNumeric(value) || (isString(value) && profile.matchOutcomes.includes(value.toLowerCase()))) &&
+          // if there is a bracketed value, ensure nonbracketed value has a numeric component
+          (!hasBracketedValue(value) || hasNumeric(getNonBracketedValue(value))) &&
+          !multiColumnValues.includes(getNonBracketedValue(value)) &&
+          value.toString().length !== 1
+      )
     );
 
   return {
     potentialScoreValues,
     multiColumnFrequency,
     multiColumnValues,
+    greatestFrequency,
     columnFrequency,
+    frequencyOrder,
     columnProfiles,
     rowGroupings,
     filteredKeys,

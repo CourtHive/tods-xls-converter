@@ -69,10 +69,12 @@ export const config = {
       },
       {
         type: KNOCKOUT,
+        infoClass: 'drawInfo',
         rowIds: ['knockoutParticipants', 'drawFooter']
       },
       {
         type: ROUND_ROBIN,
+        infoClass: 'drawInfo',
         rowIds: ['roundRobinParticipants', 'drawFooter']
       },
       {

@@ -1,5 +1,6 @@
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
 import { HEADER, FOOTER } from '../constants/sheetElements';
+import { isString } from '../utilities/convenience';
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
@@ -12,12 +13,19 @@ export const config = {
     skipWords: [
       'final',
       'sencillos',
+      'nacionales',
+      'principal',
+      'valores',
+      'nuevos',
+      'sede',
+      'medalla',
+      'club',
       { startsWithEndsWith: { startsWith: [1, 2, 3, 4, 5, 6, 7, 8, 9], endsWith: 'm' }, remove: ['"."'] }
     ],
     skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
     matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
-    matchOutcomes: ['doble w.o', 'ret', 'def', 'w.o', 'w/o', 'wo', 'abandoned'],
+    matchOutcomes: ['doble w.o', 'ret', 'def', 'w.o', 'w/o', 'wo', 'abandoned', 'gana x w.o', 'pierde x w.o'],
     identification: {
       includes: [],
       sub_includes: []
@@ -26,11 +34,13 @@ export const config = {
     knockOutRounds: [
       'PRIMERA RONDA',
       'SEGUNDA RONDA',
+      'TERCERA RONDA',
       'OCTAVOS',
       'CUARTOS',
       'SEMIFINAL',
       'SEMIFINALES',
       'FINAL',
+      'FINALES',
       'CAMPEON',
       'GANADOR',
       'GANADORA'
@@ -42,6 +52,7 @@ export const config = {
         elements: [
           'PRIMERA RONDA',
           'SEGUNDA RONDA',
+          'TERCERA RONDA',
           'OCTAVOS',
           'CUARTOS',
           'SEMIFINAL',
@@ -64,7 +75,7 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        elements: [{ text: 'FORMATO', options: { startsWith: true } }, 'TESTIGOS'],
+        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos'],
         rows: 8,
         minimumElements: 1
       }
@@ -76,10 +87,12 @@ export const config = {
       },
       {
         type: KNOCKOUT,
+        infoClass: 'drawInfo',
         rowIds: ['knockoutParticipants', 'drawFooter']
       },
       {
         type: ROUND_ROBIN,
+        infoClass: 'drawInfo',
         rowIds: ['roundRobinParticipants', 'drawFooter']
       },
       {
@@ -160,10 +173,24 @@ export const config = {
       {
         attribute: 'representatives',
         searchText: 'testigos',
+        stopOnEmpty: true,
         columnOffset: 1,
-        postProcessor: (value) => value.split(',')
+        rowCount: 2,
+        postProcessor: (value) => isString(value) && value.split(',')
       },
       { attribute: 'financial', searchText: 'fiscales', columnOffset: 1 },
+      {
+        attribute: 'delegate',
+        searchText: ['delegada', 'delegado'],
+        columnOffset: 1
+        // postProcessor: 'officialParser'
+      },
+      {
+        attribute: 'subDelegate',
+        searchText: ['subdelegada', 'subdelegado'],
+        columnOffset: 1
+        // postProcessor: 'officialParser'
+      },
       {
         attribute: 'seedNumbers',
         searchText: ['sembrados', 'sembradas'],

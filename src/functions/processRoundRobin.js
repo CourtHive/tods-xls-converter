@@ -2,16 +2,13 @@ import { pushGlobalLog } from '../utilities/globalLog';
 
 import { SUCCESS } from '../constants/resultConstants';
 
-export function processRoundRobin({ analysis }) {
+export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, info }) {
+  if (sheetDefinition && profile && sheet);
+
   analysis.rowGroupings.forEach((grouping) => {
     const { columns, attributes, rowCount } = grouping;
     pushGlobalLog({ columns, attributes, rowCount });
   });
-  console.log(
-    // analyzer.rowGroupings
-    analysis.columnProfiles.map((v) => v.values)
-    // analyzer.columns,
-    // analyzer.attributeMap
-  );
-  return { ...SUCCESS };
+
+  return { analysis, info, ...SUCCESS };
 }

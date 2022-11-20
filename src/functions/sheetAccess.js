@@ -82,7 +82,7 @@ export function findValueRefs(searchDetails, sheet, options) {
   const refs = Object.keys(sheet).filter((ref) => {
     const transformedValue = transformValue(getCellValue(sheet[ref]));
 
-    const startsWith = (text) => transformedValue.startsWith(text);
+    const startsWith = (text) => transformedValue.startsWith(text) || transformedValue === text;
     const includes = (text) => transformedValue.includes(text);
     const equals = (text) => transformedValue === text;
 

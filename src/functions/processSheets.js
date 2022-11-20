@@ -22,7 +22,9 @@ export function processSheets({ sheetLimit, sheetNumbers = [] } = {}) {
 
   const { profile } = workbookType;
 
+  const scoreValues = [];
   let sheetNumber = 0;
+
   for (const sheetName of workbook.SheetNames) {
     sheetNumber += 1;
     if (sheetLimit && sheetNumber > sheetLimit) break;
@@ -32,9 +34,24 @@ export function processSheets({ sheetLimit, sheetNumbers = [] } = {}) {
     if (result.error) {
       pushGlobalLog({ method: 'processSheet', sheetName, error: result.error });
     }
+
+    const { analysis } = result;
+    scoreValues.push(...analysis.potentialScoreValues);
+
+    const { headerRow, footerRow } = analysis;
+    console.log({ headerRow, footerRow });
+    console.log(
+      analysis.multiColumnValues,
+      analysis.valuesMap,
+      analysis.rowGroupings
+      // analysis.columnProfiles.map((v) => v.values)
+      // analysis.columnProfiles
+      // analysis.columns,
+      // analysis.attributeMap
+    );
   }
 
-  return { ...SUCCESS };
+  return { scoreValues, ...SUCCESS };
 }
 
 export function processSheet(workbook, profile, sheetName) {
@@ -53,14 +70,14 @@ export function processSheet(workbook, profile, sheetName) {
     return { error: MISSING_SHEET_DEFINITION };
   }
 
-  const { cellRefs, info: drawInfo } = extractInfo({ profile, sheet, infoClass: 'drawInfo' });
-  console.log({ drawInfo });
+  const { cellRefs, info } = extractInfo({ profile, sheet, infoClass: sheetDefinition.infoClass });
 
   const analysis = getSheetAnalysis({
     ignoreCellRefs: cellRefs,
     sheetDefinition,
     profile,
-    sheet
+    sheet,
+    info
   });
 
   if (sheetDefinition.type === KNOCKOUT) {
@@ -69,7 +86,8 @@ export function processSheet(workbook, profile, sheetName) {
       sheetName,
       analysis,
       profile,
-      sheet
+      sheet,
+      info
     });
   } else if (sheetDefinition.type === ROUND_ROBIN) {
     return processRoundRobin({
@@ -77,16 +95,13 @@ export function processSheet(workbook, profile, sheetName) {
       sheetName,
       analysis,
       profile,
-      sheet
+      sheet,
+      info
     });
   } else if (sheetDefinition.type === PARTICIPANTS) {
     //
   } else if (sheetDefinition.type === INFORMATION) {
-    return extractInfo({
-      infoClass: 'tournamentInfo',
-      profile,
-      sheet
-    });
+    //
   } else {
     return { info: UNKNOWN_SHEET_TYPE };
   }
