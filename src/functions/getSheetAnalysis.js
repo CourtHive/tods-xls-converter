@@ -1,8 +1,17 @@
-import { isNumeric, isObject, keyRowSort, removeBits, removeSeeding } from '../utilities/convenience';
 import { findRow, getCellValue, getCol, getRow } from './sheetAccess';
 import { findRowDefinition } from './findRowDefinition';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
+import {
+  getNonBracketedValue,
+  keyHasSingleAlpha,
+  onlyNumeric,
+  keyRowSort,
+  removeBits,
+  onlyAlpha,
+  isNumeric,
+  isObject
+} from '../utilities/convenience';
 
 import { FOOTER, HEADER } from '../constants/sheetElements';
 
@@ -59,10 +68,6 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     })
   );
 
-  const onlyAlpha = (value) => profile.considerAlpha?.includes(value) || /^[a-zA-Z- ]+$/.test(value);
-  const onlyNumeric = (value) => profile.considerNumeric?.includes(value) || isNumeric(value);
-
-  const isSingleAlpha = (key) => key && key.length > 1 && isNumeric(key[1]);
   const isSkipExpression = (value, expression) => {
     const re = new RegExp(expression, 'g');
     return value && re.test(value);
@@ -120,7 +125,7 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
   const filteredKeys = Object.keys(sheet)
     .filter(isNotIgnored)
     .filter(inRowBand)
-    .filter(isSingleAlpha)
+    .filter(keyHasSingleAlpha)
     .filter(isNotSkipExpression);
 
   const assessColumn = (column) => {
@@ -136,10 +141,10 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
         const skip = profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) || isSkipWord(rawValue);
 
         if (!skip) {
-          if (onlyAlpha(rawValue)) {
+          if (onlyAlpha(rawValue, profile)) {
             assessment.containsAlpha = true;
             assessment.allNumeric = false;
-          } else if (onlyNumeric(rawValue)) {
+          } else if (onlyNumeric(rawValue, profile)) {
             assessment.containsNumeric = true;
             assessment.allAlpha = false;
             if (assessment.consecutiveNumbers) {
@@ -244,8 +249,8 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
   const valuesMap = {};
   for (const columnProfile of columnProfiles) {
     const { values, column } = columnProfile;
-    for (const uniqueValue of utilities.unique(values.map(removeSeeding))) {
-      if (onlyAlpha(uniqueValue) && !profile.matchOutcomes.includes(uniqueValue.toLowerCase())) {
+    for (const uniqueValue of utilities.unique(values.map(getNonBracketedValue))) {
+      if (onlyAlpha(uniqueValue, profile) && !profile.matchOutcomes.includes(uniqueValue.toLowerCase())) {
         if (!valuesMap[uniqueValue]) {
           valuesMap[uniqueValue] = [column];
         } else {
@@ -282,8 +287,6 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
       const value = getCellValue(sheet[key]);
       return value && isNumeric(value);
     },
-    // ensure that the key is of the form [A-Z][#], not 'AA1', for example
-    isSingleAlpha,
     targetColumn: (key, column) => getCol(key) === columns[column],
     isNotSkipExpression,
     isSkipExpression,
