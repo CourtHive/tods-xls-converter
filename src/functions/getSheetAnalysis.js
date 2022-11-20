@@ -1,17 +1,11 @@
+import { containsExpression, keyHasSingleAlpha, keyRowSort } from '../utilities/convenience';
 import { findRow, getCellValue, getCol, getRow } from './sheetAccess';
+import { getColumnAssessment } from './getColumnAssessment';
+import { getColumnCharacter } from './getColumnCharacter';
 import { findRowDefinition } from './findRowDefinition';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
-import {
-  getNonBracketedValue,
-  keyHasSingleAlpha,
-  onlyNumeric,
-  keyRowSort,
-  removeBits,
-  onlyAlpha,
-  isNumeric,
-  isObject
-} from '../utilities/convenience';
+import { getValuesMap } from './getValuesMap';
 
 import { FOOTER, HEADER } from '../constants/sheetElements';
 
@@ -68,58 +62,21 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     })
   );
 
-  const isSkipExpression = (value, expression) => {
-    const re = new RegExp(expression, 'g');
-    return value && re.test(value);
-  };
   const isNotSkipExpression = (key) => {
     const value = getCellValue(sheet[key]);
     const matchesExpression =
       profile.skipExpressions &&
       profile.skipExpressions.reduce((matchesExpression, expression) => {
-        return isSkipExpression(value, expression) ? true : matchesExpression;
+        return containsExpression(value, expression) ? true : matchesExpression;
       }, false);
     return !matchesExpression;
   };
+
   const inRowBand = (key) => {
     const row = key && getRow(key);
     return row && row > headerRow && row < footerRow;
   };
 
-  const getSkipOptions = (skipObj) => {
-    const { text, ...options } = skipObj;
-    if (text);
-    return options;
-  };
-  const processSkipWord = (skipWord, value) => {
-    const text = (isObject(skipWord) ? skipWord?.text || '' : skipWord).toLowerCase();
-    const options = isObject(skipWord) ? getSkipOptions(skipWord) : { includes: true };
-    const lowerValue = value.toLowerCase();
-
-    const { includes, startsWith, startsWithEndsWith, remove } = options;
-    const modifiedValue = remove ? removeBits(lowerValue, remove) : lowerValue;
-
-    if (includes) {
-      return modifiedValue.includes(text);
-    } else if (startsWith) {
-      return modifiedValue.startsWith(text);
-    } else if (startsWithEndsWith) {
-      const { startsWith, endsWith } = startsWithEndsWith;
-      const goodStart = Array.isArray(startsWith)
-        ? startsWith.some((start) => modifiedValue.startsWith(start.toString()))
-        : modifiedValue.startsWith(startsWith);
-      const goodEnd = Array.isArray(endsWith)
-        ? endsWith.some((end) => modifiedValue.startsWith(end))
-        : modifiedValue.endsWith(endsWith);
-      return goodStart && goodEnd;
-    }
-  };
-  const isSkipWord = (value) => (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));
-  const getValue = (key) => getCellValue(sheet[key]);
-  const isNotSkipWord = (key) => {
-    const value = getCellValue(sheet[key]);
-    return !isSkipWord(value);
-  };
   const isNotIgnored = (key) => !ignoreCellRefs.includes(key);
 
   const filteredKeys = Object.keys(sheet)
@@ -131,59 +88,7 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
   const assessColumn = (column) => {
     const isColumnKey = (key) => getCol(key) === column;
     const prospectColumnKeys = filteredKeys.filter(isColumnKey).sort(keyRowSort);
-    const truthiness = !!prospectColumnKeys.length;
-
-    const assessment = prospectColumnKeys.reduce(
-      (assessment, key) => {
-        const rawValue = getValue(key).split('.').join(''); // remove '.'
-        const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
-
-        const skip = profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) || isSkipWord(rawValue);
-
-        if (!skip) {
-          if (onlyAlpha(rawValue, profile)) {
-            assessment.containsAlpha = true;
-            assessment.allNumeric = false;
-          } else if (onlyNumeric(rawValue, profile)) {
-            assessment.containsNumeric = true;
-            assessment.allAlpha = false;
-            if (assessment.consecutiveNumbers) {
-              assessment.consecutiveNumbers = parseFloat(value) > assessment.lastNumericValue;
-            }
-            assessment.lastNumericValue = value;
-            if (assessment.allProviderId) {
-              assessment.allProviderId = profile?.isProviderId?.(value);
-            }
-          } else if (value) {
-            assessment.allNumeric = false;
-            assessment.allAlpha = false;
-          }
-
-          if (value !== '') {
-            assessment.values.push(value);
-            assessment.keyMap[key] = value;
-            assessment.rows.push(getRow(key));
-          }
-        }
-
-        return assessment;
-      },
-      {
-        attribute: attributeMap[column],
-        consecutiveNumbers: truthiness,
-        allProviderId: truthiness,
-        containsNumeric: false,
-        allNumeric: truthiness,
-        allAlpha: truthiness,
-        lastNumericValue: 0,
-        keyMap: {},
-        values: [],
-        rows: [],
-        column
-      }
-    );
-
-    return assessment;
+    return getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column });
   };
 
   const columnKeys = filteredKeys.reduce(
@@ -191,38 +96,20 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     []
   );
 
-  const columnCharacter = (columnProfile) => {
-    const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column } = columnProfile;
-
-    if (
-      consecutiveNumbers &&
-      lastNumericValue > 0 &&
-      (utilities.isPowerOf2(lastNumericValue) ||
-        (lastNumericValue < values.length && utilities.isPowerOf2(values.length)))
-    ) {
-      const character = containsAlpha ? 'preRound' : 'position';
-      columnProfile.character = character;
-      if (!attributeMap[column]) attributeMap[column] = character;
-    }
-
-    if (containsNumeric && containsAlpha) {
-      // check whether there is clear separation between numeric and alpha values
-      // and whether numeric values occur before alpha values
-      const numericMap = values.map(isNumeric);
-      const lastNumeric = numericMap.lastIndexOf(true);
-      const firstAlpha = numericMap.indexOf(false);
-      if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
-    }
-  };
-
   let columnProfiles = columnKeys
     .sort()
     .map(assessColumn)
     .filter(({ values }) => values?.length);
 
-  columnProfiles.forEach(columnCharacter);
-  if (profile.columnCharacter) columnProfiles.forEach(profile.columnCharacter);
+  // post-process columnProfiles
+  columnProfiles.forEach((columnProfile) => getColumnCharacter({ columnProfile, attributeMap }));
 
+  // apply any character processing specified by profile
+  if (profile.columnCharacter) {
+    columnProfiles.forEach((columnProfile) => profile.columnCharacter({ columnProfile, attributeMap }));
+  }
+
+  // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
 
   const commonRows = columnProfiles.reduce((commonRows, columnProfile) => {
@@ -246,22 +133,9 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     return { columns, attributes, rowCount: rows?.length, rows };
   });
 
-  const valuesMap = {};
-  for (const columnProfile of columnProfiles) {
-    const { values, column } = columnProfile;
-    for (const uniqueValue of utilities.unique(values.map(getNonBracketedValue))) {
-      if (onlyAlpha(uniqueValue, profile) && !profile.matchOutcomes.includes(uniqueValue.toLowerCase())) {
-        if (!valuesMap[uniqueValue]) {
-          valuesMap[uniqueValue] = [column];
-        } else {
-          valuesMap[uniqueValue].push(column);
-        }
-      }
-    }
-  }
-
-  const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
+  const valuesMap = getValuesMap({ columnProfiles, profile });
   const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
+  const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
   const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
 
   return {
@@ -278,20 +152,6 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     avoidRows,
     footerRow,
     headerRow,
-    columns,
-    isStringValue: (key) => {
-      const value = getCellValue(sheet[key]);
-      return value && typeof value === 'string';
-    },
-    isNumericValue: (key) => {
-      const value = getCellValue(sheet[key]);
-      return value && isNumeric(value);
-    },
-    targetColumn: (key, column) => getCol(key) === columns[column],
-    isNotSkipExpression,
-    isSkipExpression,
-    isNotSkipWord,
-    assessColumn,
-    getValue
+    columns
   };
 };

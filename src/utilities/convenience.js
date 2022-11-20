@@ -1,6 +1,6 @@
 import { utilities } from 'tods-competition-factory';
-import { getWorkbook } from '..';
 import { getRow } from '../functions/sheetAccess';
+import { getWorkbook } from '..';
 
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
@@ -23,6 +23,8 @@ export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
 
 export const onlyAlpha = (value, profile) => profile?.considerAlpha?.includes(value) || /^[a-zA-Z- ]+$/.test(value);
 export const onlyNumeric = (value, profile) => profile.considerNumeric?.includes(value) || isNumeric(value);
+export const isSkipWord = (value, profile) =>
+  (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));
 
 export const hasBracketedValue = (value) => typeof value === 'string' && /\(\d+\)$/.test(value.trim());
 export const matchSeeding = (value) => value.match(/^(.+)\((\d+)\)$/);
@@ -44,3 +46,37 @@ export const getNonBracketedValue = (value) => {
 
 // ensure that the key is of the form [A-Z][#], not 'AA1', for example
 export const keyHasSingleAlpha = (key) => key && key.length > 1 && isNumeric(key[1]);
+
+function getSkipOptions(skipObj) {
+  const { text, ...options } = skipObj;
+  if (text);
+  return options;
+}
+export function processSkipWord(skipWord, value) {
+  const text = (isObject(skipWord) ? skipWord?.text || '' : skipWord).toLowerCase();
+  const options = isObject(skipWord) ? getSkipOptions(skipWord) : { includes: true };
+  const lowerValue = value.toLowerCase();
+
+  const { includes, startsWith, startsWithEndsWith, remove } = options;
+  const modifiedValue = remove ? removeBits(lowerValue, remove) : lowerValue;
+
+  if (includes) {
+    return modifiedValue.includes(text);
+  } else if (startsWith) {
+    return modifiedValue.startsWith(text);
+  } else if (startsWithEndsWith) {
+    const { startsWith, endsWith } = startsWithEndsWith;
+    const goodStart = Array.isArray(startsWith)
+      ? startsWith.some((start) => modifiedValue.startsWith(start.toString()))
+      : modifiedValue.startsWith(startsWith);
+    const goodEnd = Array.isArray(endsWith)
+      ? endsWith.some((end) => modifiedValue.startsWith(end))
+      : modifiedValue.endsWith(endsWith);
+    return goodStart && goodEnd;
+  }
+}
+
+export function containsExpression(value, expression) {
+  const re = new RegExp(expression, 'g');
+  return value && re.test(value);
+}

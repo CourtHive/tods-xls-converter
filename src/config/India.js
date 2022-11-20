@@ -226,7 +226,7 @@ export const config = {
       return state?.toLowerCase() === 'india' ? '' : state;
     },
     isProviderId: (value) => isNumeric(value) && (value === 0 || value.toString().length === 6),
-    columnCharacter: (columnProfile) => {
+    columnCharacter: ({ columnProfile }) => {
       const { values } = columnProfile;
       const allProgressionKeys = values.every(
         (value) => typeof value === 'string' && ['a', 'b', 'as', 'bs'].includes(value.toLowerCase())
