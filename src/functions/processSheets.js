@@ -36,19 +36,23 @@ export function processSheets({ sheetLimit, sheetNumbers = [] } = {}) {
     }
 
     const { analysis } = result;
-    scoreValues.push(...analysis.potentialScoreValues);
+    if (analysis) {
+      if (analysis.potentialScoreValues) scoreValues.push(...analysis.potentialScoreValues);
 
-    const { headerRow, footerRow } = analysis;
-    console.log({ headerRow, footerRow });
-    console.log(
-      analysis.multiColumnValues,
-      analysis.valuesMap,
-      analysis.rowGroupings
-      // analysis.columnProfiles.map((v) => v.values)
-      // analysis.columnProfiles
-      // analysis.columns,
-      // analysis.attributeMap
-    );
+      // const { headerRow, footerRow } = analysis;
+      // console.log({ headerRow, footerRow });
+      console.log(
+        { sheetNumber },
+        analysis.multiColumnFrequency,
+        analysis.multiColumnValues
+        // analysis.valuesMap
+        // analysis.rowGroupings
+        // analysis.columnProfiles.map((v) => v.values)
+        // analysis.columnProfiles
+        // analysis.columns,
+        // analysis.attributeMap
+      );
+    }
   }
 
   return { scoreValues, ...SUCCESS };

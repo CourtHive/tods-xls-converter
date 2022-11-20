@@ -6,7 +6,8 @@ export function getValuesMap({ columnProfiles, profile }) {
 
   for (const columnProfile of columnProfiles) {
     const { values, column } = columnProfile;
-    for (const uniqueValue of utilities.unique(values.map(getNonBracketedValue))) {
+    const uniqueValues = utilities.unique(values.map(getNonBracketedValue));
+    for (const uniqueValue of uniqueValues) {
       if (onlyAlpha(uniqueValue, profile) && !profile.matchStatuses.includes(uniqueValue.toLowerCase())) {
         if (!valuesMap[uniqueValue]) {
           valuesMap[uniqueValue] = [column];
