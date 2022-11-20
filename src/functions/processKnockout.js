@@ -1,14 +1,16 @@
-import { pushGlobalLog } from '../utilities/globalLog';
+// import { pushGlobalLog } from '../utilities/globalLog';
 
 import { SUCCESS } from '../constants/resultConstants';
 
 export function processKnockOut({ sheetDefinition, profile, analysis, sheet, info }) {
   if (sheetDefinition && profile && sheet);
 
+  /*
   analysis.rowGroupings.forEach((grouping) => {
     const { columns, attributes, rowCount } = grouping;
     pushGlobalLog({ columns, attributes, rowCount });
   });
+  */
 
   /*
   const result = getParticipantRows({

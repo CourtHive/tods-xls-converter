@@ -8,6 +8,9 @@ import { HEADER, FOOTER } from '../constants/sheetElements';
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
 // provided that a player advanced!
 
+// INTEREST: '*LL: LUCKY LOSER', '*LL: ....', '(Si el servicio toca la red y entra en el cuadro de', 'servicio correcto, la bola sigue en juego)'
+// 'G: WO', 'V: PRESENTE', 'R: WO'
+
 const knockOutRounds = [
   'PRIMERA RONDA',
   'SEGUNDA RONDA',
@@ -24,22 +27,44 @@ const knockOutRounds = [
 ];
 
 export const config = {
-  organization: 'CR',
+  organization: 'Costa Rica',
   mustContainSheetNames: [],
   profile: {
     skipWords: [
+      // TODO: introduce { regex } // which would be an exact match
       'final',
-      'principal',
-      'valores',
-      'nuevos',
       'medalla',
+      'fiscales',
+      'U10',
+      'U12',
+      'U14',
+      'U16',
+      'U18',
       { text: ' pm', endsWith: true },
+      { text: 'puntos', endsWith: true },
       { text: ' dobles', endsWith: true },
-      { text: 'varones', endsWith: true },
-      { text: 'damas', endsWith: true },
+      { text: 'dobles', startsWith: true },
+      { text: 'varones', includes: true },
+      { text: 'valones', endsWith: true },
+      { text: 'break', includes: true },
+      { text: 'damas', includes: true },
+      { text: 'nota', startsWith: true },
+      { text: 'formato', startsWith: true },
+      { text: 'servicio', includes: true },
+      { text: 'clasifica', includes: true },
+      { text: 'clasificado', includes: true },
+      { text: 'clasficada', includes: true },
+      { text: 'clasificada', includes: true },
+      { text: 'claficicada', includes: true },
+      { text: 'sets con', includes: true },
+      { text: 'sets sin', includes: true },
+      { text: 'ganadadora', startsWith: true },
+      { text: 'ganadora', startsWith: true },
+      { text: 'ganador', startsWith: true },
       { text: 'club', startsWith: true },
       { text: 'sede', startsWith: true },
       { text: 'ano', startsWith: true },
+      { text: 'principal', includes: true },
       { text: 'lluvia', includes: true },
       { text: 'sencillos', includes: true },
       { text: 'nacionales', includes: true },
@@ -49,7 +74,21 @@ export const config = {
     skipExpressions: [],
     considerAlpha: [',', '(', ')', '/'],
     matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
-    matchOutcomes: ['doble w.o', 'ret', 'def', 'w.o', 'w/o', 'wo', 'abandoned', 'gana x w.o', 'pierde x w.o'],
+    matchOutcomes: [
+      'doble w.o',
+      'ret',
+      'def',
+      'w.o',
+      'w/o',
+      'wo',
+      'abandoned',
+      'gana x w.o',
+      'pierde x w.o',
+      'gana x wo',
+      'gana wo',
+      'pierde x wo',
+      'pierde wo'
+    ],
     identification: {
       includes: [],
       sub_includes: []

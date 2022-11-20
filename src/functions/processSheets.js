@@ -15,14 +15,15 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export function processSheets({ sheetLimit, sheetNumbers = [] } = {}) {
+export function processSheets({ sheetLimit, sheetNumbers = [], filename } = {}) {
   const { workbook, workbookType } = getWorkbook();
   if (!workbook) return { error: MISSING_WORKBOOK };
   if (!workbookType) return { error: UNKNOWN_WORKBOOK_TYPE };
 
   const { profile } = workbookType;
 
-  const scoreValues = [];
+  const skippedResults = [];
+  const resultValues = [];
   let sheetNumber = 0;
 
   for (const sheetName of workbook.SheetNames) {
@@ -30,21 +31,25 @@ export function processSheets({ sheetLimit, sheetNumbers = [] } = {}) {
     if (sheetLimit && sheetNumber > sheetLimit) break;
 
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
-    const result = processSheet(workbook, profile, sheetName);
+    const result = processSheet({ workbook, profile, sheetName, sheetNumber, filename });
     if (result.error) {
       pushGlobalLog({ method: 'processSheet', sheetName, error: result.error });
     }
 
     const { analysis } = result;
     if (analysis) {
-      if (analysis.potentialScoreValues) scoreValues.push(...analysis.potentialScoreValues);
+      if (analysis.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
+      if (analysis.skippedResults) skippedResults.push(...Object.keys(analysis.skippedResults));
 
+      /*
       // const { headerRow, footerRow } = analysis;
       // console.log({ headerRow, footerRow });
       console.log(
-        { sheetNumber },
-        analysis.multiColumnFrequency,
-        analysis.multiColumnValues
+        // { sheetNumber }
+        // analysis.multiColumnFrequency,
+        // analysis.multiColumnValues
+        // { skippedResults: Object.keys(analysis.skippedResults) }
+        analysis.skippedResults['W:CA']
         // analysis.valuesMap
         // analysis.rowGroupings
         // analysis.columnProfiles.map((v) => v.values)
@@ -52,13 +57,14 @@ export function processSheets({ sheetLimit, sheetNumbers = [] } = {}) {
         // analysis.columns,
         // analysis.attributeMap
       );
+      */
     }
   }
 
-  return { scoreValues, ...SUCCESS };
+  return { resultValues, skippedResults, ...SUCCESS };
 }
 
-export function processSheet(workbook, profile, sheetName) {
+export function processSheet({ workbook, profile, sheetName, sheetNumber, filename }) {
   const sheet = workbook.Sheets[sheetName];
 
   const sheetDefinition = identifySheet({ sheetName, sheet, profile });
@@ -79,6 +85,9 @@ export function processSheet(workbook, profile, sheetName) {
   const analysis = getSheetAnalysis({
     ignoreCellRefs: cellRefs,
     sheetDefinition,
+    sheetNumber,
+    sheetName,
+    filename,
     profile,
     sheet,
     info

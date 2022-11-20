@@ -1,6 +1,6 @@
 import { identifyWorkbook } from './functions/identifyWorkbook';
 import { processSheets } from './functions/processSheets';
-import { printGlobalLog } from './utilities/globalLog';
+import { printGlobalLog, pushGlobalLog } from './utilities/globalLog';
 import { read } from 'xlsx';
 
 import { SUCCESS } from './constants/resultConstants';
@@ -18,6 +18,11 @@ export function loadWorkbook(buf) {
   if (result.error) return result;
 
   workbookType = result.workbookType;
+  pushGlobalLog({
+    method: 'identifyWorkbook',
+    provider: workbookType.organization,
+    keyColors: { provider: 'brightyellow' }
+  });
 
   return { workbookType, ...xlsTODS, ...SUCCESS };
 }

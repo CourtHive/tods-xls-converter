@@ -38,7 +38,8 @@ export const onlyNumeric = (value, profile) => profile.considerNumeric?.includes
 export const isSkipWord = (value, profile) =>
   (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));
 
-export const hasBracketedValue = (value) => typeof value === 'string' && /\(\d+\)$/.test(value.trim());
+export const startsWithIterator = (value) => isString(value) && /^\d\s/.test(value.trim());
+export const hasBracketedValue = (value) => isString(value) && /\(\d+\)$/.test(value.trim());
 export const matchSeeding = (value) => value.match(/^(.+)\((\d+)\)$/);
 export const getSeeding = (value) => {
   if (typeof value !== 'string') return;
