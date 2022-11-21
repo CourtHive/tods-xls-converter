@@ -1,21 +1,19 @@
-import { getTournamentRecord, getWorkbookProps, getWorkbook } from './global/state';
-import { printGlobalLog, printLog, purgeGlobalLog } from './utilities/globalLog';
 import { identifyWorkbook } from './functions/identifyWorkbook';
 import { processDirectory } from './utilities/processDirectory';
 import { processSheets } from './functions/processSheets';
+import { factory } from 'tods-competition-factory';
 import { loadWorkbook } from './global/loader';
+import globalLog from './utilities/globalLog';
+import xlsState from './global/state';
 
 export const xlsTODS = {
-  getTournamentRecord,
-  getWorkbookProps,
   identifyWorkbook,
   processDirectory,
-  printGlobalLog,
-  purgeGlobalLog,
+  ...globalLog,
+  ...xlsState,
   processSheets,
   loadWorkbook,
-  getWorkbook,
-  printLog
+  factory
 };
 
 export default xlsTODS;

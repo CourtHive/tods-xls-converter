@@ -1,5 +1,6 @@
 import { processDirectory } from './src/utilities/processDirectory';
-import { printLog } from './src/utilities/globalLog';
+import { printGlobalLog } from './src/utilities/globalLog';
+import { setLoggingActive } from './src/global/state';
 import { it } from 'vitest';
 
 import { INDETERMINATE } from './src/constants/sheetTypes';
@@ -8,8 +9,6 @@ import { INDETERMINATE } from './src/constants/sheetTypes';
 it('can process a directory', () => {
   const readDir = './examples/sheets';
 
-  const log = { details: true };
-
   const sheetTypes = [INDETERMINATE];
   const sheetNumbers = [];
   const sheetLimit = 0;
@@ -17,6 +16,7 @@ it('can process a directory', () => {
   const processLimit = 0;
   const startIndex = 0;
 
-  let result = processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers, log });
-  printLog(result.processLog);
+  setLoggingActive(true);
+  processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers });
+  printGlobalLog(true);
 });

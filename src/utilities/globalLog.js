@@ -1,29 +1,46 @@
 import { utilities } from 'tods-competition-factory';
 import { logColors } from '../assets/logColors';
+import { getLoggingActive } from '../global/state';
+import { isString } from './identification';
 
+const namedLogs = {};
 const globalLog = [];
 
-export function pushGlobalLog(value) {
-  if (typeof value === 'string') value = { method: value };
-  globalLog.push(value);
+export function pushGlobalLog(value, logName) {
+  if (!getLoggingActive()) return;
+
+  if (isString(value)) value = { method: value };
+  if (isString(logName)) {
+    if (namedLogs[logName]) {
+      namedLogs[logName].push(value);
+    } else {
+      namedLogs[logName] = [value];
+    }
+  } else {
+    globalLog.push(value);
+  }
 }
 
 export function popGlobalLog(value) {
   return globalLog.pop(value);
 }
 
-export function getGlobalLog(purge) {
-  const globalLogCopy = globalLog.slice();
+export function getGlobalLog({ purge, logName } = {}) {
+  const globalLogCopy = logName && namedLogs[logName] ? namedLogs[logName].slice() : globalLog.slice();
   if (purge) {
-    globalLog.length = 0;
+    if (logName) {
+      namedLogs[logName].length = 0;
+    } else {
+      globalLog.length = 0;
+    }
   }
   return globalLogCopy;
 }
 
 const internalKeys = ['color', 'keyColors', 'method', 'newLine', 'lineAfter', 'separator', 'divider'];
 
-export function printGlobalLog(purge) {
-  const globalLogCopy = getGlobalLog(purge);
+export function printGlobalLog(props) {
+  const globalLogCopy = getGlobalLog(props);
   printLog(globalLogCopy);
 }
 
@@ -77,3 +94,12 @@ export function printLog(logArray) {
 export function purgeGlobalLog() {
   globalLog.length = 0;
 }
+
+export default {
+  purgeGlobalLog,
+  printGlobalLog,
+  pushGlobalLog,
+  getGlobalLog,
+  popGlobalLog,
+  printLog
+};

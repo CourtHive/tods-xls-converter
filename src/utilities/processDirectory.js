@@ -1,12 +1,10 @@
-import { printGlobalLog, purgeGlobalLog, pushGlobalLog } from './globalLog';
 import { processSheets } from '../functions/processSheets';
 import { getTournamentRecord } from '../global/state';
 import { readdirSync, readFileSync } from 'fs-extra';
-import { utilities } from 'tods-competition-factory';
 import { loadWorkbook } from '../global/loader';
+import { pushGlobalLog } from './globalLog';
 
 export function processDirectory({
-  log = { resultValues: false, skippedResults: false, details: false },
   writeTournamentRecords = false,
   writeDir = './',
   readDir = './',
@@ -74,11 +72,6 @@ export function processDirectory({
     }
   }
 
-  if (log.resultValues) console.table(utilities.unique(resultValues));
-  if (log.skippedResults && skippedResults.length) {
-    console.table(utilities.unique(skippedResults).sort());
-  }
-
   const errorKeys = Object.keys(errorLog);
   const filesWithErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
   const totalErrors = errorKeys
@@ -96,12 +89,6 @@ export function processDirectory({
     filesWithErrors,
     totalErrors
   });
-
-  if (log.details) {
-    printGlobalLog();
-  } else {
-    purgeGlobalLog();
-  }
 
   return { fileResults, resultValues, skippedResults };
 }
