@@ -1,3 +1,7 @@
+// node
+// ..then..
+// .load build.js
+
 const { xlsTODS } = require('../dist');
 const readDir = './sheets';
 
