@@ -3,8 +3,14 @@
 // .load build.js
 
 const { xlsTODS } = require('../dist');
+xlsTODS.setLoggingActive(true);
 
-let result;
+const x = {
+  purge: (props) => {
+    console.log('logs purged');
+    xlsTODS.purgeGlobalLog(props);
+  }
+};
 const props = {
   sheetTypes: ['INDETERMINATE'],
   readDir: './sheets',
@@ -14,7 +20,11 @@ const props = {
   sheetLimit: 0
 };
 
-result = xlsTODS.setLoggingActive(true);
-if (result); // stop linter complaint
-result = xlsTODS.processDirectory(props);
-xlsTODS.printGlobalLog();
+const go = (props) => {
+  const result = xlsTODS.processDirectory(props);
+  Object.assign(x, result);
+};
+const print = (props) => xlsTODS.printGlobalLog(props);
+
+go(props);
+print(props);

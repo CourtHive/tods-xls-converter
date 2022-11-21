@@ -82,8 +82,9 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
 
   const { hasValues, sheetDefinition } = identifySheet({ sheetName, sheet, profile });
 
-  const skipped = sheetTypes.length && sheetDefinition && !sheetTypes.includes(sheetDefinition.type);
-  if (!hasValues || skipped) return { analysis: { skipped }, hasValues, ...SUCCESS };
+  const sheetType = sheetDefinition?.type;
+  const skipped = sheetTypes.length && sheetType && !sheetTypes.includes(sheetType);
+  if (!hasValues || skipped) return { analysis: { skipped }, sheetType, hasValues, ...SUCCESS };
 
   if (sheetDefinition) {
     const method = `processSheet ${sheetNumber}`;
@@ -103,6 +104,7 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
     sheetDefinition,
     sheetNumber,
     sheetName,
+    sheetType,
     filename,
     profile,
     sheet,

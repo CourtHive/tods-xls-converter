@@ -13,8 +13,8 @@ it('can process a directory', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 0;
-  const startIndex = 0;
+  const processLimit = 2;
+  const startIndex = 12;
 
   setLoggingActive(true);
   processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers });

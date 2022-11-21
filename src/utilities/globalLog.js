@@ -27,13 +27,7 @@ export function popGlobalLog(value) {
 
 export function getGlobalLog({ purge, logName } = {}) {
   const globalLogCopy = logName && namedLogs[logName] ? namedLogs[logName].slice() : globalLog.slice();
-  if (purge) {
-    if (logName) {
-      namedLogs[logName].length = 0;
-    } else {
-      globalLog.length = 0;
-    }
-  }
+  if (purge) purgeGlobalLog(logName);
   return globalLogCopy;
 }
 
@@ -58,9 +52,7 @@ export function printLog(logArray) {
         if (line[key] === undefined) return;
 
         const keyColor =
-          keyColors && Object.keys(keyColors).includes(key) && logColors[keyColors[key]]
-            ? logColors[keyColors[key]]
-            : logColors.brightwhite;
+          keyColors && Object.keys(keyColors).includes(key) ? logColors[keyColors[key]] : logColors.brightwhite;
 
         return `${attributeColor}${key}: ${keyColor}${line[key]}`;
       })
@@ -91,8 +83,12 @@ export function printLog(logArray) {
   if (modifiedText?.length) console.log(...modifiedText);
 }
 
-export function purgeGlobalLog() {
-  globalLog.length = 0;
+export function purgeGlobalLog(logName) {
+  if (logName) {
+    if (namedLogs[logName]) namedLogs[logName].length = 0;
+  } else {
+    globalLog.length = 0;
+  }
 }
 
 export default {
