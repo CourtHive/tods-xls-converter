@@ -29,7 +29,7 @@ const roundNames = [
 ];
 
 export const config = {
-  organization: 'Costa Rica',
+  organization: 'FEDERACION COSTARRICENSE DE TENIS',
   mustContainSheetNames: [],
   profile: {
     skipWords: [
@@ -289,5 +289,6 @@ export const config = {
       return vTest || mTest;
     });
     return potentials;
-  }
+  },
+  identifyingStrings: ['FEDERACION COSTARRICENSE DE TENIS']
 };

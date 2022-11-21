@@ -7,12 +7,13 @@ const excludeValues = ['undefined'];
 export function identifySheet({ sheet, profile }) {
   const hasValues = Object.keys(sheet).some((ref) => {
     const value = getCellValue(sheet[ref]);
-    const consideredValue = !excludeValues.includes(value);
-    if (consideredValue) console.log({ consideredValue });
+    const consideredValue = !excludeValues.includes(value) && value;
     return consideredValue;
   });
 
-  if (!hasValues) return { hasValues };
+  if (!hasValues) {
+    return { hasValues };
+  }
 
   const sheetDefinitions = profile.sheetDefinitions;
   const rowDefinitions = profile.rowDefinitions;
