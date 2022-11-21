@@ -44,9 +44,16 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (sheetLimit && sheetNumber > sheetLimit) break;
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
 
-    const { error, analysis } = processSheet({ workbook, profile, sheetName, sheetNumber, filename, sheetTypes });
+    const { error, analysis, hasValues } = processSheet({
+      sheetNumber,
+      sheetTypes,
+      sheetName,
+      filename,
+      workbook,
+      profile
+    });
 
-    sheetAnalysis[sheetNumber] = { sheetName, analysis };
+    sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
 
     if (error) {
       const method = `processSheet ${sheetNumber}`;
@@ -75,7 +82,8 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
 
   const { hasValues, sheetDefinition } = identifySheet({ sheetName, sheet, profile });
 
-  if (!hasValues || (sheetTypes.length && !sheetTypes.includes(sheetDefinition.type))) return { ...SUCCESS };
+  const skipped = sheetTypes.length && sheetDefinition && !sheetTypes.includes(sheetDefinition.type);
+  if (!hasValues || skipped) return { analysis: { skipped }, hasValues, ...SUCCESS };
 
   if (sheetDefinition) {
     const method = `processSheet ${sheetNumber}`;

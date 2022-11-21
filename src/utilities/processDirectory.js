@@ -6,7 +6,7 @@ import { utilities } from 'tods-competition-factory';
 import { loadWorkbook } from '../global/loader';
 
 export function processDirectory({
-  log = { resultValues: false, skippedResults: false, details: true },
+  log = { resultValues: false, skippedResults: false, details: false },
   writeTournamentRecords = false,
   writeDir = './',
   readDir = './',

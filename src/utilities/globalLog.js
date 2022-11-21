@@ -28,6 +28,8 @@ export function printGlobalLog(purge) {
 }
 
 export function printLog(logArray) {
+  if (!Array.isArray(logArray)) return;
+
   const modifiedText = logArray.map((line) => {
     const { color, keyColors = {}, method, newLine, lineAfter, divider, separator = '-' } = line;
     const methodColor = Object.keys(logColors).includes(color) ? logColors[color] : logColors.cyan;
