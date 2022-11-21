@@ -1,8 +1,9 @@
+import { printGlobalLog, purgeGlobalLog, pushGlobalLog } from './globalLog';
 import { processSheets } from '../functions/processSheets';
-import { utilities } from 'tods-competition-factory';
+import { getTournamentRecord } from '../global/state';
 import { readdirSync, readFileSync } from 'fs-extra';
-import { pushGlobalLog } from './globalLog';
-import xlsTODS from '..';
+import { utilities } from 'tods-competition-factory';
+import { loadWorkbook } from '../global/loader';
 
 export function processDirectory({
   log = { resultValues: false, skippedResults: false, details: true },
@@ -46,7 +47,7 @@ export function processDirectory({
   let index = 0;
   for (const filename of filenames) {
     const buf = readFileSync(`${readDir}/${filename}`);
-    let result = xlsTODS.loadWorkbook(buf, index);
+    let result = loadWorkbook(buf, index);
     result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
     fileResults[index] = result;
     index += 1;
@@ -66,7 +67,7 @@ export function processDirectory({
     }
 
     if (writeTournamentRecords && writeDir) {
-      const { tournamentRecord } = xlsTODS.getTournamentRecord();
+      const { tournamentRecord } = getTournamentRecord();
       if (tournamentRecord.tournamentId) {
         // write to file
       }
@@ -97,9 +98,9 @@ export function processDirectory({
   });
 
   if (log.details) {
-    xlsTODS.printGlobalLog();
+    printGlobalLog();
   } else {
-    xlsTODS.purgeGlobalLog();
+    purgeGlobalLog();
   }
 
   return { fileResults, resultValues, skippedResults };

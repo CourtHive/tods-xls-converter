@@ -1,6 +1,8 @@
+import { isNumeric, isObject, isString } from './identification';
 import { utilities } from 'tods-competition-factory';
 import { getRow } from '../functions/sheetAccess';
 import { getWorkbook } from '../global/state';
+import { removeBits } from './transformers';
 
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
@@ -8,21 +10,6 @@ export function maxInstance(values) {
   return Object.keys(valueCounts).reduce((p, c) => (valueCounts[c] === valueInstances ? c : p), undefined);
 }
 
-export const hasNumeric = (value) => /\d+/.test(value);
-export const isString = (value) => typeof value === 'string';
-export const isNumeric = (value) => /^\d+(a)?$/.test(value);
-export const isObject = (value) => typeof value === 'object';
-export const removeBits = (value, remove = []) => {
-  remove.forEach((replace) => {
-    if (['(', ')'].includes(replace)) {
-      value = isString(value) ? value.split(replace).join('') : value;
-    } else {
-      const re = new RegExp(replace, 'g');
-      value = isString(value) ? value.replace(re, '') : value;
-    }
-  });
-  return value;
-};
 export const removeTrailing = (value, remove = ['.', ':', ',']) => {
   if (remove.some((r) => value.endsWith(r))) return value.slice(0, value.length - 1);
   return value;

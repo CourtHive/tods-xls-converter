@@ -1,6 +1,7 @@
 import { normalizeDiacritics, normalizeWhiteSpaces } from 'normalize-text';
+import { removeBits } from '../utilities/transformers';
+import { isObject } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
-import { isObject, removeBits } from '../utilities/convenience';
 
 const { unique, instanceCount } = utilities;
 

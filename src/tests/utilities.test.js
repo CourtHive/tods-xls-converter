@@ -1,4 +1,5 @@
-import { getNonBracketedValue, getSeeding, hasBracketedValue, hasNumeric } from '../utilities/convenience';
+import { getNonBracketedValue, getSeeding, hasBracketedValue } from '../utilities/convenience';
+import { hasNumeric } from '../utilities/identification';
 import { expect, it, test } from 'vitest';
 
 const scenarios = [

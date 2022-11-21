@@ -1,4 +1,4 @@
-import { isString } from '../utilities/convenience';
+import { isString } from '../utilities/identification';
 
 import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE } from '../constants/sheetTypes';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';

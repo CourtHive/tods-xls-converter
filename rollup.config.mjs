@@ -110,5 +110,4 @@ function createExport({ input, folder, packageName, cjs, esm }) {
 
 const cjsExports = [{ input: 'src/index.js', cjs: true }].map(createExport);
 
-console.log({ esmExports });
 export default [...cjsExports, ...esmExports];

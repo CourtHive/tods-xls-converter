@@ -1,4 +1,5 @@
-import { isNumeric, isSkipWord, onlyAlpha, onlyNumeric } from '../utilities/convenience';
+import { isSkipWord, onlyAlpha, onlyNumeric } from '../utilities/convenience';
+import { isNumeric } from '../utilities/identification';
 import { getCellValue, getRow } from './sheetAccess';
 
 export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column }) {

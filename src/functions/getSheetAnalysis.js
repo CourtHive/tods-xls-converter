@@ -1,3 +1,4 @@
+import { hasNumeric, isString } from '../utilities/identification';
 import { getCellValue, getCol, getRow } from './sheetAccess';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getColumnCharacter } from './getColumnCharacter';
@@ -9,8 +10,6 @@ import {
   containsExpression,
   getNonBracketedValue,
   hasBracketedValue,
-  hasNumeric,
-  isString,
   keyHasSingleAlpha,
   keyRowSort,
   startsWithIterator,
