@@ -17,13 +17,17 @@ import {
 
 export function processSheets({ sheetLimit, sheetNumbers = [], filename, types } = {}) {
   const { workbook, workbookType } = getWorkbook();
+
   if (!workbook) return { error: MISSING_WORKBOOK };
   if (!workbookType) return { error: UNKNOWN_WORKBOOK_TYPE };
 
   const { profile } = workbookType;
 
+  pushGlobalLog({ filename, keyColors: { filename: 'brightgreen' }, divider: 70 });
+
   const skippedResults = [];
   const resultValues = [];
+  const errorLog = {};
   let sheetNumber = 0;
 
   for (const sheetName of workbook.SheetNames) {
@@ -34,7 +38,12 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, types }
     const { error, analysis } = processSheet({ workbook, profile, sheetName, sheetNumber, filename, types });
 
     if (error) {
-      pushGlobalLog({ method: 'processSheet', sheetName, error: error });
+      pushGlobalLog({ method: 'processSheet', sheetName, error, keyColors: { error: 'brightred' } });
+      if (!errorLog[error]) {
+        errorLog[error] = [sheetName];
+      } else {
+        errorLog[error].push(sheetName);
+      }
     }
 
     if (analysis) {
@@ -61,7 +70,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, types }
     }
   }
 
-  return { resultValues, skippedResults, ...SUCCESS };
+  return { errorLog, resultValues, skippedResults, ...SUCCESS };
 }
 
 export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, types = [] }) {

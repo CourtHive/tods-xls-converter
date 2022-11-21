@@ -11,7 +11,7 @@ import { HEADER, FOOTER } from '../constants/sheetElements';
 // INTEREST: '*LL: LUCKY LOSER', '*LL: ....', '(Si el servicio toca la red y entra en el cuadro de', 'servicio correcto, la bola sigue en juego)'
 // 'G: WO', 'V: PRESENTE', 'R: WO'
 
-const knockOutRounds = [
+const roundNames = [
   'PRIMERA RONDA',
   'SEGUNDA RONDA',
   'TERCERA RONDA',
@@ -23,7 +23,9 @@ const knockOutRounds = [
   'FINALES',
   'CAMPEON',
   'GANADOR',
-  'GANADORA'
+  'GANADORA',
+  'CLASIFICADOS',
+  'CLASIFICADAS'
 ];
 
 export const config = {
@@ -35,6 +37,8 @@ export const config = {
       'final',
       'medalla',
       'fiscales',
+      'preclasificados',
+      'preclasificadas',
       'U10',
       'U12',
       'U14',
@@ -46,7 +50,9 @@ export const config = {
       { text: 'dobles', startsWith: true },
       { text: 'varones', includes: true },
       { text: 'valones', endsWith: true },
+      { text: 'menu', includes: true },
       { text: 'break', includes: true },
+      { text: 'grado', includes: true },
       { text: 'damas', includes: true },
       { text: 'nota', startsWith: true },
       { text: 'formato', startsWith: true },
@@ -56,6 +62,9 @@ export const config = {
       { text: 'clasficada', includes: true },
       { text: 'clasificada', includes: true },
       { text: 'claficicada', includes: true },
+      { text: 'lugar', includes: true },
+      { text: 'grupo', includes: true },
+      { text: 'ranking', includes: true },
       { text: 'sets con', includes: true },
       { text: 'sets sin', includes: true },
       { text: 'ganadadora', startsWith: true },
@@ -94,21 +103,21 @@ export const config = {
       sub_includes: []
     },
     columnsMap: {},
-    knockOutRounds,
+    knockOutRounds: roundNames,
     rowDefinitions: [
       {
         type: HEADER,
         id: 'knockoutParticipants',
-        elements: [...knockOutRounds],
+        elements: [...roundNames],
         rows: 1,
-        minimumElements: 3
+        minimumElements: 2
       },
       {
         type: HEADER,
         id: 'roundRobinParticipants',
         elements: ['1', '2', '3', '4'],
         rows: 1,
-        minimumElements: 4
+        minimumElements: 3
       },
       {
         type: FOOTER,
@@ -134,18 +143,7 @@ export const config = {
     headerColumns: [
       {
         attr: 'round',
-        header: [
-          'PRIMERA RONDA',
-          'SEGUNDA RONDA',
-          'OCTAVOS',
-          'CUARTOS',
-          'SEMIFINAL',
-          'SEMIFINALES',
-          'FINAL',
-          'CAMPEÓN',
-          'GANADOR',
-          'GANADORA'
-        ]
+        header: roundNames
       }
     ],
     playerRows: { playerNames: true, lastName: true, firstName: true },
@@ -231,6 +229,28 @@ export const config = {
         stopOnEmpty: true,
         rowOffset: 1,
         rowCount: 16
+      },
+      {
+        attribute: 'preQualifiers',
+        searchText: ['preclasificados', 'preclasificadas'],
+        stopOnEmpty: true,
+        rowOffset: 1,
+        rowCount: 8
+      },
+      {
+        attribute: 'preQualifyingnumbers',
+        searchText: ['preclasificados', 'preclasificadas'],
+        stopOnEmpty: true,
+        columnOffset: -1,
+        rowOffset: 1,
+        rowCount: 8
+      },
+      {
+        attribute: 'rankingPoints',
+        searchText: ['puntos en el ranking:'],
+        stopOnEmpty: true,
+        rowOffset: 1,
+        rowCount: 8
       }
     ],
     dateParser: (date) => {
