@@ -1,13 +1,17 @@
+import { printGlobalLog, purgeGlobalLog, pushGlobalLog } from './utilities/globalLog';
 import { identifyWorkbook } from './functions/identifyWorkbook';
 import { processSheets } from './functions/processSheets';
-import { printGlobalLog, pushGlobalLog } from './utilities/globalLog';
 import { read } from 'xlsx';
 
 import { SUCCESS } from './constants/resultConstants';
 
-let workbook, workbookType;
+let tournamentRecord = {},
+  workbookType,
+  workbook;
 
 export function loadWorkbook(buf, index) {
+  tournamentRecord = {};
+
   try {
     workbook = read(buf);
   } catch (error) {
@@ -38,13 +42,19 @@ export function getWorkbookProps() {
   return { ...workbook, workbookType };
 }
 
+export function getTournamentRecord() {
+  return { tournamentRecord };
+}
+
 export const xlsTODS = {
-  getWorkbook,
+  getTournamentRecord,
   getWorkbookProps,
   identifyWorkbook,
-  loadWorkbook,
   printGlobalLog,
-  processSheets
+  purgeGlobalLog,
+  processSheets,
+  loadWorkbook,
+  getWorkbook
 };
 
 export default xlsTODS;
