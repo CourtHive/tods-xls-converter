@@ -1,5 +1,5 @@
 import { getTournamentRecord, getWorkbookProps, getWorkbook } from './global/state';
-import { printGlobalLog, purgeGlobalLog } from './utilities/globalLog';
+import { printGlobalLog, printLog, purgeGlobalLog } from './utilities/globalLog';
 import { identifyWorkbook } from './functions/identifyWorkbook';
 import { processDirectory } from './utilities/processDirectory';
 import { processSheets } from './functions/processSheets';
@@ -14,7 +14,8 @@ export const xlsTODS = {
   purgeGlobalLog,
   processSheets,
   loadWorkbook,
-  getWorkbook
+  getWorkbook,
+  printLog
 };
 
 export default xlsTODS;

@@ -24,8 +24,11 @@ const internalKeys = ['color', 'keyColors', 'method', 'newLine', 'lineAfter', 's
 
 export function printGlobalLog(purge) {
   const globalLogCopy = getGlobalLog(purge);
+  printLog(globalLogCopy);
+}
 
-  const modifiedText = globalLogCopy.map((line) => {
+export function printLog(logArray) {
+  const modifiedText = logArray.map((line) => {
     const { color, keyColors = {}, method, newLine, lineAfter, divider, separator = '-' } = line;
     const methodColor = Object.keys(logColors).includes(color) ? logColors[color] : logColors.cyan;
     const bodyKeys = Object.keys(line).filter((key) => !internalKeys.includes(key));
