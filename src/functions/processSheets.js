@@ -1,3 +1,5 @@
+import { processIndeterminate } from './processIndeterminate';
+import { generateTournamentId } from '../utilities/hashing';
 import { processRoundRobin } from './processRoundRobin';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
@@ -6,7 +8,7 @@ import { identifySheet } from './identifySheet';
 import { extractInfo } from './extractInfo';
 import { getWorkbook } from '..';
 
-import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN } from '../constants/sheetTypes';
+import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
 import { SUCCESS } from '../constants/resultConstants';
 import {
   MISSING_SHEET_DEFINITION,
@@ -15,7 +17,7 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export function processSheets({ sheetLimit, sheetNumbers = [], filename, types } = {}) {
+export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes } = {}) {
   const { workbook, workbookType } = getWorkbook();
 
   if (!workbook) return { error: MISSING_WORKBOOK };
@@ -23,9 +25,16 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, types }
 
   const { profile } = workbookType;
 
-  pushGlobalLog({ filename, keyColors: { filename: 'brightgreen' }, divider: 70 });
+  const sheetCount = workbook.SheetNames.length;
+  pushGlobalLog({
+    keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
+    divider: 70,
+    sheetCount,
+    filename
+  });
 
   const skippedResults = [];
+  const sheetAnalysis = {};
   const resultValues = [];
   const errorLog = {};
   let sheetNumber = 0;
@@ -35,10 +44,13 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, types }
     if (sheetLimit && sheetNumber > sheetLimit) break;
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
 
-    const { error, analysis } = processSheet({ workbook, profile, sheetName, sheetNumber, filename, types });
+    const { error, analysis } = processSheet({ workbook, profile, sheetName, sheetNumber, filename, sheetTypes });
+
+    sheetAnalysis[sheetNumber] = { sheetName, analysis };
 
     if (error) {
-      pushGlobalLog({ method: 'processSheet', sheetName, error, keyColors: { error: 'brightred' } });
+      const method = `processSheet ${sheetNumber}`;
+      pushGlobalLog({ method, sheetName, error, keyColors: { error: 'brightred' } });
       if (!errorLog[error]) {
         errorLog[error] = [sheetName];
       } else {
@@ -46,46 +58,32 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, types }
       }
     }
 
-    if (analysis) {
-      if (analysis.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
-      if (analysis.skippedResults) skippedResults.push(...Object.keys(analysis.skippedResults));
-
-      /*
-      // const { headerRow, footerRow } = analysis;
-      // console.log({ headerRow, footerRow });
-      console.log(
-        // { sheetNumber }
-        // analysis.multiColumnFrequency,
-        // analysis.multiColumnValues
-        // { skippedResults: Object.keys(analysis.skippedResults) }
-        analysis.skippedResults['W:CA']
-        // analysis.valuesMap
-        // analysis.rowGroupings
-        // analysis.columnProfiles.map((v) => v.values)
-        // analysis.columnProfiles
-        // analysis.columns,
-        // analysis.attributeMap
-      );
-      */
+    if (analysis?.tournamentDetails) {
+      const tournamentId = generateTournamentId();
+      console.log({ tournamentId });
     }
+
+    if (analysis?.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
+    if (analysis?.skippedResults) skippedResults.push(...Object.keys(analysis.skippedResults));
   }
 
-  return { errorLog, resultValues, skippedResults, ...SUCCESS };
+  return { sheetAnalysis, errorLog, resultValues, skippedResults, ...SUCCESS };
 }
 
-export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, types = [] }) {
+export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, sheetTypes = [] }) {
   const sheet = workbook.Sheets[sheetName];
 
   const { hasValues, sheetDefinition } = identifySheet({ sheetName, sheet, profile });
 
-  if (!hasValues || (types.length && !types.includes(sheetDefinition.type))) return { ...SUCCESS };
+  if (!hasValues || (sheetTypes.length && !sheetTypes.includes(sheetDefinition.type))) return { ...SUCCESS };
 
   if (sheetDefinition) {
+    const method = `processSheet ${sheetNumber}`;
     pushGlobalLog({
-      method: 'processSheet',
-      sheetName,
+      method,
+      keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
       type: sheetDefinition.type,
-      keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' }
+      sheetName
     });
   } else {
     return { error: MISSING_SHEET_DEFINITION };
@@ -122,6 +120,16 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
       sheet,
       info
     });
+  } else if (sheetDefinition.type === INDETERMINATE) {
+    return processIndeterminate({
+      sheetDefinition,
+      sheetName,
+      analysis,
+      profile,
+      sheet,
+      info
+    });
+    //
   } else if (sheetDefinition.type === PARTICIPANTS) {
     //
   } else if (sheetDefinition.type === INFORMATION) {

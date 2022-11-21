@@ -15,6 +15,7 @@ export function identifySheet({ sheet, profile }) {
     return { hasValues };
   }
 
+  // profile.sheetDefinitions should be ordered such that least certain matches occur last
   const sheetDefinitions = profile.sheetDefinitions;
   const rowDefinitions = profile.rowDefinitions;
   const rowIds = rowDefinitions
@@ -24,10 +25,10 @@ export function identifySheet({ sheet, profile }) {
     }, [])
     .filter(Boolean);
 
-  const identifiedDefinition = sheetDefinitions.reduce((sheetDefinition, currentDefinition) => {
+  const identifiedDefinition = sheetDefinitions.find((currentDefinition) => {
     const exactMatch = currentDefinition.rowIds.reduce((result, rowId) => rowIds.includes(rowId) && result, true);
-    return exactMatch ? currentDefinition : sheetDefinition;
-  }, undefined);
+    return exactMatch;
+  });
 
   return { sheetDefinition: identifiedDefinition, hasValues, ...SUCCESS };
 }

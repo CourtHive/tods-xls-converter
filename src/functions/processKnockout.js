@@ -6,6 +6,11 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
   if (sheetDefinition && profile && sheet);
 
   /*
+    const matchUpAttributes = { roundNumber: 1, roundPosition: 1, drawSize: 32, participantNames: ['Ray', 'Charles'] };
+    const matchUpId = generateMatchUpId(matchUpAttributes);
+    console.log({ matchUpId });
+    */
+  /*
   analysis.rowGroupings.forEach((grouping) => {
     const { columns, attributes, rowCount } = grouping;
     pushGlobalLog({ columns, attributes, rowCount });

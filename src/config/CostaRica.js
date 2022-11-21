@@ -1,6 +1,6 @@
 import { isString } from '../utilities/convenience';
 
-import { KNOCKOUT, ROUND_ROBIN, MENU } from '../constants/sheetTypes';
+import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE } from '../constants/sheetTypes';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 import { HEADER, FOOTER } from '../constants/sheetElements';
 
@@ -28,8 +28,9 @@ const roundNames = [
   'CLASIFICADAS'
 ];
 
+const organization = 'FEDERACION COSTARRICENSE DE TENIS';
 export const config = {
-  organization: 'FEDERACION COSTARRICENSE DE TENIS',
+  organization,
   mustContainSheetNames: [],
   profile: {
     skipWords: [
@@ -132,8 +133,16 @@ export const config = {
         elements: [{ text: 'panel de navegacion', options: { includes: true } }],
         rows: 1,
         minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'federationHeader',
+        elements: [{ text: organization, options: { startsWith: true } }],
+        rows: 1,
+        minimumElements: 1
       }
     ],
+    // these should be ordered such that least certain matches are last
     sheetDefinitions: [
       {
         type: KNOCKOUT,
@@ -148,6 +157,11 @@ export const config = {
       {
         type: MENU,
         rowIds: ['menuHeader']
+      },
+      {
+        type: INDETERMINATE,
+        infoClass: 'drawInfo',
+        rowIds: ['federationHeader', 'drawFooter']
       }
     ],
     gaps: { draw: { term: 'Round 1', gap: 0 } },
@@ -158,16 +172,7 @@ export const config = {
       }
     ],
     playerRows: { playerNames: true, lastName: true, firstName: true },
-    tournamentInfo: [
-      /*
-      {
-        attribute: 'categories',
-        searchText: 'Versenyszám 1',
-        rowOffset: 1,
-        columnOffsets: [0, 1, 2, 3, 4]
-      }
-      */
-    ],
+    tournamentInfo: [],
     drawInfo: [
       {
         attribute: [TOURNAMENT_NAME],
@@ -290,5 +295,5 @@ export const config = {
     });
     return potentials;
   },
-  identifyingStrings: ['FEDERACION COSTARRICENSE DE TENIS']
+  identifyingStrings: [organization]
 };
