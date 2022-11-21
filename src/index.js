@@ -7,7 +7,7 @@ import { SUCCESS } from './constants/resultConstants';
 
 let workbook, workbookType;
 
-export function loadWorkbook(buf) {
+export function loadWorkbook(buf, index) {
   try {
     workbook = read(buf);
   } catch (error) {
@@ -20,8 +20,11 @@ export function loadWorkbook(buf) {
   workbookType = result.workbookType;
   pushGlobalLog({
     method: 'identifyWorkbook',
+    keyColors: { provider: 'brightyellow', index: 'brightyellow' },
+    newLine: true,
+
     provider: workbookType.organization,
-    keyColors: { provider: 'brightyellow' }
+    index
   });
 
   return { workbookType, ...xlsTODS, ...SUCCESS };

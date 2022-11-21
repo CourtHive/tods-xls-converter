@@ -207,6 +207,7 @@ export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet, o
   );
   const valueCounts = instanceCount(elementRows);
   const elementInstances = Math.max(0, ...Object.values(valueCounts));
+
   if (elementInstances >= rowDefinition.minimumElements) {
     const targetRows = Object.keys(valueCounts).reduce(
       (p, c) => (valueCounts[c] === elementInstances ? p.concat(+c) : p),

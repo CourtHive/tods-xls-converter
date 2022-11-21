@@ -76,9 +76,9 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, types }
 export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, types = [] }) {
   const sheet = workbook.Sheets[sheetName];
 
-  const sheetDefinition = identifySheet({ sheetName, sheet, profile });
+  const { hasValues, sheetDefinition } = identifySheet({ sheetName, sheet, profile });
 
-  if (types.length && !types.includes(sheetDefinition.type)) return { ...SUCCESS };
+  if (!hasValues || (types.length && !types.includes(sheetDefinition.type))) return { ...SUCCESS };
 
   if (sheetDefinition) {
     pushGlobalLog({

@@ -10,8 +10,8 @@ import { expect, it } from 'vitest';
 
 it('can log factory version', () => {
   const rootDir = './src/tests/sheets';
-  const processLimit = 0;
-  const startIndex = 0;
+  const processLimit = 1;
+  const startIndex = 14;
 
   const isXLS = (filename) => filename.split('.').reverse()[0].startsWith('xls');
   let filenames = readdirSync(rootDir).filter(isXLS);
@@ -39,12 +39,14 @@ it('can log factory version', () => {
   const resultValues = [];
   const errorLog = {};
 
+  let index = 0;
   for (const filename of filenames) {
     const buf = readFileSync(`${rootDir}/${filename}`);
-    let result = xlsTODS.loadWorkbook(buf).processSheets({ filename });
+    let result = xlsTODS.loadWorkbook(buf, index).processSheets({ filename, sheetNumbers: [2] });
     // let result = xlsTODS.loadWorkbook(buf).processSheets({ filename, sheetLimit: 1 });
     // let result = xlsTODS.loadWorkbook(buf).processSheets({ filename, sheetNumbers: [3] });
     expect(result.success).toEqual(true);
+    index += 1;
 
     if (result.resultValues?.length) resultValues.push(...result.resultValues);
     // console.log({ resultValues: utilities.unique(result.resultValues) });

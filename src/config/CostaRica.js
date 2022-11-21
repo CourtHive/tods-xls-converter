@@ -1,7 +1,7 @@
 import { isString } from '../utilities/convenience';
 
+import { KNOCKOUT, ROUND_ROBIN, MENU } from '../constants/sheetTypes';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
-import { KNOCKOUT, ROUND_ROBIN } from '../constants/sheetTypes';
 import { HEADER, FOOTER } from '../constants/sheetElements';
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
@@ -125,6 +125,13 @@ export const config = {
         elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos'],
         rows: 8,
         minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'menuHeader',
+        elements: [{ text: 'panel de navegacion', options: { includes: true } }],
+        rows: 1,
+        minimumElements: 1
       }
     ],
     sheetDefinitions: [
@@ -137,6 +144,10 @@ export const config = {
         type: ROUND_ROBIN,
         infoClass: 'drawInfo',
         rowIds: ['roundRobinParticipants', 'drawFooter']
+      },
+      {
+        type: MENU,
+        rowIds: ['menuHeader']
       }
     ],
     gaps: { draw: { term: 'Round 1', gap: 0 } },

@@ -33,12 +33,16 @@ export function printGlobalLog(purge) {
       (Object.keys(keyColors).includes('attributes') && logColors[keyColors.attributes]) || logColors.white;
     const body = bodyKeys
       .map((key) => {
+        if (line[key] === undefined) return;
+
         const keyColor =
           keyColors && Object.keys(keyColors).includes(key) && logColors[keyColors[key]]
             ? logColors[keyColors[key]]
             : logColors.brightwhite;
+
         return `${attributeColor}${key}: ${keyColor}${line[key]}`;
       })
+      .filter(Boolean)
       .join(', ');
 
     const tabs = method?.length < 15 ? `\t\t` : '\t';
