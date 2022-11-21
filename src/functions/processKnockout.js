@@ -1,14 +1,21 @@
-import { pushGlobalLog } from '../utilities/globalLog';
+// import { pushGlobalLog } from '../utilities/globalLog';
 
 import { SUCCESS } from '../constants/resultConstants';
 
 export function processKnockOut({ sheetDefinition, profile, analysis, sheet, info }) {
   if (sheetDefinition && profile && sheet);
 
+  /*
+    const matchUpAttributes = { roundNumber: 1, roundPosition: 1, drawSize: 32, participantNames: ['Ray', 'Charles'] };
+    const matchUpId = generateMatchUpId(matchUpAttributes);
+    console.log({ matchUpId });
+    */
+  /*
   analysis.rowGroupings.forEach((grouping) => {
     const { columns, attributes, rowCount } = grouping;
     pushGlobalLog({ columns, attributes, rowCount });
   });
+  */
 
   /*
   const result = getParticipantRows({

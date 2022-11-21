@@ -1,42 +1,19 @@
 import { identifyWorkbook } from './functions/identifyWorkbook';
+import { processDirectory } from './utilities/processDirectory';
 import { processSheets } from './functions/processSheets';
-import { printGlobalLog } from './utilities/globalLog';
-import { read } from 'xlsx';
-
-import { SUCCESS } from './constants/resultConstants';
-
-let workbook, workbookType;
-
-export function loadWorkbook(buf) {
-  try {
-    workbook = read(buf);
-  } catch (error) {
-    return { error };
-  }
-
-  let result = identifyWorkbook(workbook);
-  if (result.error) return result;
-
-  workbookType = result.workbookType;
-
-  return { workbookType, ...xlsTODS, ...SUCCESS };
-}
-
-export function getWorkbook() {
-  return { workbook, workbookType };
-}
-
-export function getWorkbookProps() {
-  return { ...workbook, workbookType };
-}
+import { factory } from 'tods-competition-factory';
+import { loadWorkbook } from './global/loader';
+import globalLog from './utilities/globalLog';
+import xlsState from './global/state';
 
 export const xlsTODS = {
-  getWorkbook,
-  getWorkbookProps,
   identifyWorkbook,
+  processDirectory,
+  ...globalLog,
+  ...xlsState,
+  processSheets,
   loadWorkbook,
-  printGlobalLog,
-  processSheets
+  factory
 };
 
 export default xlsTODS;

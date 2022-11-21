@@ -1,3 +1,4 @@
+import { hasNumeric, isString } from '../utilities/identification';
 import { getCellValue, getCol, getRow } from './sheetAccess';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getColumnCharacter } from './getColumnCharacter';
@@ -9,16 +10,23 @@ import {
   containsExpression,
   getNonBracketedValue,
   hasBracketedValue,
-  hasNumeric,
-  isString,
   keyHasSingleAlpha,
   keyRowSort,
+  startsWithIterator,
   tidyValue
 } from '../utilities/convenience';
 
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 
-export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, profile }) => {
+export const getSheetAnalysis = ({
+  ignoreCellRefs = [],
+  sheetDefinition,
+  sheetNumber,
+  sheetName,
+  filename,
+  profile,
+  sheet
+}) => {
   const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition });
   const columns = getHeaderColumns({ sheet, profile, headerRow });
 
@@ -125,27 +133,41 @@ export const getSheetAnalysis = ({ ignoreCellRefs = [], sheet, sheetDefinition, 
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );
 
-  const potentialScoreValues = columnProfiles
+  const skippedResults = {};
+
+  const potentialResultValues = columnProfiles
     .filter(({ column }) => targetColumns.includes(column))
-    .flatMap(({ values }) =>
-      values.map(tidyValue).filter(
-        (value) =>
+    .flatMap(({ column, values }) => {
+      return values.map(tidyValue).filter((value) => {
+        const potentialResult =
           (hasNumeric(value) || (isString(value) && profile.matchOutcomes.includes(value.toLowerCase()))) &&
           // if there is a bracketed value, ensure nonbracketed value has a numeric component
           (!hasBracketedValue(value) || hasNumeric(getNonBracketedValue(value))) &&
           !multiColumnValues.includes(getNonBracketedValue(value)) &&
           !value.toString().toLowerCase().includes(' am ') &&
           !value.toString().toLowerCase().includes(' pm ') &&
-          value.toString().length !== 1
-      )
-    );
+          !startsWithIterator(value) &&
+          value.toString().length !== 1;
+
+        if (!potentialResult) {
+          if (!skippedResults[value]) {
+            skippedResults[value] = [{ filename, sheetName, sheetNumber, column }];
+          } else {
+            skippedResults[value].push({ filename, sheetName, sheetNumber, column });
+          }
+        }
+
+        return potentialResult;
+      });
+    });
 
   return {
-    potentialScoreValues,
+    potentialResultValues,
     multiColumnFrequency,
     multiColumnValues,
     greatestFrequency,
     columnFrequency,
+    skippedResults,
     frequencyOrder,
     columnProfiles,
     rowGroupings,

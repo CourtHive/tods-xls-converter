@@ -1,12 +1,14 @@
+import { processIndeterminate } from './processIndeterminate';
+import { generateTournamentId } from '../utilities/hashing';
 import { processRoundRobin } from './processRoundRobin';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
 import { processKnockOut } from './processKnockout';
 import { identifySheet } from './identifySheet';
+import { getWorkbook } from '../global/state';
 import { extractInfo } from './extractInfo';
-import { getWorkbook } from '..';
 
-import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN } from '../constants/sheetTypes';
+import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
 import { SUCCESS } from '../constants/resultConstants';
 import {
   MISSING_SHEET_DEFINITION,
@@ -15,60 +17,81 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export function processSheets({ sheetLimit, sheetNumbers = [] } = {}) {
+export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes } = {}) {
   const { workbook, workbookType } = getWorkbook();
+
   if (!workbook) return { error: MISSING_WORKBOOK };
   if (!workbookType) return { error: UNKNOWN_WORKBOOK_TYPE };
 
   const { profile } = workbookType;
 
-  const scoreValues = [];
+  const sheetCount = workbook.SheetNames.length;
+  pushGlobalLog({
+    keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
+    divider: 80,
+    sheetCount,
+    filename
+  });
+
+  const skippedResults = [];
+  const sheetAnalysis = {};
+  const resultValues = [];
+  const errorLog = {};
   let sheetNumber = 0;
 
   for (const sheetName of workbook.SheetNames) {
     sheetNumber += 1;
     if (sheetLimit && sheetNumber > sheetLimit) break;
-
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
-    const result = processSheet(workbook, profile, sheetName);
-    if (result.error) {
-      pushGlobalLog({ method: 'processSheet', sheetName, error: result.error });
+
+    const { error, analysis, hasValues } = processSheet({
+      sheetNumber,
+      sheetTypes,
+      sheetName,
+      filename,
+      workbook,
+      profile
+    });
+
+    sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
+
+    if (error) {
+      const method = `processSheet ${sheetNumber}`;
+      pushGlobalLog({ method, sheetName, error, keyColors: { error: 'brightred' } });
+      if (!errorLog[error]) {
+        errorLog[error] = [sheetName];
+      } else {
+        errorLog[error].push(sheetName);
+      }
     }
 
-    const { analysis } = result;
-    if (analysis) {
-      if (analysis.potentialScoreValues) scoreValues.push(...analysis.potentialScoreValues);
-
-      // const { headerRow, footerRow } = analysis;
-      // console.log({ headerRow, footerRow });
-      console.log(
-        { sheetNumber },
-        analysis.multiColumnFrequency,
-        analysis.multiColumnValues
-        // analysis.valuesMap
-        // analysis.rowGroupings
-        // analysis.columnProfiles.map((v) => v.values)
-        // analysis.columnProfiles
-        // analysis.columns,
-        // analysis.attributeMap
-      );
+    if (analysis?.tournamentDetails) {
+      const tournamentId = generateTournamentId();
+      console.log({ tournamentId });
     }
+
+    if (analysis?.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
+    if (analysis?.skippedResults) skippedResults.push(...Object.keys(analysis.skippedResults));
   }
 
-  return { scoreValues, ...SUCCESS };
+  return { sheetAnalysis, errorLog, resultValues, skippedResults, ...SUCCESS };
 }
 
-export function processSheet(workbook, profile, sheetName) {
+export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, sheetTypes = [] }) {
   const sheet = workbook.Sheets[sheetName];
 
-  const sheetDefinition = identifySheet({ sheetName, sheet, profile });
+  const { hasValues, sheetDefinition } = identifySheet({ sheetName, sheet, profile });
+
+  const skipped = sheetTypes.length && sheetDefinition && !sheetTypes.includes(sheetDefinition.type);
+  if (!hasValues || skipped) return { analysis: { skipped }, hasValues, ...SUCCESS };
 
   if (sheetDefinition) {
+    const method = `processSheet ${sheetNumber}`;
     pushGlobalLog({
-      method: 'processSheet',
-      sheetName,
+      method,
+      keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
       type: sheetDefinition.type,
-      keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' }
+      sheetName
     });
   } else {
     return { error: MISSING_SHEET_DEFINITION };
@@ -76,32 +99,37 @@ export function processSheet(workbook, profile, sheetName) {
 
   const { cellRefs, info } = extractInfo({ profile, sheet, infoClass: sheetDefinition.infoClass });
 
-  const analysis = getSheetAnalysis({
-    ignoreCellRefs: cellRefs,
+  const props = {
     sheetDefinition,
+    sheetNumber,
+    sheetName,
+    filename,
     profile,
     sheet,
     info
+  };
+
+  const analysis = getSheetAnalysis({
+    ignoreCellRefs: cellRefs,
+    ...props
   });
 
   if (sheetDefinition.type === KNOCKOUT) {
     return processKnockOut({
-      sheetDefinition,
-      sheetName,
       analysis,
-      profile,
-      sheet,
-      info
+      ...props
     });
   } else if (sheetDefinition.type === ROUND_ROBIN) {
     return processRoundRobin({
-      sheetDefinition,
-      sheetName,
       analysis,
-      profile,
-      sheet,
-      info
+      ...props
     });
+  } else if (sheetDefinition.type === INDETERMINATE) {
+    return processIndeterminate({
+      analysis,
+      ...props
+    });
+    //
   } else if (sheetDefinition.type === PARTICIPANTS) {
     //
   } else if (sheetDefinition.type === INFORMATION) {

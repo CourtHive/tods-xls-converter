@@ -1,5 +1,5 @@
 import { postProcessors } from '../functions/postProcessors';
-import { isNumeric } from '../utilities/convenience';
+import { isNumeric } from '../utilities/identification';
 
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
 import { HEADER, FOOTER } from '../constants/sheetElements';

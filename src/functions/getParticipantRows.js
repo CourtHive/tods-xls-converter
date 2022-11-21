@@ -1,14 +1,13 @@
 import { getRow, getCol, cellsContaining, numberValue, getCellValue } from './sheetAccess';
 import { validRanking } from '../utilities/validators';
 import { maxInstance } from '../utilities/convenience';
+import { isNumeric } from '../utilities/identification';
+
 import { POSITION } from '../constants/columnConstants';
-// import { sheetAnalyzer } from './sheetAnalyzer';
 
 export function getParticipantRows(props) {
   const { headerRow, footerRow, avoidRows, columns, profile, sheet } = props;
   if (!profile) return { rows: [], preRoundRows: [] };
-
-  // const analyzer = sheetAnalyzer(props);
 
   const skipWords = profile.skipWords;
   const skipExpressions = profile.skipExpressions;
@@ -16,7 +15,6 @@ export function getParticipantRows(props) {
     const value = getCellValue(sheet[key]);
     return value && typeof value === 'string';
   };
-  const isNumeric = (value) => /^\d+(a)?$/.test(value);
   const isNumericValue = (key) => {
     const value = getCellValue(sheet[key]);
     return value && isNumeric(value);

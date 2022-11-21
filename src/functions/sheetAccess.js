@@ -1,6 +1,7 @@
 import { normalizeDiacritics, normalizeWhiteSpaces } from 'normalize-text';
+import { removeBits } from '../utilities/transformers';
+import { isObject } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
-import { isObject, removeBits } from '../utilities/convenience';
 
 const { unique, instanceCount } = utilities;
 
@@ -207,6 +208,7 @@ export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet, o
   );
   const valueCounts = instanceCount(elementRows);
   const elementInstances = Math.max(0, ...Object.values(valueCounts));
+
   if (elementInstances >= rowDefinition.minimumElements) {
     const targetRows = Object.keys(valueCounts).reduce(
       (p, c) => (valueCounts[c] === elementInstances ? p.concat(+c) : p),

@@ -1,5 +1,5 @@
+import { isNumeric } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
-import { isNumeric } from '../utilities/convenience';
 
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 

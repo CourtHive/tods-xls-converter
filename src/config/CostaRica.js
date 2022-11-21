@@ -1,14 +1,17 @@
-import { isString } from '../utilities/convenience';
+import { isString } from '../utilities/identification';
 
+import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE } from '../constants/sheetTypes';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
-import { KNOCKOUT, ROUND_ROBIN } from '../constants/sheetTypes';
 import { HEADER, FOOTER } from '../constants/sheetElements';
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
 // provided that a player advanced!
 
-const knockOutRounds = [
+// INTEREST: '*LL: LUCKY LOSER', '*LL: ....', '(Si el servicio toca la red y entra en el cuadro de', 'servicio correcto, la bola sigue en juego)'
+// 'G: WO', 'V: PRESENTE', 'R: WO'
+
+const roundNames = [
   'PRIMERA RONDA',
   'SEGUNDA RONDA',
   'TERCERA RONDA',
@@ -20,26 +23,58 @@ const knockOutRounds = [
   'FINALES',
   'CAMPEON',
   'GANADOR',
-  'GANADORA'
+  'GANADORA',
+  'CLASIFICADOS',
+  'CLASIFICADAS'
 ];
 
+const organization = 'FEDERACION COSTARRICENSE DE TENIS';
 export const config = {
-  organization: 'CR',
+  organization,
   mustContainSheetNames: [],
   profile: {
     skipWords: [
+      // TODO: introduce { regex } // which would be an exact match
       'final',
-      'principal',
-      'valores',
-      'nuevos',
       'medalla',
+      'fiscales',
+      'preclasificados',
+      'preclasificadas',
+      'U10',
+      'U12',
+      'U14',
+      'U16',
+      'U18',
       { text: ' pm', endsWith: true },
+      { text: 'puntos', endsWith: true },
       { text: ' dobles', endsWith: true },
-      { text: 'varones', endsWith: true },
-      { text: 'damas', endsWith: true },
+      { text: 'dobles', startsWith: true },
+      { text: 'varones', includes: true },
+      { text: 'valones', endsWith: true },
+      { text: 'menu', includes: true },
+      { text: 'break', includes: true },
+      { text: 'grado', includes: true },
+      { text: 'damas', includes: true },
+      { text: 'nota', startsWith: true },
+      { text: 'formato', startsWith: true },
+      { text: 'servicio', includes: true },
+      { text: 'clasifica', includes: true },
+      { text: 'clasificado', includes: true },
+      { text: 'clasficada', includes: true },
+      { text: 'clasificada', includes: true },
+      { text: 'claficicada', includes: true },
+      { text: 'lugar', includes: true },
+      { text: 'grupo', includes: true },
+      { text: 'ranking', includes: true },
+      { text: 'sets con', includes: true },
+      { text: 'sets sin', includes: true },
+      { text: 'ganadadora', startsWith: true },
+      { text: 'ganadora', startsWith: true },
+      { text: 'ganador', startsWith: true },
       { text: 'club', startsWith: true },
       { text: 'sede', startsWith: true },
       { text: 'ano', startsWith: true },
+      { text: 'principal', includes: true },
       { text: 'lluvia', includes: true },
       { text: 'sencillos', includes: true },
       { text: 'nacionales', includes: true },
@@ -49,27 +84,41 @@ export const config = {
     skipExpressions: [],
     considerAlpha: [',', '(', ')', '/'],
     matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
-    matchOutcomes: ['doble w.o', 'ret', 'def', 'w.o', 'w/o', 'wo', 'abandoned', 'gana x w.o', 'pierde x w.o'],
+    matchOutcomes: [
+      'doble w.o',
+      'ret',
+      'def',
+      'w.o',
+      'w/o',
+      'wo',
+      'abandoned',
+      'gana x w.o',
+      'pierde x w.o',
+      'gana x wo',
+      'gana wo',
+      'pierde x wo',
+      'pierde wo'
+    ],
     identification: {
       includes: [],
       sub_includes: []
     },
     columnsMap: {},
-    knockOutRounds,
+    knockOutRounds: roundNames,
     rowDefinitions: [
       {
         type: HEADER,
         id: 'knockoutParticipants',
-        elements: [...knockOutRounds],
+        elements: [...roundNames],
         rows: 1,
-        minimumElements: 3
+        minimumElements: 2
       },
       {
         type: HEADER,
         id: 'roundRobinParticipants',
         elements: ['1', '2', '3', '4'],
         rows: 1,
-        minimumElements: 4
+        minimumElements: 3
       },
       {
         type: FOOTER,
@@ -77,8 +126,23 @@ export const config = {
         elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos'],
         rows: 8,
         minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'menuHeader',
+        elements: [{ text: 'panel de navegacion', options: { includes: true } }],
+        rows: 1,
+        minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'federationHeader',
+        elements: [{ text: organization, options: { startsWith: true } }],
+        rows: 1,
+        minimumElements: 1
       }
     ],
+    // these should be ordered such that least certain matches are last
     sheetDefinitions: [
       {
         type: KNOCKOUT,
@@ -89,37 +153,26 @@ export const config = {
         type: ROUND_ROBIN,
         infoClass: 'drawInfo',
         rowIds: ['roundRobinParticipants', 'drawFooter']
+      },
+      {
+        type: MENU,
+        rowIds: ['menuHeader']
+      },
+      {
+        type: INDETERMINATE,
+        infoClass: 'drawInfo',
+        rowIds: ['federationHeader', 'drawFooter']
       }
     ],
     gaps: { draw: { term: 'Round 1', gap: 0 } },
     headerColumns: [
       {
         attr: 'round',
-        header: [
-          'PRIMERA RONDA',
-          'SEGUNDA RONDA',
-          'OCTAVOS',
-          'CUARTOS',
-          'SEMIFINAL',
-          'SEMIFINALES',
-          'FINAL',
-          'CAMPEÓN',
-          'GANADOR',
-          'GANADORA'
-        ]
+        header: roundNames
       }
     ],
     playerRows: { playerNames: true, lastName: true, firstName: true },
-    tournamentInfo: [
-      /*
-      {
-        attribute: 'categories',
-        searchText: 'Versenyszám 1',
-        rowOffset: 1,
-        columnOffsets: [0, 1, 2, 3, 4]
-      }
-      */
-    ],
+    tournamentInfo: [],
     drawInfo: [
       {
         attribute: [TOURNAMENT_NAME],
@@ -192,6 +245,28 @@ export const config = {
         stopOnEmpty: true,
         rowOffset: 1,
         rowCount: 16
+      },
+      {
+        attribute: 'preQualifiers',
+        searchText: ['preclasificados', 'preclasificadas'],
+        stopOnEmpty: true,
+        rowOffset: 1,
+        rowCount: 8
+      },
+      {
+        attribute: 'preQualifyingnumbers',
+        searchText: ['preclasificados', 'preclasificadas'],
+        stopOnEmpty: true,
+        columnOffset: -1,
+        rowOffset: 1,
+        rowCount: 8
+      },
+      {
+        attribute: 'rankingPoints',
+        searchText: ['puntos en el ranking:'],
+        stopOnEmpty: true,
+        rowOffset: 1,
+        rowCount: 8
       }
     ],
     dateParser: (date) => {
@@ -219,5 +294,6 @@ export const config = {
       return vTest || mTest;
     });
     return potentials;
-  }
+  },
+  identifyingStrings: [organization]
 };

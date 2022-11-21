@@ -1,6 +1,8 @@
+import { isNumeric, isObject, isString } from './identification';
 import { utilities } from 'tods-competition-factory';
 import { getRow } from '../functions/sheetAccess';
-import { getWorkbook } from '..';
+import { getWorkbook } from '../global/state';
+import { removeBits } from './transformers';
 
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
@@ -8,21 +10,6 @@ export function maxInstance(values) {
   return Object.keys(valueCounts).reduce((p, c) => (valueCounts[c] === valueInstances ? c : p), undefined);
 }
 
-export const hasNumeric = (value) => /\d+/.test(value);
-export const isString = (value) => typeof value === 'string';
-export const isNumeric = (value) => /^\d+(a)?$/.test(value);
-export const isObject = (value) => typeof value === 'object';
-export const removeBits = (value, remove = []) => {
-  remove.forEach((replace) => {
-    if (['(', ')'].includes(replace)) {
-      value = isString(value) ? value.split(replace).join('') : value;
-    } else {
-      const re = new RegExp(replace, 'g');
-      value = isString(value) ? value.replace(re, '') : value;
-    }
-  });
-  return value;
-};
 export const removeTrailing = (value, remove = ['.', ':', ',']) => {
   if (remove.some((r) => value.endsWith(r))) return value.slice(0, value.length - 1);
   return value;
@@ -33,12 +20,13 @@ export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
 
 const isAlpha = (value) => /^[a-zA-Z- ]+$/.test(value);
 export const onlyAlpha = (value, profile) =>
-  Array.isArray(profile.considerAlpha) ? isAlpha(removeBits(value, profile.considerAlpha)) : isAlpha(value);
+  Array.isArray(profile?.considerAlpha) ? isAlpha(removeBits(value, profile.considerAlpha)) : isAlpha(value);
 export const onlyNumeric = (value, profile) => profile.considerNumeric?.includes(value) || isNumeric(value);
 export const isSkipWord = (value, profile) =>
   (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));
 
-export const hasBracketedValue = (value) => typeof value === 'string' && /\(\d+\)$/.test(value.trim());
+export const startsWithIterator = (value) => isString(value) && /^\d\s/.test(value.trim());
+export const hasBracketedValue = (value) => isString(value) && /\(\d+\)$/.test(value.trim());
 export const matchSeeding = (value) => value.match(/^(.+)\((\d+)\)$/);
 export const getSeeding = (value) => {
   if (typeof value !== 'string') return;
