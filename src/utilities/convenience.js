@@ -1,6 +1,6 @@
 import { utilities } from 'tods-competition-factory';
 import { getRow } from '../functions/sheetAccess';
-import { getWorkbook } from '..';
+import { getWorkbook } from '../global/state';
 
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);

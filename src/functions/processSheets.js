@@ -5,8 +5,8 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
 import { processKnockOut } from './processKnockout';
 import { identifySheet } from './identifySheet';
+import { getWorkbook } from '../global/state';
 import { extractInfo } from './extractInfo';
-import { getWorkbook } from '..';
 
 import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
 import { SUCCESS } from '../constants/resultConstants';

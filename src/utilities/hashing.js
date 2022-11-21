@@ -1,4 +1,4 @@
-import { getWorkbookProps } from '..';
+import { getWorkbookProps } from '../global/state';
 import hashSum from 'hash-sum';
 
 import { INVALID_VALUES, MISSING_VALUES } from '../constants/errorConditions';

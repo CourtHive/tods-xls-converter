@@ -1,3 +1,4 @@
+import { processSheets } from '../functions/processSheets';
 import { utilities } from 'tods-competition-factory';
 import { readdirSync, readFileSync } from 'fs-extra';
 import { pushGlobalLog } from './globalLog';
@@ -45,7 +46,8 @@ export function processDirectory({
   let index = 0;
   for (const filename of filenames) {
     const buf = readFileSync(`${readDir}/${filename}`);
-    let result = xlsTODS.loadWorkbook(buf, index).processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
+    let result = xlsTODS.loadWorkbook(buf, index);
+    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
     fileResults[index] = result;
     index += 1;
 

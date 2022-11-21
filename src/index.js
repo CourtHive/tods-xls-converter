@@ -3,25 +3,35 @@ import { identifyWorkbook } from './functions/identifyWorkbook';
 import { processSheets } from './functions/processSheets';
 import { read } from 'xlsx';
 
+import {
+  setTournamentRecord,
+  getTournamentRecord,
+  getWorkbookProps,
+  setWorkbookType,
+  getWorkbook,
+  setWorkbook
+} from './global/state';
+
 import { SUCCESS } from './constants/resultConstants';
 
-let tournamentRecord = {},
-  workbookType,
-  workbook;
-
 export function loadWorkbook(buf, index) {
-  tournamentRecord = {};
+  setTournamentRecord({});
+
+  let data;
 
   try {
-    workbook = read(buf);
+    data = read(buf);
+    setWorkbook(data);
   } catch (error) {
     return { error };
   }
 
-  let result = identifyWorkbook(workbook);
+  let result = identifyWorkbook(data);
   if (result.error) return result;
 
-  workbookType = result.workbookType;
+  const workbookType = result.workbookType;
+  setWorkbookType(workbookType);
+
   pushGlobalLog({
     method: 'identifyWorkbook',
     keyColors: { provider: 'brightyellow', index: 'brightyellow' },
@@ -32,18 +42,6 @@ export function loadWorkbook(buf, index) {
   });
 
   return { workbookType, ...xlsTODS, ...SUCCESS };
-}
-
-export function getWorkbook() {
-  return { workbook, workbookType };
-}
-
-export function getWorkbookProps() {
-  return { ...workbook, workbookType };
-}
-
-export function getTournamentRecord() {
-  return { tournamentRecord };
 }
 
 export const xlsTODS = {
