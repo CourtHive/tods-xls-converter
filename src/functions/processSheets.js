@@ -91,8 +91,7 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
 
   const { cellRefs, info } = extractInfo({ profile, sheet, infoClass: sheetDefinition.infoClass });
 
-  const analysis = getSheetAnalysis({
-    ignoreCellRefs: cellRefs,
+  const props = {
     sheetDefinition,
     sheetNumber,
     sheetName,
@@ -100,34 +99,27 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
     profile,
     sheet,
     info
+  };
+
+  const analysis = getSheetAnalysis({
+    ignoreCellRefs: cellRefs,
+    ...props
   });
 
   if (sheetDefinition.type === KNOCKOUT) {
     return processKnockOut({
-      sheetDefinition,
-      sheetName,
       analysis,
-      profile,
-      sheet,
-      info
+      ...props
     });
   } else if (sheetDefinition.type === ROUND_ROBIN) {
     return processRoundRobin({
-      sheetDefinition,
-      sheetName,
       analysis,
-      profile,
-      sheet,
-      info
+      ...props
     });
   } else if (sheetDefinition.type === INDETERMINATE) {
     return processIndeterminate({
-      sheetDefinition,
-      sheetName,
       analysis,
-      profile,
-      sheet,
-      info
+      ...props
     });
     //
   } else if (sheetDefinition.type === PARTICIPANTS) {
