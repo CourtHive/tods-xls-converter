@@ -33,7 +33,7 @@ export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
 
 const isAlpha = (value) => /^[a-zA-Z- ]+$/.test(value);
 export const onlyAlpha = (value, profile) =>
-  Array.isArray(profile.considerAlpha) ? isAlpha(removeBits(value, profile.considerAlpha)) : isAlpha(value);
+  Array.isArray(profile?.considerAlpha) ? isAlpha(removeBits(value, profile.considerAlpha)) : isAlpha(value);
 export const onlyNumeric = (value, profile) => profile.considerNumeric?.includes(value) || isNumeric(value);
 export const isSkipWord = (value, profile) =>
   (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));

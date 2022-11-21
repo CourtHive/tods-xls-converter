@@ -28,7 +28,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   const sheetCount = workbook.SheetNames.length;
   pushGlobalLog({
     keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
-    divider: 70,
+    divider: 80,
     sheetCount,
     filename
   });

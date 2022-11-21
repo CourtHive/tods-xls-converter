@@ -29,7 +29,7 @@ export function processDirectory({
     lineAfter: true,
     separator: ':',
     newLine: true,
-    divider: 70,
+    divider: 80,
 
     workbookCount,
     processing
@@ -88,7 +88,7 @@ export function processDirectory({
     color: 'brightcyan',
     separator: ':',
     newLine: true,
-    divider: 70,
+    divider: 80,
 
     filesWithErrors,
     totalErrors
