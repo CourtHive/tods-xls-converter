@@ -8,6 +8,7 @@ specifiers:
   eslint-plugin-compat: ^4.0.2
   eslint-plugin-import: ^2.26.0
   eslint-plugin-prettier: ^4.2.1
+  esm: ^3.2.25
   fs-extra: ^10.1.0
   hash-sum: ^2.0.0
   husky: ^8.0.2
@@ -24,6 +25,7 @@ specifiers:
   xlsx: 0.18.5
 
 dependencies:
+  esm: 3.2.25
   hash-sum: 2.0.0
   node-xlsx: 0.21.0
   normalize-text: 2.4.1
@@ -1591,6 +1593,11 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /esm/3.2.25:
+    resolution: {integrity: sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA==}
+    engines: {node: '>=6'}
+    dev: false
 
   /espree/9.4.1:
     resolution: {integrity: sha512-XwctdmTO6SIvCzd9810yyNzIrOrqNYV9Koizx4C/mRhf9uq0o4yHoCEU/670pOxOL/MSraektvSAji79kX90Vg==}

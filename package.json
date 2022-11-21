@@ -57,6 +57,7 @@
     "eslint-plugin-compat": "^4.0.2",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "esm": "^3.2.25",
     "fs-extra": "^10.1.0",
     "husky": "^8.0.2",
     "lint-staged": "^13.0.3",
