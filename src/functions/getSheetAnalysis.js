@@ -2,6 +2,7 @@ import { hasNumeric, isString } from '../utilities/identification';
 import { getCellValue, getCol, getRow } from './sheetAccess';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getColumnCharacter } from './getColumnCharacter';
+import { getPositionRows } from './getPositionRows';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getContentFrame } from './getContentFrame';
@@ -92,12 +93,6 @@ export const getSheetAnalysis = ({
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
 
-  /*
-  const positioningData = columnProfiles.find((profile) =>
-    [positionColumn, preRoundColumn].includes(profile.column)
-  )?.keyMap;
-  */
-
   const { valuesMap, participants, seededParticipants } = getValuesMap({ columnProfiles, profile });
   const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
@@ -117,6 +112,8 @@ export const getSheetAnalysis = ({
   const targetColumns = Object.keys(multiColumnFrequency).filter(
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );
+
+  const { positionRows } = getPositionRows({ columnProfiles, positionColumn, preRoundColumn });
 
   const skippedResults = {};
   const potentialResultValues = columnProfiles
@@ -155,8 +152,9 @@ export const getSheetAnalysis = ({
     skippedResults,
     frequencyOrder,
     columnProfiles,
-    participants, // should this be done in knockout post-processing?
     attributeMap,
+    participants, // should this be done in knockout post-processing?
+    positionRows,
     filteredKeys,
     sheetNumber,
     columnKeys,
