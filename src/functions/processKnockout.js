@@ -3,6 +3,20 @@ import { SUCCESS } from '../constants/resultConstants';
 export function processKnockOut({ sheetDefinition, profile, analysis, sheet, info }) {
   if (sheetDefinition && profile && sheet);
 
+  // NOTES:
+  // *. Is there a pre-round
+  // *. Characterize { drawSize: ##, R: 32, 16, 8. 4. 3 }
+  // *. For each round, does the previous round have matching names
+  // *. Using matching values across rounds calculate where progressing values should occur (to correct for those which have misspellings)
+  // *. For each round, calculate which rows are paired
+  // *. Is the structure SINGLES or DOUBLES?
+  // *. Was the structure completed? Does the final round have 1 or 3?
+  // *. Does the first round have powerOf2 participants/byes
+  // *. Are there some rounds which have comma separating alpha values and some which do not?
+  // *. Do all rounds have comma separated alpha values?
+  // *. If there is a pre-round, are there results/scores in the first round participant column
+  // *. Go back to each round and get date/times which occur on rows between paired paritipants
+
   /*
     const matchUpAttributes = { roundNumber: 1, roundPosition: 1, drawSize: 32, participantNames: ['Ray', 'Charles'] };
     const matchUpId = generateMatchUpId(matchUpAttributes);

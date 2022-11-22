@@ -45,6 +45,7 @@ export const config = {
       'U14',
       'U16',
       'U18',
+      { text: ' tba', startsWith: true },
       { text: ' pm', endsWith: true },
       { text: 'puntos', endsWith: true },
       { text: ' dobles', endsWith: true },
