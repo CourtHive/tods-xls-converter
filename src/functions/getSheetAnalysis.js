@@ -92,7 +92,13 @@ export const getSheetAnalysis = ({
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
 
-  const valuesMap = getValuesMap({ columnProfiles, profile });
+  /*
+  const positioningData = columnProfiles.find((profile) =>
+    [positionColumn, preRoundColumn].includes(profile.column)
+  )?.keyMap;
+  */
+
+  const { valuesMap, participants, seededParticipants } = getValuesMap({ columnProfiles, profile });
   const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
   const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
@@ -107,14 +113,12 @@ export const getSheetAnalysis = ({
     .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
-
   const positionColumn = columnProfiles.find(({ attribute }) => attribute === POSITION)?.column;
   const targetColumns = Object.keys(multiColumnFrequency).filter(
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );
 
   const skippedResults = {};
-
   const potentialResultValues = columnProfiles
     .filter(({ column }) => targetColumns.includes(column))
     .flatMap(({ column, values }) => {
@@ -144,12 +148,14 @@ export const getSheetAnalysis = ({
   return {
     potentialResultValues,
     multiColumnFrequency,
+    seededParticipants, // should this be done in knockout post-processing?
     multiColumnValues,
     greatestFrequency,
     columnFrequency,
     skippedResults,
     frequencyOrder,
     columnProfiles,
+    participants, // should this be done in knockout post-processing?
     attributeMap,
     filteredKeys,
     sheetNumber,
