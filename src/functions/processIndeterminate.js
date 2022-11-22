@@ -27,5 +27,5 @@ export function processIndeterminate({ sheetDefinition, sheet, sheetNumber, shee
     });
   }
 
-  return { analysis, info, ...SUCCESS };
+  return { analysis, info, hasValues: true, ...SUCCESS };
 }
