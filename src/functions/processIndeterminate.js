@@ -17,8 +17,6 @@ export function processIndeterminate({ sheetDefinition, sheet, sheetNumber, shee
   const positionValuesCount = positionColumn.values.length;
   const viableFrequencyColumn = maxFrequencyValue <= positionValuesCount && maxFrequencyValue > positionValuesCount / 2;
 
-  console.log({ hasPosition, twoOrMoreColumns, viableFrequencyColumn, positionValuesCount, maxFrequencyValue });
-
   if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
     pushGlobalLog({
       method: 'identified',
