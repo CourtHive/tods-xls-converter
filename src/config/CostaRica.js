@@ -1,8 +1,8 @@
 import { isString } from '../utilities/identification';
 
 import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE } from '../constants/sheetTypes';
+import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
-import { HEADER, FOOTER } from '../constants/sheetElements';
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
@@ -168,8 +168,8 @@ export const config = {
     gaps: { draw: { term: 'Round 1', gap: 0 } },
     headerColumns: [
       {
-        attr: 'round',
-        header: roundNames
+        header: roundNames,
+        attr: ROUND
       }
     ],
     playerRows: { playerNames: true, lastName: true, firstName: true },

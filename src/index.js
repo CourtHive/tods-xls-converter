@@ -7,10 +7,12 @@ import globalLog from './utilities/globalLog';
 import xlsState from './global/state';
 
 // post processing functions
+import { getRoundRobinValues } from './functions/processRoundRobin';
 import { getRowGroupings } from './functions/getRowGroupings';
 import { findTarget } from './functions/findTarget';
 
 const f = {
+  getRoundRobinValues,
   getRowGroupings,
   findTarget
 };

@@ -25,7 +25,8 @@ export const getSheetAnalysis = ({
   sheetName,
   sheetType,
   profile,
-  sheet
+  sheet,
+  info
 }) => {
   const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition });
   const columns = getHeaderColumns({ sheet, profile, headerRow });
@@ -159,6 +160,7 @@ export const getSheetAnalysis = ({
     avoidRows,
     footerRow,
     headerRow,
-    columns
+    columns,
+    info
   };
 };

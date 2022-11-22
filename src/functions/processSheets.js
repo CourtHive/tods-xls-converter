@@ -36,6 +36,8 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   const skippedResults = [];
   const sheetAnalysis = {};
   const resultValues = [];
+  const participants = [];
+  const structures = [];
   const errorLog = {};
   let sheetNumber = 0;
 
@@ -44,7 +46,13 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (sheetLimit && sheetNumber > sheetLimit) break;
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
 
-    const { error, analysis, hasValues } = processSheet({
+    const {
+      participants: structureParticipants,
+      hasValues,
+      structure,
+      analysis,
+      error
+    } = processSheet({
       sheetNumber,
       sheetTypes,
       sheetName,
@@ -54,6 +62,9 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     });
 
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
+
+    if (structureParticipants?.length) participants.push(...structureParticipants);
+    if (structure) structures.push(structure);
 
     if (error) {
       const method = `processSheet ${sheetNumber}`;
@@ -66,7 +77,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     }
 
     if (analysis?.tournamentDetails) {
-      const tournamentId = generateTournamentId();
+      const { tournamentId } = generateTournamentId({ attributes: [analysis.tournamentDetails] });
       console.log({ tournamentId });
     }
 
@@ -74,7 +85,10 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (analysis?.skippedResults) skippedResults.push(...Object.keys(analysis.skippedResults));
   }
 
-  return { sheetAnalysis, errorLog, resultValues, skippedResults, ...SUCCESS };
+  // TODO: combine structures into drawDefinitions/events
+  // *. requires category which can be parsed from sheetNames or sheet info
+
+  return { sheetAnalysis, errorLog, resultValues, skippedResults, structures, participants, ...SUCCESS };
 }
 
 export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, sheetTypes = [] }) {

@@ -1,5 +1,5 @@
+import { getTournamentRecord, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
-import { getTournamentRecord } from '../global/state';
 import { readdirSync, readFileSync } from 'fs-extra';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
@@ -9,6 +9,7 @@ export function processDirectory({
   writeDir = './',
   readDir = './',
 
+  includeWorkbooks,
   processLimit = 0,
   startIndex = 0,
   sheetNumbers,
@@ -46,8 +47,9 @@ export function processDirectory({
   for (const filename of filenames) {
     const buf = readFileSync(`${readDir}/${filename}`);
     let result = loadWorkbook(buf, index);
+    const additionalContent = includeWorkbooks ? getWorkbook() : {};
     result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
-    fileResults[index] = { filename, ...result };
+    fileResults[index] = { filename, ...result, ...additionalContent };
     index += 1;
 
     if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);

@@ -11,6 +11,7 @@ const purge = (logName) => {
 };
 
 const props = {
+  includeWorkbooks: false,
   readDir: './sheets',
   sheetNumbers: [],
   sheetTypes: [],
