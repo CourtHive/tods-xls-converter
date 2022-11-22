@@ -4,6 +4,8 @@ export const logColors = {
   dim: '\x1b[2m',
 
   red: '\x1b[31m',
+  lightred: '\x1b[1;31m',
+  pink: '\x1b[1;35m',
   brightred: '\x1b[91m',
   green: '\x1b[32m',
   brightgreen: '\x1b[92m',
@@ -17,5 +19,7 @@ export const logColors = {
   cyan: '\x1b[36m',
   brightcyan: '\x1b[96m',
   white: '\x1b[37m',
-  brightwhite: '\x1b[97m'
+  brightwhite: '\x1b[97m',
+  mustard: '\x1b[0;33m',
+  gray: '\x1b[0;37m'
 };
