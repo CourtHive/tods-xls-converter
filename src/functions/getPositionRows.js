@@ -13,7 +13,10 @@ export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn
     .map((key) => !isNaN(parseInt(keyMap[key])) && getRow(key))
     .filter(Boolean);
 
-  if (!missingPositions) return { positionRows: knownRows.map(getRef) };
+  if (!missingPositions) {
+    const positionProgression = getPositionProgression(allRows);
+    return { positionRows: knownRows.map(getRef), positionProgression };
+  }
 
   const keyedRows = Object.keys(keyMap).map(getRow);
   const minRow = Math.min(...keyedRows);
@@ -23,5 +26,27 @@ export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn
   const missingPositionRows = missingPositions.map((position) => (position - 1) * rowStep + minRow);
   const allRows = [...knownRows, ...missingPositionRows].sort(utilities.numericSort);
 
-  return { positionRows: allRows.map(getRef) };
+  const positionProgression = getPositionProgression(allRows);
+
+  return { positionRows: allRows.map(getRef), positionProgression };
+}
+
+function getPositionProgression(rows) {
+  const positionProgression = [];
+  let pairedRows = utilities.chunkArray(rows, 2);
+  positionProgression.push(pairedRows);
+  while (pairedRows.length > 1) {
+    const nextColumn = pairedRows.map(getMidPoint);
+    pairedRows = utilities.chunkArray(nextColumn, 2);
+    positionProgression.push(pairedRows);
+  }
+
+  return positionProgression;
+}
+
+function getMidPoint(rows) {
+  const isOdd = (x) => x % 2;
+  const diff = Math.abs(rows[1] - rows[0]);
+  const step = isOdd(diff) ? Math.floor(diff / 2) : diff / 2;
+  return Math.min(...rows) + step;
 }

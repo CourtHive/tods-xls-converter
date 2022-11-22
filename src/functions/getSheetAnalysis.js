@@ -113,7 +113,7 @@ export const getSheetAnalysis = ({
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );
 
-  const { positionRows } = getPositionRows({ columnProfiles, positionColumn, preRoundColumn });
+  const { positionRows, positionProgression } = getPositionRows({ columnProfiles, positionColumn, preRoundColumn });
 
   const skippedResults = {};
   const potentialResultValues = columnProfiles
@@ -145,6 +145,7 @@ export const getSheetAnalysis = ({
   return {
     potentialResultValues,
     multiColumnFrequency,
+    positionProgression, // should this be done in knockout post-processing?
     seededParticipants, // should this be done in knockout post-processing?
     multiColumnValues,
     greatestFrequency,
