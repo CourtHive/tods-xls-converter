@@ -5,7 +5,7 @@ import { getCellValue, getRow } from './sheetAccess';
 export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column }) {
   const truthiness = !!prospectColumnKeys.length;
 
-  const assessment = prospectColumnKeys.reduce(
+  const assessment = prospectColumnKeys.sort().reduce(
     (assessment, key) => {
       const rawValue = getCellValue(sheet[key]).split('.').join(''); // remove '.'
       const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
