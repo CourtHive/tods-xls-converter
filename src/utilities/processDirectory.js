@@ -14,7 +14,7 @@ export function processDirectory({
   sheetNumbers,
   sheetTypes,
   sheetLimit
-}) {
+} = {}) {
   const isXLS = (filename) => filename.split('.').reverse()[0].startsWith('xls');
   let filenames = readdirSync(readDir).filter(isXLS);
   const workbookCount = filenames.length;
