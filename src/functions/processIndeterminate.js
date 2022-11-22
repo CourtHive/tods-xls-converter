@@ -1,10 +1,12 @@
 import { pushGlobalLog } from '../utilities/globalLog';
+import { processKnockOut } from './processKnockout';
 
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import { KNOCKOUT } from '../constants/sheetTypes';
 
-export function processIndeterminate({ sheetDefinition, sheet, sheetNumber, sheetName, profile, analysis, info }) {
+export function processIndeterminate(props) {
+  const { sheetDefinition, sheet, sheetNumber, sheetName, profile, analysis, info } = props;
   if (sheetDefinition && sheetNumber && profile && sheet);
 
   const hasPosition = Object.values(analysis.attributeMap).includes(POSITION);
@@ -25,7 +27,9 @@ export function processIndeterminate({ sheetDefinition, sheet, sheetNumber, shee
       type: KNOCKOUT,
       sheetName
     });
+
+    return processKnockOut(props);
   }
 
-  return { analysis, info, ...SUCCESS };
+  return { analysis, info, hasValues: true, ...SUCCESS };
 }

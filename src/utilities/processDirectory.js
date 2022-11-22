@@ -47,7 +47,7 @@ export function processDirectory({
     const buf = readFileSync(`${readDir}/${filename}`);
     let result = loadWorkbook(buf, index);
     result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
-    fileResults[index] = result;
+    fileResults[index] = { filename, ...result };
     index += 1;
 
     if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
@@ -78,6 +78,13 @@ export function processDirectory({
     ?.flatMap((key) => errorLog[key].map((file) => file.sheetNames.length))
     .reduce((a, b) => a + b, 0);
 
+  const sheetsProcessed = Object.values(fileResults)
+    .map(
+      ({ sheetAnalysis }) =>
+        Object.values(sheetAnalysis).filter(({ hasValues, analysis }) => hasValues && !analysis.skipped).length
+    )
+    .reduce((a, b) => a + b, 0);
+
   pushGlobalLog({
     method: 'processingComplete',
     keyColors: { attributes: 'brightgreen' },
@@ -86,6 +93,7 @@ export function processDirectory({
     newLine: true,
     divider: 80,
 
+    sheetsProcessed,
     filesWithErrors,
     totalErrors
   });

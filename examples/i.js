@@ -5,26 +5,30 @@
 const { xlsTODS } = require('../dist');
 xlsTODS.setLoggingActive(true);
 
-const x = {
-  purge: (props) => {
-    console.log('logs purged');
-    xlsTODS.purgeGlobalLog(props);
-  }
+const purge = (logName) => {
+  console.log('logs purged');
+  xlsTODS.purgeGlobalLog(logName);
 };
+
 const props = {
-  sheetTypes: ['INDETERMINATE'],
   readDir: './sheets',
   sheetNumbers: [],
+  sheetTypes: [],
   processLimit: 0,
   startIndex: 0,
   sheetLimit: 0
 };
 
-const go = (props) => {
+const x = {};
+const go = () => {
   const result = xlsTODS.processDirectory(props);
   Object.assign(x, result);
+  console.log(Object.keys(x));
 };
 const print = (props) => xlsTODS.printGlobalLog(props);
 
 go(props);
-print(props);
+
+if (print && purge && x) {
+  console.log('x.results; modify props; go(), print(), purge(logName)');
+}

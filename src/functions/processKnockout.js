@@ -1,5 +1,3 @@
-// import { pushGlobalLog } from '../utilities/globalLog';
-
 import { SUCCESS } from '../constants/resultConstants';
 
 export function processKnockOut({ sheetDefinition, profile, analysis, sheet, info }) {
@@ -9,7 +7,8 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
     const matchUpAttributes = { roundNumber: 1, roundPosition: 1, drawSize: 32, participantNames: ['Ray', 'Charles'] };
     const matchUpId = generateMatchUpId(matchUpAttributes);
     console.log({ matchUpId });
-    */
+  */
+
   /*
   analysis.rowGroupings.forEach((grouping) => {
     const { columns, attributes, rowCount } = grouping;
@@ -106,5 +105,5 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
   return { drawInfo, playersMap, participantsMap, ...SUCCESS };
   */
 
-  return { analysis, info, ...SUCCESS };
+  return { analysis, info, hasValues: true, ...SUCCESS };
 }
