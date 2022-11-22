@@ -10,3 +10,9 @@ Add .xls, .xlsm, .xlsx files into `examples/sheets`. In the `examples` directory
 node
 .load i.js
 ```
+
+### findTarget
+
+```console
+x.f.findTarget(r.fileResults, 'target')
+```

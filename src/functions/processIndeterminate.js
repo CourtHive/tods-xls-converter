@@ -20,6 +20,8 @@ export function processIndeterminate(props) {
   const viableFrequencyColumn = maxFrequencyValue <= positionValuesCount && maxFrequencyValue > positionValuesCount / 2;
 
   if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
+    analysis.sheetType = KNOCKOUT;
+
     pushGlobalLog({
       method: 'identified',
       color: 'mustard',

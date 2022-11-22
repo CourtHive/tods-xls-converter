@@ -2,8 +2,8 @@ import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
-import { HEADER, FOOTER } from '../constants/sheetElements';
 import { TOURNAMENT_ID, TOURNAMENT_NAME } from '../constants/attributeConstants';
+import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 
 export const config = {
   organization: 'IND',
@@ -61,7 +61,7 @@ export const config = {
       { attr: 'lastName', header: 'family name' },
       { attr: 'firstName', header: 'first name' },
       { attr: 'personId', header: 'reg.no' },
-      { attr: 'round', header: ['2nd round', 'quarterfinals', 'semifinals', 'final'] }
+      { attr: ROUND, header: ['2nd round', 'quarterfinals', 'semifinals', 'final'] }
     ],
     sheetDefinitions: [
       {

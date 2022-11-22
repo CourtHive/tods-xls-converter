@@ -2,15 +2,16 @@
 // ..then..
 // .load build.js
 
-const { xlsTODS } = require('../dist');
-xlsTODS.setLoggingActive(true);
+const { xlsTODS: x } = require('../dist');
+x.setLoggingActive(true);
 
 const purge = (logName) => {
   console.log('logs purged');
-  xlsTODS.purgeGlobalLog(logName);
+  x.purgeGlobalLog(logName);
 };
 
 const props = {
+  includeWorkbooks: false,
   readDir: './sheets',
   sheetNumbers: [],
   sheetTypes: [],
@@ -19,16 +20,16 @@ const props = {
   sheetLimit: 0
 };
 
-const x = {};
+const r = {};
 const go = () => {
-  const result = xlsTODS.processDirectory(props);
-  Object.assign(x, result);
-  console.log(Object.keys(x));
+  const result = x.processDirectory(props);
+  Object.assign(r, result);
+  console.log(Object.keys(r));
 };
-const print = (props) => xlsTODS.printGlobalLog(props);
+const print = (props) => x.printGlobalLog(props);
 
 go(props);
 
 if (print && purge && x) {
-  console.log('x.results; modify props; go(), print(), purge(logName)');
+  console.log('r for results; modify props; go(), print(), purge(logName)');
 }

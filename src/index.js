@@ -1,10 +1,21 @@
 import { identifyWorkbook } from './functions/identifyWorkbook';
 import { processDirectory } from './utilities/processDirectory';
 import { processSheets } from './functions/processSheets';
-import { factory } from 'tods-competition-factory';
+import * as factory from 'tods-competition-factory';
 import { loadWorkbook } from './global/loader';
 import globalLog from './utilities/globalLog';
 import xlsState from './global/state';
+
+// post processing functions
+import { getRoundRobinValues } from './functions/processRoundRobin';
+import { getRowGroupings } from './functions/getRowGroupings';
+import { findTarget } from './functions/findTarget';
+
+const f = {
+  getRoundRobinValues,
+  getRowGroupings,
+  findTarget
+};
 
 export const xlsTODS = {
   identifyWorkbook,
@@ -13,7 +24,8 @@ export const xlsTODS = {
   ...xlsState,
   processSheets,
   loadWorkbook,
-  factory
+  factory,
+  f
 };
 
 export default xlsTODS;
