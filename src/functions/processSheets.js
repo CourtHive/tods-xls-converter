@@ -35,8 +35,8 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
   const skippedResults = [];
   const sheetAnalysis = {};
+  const participants = {};
   const resultValues = [];
-  const participants = [];
   const structures = [];
   const errorLog = {};
   let sheetNumber = 0;
@@ -63,7 +63,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
 
-    if (structureParticipants?.length) participants.push(...structureParticipants);
+    Object.assign(participants, structureParticipants);
     if (structure) structures.push(structure);
 
     if (error) {
