@@ -23,7 +23,7 @@ export const getSheetAnalysis = ({
   sheetDefinition,
   sheetNumber,
   sheetName,
-  filename,
+  sheetType,
   profile,
   sheet
 }) => {
@@ -91,27 +91,6 @@ export const getSheetAnalysis = ({
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
 
-  const commonRows = columnProfiles.reduce((commonRows, columnProfile) => {
-    const rowsString = columnProfile.rows.join('|');
-    if (!commonRows[rowsString]) {
-      commonRows[rowsString] = [columnProfile.column];
-    } else {
-      commonRows[rowsString].push(columnProfile.column);
-    }
-
-    return commonRows;
-  }, {});
-
-  const rowGroupings = Object.keys(commonRows).map((key) => {
-    const columns = commonRows[key];
-    const rows = key
-      .split('|')
-      .sort(utilities.numericSort)
-      .map((row) => parseInt(row));
-    const attributes = columns.map((column) => attributeMap[column]).filter(Boolean);
-    return { columns, attributes, rowCount: rows?.length, rows };
-  });
-
   const valuesMap = getValuesMap({ columnProfiles, profile });
   const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
@@ -151,9 +130,9 @@ export const getSheetAnalysis = ({
 
         if (!potentialResult) {
           if (!skippedResults[value]) {
-            skippedResults[value] = [{ filename, sheetName, sheetNumber, column }];
+            skippedResults[value] = [column];
           } else {
-            skippedResults[value].push({ filename, sheetName, sheetNumber, column });
+            skippedResults[value].push(column);
           }
         }
 
@@ -172,11 +151,10 @@ export const getSheetAnalysis = ({
     columnProfiles,
     attributeMap,
     filteredKeys,
-    rowGroupings,
     sheetNumber,
     columnKeys,
-    commonRows,
     sheetName,
+    sheetType,
     valuesMap,
     avoidRows,
     footerRow,

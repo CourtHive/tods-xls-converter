@@ -6,6 +6,15 @@ import { loadWorkbook } from './global/loader';
 import globalLog from './utilities/globalLog';
 import xlsState from './global/state';
 
+// post processing functions
+import { getRowGroupings } from './functions/getRowGroupings';
+import { findTarget } from './functions/findTarget';
+
+const f = {
+  getRowGroupings,
+  findTarget
+};
+
 export const xlsTODS = {
   identifyWorkbook,
   processDirectory,
@@ -13,7 +22,8 @@ export const xlsTODS = {
   ...xlsState,
   processSheets,
   loadWorkbook,
-  factory
+  factory,
+  f
 };
 
 export default xlsTODS;

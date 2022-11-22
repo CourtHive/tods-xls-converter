@@ -37,7 +37,6 @@ export const config = {
       // TODO: introduce { regex } // which would be an exact match
       'final',
       'medalla',
-      'fiscales',
       'preclasificados',
       'preclasificadas',
       'U10',
@@ -58,6 +57,7 @@ export const config = {
       { text: 'damas', includes: true },
       { text: 'nota', startsWith: true },
       { text: 'formato', startsWith: true },
+      { text: 'fiscales', startsWith: true },
       { text: 'servicio', includes: true },
       { text: 'clasifica', includes: true },
       { text: 'clasificado', includes: true },
