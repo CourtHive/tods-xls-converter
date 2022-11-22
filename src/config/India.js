@@ -199,7 +199,7 @@ export const config = {
         columnOffset: 2,
         postProcessor: 'dateParser'
       },
-      { attribute: 'seededPlayerNames', searchText: 'Seeded players', rowOffset: 1, rowCount: 8 },
+      { attribute: 'seededParticipantNames', searchText: 'Seeded players', rowOffset: 1, rowCount: 8 },
       { attribute: 'luckyLoserPlayerNames', searchText: 'Lucky losers', rowOffset: 1, rowCount: 8 }
     ],
     dateTimeParser: (dateTimeString) => {

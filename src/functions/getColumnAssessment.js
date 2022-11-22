@@ -59,8 +59,8 @@ export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, p
 
   const containsNumeric = assessment.values.some(isNumeric);
   if (!containsNumeric) {
-    assessment.consecutiveNumbers = false;
     assessment.lastNumericValue = undefined;
+    assessment.consecutiveNumbers = false;
     assessment.allProviderId = undefined;
   }
 

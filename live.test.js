@@ -1,22 +1,22 @@
 import { processDirectory } from './src/utilities/processDirectory';
-import { printGlobalLog } from './src/utilities/globalLog';
 import { setLoggingActive } from './src/global/state';
 import { it } from 'vitest';
 
-import { INDETERMINATE } from './src/constants/sheetTypes';
+import { KNOCKOUT } from './src/constants/sheetTypes';
 
 // test without building against sheets in example directory
 it('can process a directory', () => {
   const readDir = './examples/sheets';
 
-  const sheetTypes = [INDETERMINATE];
-  const sheetNumbers = [];
+  const sheetTypes = [KNOCKOUT];
+  const sheetNumbers = [12];
   const sheetLimit = 0;
 
-  const processLimit = 2;
-  const startIndex = 12;
+  const processLimit = 1;
+  const startIndex = 4;
 
   setLoggingActive(true);
-  processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers });
-  printGlobalLog(true);
+  const result = processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers });
+  console.log(result.fileResults[0].filename);
+  console.log(result.fileResults[0].sheetAnalysis[12].analysis.columnProfiles[0]);
 });
