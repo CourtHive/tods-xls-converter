@@ -23,16 +23,5 @@ export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn
   const missingPositionRows = missingPositions.map((position) => (position - 1) * rowStep + minRow);
   const allRows = [...knownRows, ...missingPositionRows].sort(utilities.numericSort);
 
-  console.log({
-    minRow,
-    maxRow,
-    rowStep,
-    missingPositions,
-    missingPositionRows,
-    knownRows,
-    allRows,
-    refs: allRows.map(getRef)
-  });
-
   return { positionRows: allRows.map(getRef) };
 }
