@@ -3,6 +3,7 @@ import { utilities } from 'tods-competition-factory';
 import { getRow } from '../functions/sheetAccess';
 import { getWorkbook } from '../global/state';
 import { removeBits } from './transformers';
+import { POSITION } from '../constants/columnConstants';
 
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
@@ -81,4 +82,8 @@ export function processSkipWord(skipWord, value) {
 export function containsExpression(value, expression) {
   const re = new RegExp(expression, 'g');
   return value && re.test(value);
+}
+
+export function getPositionColumn(columnProfiles) {
+  return columnProfiles.find(({ attribute, character }) => [attribute, character].includes(POSITION))?.column;
 }

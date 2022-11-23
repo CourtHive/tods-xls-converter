@@ -1,6 +1,7 @@
+import { getPositionColumn } from '../utilities/convenience';
 import { getPositionRows } from './getPositionRows';
 
-import { POSITION, PRE_ROUND } from '../constants/columnConstants';
+import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
 export function processKnockOut({ sheetDefinition, profile, analysis, sheet, info }) {
@@ -9,7 +10,7 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
   const { columnProfiles } = analysis;
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
-  const positionColumn = columnProfiles.find(({ attribute }) => attribute === POSITION)?.column;
+  const positionColumn = getPositionColumn(analysis.columnProfiles);
 
   const { positionRows, positionProgression, preRoundParticipantRows } = getPositionRows({
     columnProfiles,
