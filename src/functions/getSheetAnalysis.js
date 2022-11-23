@@ -113,6 +113,8 @@ export const getSheetAnalysis = ({
   );
 
   const skippedResults = {};
+  const columnResultValues = {};
+
   const potentialResultValues = columnProfiles
     .filter(({ column }) => targetColumns.includes(column))
     .flatMap(({ column, values }) => {
@@ -135,6 +137,13 @@ export const getSheetAnalysis = ({
           }
         }
 
+        if (potentialResult) {
+          if (!columnResultValues[value]) {
+            columnResultValues[value] = [column];
+          } else {
+            columnResultValues[value].push(column);
+          }
+        }
         return potentialResult;
       });
     });
@@ -161,7 +170,8 @@ export const getSheetAnalysis = ({
     footerRow,
     headerRow,
     columns,
-    info
+    info,
+    columnResultValues
   };
 
   return result;

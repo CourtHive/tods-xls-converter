@@ -27,6 +27,7 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
   // NOTES:
   // *. Is there a pre-round
   // *. Use preRoundParticipantRows to create Qualifying Structure with matchUps
+  // *.results can be inferred by looking at columngProfile keyMap values which occur between positionRows
   // *. Characterize { drawSize: ##, R: 32, 16, 8. 4. 3 }
   // *. For each round, does the previous round have matching names
   // *. Using matching values across rounds calculate where progressing values should occur (to correct for those which have misspellings)
