@@ -12,23 +12,36 @@ import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 // 'G: WO', 'V: PRESENTE', 'R: WO'
 
 const roundNames = [
-  'PRIMERA RONDA',
-  'SEGUNDA RONDA',
-  'TERCERA RONDA',
-  'OCTAVOS',
-  'CUARTOS',
-  'SEMIFINAL',
-  'SEMIFINALES',
-  'FINAL',
-  'FINALES',
-  'CAMPEON',
-  'GANADOR',
-  'GANADORA',
-  'CLASIFICADOS',
-  'CLASIFICADAS'
+  'primera ronda',
+  'segunda ronda',
+  'tercera ronda',
+  'octavos',
+  'cuartos',
+  'semifinal',
+  'semifinales',
+  'final',
+  'finales',
+  'campeon',
+  'ganador',
+  'ganadora',
+  'clasificados',
+  'clasificadas'
 ];
 
-const qualifyingIdentifiers = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8'];
+const qualifyingIdentifiers = [
+  'Q1',
+  'Q2',
+  'Q3',
+  'Q4',
+  'Q5',
+  'Q6',
+  'Q7',
+  'Q8',
+  'clasificadas',
+  'clasificados',
+  'preclasificados', // TODO: differentiate qualifying and pre-qualifying
+  'preclasificadas'
+];
 const categories = ['U10', 'U12', 'U14', 'U16', 'U18'];
 
 const organization = 'FEDERACION COSTARRICENSE DE TENIS';
@@ -40,8 +53,6 @@ export const config = {
       // TODO: introduce { regex } // which would be an exact match
       'final',
       'medalla',
-      'preclasificados',
-      'preclasificadas',
       ...categories, // use regex
       ...qualifyingIdentifiers, // use regex
       { text: ' tba', startsWith: true },
