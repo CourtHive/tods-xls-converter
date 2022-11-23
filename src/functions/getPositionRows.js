@@ -26,9 +26,10 @@ export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn
   const missingPositionRows = missingPositions.map((position) => (position - 1) * rowStep + minRow);
   const allRows = [...knownRows, ...missingPositionRows].sort(utilities.numericSort);
 
+  const preRoundParticipantRows = keyedRows.filter((row) => !knownRows.includes(row));
   const positionProgression = getPositionProgression(allRows);
 
-  return { positionRows: allRows.map(getRef), positionProgression };
+  return { positionRows: allRows.map(getRef), positionProgression, preRoundParticipantRows };
 }
 
 function getPositionProgression(rows) {

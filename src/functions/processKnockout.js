@@ -11,8 +11,14 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const positionColumn = columnProfiles.find(({ attribute }) => attribute === POSITION)?.column;
 
-  const { positionRows, positionProgression } = getPositionRows({ columnProfiles, positionColumn, preRoundColumn });
+  const { positionRows, positionProgression, preRoundParticipantRows } = getPositionRows({
+    columnProfiles,
+    positionColumn,
+    preRoundColumn
+  });
+
   Object.assign(analysis, {
+    preRoundParticipantRows,
     positionProgression,
     positionRows
   });
