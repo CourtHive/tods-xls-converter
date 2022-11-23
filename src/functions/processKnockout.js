@@ -1,8 +1,23 @@
+import { getPositionRows } from './getPositionRows';
+
+import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
 export function processKnockOut({ sheetDefinition, profile, analysis, sheet, info }) {
   if (sheetDefinition && profile && sheet);
 
+  const { columnProfiles } = analysis;
+
+  const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
+  const positionColumn = columnProfiles.find(({ attribute }) => attribute === POSITION)?.column;
+
+  const { positionRows, positionProgression } = getPositionRows({ columnProfiles, positionColumn, preRoundColumn });
+  Object.assign(analysis, {
+    positionProgression,
+    positionRows
+  });
+
+  return { analysis, info, hasValues: true, ...SUCCESS };
   // NOTES:
   // *. Is there a pre-round
   // *. Characterize { drawSize: ##, R: 32, 16, 8. 4. 3 }
@@ -118,6 +133,4 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
 
   return { drawInfo, playersMap, participantsMap, ...SUCCESS };
   */
-
-  return { analysis, info, hasValues: true, ...SUCCESS };
 }

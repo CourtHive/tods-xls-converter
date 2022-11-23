@@ -2,7 +2,6 @@ import { hasNumeric, isString } from '../utilities/identification';
 import { getCellValue, getCol, getRow } from './sheetAccess';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getColumnCharacter } from './getColumnCharacter';
-import { getPositionRows } from './getPositionRows';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getContentFrame } from './getContentFrame';
@@ -113,8 +112,6 @@ export const getSheetAnalysis = ({
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );
 
-  const { positionRows, positionProgression } = getPositionRows({ columnProfiles, positionColumn, preRoundColumn });
-
   const skippedResults = {};
   const potentialResultValues = columnProfiles
     .filter(({ column }) => targetColumns.includes(column))
@@ -142,11 +139,10 @@ export const getSheetAnalysis = ({
       });
     });
 
-  return {
+  const result = {
     potentialResultValues,
     multiColumnFrequency,
-    positionProgression, // should this be done in knockout post-processing?
-    seededParticipants, // should this be done in knockout post-processing?
+    seededParticipants,
     multiColumnValues,
     greatestFrequency,
     columnFrequency,
@@ -154,8 +150,7 @@ export const getSheetAnalysis = ({
     frequencyOrder,
     columnProfiles,
     attributeMap,
-    participants, // should this be done in knockout post-processing?
-    positionRows,
+    participants,
     filteredKeys,
     sheetNumber,
     columnKeys,
@@ -168,4 +163,6 @@ export const getSheetAnalysis = ({
     columns,
     info
   };
+
+  return result;
 };
