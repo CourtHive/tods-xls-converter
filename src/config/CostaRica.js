@@ -28,6 +28,9 @@ const roundNames = [
   'CLASIFICADAS'
 ];
 
+const qualifyingIdentifiers = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8'];
+const categories = ['U10', 'U12', 'U14', 'U16', 'U18'];
+
 const organization = 'FEDERACION COSTARRICENSE DE TENIS';
 export const config = {
   organization,
@@ -39,19 +42,8 @@ export const config = {
       'medalla',
       'preclasificados',
       'preclasificadas',
-      'U10', // use regex
-      'U12',
-      'U14',
-      'U16',
-      'U18',
-      'Q1', // use regex
-      'Q2',
-      'Q3',
-      'Q4',
-      'Q5',
-      'Q6',
-      'Q7',
-      'Q8',
+      ...categories, // use regex
+      ...qualifyingIdentifiers, // use regex
       { text: ' tba', startsWith: true },
       { text: ' pm', endsWith: true },
       { text: 'puntos', endsWith: true },
@@ -94,6 +86,7 @@ export const config = {
     skipExpressions: [],
     considerAlpha: [',', '(', ')', '/'],
     matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
+    qualifyingIdentifiers,
     matchOutcomes: [
       'doble w.o',
       'ret',
@@ -109,10 +102,7 @@ export const config = {
       'pierde x wo',
       'pierde wo'
     ],
-    identification: {
-      includes: [],
-      sub_includes: []
-    },
+    categories,
     columnsMap: {},
     knockOutRounds: roundNames,
     rowDefinitions: [
