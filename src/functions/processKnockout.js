@@ -26,6 +26,7 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
   return { analysis, info, hasValues: true, ...SUCCESS };
   // NOTES:
   // *. Is there a pre-round
+  // *. Use preRoundParticipantRows to create Qualifying Structure with matchUps
   // *. Characterize { drawSize: ##, R: 32, 16, 8. 4. 3 }
   // *. For each round, does the previous round have matching names
   // *. Using matching values across rounds calculate where progressing values should occur (to correct for those which have misspellings)
