@@ -57,7 +57,7 @@ export function getCol(reference) {
   return reference ? reference[0] : undefined;
 }
 
-export function findValueRefs(searchDetails, sheet, options) {
+export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
   const normalizedLowerCase = (value) => {
     const text = isObject(value) ? value.text : value;
     const normalizedText = normalizeDiacritics((text || '').toLowerCase());
@@ -80,8 +80,11 @@ export function findValueRefs(searchDetails, sheet, options) {
     }
   }
 
+  const refMap = {};
+
   const refs = Object.keys(sheet).filter((ref) => {
-    const transformedValue = transformValue(getCellValue(sheet[ref]));
+    const value = getCellValue(sheet[ref]);
+    const transformedValue = transformValue(value);
 
     const startsWith = (text) => transformedValue.startsWith(text) || transformedValue === text;
     const includes = (text) => transformedValue.includes(text);
@@ -97,16 +100,22 @@ export function findValueRefs(searchDetails, sheet, options) {
 
     if (objectSearchDetails.some(checkObjectDetail)) return true;
 
+    let matchFound;
+
     if (options?.startsWith) {
-      return textSearchDetails.some(startsWith);
+      matchFound = textSearchDetails.some(startsWith);
     } else if (options?.includes) {
-      return textSearchDetails.some(includes);
+      matchFound = textSearchDetails.some(includes);
     } else {
-      return textSearchDetails.some(equals);
+      matchFound = textSearchDetails.some(equals);
     }
+
+    if (matchFound && mapValues) refMap[ref] = { value, transformedValue };
+
+    return matchFound;
   });
 
-  return refs;
+  return mapValues ? refMap : refs;
 
   function transformValue(value) {
     value = value.toLowerCase();
@@ -122,7 +131,7 @@ export function findValueRefs(searchDetails, sheet, options) {
 
 // instance allows specification of which encountered match to extract
 export function getTargetValue({ searchText, sheet, rowOffset = 0, columnOffset = 0, options, instance = 1 }) {
-  const nameRefs = findValueRefs(searchText, sheet, options);
+  const nameRefs = findValueRefs({ searchDetails: searchText, sheet, options });
   if (!Array.isArray(nameRefs) || nameRefs.length < 1) return '';
 
   const row = getRow(nameRefs[instance - 1]);
@@ -148,7 +157,7 @@ export function getValueRange({
   options,
   sheet
 }) {
-  const nameRefs = findValueRefs(searchText, sheet, options);
+  const nameRefs = findValueRefs({ searchDetails: searchText, sheet, options });
   if (!Array.isArray(nameRefs) || nameRefs.length < 1) return '';
 
   const column = getCol(nameRefs[instance - 1]);
@@ -199,8 +208,8 @@ export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet, o
       .map((element) => (options.normalize ? toNormal(element) : element))
       .map((element) => {
         const valueRefs = Array.isArray(element)
-          ? element.flatMap((e) => findValueRefs(e, sheet, options))
-          : findValueRefs(element, sheet, options);
+          ? element.flatMap((e) => findValueRefs({ searchDetails: e, sheet, options }))
+          : findValueRefs({ searchDetails: element, sheet, options });
         // remove duplicate instances on the same row
         return unique(valueRefs.map(getRow));
       })
