@@ -38,10 +38,6 @@ export const config = {
         rowOffset: -1 // missing drawPosition for doubles partner is no previous line
       }
     },
-    identification: {
-      includes: [],
-      sub_includes: []
-    },
     columnsMap: {
       position: 'A',
       rank: '',

@@ -23,10 +23,6 @@ export const config = {
       }
     },
     */
-    identification: {
-      includes: [],
-      sub_includes: []
-    },
     rowDefinitions: [
       {
         type: HEADER,
