@@ -5,10 +5,13 @@ import { getColumnCharacter } from './getColumnCharacter';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getContentFrame } from './getContentFrame';
+import { getIsQualifying } from './getIsQualifying';
 import { getValuesMap } from './getValuesMap';
+import { getCategory } from './getCategory';
 import {
   containsExpression,
   getNonBracketedValue,
+  getPositionColumn,
   hasBracketedValue,
   keyHasSingleAlpha,
   keyRowSort,
@@ -16,7 +19,7 @@ import {
   tidyValue
 } from '../utilities/convenience';
 
-import { POSITION, PRE_ROUND } from '../constants/columnConstants';
+import { PRE_ROUND } from '../constants/columnConstants';
 
 export const getSheetAnalysis = ({
   ignoreCellRefs = [],
@@ -107,7 +110,7 @@ export const getSheetAnalysis = ({
     .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
-  const positionColumn = columnProfiles.find(({ attribute }) => attribute === POSITION)?.column;
+  const positionColumn = getPositionColumn(columnProfiles);
   const targetColumns = Object.keys(multiColumnFrequency).filter(
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );
@@ -148,6 +151,9 @@ export const getSheetAnalysis = ({
       });
     });
 
+  const { category } = getCategory({ sheet, sheetName, profile });
+  const { isQualifying } = getIsQualifying({ sheet, sheetName, profile });
+
   const result = {
     potentialResultValues,
     multiColumnFrequency,
@@ -159,8 +165,9 @@ export const getSheetAnalysis = ({
     frequencyOrder,
     columnProfiles,
     attributeMap,
-    participants,
     filteredKeys,
+    isQualifying,
+    participants,
     sheetNumber,
     columnKeys,
     sheetName,
@@ -169,6 +176,7 @@ export const getSheetAnalysis = ({
     avoidRows,
     footerRow,
     headerRow,
+    category,
     columns,
     info,
     columnResultValues
