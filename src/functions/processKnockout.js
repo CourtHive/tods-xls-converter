@@ -1,4 +1,6 @@
 import { getPositionColumn } from '../utilities/convenience';
+import { utilities } from 'tods-competition-factory';
+import { getRoundMatchUps } from './getRoundMatchUp';
 import { getPositionRows } from './getPositionRows';
 
 import { PRE_ROUND } from '../constants/columnConstants';
@@ -18,8 +20,26 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
     preRoundColumn
   });
 
+  const qualifyingStructure = {},
+    structure = {},
+    matchUps = [];
+
   // *. If preRound, use `preRoundParticipantRows` and positionRows[0] to see whether there are progressed participants and set first roundNumber column
   //    - preRound is roundNumber: 0, first round of structure is roundNumber: 1
+
+  if (preRoundParticipantRows?.length) {
+    const pairedPositions = utilities.chunkArray(preRoundParticipantRows, 2);
+    // these matchUps will go into qualifyingStructure
+    qualifyingStructure.matchUps = getRoundMatchUps({
+      column: preRoundColumn,
+      pairedPositions,
+      roundNumber: 1,
+      analysis
+    });
+
+    matchUps.push(...qualifyingStructure.matchUps);
+  }
+
   // *. if no preRound, check whether there are values present in the valuesMap on positionRows[0] of first column after the position round
   //    - check whether there are progressed particpants in positionRows[1]
   //    - in rare cases there may be a preRound column BEFORE the position column... if position column > A this could be true
@@ -32,6 +52,7 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
   });
 
   return { analysis, info, hasValues: true, ...SUCCESS };
+
   // NOTES:
   // *. Is there a pre-round
   // *. Use preRoundParticipantRows to create Qualifying Structure with matchUps
