@@ -1,5 +1,5 @@
 import { processIndeterminate } from './processIndeterminate';
-import { generateTournamentId } from '../utilities/hashing';
+// import { generateTournamentId } from '../utilities/hashing';
 import { processRoundRobin } from './processRoundRobin';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
@@ -76,14 +76,17 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       }
     }
 
-    if (analysis?.tournamentDetails) {
-      const { tournamentId } = generateTournamentId({ attributes: [analysis.tournamentDetails] });
-      console.log({ tournamentId });
-    }
-
     if (analysis?.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
     if (analysis?.skippedResults) skippedResults.push(...Object.keys(analysis.skippedResults));
   }
+
+  /*
+    if (analysis?.tournamentDetails) {
+      // this should consider info.tournamentName, info.director if consistent across sheets
+      const { tournamentId } = generateTournamentId({ attributes: [analysis.tournamentDetails] });
+      console.log({ tournamentId });
+    }
+  */
 
   // TODO: combine structures into drawDefinitions/events
   // *. requires category which can be parsed from sheetNames or sheet info
