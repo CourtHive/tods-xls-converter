@@ -18,5 +18,5 @@ it('can process a directory', () => {
   setLoggingActive(true);
   const result = processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers });
   console.log(result.fileResults[0].filename);
-  console.log(result.fileResults[0].sheetAnalysis[1].analysis);
+  console.log(result.fileResults[0].sheetAnalysis[12].analysis);
 });

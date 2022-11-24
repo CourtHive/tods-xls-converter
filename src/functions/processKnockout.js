@@ -18,6 +18,13 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
     preRoundColumn
   });
 
+  // *. If preRound, use `preRoundParticipantRows` and positionRows[0] to see whether there are progressed participants and set first roundNumber column
+  //    - preRound is roundNumber: 0, first round of structure is roundNumber: 1
+  // *. if no preRound, check whether there are values present in the valuesMap on positionRows[0] of first column after the position round
+  //    - check whether there are progressed particpants in positionRows[1]
+  //    - in rare cases there may be a preRound column BEFORE the position column... if position column > A this could be true
+  //    - if there is a column before positionRound see whether any of the positioned values of roundNumber: 1 are present in that coulmn
+
   Object.assign(analysis, {
     preRoundParticipantRows,
     positionProgression,
