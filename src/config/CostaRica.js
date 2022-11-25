@@ -54,7 +54,14 @@ export const config = {
       'final',
       'medalla',
       ...categories, // use regex
-      ...qualifyingIdentifiers, // use regex
+      { text: 'Q1', exact: true },
+      { text: 'Q2', exact: true },
+      { text: 'Q3', exact: true },
+      { text: 'Q4', exact: true },
+      { text: 'Q5', exact: true },
+      { text: 'Q6', exact: true },
+      { text: 'Q7', exact: true },
+      { text: 'Q8', exact: true },
       { text: ' tba', startsWith: true },
       { text: ' pm', endsWith: true },
       { text: 'puntos', endsWith: true },
@@ -88,16 +95,21 @@ export const config = {
       { text: 'sede', startsWith: true },
       { text: 'ano', startsWith: true },
       { text: 'principal', includes: true },
-      { text: 'lluvia', includes: true },
+      { text: 'lluvia', exact: true },
       { text: 'sencillos', includes: true },
       { text: 'nacionales', includes: true },
       { startsWithEndsWith: { startsWith: [1, 2, 3, 4, 5, 6, 7, 8, 9], endsWith: 'm' }, remove: ['"."'] }
     ],
+    skipProfile: { skipFloatValues: true },
     skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
     considerAlpha: [',', '(', ')', '/'],
     matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
+    matchUpStatuses: { bye: 'BYE' },
     qualifyingIdentifiers,
+    doubles: {
+      stringIdentifier: '/'
+    },
     matchOutcomes: [
       'doble w.o',
       'ret',
