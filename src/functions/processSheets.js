@@ -1,5 +1,4 @@
 import { processIndeterminate } from './processIndeterminate';
-// import { generateTournamentId } from '../utilities/hashing';
 import { processRoundRobin } from './processRoundRobin';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
@@ -46,11 +45,14 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (sheetLimit && sheetNumber > sheetLimit) break;
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
 
+    console.log({ sheetName, sheetNumber });
+
     const {
       participants: structureParticipants,
+      structures: sheetStructures,
       hasValues,
-      structure,
       analysis,
+      skipped,
       error
     } = processSheet({
       sheetNumber,
@@ -64,7 +66,10 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
 
     Object.assign(participants, structureParticipants);
-    if (structure) structures.push(structure);
+
+    if (!skipped) {
+      if (sheetStructures) structures.push(...sheetStructures);
+    }
 
     if (error) {
       const method = `processSheet ${sheetNumber}`;
@@ -90,6 +95,8 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
   // TODO: combine structures into drawDefinitions/events
   // *. requires category which can be parsed from sheetNames or sheet info
+
+  // Now group structures by category and singles/doubles and generate events/drawDefinitions
 
   return { sheetAnalysis, errorLog, resultValues, skippedResults, structures, participants, ...SUCCESS };
 }
