@@ -9,7 +9,7 @@ it('can process a directory', () => {
   const readDir = './examples/sheets';
 
   const sheetTypes = [KNOCKOUT];
-  const sheetNumbers = [1, 12];
+  const sheetNumbers = [14];
   const sheetLimit = 0;
 
   const processLimit = 1;
@@ -18,5 +18,5 @@ it('can process a directory', () => {
   setLoggingActive(true);
   const result = processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers });
   console.log(result.fileResults[0].filename);
-  // console.log(result.fileResults[0].sheetAnalysis[12].analysis);
+  // console.log(result.fileResults[0].sheetAnalysis[12].analysis.isQualifying);
 });
