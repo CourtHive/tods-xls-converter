@@ -14,5 +14,5 @@ documentation/build
 package-lock.json
 *decoy*
 *.xls*
-*.pdf
-*.jpg
+india/
+CostaRica/
