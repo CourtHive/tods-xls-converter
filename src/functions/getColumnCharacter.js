@@ -20,6 +20,7 @@ export function getColumnCharacter({ columnProfile, attributeMap }) {
   if (containsNumeric && containsAlpha) {
     // check whether there is clear separation between numeric and alpha values
     // and whether numeric values occur before alpha values
+    // if this is the case discard the numeric values
     const numericMap = values.map(isNumeric);
     const lastNumeric = numericMap.lastIndexOf(true);
     const firstAlpha = numericMap.indexOf(false);

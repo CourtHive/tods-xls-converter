@@ -12,21 +12,37 @@ import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 // 'G: WO', 'V: PRESENTE', 'R: WO'
 
 const roundNames = [
-  'PRIMERA RONDA',
-  'SEGUNDA RONDA',
-  'TERCERA RONDA',
-  'OCTAVOS',
-  'CUARTOS',
-  'SEMIFINAL',
-  'SEMIFINALES',
-  'FINAL',
-  'FINALES',
-  'CAMPEON',
-  'GANADOR',
-  'GANADORA',
-  'CLASIFICADOS',
-  'CLASIFICADAS'
+  'primera ronda',
+  'segunda ronda',
+  'tercera ronda',
+  'octavos',
+  'cuartos',
+  'semifinal',
+  'semifinales',
+  'final',
+  'finales',
+  'campeon',
+  'ganador',
+  'ganadora',
+  'clasificados',
+  'clasificadas'
 ];
+
+const qualifyingIdentifiers = [
+  'Q1',
+  'Q2',
+  'Q3',
+  'Q4',
+  'Q5',
+  'Q6',
+  'Q7',
+  'Q8',
+  'clasificadas',
+  'clasificados',
+  'preclasificados', // TODO: differentiate qualifying and pre-qualifying
+  'preclasificadas'
+];
+const categories = ['U10', 'U12', 'U14', 'U16', 'U18'];
 
 const organization = 'FEDERACION COSTARRICENSE DE TENIS';
 export const config = {
@@ -37,13 +53,15 @@ export const config = {
       // TODO: introduce { regex } // which would be an exact match
       'final',
       'medalla',
-      'preclasificados',
-      'preclasificadas',
-      'U10',
-      'U12',
-      'U14',
-      'U16',
-      'U18',
+      ...categories, // use regex
+      { text: 'Q1', exact: true },
+      { text: 'Q2', exact: true },
+      { text: 'Q3', exact: true },
+      { text: 'Q4', exact: true },
+      { text: 'Q5', exact: true },
+      { text: 'Q6', exact: true },
+      { text: 'Q7', exact: true },
+      { text: 'Q8', exact: true },
       { text: ' tba', startsWith: true },
       { text: ' pm', endsWith: true },
       { text: 'puntos', endsWith: true },
@@ -69,6 +87,7 @@ export const config = {
       { text: 'ranking', includes: true },
       { text: 'sets con', includes: true },
       { text: 'sets sin', includes: true },
+      { text: 'con ventajas', includes: true },
       { text: 'ganadadora', startsWith: true },
       { text: 'ganadora', startsWith: true },
       { text: 'ganador', startsWith: true },
@@ -76,15 +95,21 @@ export const config = {
       { text: 'sede', startsWith: true },
       { text: 'ano', startsWith: true },
       { text: 'principal', includes: true },
-      { text: 'lluvia', includes: true },
+      { text: 'lluvia', exact: true },
       { text: 'sencillos', includes: true },
       { text: 'nacionales', includes: true },
       { startsWithEndsWith: { startsWith: [1, 2, 3, 4, 5, 6, 7, 8, 9], endsWith: 'm' }, remove: ['"."'] }
     ],
+    skipProfile: { skipFloatValues: true },
     skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
     considerAlpha: [',', '(', ')', '/'],
     matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
+    matchUpStatuses: { bye: 'BYE' },
+    qualifyingIdentifiers,
+    doubles: {
+      stringIdentifier: '/'
+    },
     matchOutcomes: [
       'doble w.o',
       'ret',
@@ -100,10 +125,7 @@ export const config = {
       'pierde x wo',
       'pierde wo'
     ],
-    identification: {
-      includes: [],
-      sub_includes: []
-    },
+    categories,
     columnsMap: {},
     knockOutRounds: roundNames,
     rowDefinitions: [
@@ -241,7 +263,7 @@ export const config = {
         rowCount: 16
       },
       {
-        attribute: 'seededPlayerNames',
+        attribute: 'seededParticipantNames',
         searchText: ['sembrados', 'sembradas'],
         stopOnEmpty: true,
         rowOffset: 1,

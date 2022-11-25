@@ -57,8 +57,8 @@ export function generateId({ prepend, attributes = [], defaultAttributes = [] } 
 
   const id = [
     prepend || '',
-    ...[organization, Author, CreatedDate].map(hashSum),
-    hashSum(filteredAttributes.join(':'))
+    hashSum(filteredAttributes.join(':')), // unique bits first!
+    ...[organization, Author, CreatedDate].map(hashSum)
   ].join('-');
 
   return { id };

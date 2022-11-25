@@ -9,10 +9,12 @@ import xlsState from './global/state';
 // post processing functions
 import { getRoundRobinValues } from './functions/processRoundRobin';
 import { getRowGroupings } from './functions/getRowGroupings';
+import { contextAnalisys } from './utilities/transformers';
 import { findTarget } from './functions/findTarget';
 
 const f = {
   getRoundRobinValues,
+  contextAnalisys,
   getRowGroupings,
   findTarget
 };

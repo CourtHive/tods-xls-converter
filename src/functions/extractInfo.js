@@ -1,4 +1,5 @@
 import { getCellValue, getTargetValue, getValueRange } from './sheetAccess';
+import { isSkipWord } from '../utilities/convenience';
 import { postProcessors } from './postProcessors';
 
 import { SUCCESS } from '../constants/resultConstants';
@@ -24,7 +25,7 @@ export function extractInfo({ profile, sheet, infoClass }) {
         if (accessor.rowCount || accessor.columnCount) {
           const props = Object.assign({}, accessor, { sheet });
           const { values, cellRefs: refs } = getValueRange(props);
-          const value = values?.filter(Boolean);
+          const value = values?.filter(Boolean).filter((value) => !isSkipWord(value, profile));
           if (value) {
             extractObject[accessor.attribute] = processValue({ accessor, value });
             cellRefs.push(...refs);

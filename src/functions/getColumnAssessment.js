@@ -5,6 +5,7 @@ import { getCellValue, getRow } from './sheetAccess';
 export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column }) {
   const truthiness = !!prospectColumnKeys.length;
 
+  // WARNING: DO NOT SORT KEYS
   const assessment = prospectColumnKeys.reduce(
     (assessment, key) => {
       const rawValue = getCellValue(sheet[key]).split('.').join(''); // remove '.'
@@ -58,8 +59,8 @@ export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, p
 
   const containsNumeric = assessment.values.some(isNumeric);
   if (!containsNumeric) {
-    assessment.consecutiveNumbers = false;
     assessment.lastNumericValue = undefined;
+    assessment.consecutiveNumbers = false;
     assessment.allProviderId = undefined;
   }
 

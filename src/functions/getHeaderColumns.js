@@ -8,7 +8,10 @@ export function getHeaderColumns({ sheet, profile, headerRow }) {
   if (profile.headerColumns) {
     profile.headerColumns.forEach((obj) => {
       const getRef = (text) => {
-        const ref = findValueRefs(text, sheet).reduce((p, c) => (getRow(c) === parseInt(headerRow) ? c : p), undefined);
+        const ref = findValueRefs({ searchDetails: text, sheet }).reduce(
+          (p, c) => (getRow(c) === parseInt(headerRow) ? c : p),
+          undefined
+        );
         const col = ref && getCol(ref);
 
         if (col) {

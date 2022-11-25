@@ -1,3 +1,4 @@
+import { getPositionColumn } from '../utilities/convenience';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { processKnockOut } from './processKnockout';
 
@@ -13,9 +14,7 @@ export function processIndeterminate(props) {
   const frequencyValues = Object.values(analysis.columnFrequency);
   const twoOrMoreColumns = frequencyValues.length >= 2;
   const maxFrequencyValue = Math.max(...frequencyValues);
-  const positionColumn = analysis.columnProfiles.find(({ attribute, character }) =>
-    [attribute, character].includes(POSITION)
-  );
+  const positionColumn = getPositionColumn(analysis.columnProfiles);
   const positionValuesCount = positionColumn.values.length;
   const viableFrequencyColumn = maxFrequencyValue <= positionValuesCount && maxFrequencyValue > positionValuesCount / 2;
 

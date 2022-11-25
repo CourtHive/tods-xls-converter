@@ -4,11 +4,15 @@ import { getRow } from '../functions/sheetAccess';
 import { getWorkbook } from '../global/state';
 import { removeBits } from './transformers';
 
+import { POSITION } from '../constants/columnConstants';
+
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
   const valueInstances = Math.max(0, ...Object.values(valueCounts));
   return Object.keys(valueCounts).reduce((p, c) => (valueCounts[c] === valueInstances ? c : p), undefined);
 }
+
+export const isFloatValue = (value) => !isNaN(Number(value)) && !Number.isInteger(Number(value));
 
 export const removeTrailing = (value, remove = ['.', ':', ',']) => {
   if (remove.some((r) => value.endsWith(r))) return value.slice(0, value.length - 1);
@@ -44,6 +48,19 @@ export const getNonBracketedValue = (value) => {
   return typeof nonBracketedValue === 'string' ? nonBracketedValue.trim() : nonBracketedValue;
 };
 
+export const withoutQualifyingDesignator = (value, qualifyingIdentifiers = []) => {
+  if (!isString(value)) return value;
+
+  for (const identifier of qualifyingIdentifiers) {
+    if (value.toLowerCase().startsWith(`${identifier.toLowerCase()} `)) {
+      const withoutIdentifier = value.split(' ').slice(1).join(' ');
+      // console.log({ value, withoutIdentifier });
+      return withoutIdentifier;
+    }
+  }
+  return value;
+};
+
 // ensure that the key is of the form [A-Z][#], not 'AA1', for example
 export const keyHasSingleAlpha = (key) => key && key.length > 1 && isNumeric(key[1]);
 
@@ -57,10 +74,12 @@ export function processSkipWord(skipWord, value) {
   const options = isObject(skipWord) ? getSkipOptions(skipWord) : { startsWith: true };
   const lowerValue = value.toLowerCase();
 
-  const { includes, startsWith, endsWith, startsWithEndsWith, remove } = options;
+  const { exact, includes, startsWith, endsWith, startsWithEndsWith, remove } = options;
   const modifiedValue = remove ? removeBits(lowerValue, remove) : lowerValue;
 
-  if (includes) {
+  if (exact) {
+    return modifiedValue === text;
+  } else if (includes) {
     return modifiedValue.includes(text);
   } else if (startsWith) {
     return modifiedValue.startsWith(text);
@@ -81,4 +100,8 @@ export function processSkipWord(skipWord, value) {
 export function containsExpression(value, expression) {
   const re = new RegExp(expression, 'g');
   return value && re.test(value);
+}
+
+export function getPositionColumn(columnProfiles) {
+  return columnProfiles.find(({ attribute, character }) => [attribute, character].includes(POSITION))?.column;
 }

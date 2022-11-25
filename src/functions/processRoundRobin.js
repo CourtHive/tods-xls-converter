@@ -73,7 +73,7 @@ export function getRoundRobinValues(analysis) {
   const positionAssignments = [];
   const positionedMatchUps = {};
   const positionNameMap = {};
-  const participants = [];
+  const participants = {};
 
   Object.keys(analysis.valuesMap).forEach((name, positionIndex) => {
     const drawPosition = positionIndex + 1;
@@ -86,7 +86,7 @@ export function getRoundRobinValues(analysis) {
       const extensions = finishingPosition && [{ name: 'participantResults', value: { finishingPosition } }];
       if (extensions) positionAssignment.extensions = extensions;
       positionAssignments.push(positionAssignment);
-      participants.push({ participantId, participantName });
+      participants[participantId] = { participantId, participantName };
     }
     const orderedResultsColumns = resultsColumns.sort();
     // get resultsColumns in which they do not appear

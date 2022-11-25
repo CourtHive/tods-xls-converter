@@ -5,18 +5,22 @@ import { getColumnCharacter } from './getColumnCharacter';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getContentFrame } from './getContentFrame';
+import { getIsQualifying } from './getIsQualifying';
 import { getValuesMap } from './getValuesMap';
+import { getCategory } from './getCategory';
 import {
   containsExpression,
   getNonBracketedValue,
+  getPositionColumn,
   hasBracketedValue,
+  isFloatValue,
   keyHasSingleAlpha,
   keyRowSort,
   startsWithIterator,
   tidyValue
 } from '../utilities/convenience';
 
-import { POSITION, PRE_ROUND } from '../constants/columnConstants';
+import { PRE_ROUND } from '../constants/columnConstants';
 
 export const getSheetAnalysis = ({
   ignoreCellRefs = [],
@@ -44,12 +48,13 @@ export const getSheetAnalysis = ({
 
   const isNotSkipExpression = (key) => {
     const value = getCellValue(sheet[key]);
+    const checkFloats = profile.skipProfile?.skipFloatValues;
     const matchesExpression =
       profile.skipExpressions &&
       profile.skipExpressions.reduce((matchesExpression, expression) => {
         return containsExpression(value, expression) ? true : matchesExpression;
       }, false);
-    return !matchesExpression;
+    return !matchesExpression && (!checkFloats || !isFloatValue(value));
   };
 
   const inRowBand = (key) => {
@@ -92,7 +97,7 @@ export const getSheetAnalysis = ({
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
 
-  const valuesMap = getValuesMap({ columnProfiles, profile });
+  const { valuesMap, participants, seededParticipants } = getValuesMap({ columnProfiles, profile });
   const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
   const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
@@ -107,13 +112,14 @@ export const getSheetAnalysis = ({
     .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
-
-  const positionColumn = columnProfiles.find(({ attribute }) => attribute === POSITION)?.column;
+  const positionColumn = getPositionColumn(columnProfiles);
   const targetColumns = Object.keys(multiColumnFrequency).filter(
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );
 
   const skippedResults = {};
+  const resultValueColumns = {};
+  const columnResultValues = {};
 
   const potentialResultValues = columnProfiles
     .filter(({ column }) => targetColumns.includes(column))
@@ -137,13 +143,30 @@ export const getSheetAnalysis = ({
           }
         }
 
+        if (potentialResult) {
+          if (!resultValueColumns[value]) {
+            resultValueColumns[value] = [column];
+          } else {
+            resultValueColumns[value].push(column);
+          }
+          if (!columnResultValues[column]) {
+            columnResultValues[column] = [value];
+          } else {
+            columnResultValues[column].push(value);
+          }
+        }
         return potentialResult;
       });
     });
 
-  return {
+  const { category } = getCategory({ sheet, sheetName, profile });
+  const { isQualifying } = getIsQualifying({ sheet, sheetName, profile });
+
+  const result = {
     potentialResultValues,
     multiColumnFrequency,
+    columnResultValues,
+    seededParticipants,
     multiColumnValues,
     greatestFrequency,
     columnFrequency,
@@ -152,6 +175,8 @@ export const getSheetAnalysis = ({
     columnProfiles,
     attributeMap,
     filteredKeys,
+    isQualifying,
+    participants,
     sheetNumber,
     columnKeys,
     sheetName,
@@ -160,7 +185,11 @@ export const getSheetAnalysis = ({
     avoidRows,
     footerRow,
     headerRow,
+    category,
     columns,
-    info
+    info,
+    resultValueColumns
   };
+
+  return result;
 };
