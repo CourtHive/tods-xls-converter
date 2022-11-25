@@ -13,6 +13,7 @@ import {
   getNonBracketedValue,
   getPositionColumn,
   hasBracketedValue,
+  isFloatValue,
   keyHasSingleAlpha,
   keyRowSort,
   startsWithIterator,
@@ -47,12 +48,13 @@ export const getSheetAnalysis = ({
 
   const isNotSkipExpression = (key) => {
     const value = getCellValue(sheet[key]);
+    const checkFloats = profile.skipProfile?.skipFloatValues;
     const matchesExpression =
       profile.skipExpressions &&
       profile.skipExpressions.reduce((matchesExpression, expression) => {
         return containsExpression(value, expression) ? true : matchesExpression;
       }, false);
-    return !matchesExpression;
+    return !matchesExpression && (!checkFloats || !isFloatValue(value));
   };
 
   const inRowBand = (key) => {
@@ -116,6 +118,7 @@ export const getSheetAnalysis = ({
   );
 
   const skippedResults = {};
+  const resultValueColumns = {};
   const columnResultValues = {};
 
   const potentialResultValues = columnProfiles
@@ -141,10 +144,15 @@ export const getSheetAnalysis = ({
         }
 
         if (potentialResult) {
-          if (!columnResultValues[value]) {
-            columnResultValues[value] = [column];
+          if (!resultValueColumns[value]) {
+            resultValueColumns[value] = [column];
           } else {
-            columnResultValues[value].push(column);
+            resultValueColumns[value].push(column);
+          }
+          if (!columnResultValues[column]) {
+            columnResultValues[column] = [value];
+          } else {
+            columnResultValues[column].push(value);
           }
         }
         return potentialResult;
@@ -157,6 +165,7 @@ export const getSheetAnalysis = ({
   const result = {
     potentialResultValues,
     multiColumnFrequency,
+    columnResultValues,
     seededParticipants,
     multiColumnValues,
     greatestFrequency,
@@ -179,7 +188,7 @@ export const getSheetAnalysis = ({
     category,
     columns,
     info,
-    columnResultValues
+    resultValueColumns
   };
 
   return result;
