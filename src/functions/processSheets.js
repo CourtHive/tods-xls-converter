@@ -61,14 +61,14 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     });
 
     const matchUpsCount = sheetStructures?.flatMap(
-      (structure) => structure.matchUps || structure.structures?.flatMap(({ matchUps }) => matchUps)
+      (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
     )?.length;
 
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
 
     Object.assign(participants, structureParticipants);
 
-    if (!analysis.skipped) {
+    if (analysis && (!analysis?.skipped || !hasValues)) {
       if (sheetStructures) structures.push(...sheetStructures);
       const { isQualifying, category, sheetType } = analysis;
       const { gender, matchUpType } = analysis?.info || {};
