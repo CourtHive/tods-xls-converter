@@ -122,17 +122,15 @@ export const config = {
       'doble wo',
       'ret',
       'def',
-      'w.o',
       'w/o',
       'wo',
       'abandoned',
-      'gana x w.o',
-      'pierde x w.o',
       'gana x wo',
       'gana wo',
       'pierde x wo',
       'pierde wo'
     ],
+    winIdentifier: 'gana',
     categories,
     columnsMap: {},
     knockOutRounds: roundNames,
@@ -221,6 +219,12 @@ export const config = {
         searchText: 'categoria',
         columnOffset: 1,
         postProcessor: 'genderParser'
+      },
+      {
+        attribute: 'category',
+        searchText: 'categoria',
+        columnOffset: 1,
+        postProcessor: 'categoryParser'
       },
       {
         attribute: 'venue',
@@ -326,6 +330,10 @@ export const config = {
         value?.toString().toLowerCase().includes(identifier.searchText.toLowerCase())
       )?.gender;
       return gender;
+    },
+    categoryParser: (value) => {
+      const category = categories.find((category) => value.includes(category));
+      return category;
     }
   },
   sheetNameMatcher: (sheetNames) => {
