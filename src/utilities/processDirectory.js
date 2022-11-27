@@ -36,7 +36,11 @@ export function processDirectory({
     processing
   });
 
-  if (processLimit) filenames = filenames.slice(startIndex, startIndex + processLimit);
+  if (processLimit) {
+    filenames = filenames.slice(startIndex, startIndex + processLimit);
+  } else if (startIndex) {
+    filenames = filenames.slice(startIndex);
+  }
 
   const skippedResults = [];
   const resultValues = [];
@@ -84,7 +88,7 @@ export function processDirectory({
   const sheetsProcessed = Object.values(fileResults)
     .map(
       ({ sheetAnalysis }) =>
-        Object.values(sheetAnalysis).filter(({ hasValues, analysis }) => hasValues && !analysis.skipped).length
+        Object.values(sheetAnalysis).filter(({ hasValues, analysis }) => hasValues && !analysis?.skipped).length
     )
     .reduce((a, b) => a + b, 0);
 
