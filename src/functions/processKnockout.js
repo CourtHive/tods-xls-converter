@@ -10,7 +10,7 @@ export function processKnockOut({ profile, analysis }) {
   const { columnProfiles } = analysis;
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
-  const positionColumn = getPositionColumn(analysis.columnProfiles);
+  const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
   const { positionRows, positionProgression, preRoundParticipantRows } = getPositionRows({
     columnProfiles,

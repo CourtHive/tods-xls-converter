@@ -88,7 +88,7 @@ export const getSheetAnalysis = ({
     .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
-  const positionColumn = getPositionColumn(columnProfiles);
+  const { positionColumn } = getPositionColumn(columnProfiles);
   const targetColumns = Object.keys(multiColumnFrequency).filter(
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );

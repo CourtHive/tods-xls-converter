@@ -103,5 +103,11 @@ export function containsExpression(value, expression) {
 }
 
 export function getPositionColumn(columnProfiles) {
-  return columnProfiles.find(({ attribute, character }) => [attribute, character].includes(POSITION))?.column;
+  const positionColumnProfile = columnProfiles.find(({ attribute, character }) =>
+    [attribute, character].includes(POSITION)
+  );
+  return {
+    positionColumn: positionColumnProfile?.column,
+    positionColumnProfile
+  };
 }

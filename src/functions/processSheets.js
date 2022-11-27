@@ -77,6 +77,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     }
 
     if (error) {
+      console.log({ error });
       const method = `processSheet ${sheetNumber}`;
       pushGlobalLog({ method, sheetName, error, keyColors: { error: 'brightred' } });
       if (!errorLog[error]) {
