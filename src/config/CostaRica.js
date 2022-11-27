@@ -212,18 +212,21 @@ export const config = {
         attribute: 'matchUpType',
         searchText: 'categoria',
         columnOffset: 1,
+        instance: 0,
         postProcessor: 'matchUpTypeParser'
       },
       {
         attribute: 'gender',
         searchText: 'categoria',
         columnOffset: 1,
+        instance: 0,
         postProcessor: 'genderParser'
       },
       {
         attribute: 'category',
         searchText: 'categoria',
         columnOffset: 1,
+        instance: 0,
         postProcessor: 'categoryParser'
       },
       {
@@ -275,6 +278,7 @@ export const config = {
       {
         attribute: 'seedNumbers',
         searchText: ['sembrados', 'sembradas'],
+        columnCountMinimum: true,
         stopOnEmpty: true,
         columnOffset: -1,
         rowOffset: 1,
@@ -283,6 +287,7 @@ export const config = {
       {
         attribute: 'seededParticipantNames',
         searchText: ['sembrados', 'sembradas'],
+        columnCountMinimum: true,
         stopOnEmpty: true,
         rowOffset: 1,
         rowCount: 16

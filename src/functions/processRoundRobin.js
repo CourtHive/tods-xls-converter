@@ -106,7 +106,9 @@ export function getRoundRobinValues(analysis, profile) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];
         const resultIsMatchOutcome =
-          onlyAlpha(result, profile) && profile.matchOutcomes.some((outcome) => outcome === result.toLowerCase());
+          result &&
+          onlyAlpha(result, profile) &&
+          profile.matchOutcomes.some((outcome) => outcome === result.toLowerCase());
 
         const drawPositions = [drawPosition, columnIndex + 1].sort();
         const sideString = drawPosition > columnIndex + 1 ? 'stringScoreSide1' : 'stringScoreSide2';
@@ -123,7 +125,8 @@ export function getRoundRobinValues(analysis, profile) {
             : undefined;
 
         const walkover = profile.matchUpStatuses?.walkover;
-        const matchUpStatus = walkover ? (result.toLowerCase().includes(walkover) ? WALKOVER : undefined) : undefined;
+        const matchUpStatus =
+          result && walkover ? (result.toLowerCase().includes(walkover) ? WALKOVER : undefined) : undefined;
 
         positionedMatchUps[positioning] = {
           drawPositions,

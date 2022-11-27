@@ -9,11 +9,11 @@ it('can process a directory', () => {
   const readDir = './examples/sheets';
 
   const sheetTypes = [];
-  const sheetNumbers = [];
+  const sheetNumbers = [5];
   const sheetLimit = 0;
 
   const processLimit = 1;
-  const startIndex = 0;
+  const startIndex = 5;
 
   setLoggingActive(true);
   const result = processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers });

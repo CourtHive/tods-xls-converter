@@ -1,5 +1,6 @@
 import { getNonBracketedValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { matchUpStatusConstants, utilities } from 'tods-competition-factory';
+import { isNumeric } from '../utilities/identification';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -34,10 +35,8 @@ export function getRoundMatchUps({
   let roundPosition = 1;
 
   for (const pair of pairedRowNumbers) {
-    const { derivedPair, groups } = getDerivedPair({ rows: columnProfile.rows, pair });
-
-    const nextColumnRows = nextColumnProfile.rows;
-    const nextColumnGroupings = getGroupings({ rows: nextColumnRows });
+    const { derivedPair, groups } = getDerivedPair({ profile, columnProfile, pair });
+    const nextColumnGroupings = getGroupings({ columnProfile: nextColumnProfile });
     const nextColumnRowTarget = Math.abs(derivedPair[1] - derivedPair[0]) / 2 + Math.min(...derivedPair);
     const nextColumnRowNumber = nextColumnGroupings.reduce((rowNumber, grouping) => {
       if (grouping.includes(nextColumnRowTarget)) return grouping[0];
@@ -141,7 +140,6 @@ function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysi
   }, {});
   if (exactMatchSide?.advancedSide) return exactMatchSide;
 
-  // console.log({ pairParticipantNames, nonBracketedParticipantNames });
   const startsWith = nonBracketedParticipantNames.reduce((side, participantName, i) => {
     const condition = participantName.startsWith(nonBracketedWinningParticipantName);
     if (condition) {
@@ -189,12 +187,17 @@ function getMatchUpParticipants({ profile, columnProfile, derivedPair, roundPosi
   return { pairParticipantNames, matchUpParticipants };
 }
 
-function getGroupings({ rows }) {
+function getGroupings({ columnProfile }) {
   const groupings = [];
   let grouping;
   let current;
 
-  for (const row of rows) {
+  let index = -1;
+  for (const row of columnProfile?.rows || []) {
+    index += 1;
+    const value = columnProfile.values[index];
+    if (isNumeric(value)) continue;
+
     if (row - 1 === current) {
       grouping.push(row);
       current = row;
@@ -206,12 +209,12 @@ function getGroupings({ rows }) {
       continue;
     }
   }
-  groupings.push(grouping);
+  if (grouping) groupings.push(grouping);
 
   return groupings;
 }
 
-function getDerivedPair({ rows, pair }) {
+function getDerivedPair({ profile, columnProfile, pair }) {
   const diff = Math.abs(pair[1] - pair[0]);
   if (diff < 4) return { derivedPair: pair, groups: [[pair[0]], [pair[1]]] };
 
@@ -223,7 +226,7 @@ function getDerivedPair({ rows, pair }) {
   };
 
   const groups = [];
-  const groupings = getGroupings({ rows });
+  const groupings = getGroupings({ profile, columnProfile });
   const derivedPair = pair.map((rowNumber) => {
     const group = groupings.find((group) => getGroupRange(group).includes(rowNumber));
     if (group) groups.push(group);

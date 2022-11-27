@@ -45,6 +45,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (sheetLimit && sheetNumber > sheetLimit) break;
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
 
+    console.log({ sheetName, sheetNumber });
     const {
       participants: structureParticipants,
       structures: sheetStructures,

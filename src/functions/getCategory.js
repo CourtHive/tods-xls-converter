@@ -7,8 +7,8 @@ export function getCategory({ sheet, sheetName, profile }) {
   const categories = profile.categories;
   if (!categories?.length) return {};
 
-  const categoryMatches = findValueRefs({ searchDetails: categories, sheet, mapValues: true });
-  const sheetCategories = utilities.unique(Object.values(categoryMatches).map(({ value }) => value));
+  const exactCategoryMatches = findValueRefs({ searchDetails: categories, sheet, mapValues: true });
+  const sheetCategories = utilities.unique(Object.values(exactCategoryMatches).map(({ value }) => value));
 
   const sheetNameCategory = sheetName && categories.find((category) => sheetName.includes(category));
 

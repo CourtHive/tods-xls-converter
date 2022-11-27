@@ -132,21 +132,33 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
 // instance allows specification of which encountered match to extract
 export function getTargetValue({ searchText, sheet, rowOffset = 0, columnOffset = 0, options, instance = 1 }) {
   const nameRefs = findValueRefs({ searchDetails: searchText, sheet, options });
-  if (!Array.isArray(nameRefs) || nameRefs.length < 1) return '';
+  if (!Array.isArray(nameRefs) || nameRefs.length < 1) {
+    return '';
+  }
 
-  const row = getRow(nameRefs[instance - 1]);
-  const targetRow = row + rowOffset;
-  const column = getCol(nameRefs[instance - 1]);
-  const targetColumn = String.fromCharCode(((column && column.charCodeAt()) || 0) + columnOffset);
-  const targetRef = `${targetColumn}${targetRow}`;
-  const value = getCellValue(sheet[targetRef]);
+  const getInstance = (instance) => {
+    const row = getRow(nameRefs[instance - 1]);
+    const targetRow = row + rowOffset;
+    const column = getCol(nameRefs[instance - 1]);
+    const targetColumn = String.fromCharCode(((column && column.charCodeAt()) || 0) + columnOffset);
+    const targetRef = `${targetColumn}${targetRow}`;
+    const value = getCellValue(sheet[targetRef])?.trim();
+    const cellRefs = [targetRef, `${column}${row}`];
 
-  const cellRefs = [targetRef, `${column}${row}`];
+    return { cellRefs, value };
+  };
 
-  return { cellRefs, value: value?.trim() };
+  if (instance) {
+    return getInstance(instance);
+  } else {
+    // when instance is 0 it searches for first value across all instances
+    const valueInstance = nameRefs.map((ref, i) => getInstance(i + 1)).find(({ value }) => value) || {};
+    return valueInstance;
+  }
 }
 
 export function getValueRange({
+  columnCountMinimum,
   columnOffset = 0,
   columnCount = 0,
   rowOffset = 0,
@@ -154,6 +166,7 @@ export function getValueRange({
   rowCount = 0,
   stopOnEmpty,
   searchText,
+  columns,
   options,
   sheet
 }) {
@@ -182,7 +195,7 @@ export function getValueRange({
     cellRefs.push(targetRef);
     const value = getCellValue(sheet[targetRef]);
 
-    if (!value && stopOnEmpty) break;
+    if (!value && stopOnEmpty && (!columnCountMinimum || range.indexOf(increment)) >= columns.length) break;
 
     values.push(value);
   }

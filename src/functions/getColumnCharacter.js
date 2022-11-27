@@ -4,7 +4,7 @@ import { utilities } from 'tods-competition-factory';
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
-export function getColumnCharacter({ sheetType, columnProfile, attributeMap }) {
+export function getColumnCharacter({ attributeMap, columnIndex, columnProfile, sheetType }) {
   const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column, allNumeric } =
     columnProfile;
 
@@ -12,7 +12,8 @@ export function getColumnCharacter({ sheetType, columnProfile, attributeMap }) {
   const knockOutCheck =
     utilities.isPowerOf2(lastNumericValue) || (lastNumericValue < values.length && utilities.isPowerOf2(values.length));
 
-  if (numericCheck && (sheetType === ROUND_ROBIN ? allNumeric : knockOutCheck)) {
+  // preRound and position columns cannot occur beyond 4th column
+  if (columnIndex < 4 && numericCheck && (sheetType === ROUND_ROBIN ? allNumeric : knockOutCheck)) {
     const character = containsAlpha ? PRE_ROUND : POSITION;
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;

@@ -49,8 +49,11 @@ export function processKnockOut({ profile, analysis }) {
   //    - in rare cases there may be a preRound column BEFORE the position column... if position column > A this could be true
   //    - if there is a column before positionRound see whether any of the positioned values of roundNumber: 1 are present in that coulmn
 
+  const columns = analysis.columnProfiles.map(({ column }) => column).sort();
+  const boundaryIndex = Math.max(columns.indexOf(preRoundColumn), columns.indexOf(positionColumn), 0);
+
   const roundColumnsToProcess = analysis.columnProfiles
-    .filter(({ column }) => ![preRoundColumn, positionColumn].filter(Boolean).includes(column))
+    .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
     .map(({ column }) => column);
 
   roundColumnsToProcess.forEach((column, i) => {
