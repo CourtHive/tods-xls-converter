@@ -1,8 +1,11 @@
+import { genderConstants, matchUpTypes } from 'tods-competition-factory';
 import { isString } from '../utilities/identification';
 
 import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE } from '../constants/sheetTypes';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
+const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
+const { MALE, FEMALE } = genderConstants;
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
@@ -43,6 +46,10 @@ const qualifyingIdentifiers = [
   'preclasificadas'
 ];
 const categories = ['U10', 'U12', 'U14', 'U16', 'U18'];
+const genderIdentifiers = [
+  { searchText: 'varones', gender: MALE },
+  { searchText: 'damas', gender: FEMALE }
+];
 
 const organization = 'FEDERACION COSTARRICENSE DE TENIS';
 export const config = {
@@ -104,14 +111,15 @@ export const config = {
     skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
     considerAlpha: [',', '(', ')', '/'],
-    matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
-    matchUpStatuses: { bye: 'BYE' },
+    matchStatuses: ['doble wo', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
+    matchUpStatuses: { bye: 'BYE', doubleWalkover: 'doble wo', walkover: 'wo' },
     qualifyingIdentifiers,
     doubles: {
       stringIdentifier: '/'
     },
+    genderIdentifiers,
     matchOutcomes: [
-      'doble w.o',
+      'doble wo',
       'ret',
       'def',
       'w.o',
@@ -203,10 +211,16 @@ export const config = {
         columnOffset: 1
       },
       {
-        attribute: 'category',
+        attribute: 'matchUpType',
         searchText: 'categoria',
-        columnOffset: 1
-        // postProcessor: 'categoryParser'
+        columnOffset: 1,
+        postProcessor: 'matchUpTypeParser'
+      },
+      {
+        attribute: 'gender',
+        searchText: 'categoria',
+        columnOffset: 1,
+        postProcessor: 'genderParser'
       },
       {
         attribute: 'venue',
@@ -304,10 +318,14 @@ export const config = {
       }
       return result;
     },
+    matchUpTypeParser: (value) => {
+      return value?.toString().toLowerCase().includes('dobles') ? DOUBLES_MATCHUP : SINGLES_MATCHUP;
+    },
     genderParser: (value) => {
-      const male = /^F/.test(value);
-      const female = /^L/.test(value);
-      return { gender: male ? 'M' : female ? 'W' : 'X' };
+      const gender = genderIdentifiers.find((identifier) =>
+        value?.toString().toLowerCase().includes(identifier.searchText.toLowerCase())
+      )?.gender;
+      return gender;
     }
   },
   sheetNameMatcher: (sheetNames) => {

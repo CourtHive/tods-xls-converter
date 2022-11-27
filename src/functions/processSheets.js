@@ -45,8 +45,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (sheetLimit && sheetNumber > sheetLimit) break;
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
 
-    console.log({ sheetName, sheetNumber });
-
     const {
       participants: structureParticipants,
       structures: sheetStructures,
@@ -62,6 +60,17 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       workbook,
       profile
     });
+
+    const matchUpsCount = sheetStructures?.flatMap(
+      (structure) => structure.matchUps || structure.structures?.flatMap(({ matchUps }) => matchUps)
+    )?.length;
+    const {
+      isQualifying,
+      category,
+      sheetType,
+      info: { gender, matchUpType }
+    } = analysis;
+    console.log({ sheetName, sheetNumber, sheetType, isQualifying, category, matchUpType, gender, matchUpsCount });
 
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
 

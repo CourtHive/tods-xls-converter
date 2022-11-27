@@ -32,6 +32,7 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
     const { matchUps, structure, participantDetails } = processPreRound({
       preRoundParticipantRows,
       preRoundColumn,
+      participants,
       analysis,
       profile
     });
@@ -43,7 +44,7 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
     matchUps.push(...matchUps);
   }
 
-  const qualifyingParticipants = participants.filter(({ advancedParticipantName }) => advancedParticipantName);
+  // const qualifyingParticipants = participants.filter(({ advancedParticipantName }) => advancedParticipantName);
 
   // *. if no preRound, check whether there are values present in the valuesMap on positionRows[0] of first column after the position round
   //    - check whether there are progressed particpants in positionRows[1]
@@ -60,25 +61,38 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
     if (pairedRowNumbers) {
       const { matchUps: roundMatchUps, participantDetails } = getRoundMatchUps({
         pairedRowNumbers,
-        roundNumber: 1,
+        roundNumber: i + 1,
+        participants,
         analysis,
         profile,
         column
       });
 
+      if (participantDetails) {
+        participants.push(...participantDetails.filter(({ isByePosition }) => isByePosition));
+      }
+
       if (roundMatchUps) {
-        console.log({ roundMatchUps, participantDetails });
+        matchUps.push(...roundMatchUps);
+        // console.log({ roundMatchUps });
       }
     } else {
-      /*
       // diagnostics
-      const profile = analysis.columnProfiles.find((c) => c.column === column);
-      const keys = Object.keys(profile.keyMap);
-      console.log({ column, i, profile });
-      keys.forEach((key) => console.log(sheet[key]));
-      */
+      // const profile = analysis.columnProfiles.find((c) => c.column === column);
+      // const keys = Object.keys(profile.keyMap);
+      // console.log({ column, i, profile });
+      // keys.forEach((key) => console.log(sheet[key]));
     }
   });
+
+  const stage = analysis.isQualifying ? 'QUALIFYING' : 'MAIN';
+  const structure = {
+    stageSequence: analysis.isQualifying && preRoundParticipantRows?.length ? 2 : 1,
+    stageName: stage,
+    matchUps,
+    stage
+  };
+  structures.push(structure);
 
   Object.assign(analysis, {
     preRoundParticipantRows,
@@ -86,7 +100,7 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
     positionRows
   });
 
-  return { analysis, info, links, structures, matchUps, hasValues: true, ...SUCCESS };
+  return { analysis, info, links, structures, hasValues: true, ...SUCCESS };
 
   // NOTES:
   // *. Is there a pre-round

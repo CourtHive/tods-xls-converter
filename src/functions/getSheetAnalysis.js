@@ -166,6 +166,7 @@ export const getSheetAnalysis = ({
     potentialResultValues,
     multiColumnFrequency,
     columnResultValues,
+    resultValueColumns,
     seededParticipants,
     multiColumnValues,
     greatestFrequency,
@@ -187,8 +188,7 @@ export const getSheetAnalysis = ({
     headerRow,
     category,
     columns,
-    info,
-    resultValueColumns
+    info
   };
 
   return result;
