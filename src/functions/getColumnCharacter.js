@@ -2,16 +2,17 @@ import { isNumeric } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
 
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
+import { ROUND_ROBIN } from '../constants/sheetTypes';
 
-export function getColumnCharacter({ columnProfile, attributeMap }) {
-  const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column } = columnProfile;
+export function getColumnCharacter({ sheetType, columnProfile, attributeMap }) {
+  const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column, allNumeric } =
+    columnProfile;
 
-  if (
-    consecutiveNumbers &&
-    lastNumericValue > 0 &&
-    (utilities.isPowerOf2(lastNumericValue) ||
-      (lastNumericValue < values.length && utilities.isPowerOf2(values.length)))
-  ) {
+  const numericCheck = consecutiveNumbers && lastNumericValue > 0;
+  const knockOutCheck =
+    utilities.isPowerOf2(lastNumericValue) || (lastNumericValue < values.length && utilities.isPowerOf2(values.length));
+
+  if (numericCheck && (sheetType === ROUND_ROBIN ? allNumeric : knockOutCheck)) {
     const character = containsAlpha ? PRE_ROUND : POSITION;
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;

@@ -24,7 +24,7 @@ export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, i
   const { structure, participants } = getRoundRobinValues(analysis);
   if (structure) analysis.structureId = structure.structureId;
 
-  return { analysis, info, hasValues: true, structure, participants, ...SUCCESS };
+  return { analysis, hasValues: true, structures: [structure], participants, ...SUCCESS };
 }
 
 export function getRoundRobinValues(analysis) {
@@ -36,9 +36,10 @@ export function getRoundRobinValues(analysis) {
   if (!uniqueResultsColumns) return { error: 'Round Robin result columns are not unique' };
   if (!commonFirstColumn) return { error: 'Round Robin no common first column' };
 
-  const positionColumnRows = analysis.columnProfiles.find(({ attribute, character }) =>
-    [attribute, character].includes(POSITION)
-  )?.rows;
+  const positionColumnRows = analysis.columnProfiles.find(({ attribute, character }) => {
+    return [attribute, character].includes(POSITION);
+  })?.rows;
+
   const findColumnProfile = (column) => analysis.columnProfiles.find((profile) => profile.column === column);
   const firstColumnProfile = findColumnProfile(firstColumn);
   const minRow = Math.min(...firstColumnProfile.rows);
@@ -91,10 +92,12 @@ export function getRoundRobinValues(analysis) {
     const orderedResultsColumns = resultsColumns.sort();
     // get resultsColumns in which they do not appear
     const targetResultColumns = orderedResultsColumns.filter((column) => !analysis.valuesMap[name].includes(column));
+
     for (const column of targetResultColumns) {
       const columnProfile = findColumnProfile(column);
       const columnIndex = orderedResultsColumns.indexOf(column);
       const positionRow = positionColumnRows?.[positionIndex];
+
       if (positionRow) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];

@@ -9,7 +9,7 @@ it('can process a directory', () => {
   const readDir = './examples/sheets';
 
   const sheetTypes = [];
-  const sheetNumbers = [7];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 1;

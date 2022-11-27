@@ -50,7 +50,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       structures: sheetStructures,
       hasValues,
       analysis,
-      skipped,
       error
     } = processSheet({
       sheetNumber,
@@ -64,20 +63,16 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     const matchUpsCount = sheetStructures?.flatMap(
       (structure) => structure.matchUps || structure.structures?.flatMap(({ matchUps }) => matchUps)
     )?.length;
-    const {
-      isQualifying,
-      category,
-      sheetType,
-      info: { gender, matchUpType }
-    } = analysis;
-    console.log({ sheetName, sheetNumber, sheetType, isQualifying, category, matchUpType, gender, matchUpsCount });
 
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
 
     Object.assign(participants, structureParticipants);
 
-    if (!skipped) {
+    if (!analysis.skipped) {
       if (sheetStructures) structures.push(...sheetStructures);
+      const { isQualifying, category, sheetType } = analysis;
+      const { gender, matchUpType } = analysis?.info || {};
+      console.log({ sheetName, sheetNumber, sheetType, isQualifying, category, matchUpType, gender, matchUpsCount });
     }
 
     if (error) {
@@ -117,7 +112,9 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
 
   const sheetType = sheetDefinition?.type;
   const skipped = sheetTypes.length && sheetType && !sheetTypes.includes(sheetType);
-  if (!hasValues || skipped) return { analysis: { skipped }, sheetType, hasValues, ...SUCCESS };
+  if (!hasValues || skipped) {
+    return { analysis: { skipped }, sheetType, hasValues, ...SUCCESS };
+  }
 
   if (sheetDefinition) {
     const method = `processSheet ${sheetNumber}`;

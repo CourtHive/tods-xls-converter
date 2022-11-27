@@ -6,9 +6,7 @@ import { processPreRound } from './processPreRound';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
-export function processKnockOut({ sheetDefinition, profile, analysis, sheet, info }) {
-  if (sheetDefinition && profile && sheet);
-
+export function processKnockOut({ profile, analysis }) {
   const { columnProfiles } = analysis;
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
@@ -100,7 +98,7 @@ export function processKnockOut({ sheetDefinition, profile, analysis, sheet, inf
     positionRows
   });
 
-  return { analysis, info, links, structures, hasValues: true, ...SUCCESS };
+  return { analysis, links, structures, hasValues: true, ...SUCCESS };
 
   // NOTES:
   // *. Is there a pre-round
