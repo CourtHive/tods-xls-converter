@@ -18,7 +18,11 @@ export function getValuesMap({ columnProfiles, profile }) {
     }
 
     for (const uniqueValue of uniqueValues) {
-      if (onlyAlpha(uniqueValue, profile) && !profile.matchStatuses.includes(uniqueValue.toLowerCase())) {
+      const allAlpha = onlyAlpha(uniqueValue, profile);
+      const valueIsMatchStatus = allAlpha && profile.matchStatuses.includes(uniqueValue.toLowerCase());
+      const valueIsMatchOutcome = allAlpha && profile.matchOutcomes.includes(uniqueValue.toLowerCase());
+
+      if (allAlpha && !valueIsMatchOutcome && !valueIsMatchStatus) {
         if (!valuesMap[uniqueValue]) {
           valuesMap[uniqueValue] = [column];
         } else {
