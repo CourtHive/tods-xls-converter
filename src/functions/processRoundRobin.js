@@ -1,5 +1,6 @@
 import { generateMatchUpId, generateParticipantId, generateStructureId } from '../utilities/hashing';
-import { utilities } from 'tods-competition-factory';
+import { utilities, matchUpStatusConstants } from 'tods-competition-factory';
+import { onlyAlpha } from '../utilities/convenience';
 import { normalizeName } from 'normalize-text';
 import { getRow } from './sheetAccess';
 
@@ -7,6 +8,8 @@ import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import { ROUND } from '../constants/sheetElements';
+
+const { WALKOVER } = matchUpStatusConstants;
 
 export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, info }) {
   if (sheetDefinition && profile && sheet);
@@ -21,14 +24,14 @@ export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, i
   // *. attributes are info tournamentName and dateRange
   if (info[TOURNAMENT_NAME]);
 
-  const { structure, participants } = getRoundRobinValues(analysis);
+  const { structure, participants } = getRoundRobinValues(analysis, profile);
   if (structure) analysis.structureId = structure.structureId;
 
   return { analysis, hasValues: true, structures: [structure], participants, ...SUCCESS };
 }
 
-export function getRoundRobinValues(analysis) {
-  const frequencyColumns = Object.values(analysis.valuesMap);
+export function getRoundRobinValues(analysis, profile) {
+  const frequencyColumns = Object.values(analysis.valuesMap).filter((columns) => columns.length === 2);
   const firstColumn = frequencyColumns[0][0];
   const commonFirstColumn = frequencyColumns.every((frequency) => frequency[0] === firstColumn);
   const resultsColumns = frequencyColumns.map((frequency) => frequency.length === 2 && frequency[1]).filter(Boolean);
@@ -40,7 +43,8 @@ export function getRoundRobinValues(analysis) {
     return [attribute, character].includes(POSITION);
   })?.rows;
 
-  const findColumnProfile = (column) => analysis.columnProfiles.find((profile) => profile.column === column);
+  const findColumnProfile = (column) =>
+    analysis.columnProfiles.find((columnProfile) => columnProfile.column === column);
   const firstColumnProfile = findColumnProfile(firstColumn);
   const minRow = Math.min(...firstColumnProfile.rows);
   const maxRow = Math.max(...firstColumnProfile.rows) + 1; // buffer, perhaps provider.profile
@@ -59,8 +63,8 @@ export function getRoundRobinValues(analysis) {
         columnProfile.character = ROUND;
         return columnProfile;
       })
-      .map((profile) => {
-        const keyMap = profile?.keyMap;
+      .map((columnProfile) => {
+        const keyMap = columnProfile?.keyMap;
         // remove the first row which contains the player names
         return keyMap ? Object.keys(keyMap).map(getRow).sort(utilities.numericSort).slice(1) : [];
       })
@@ -101,11 +105,32 @@ export function getRoundRobinValues(analysis) {
       if (positionRow) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];
+        const resultIsMatchOutcome =
+          onlyAlpha(result, profile) && profile.matchOutcomes.some((outcome) => outcome === result.toLowerCase());
+
         const drawPositions = [drawPosition, columnIndex + 1].sort();
+        const sideString = drawPosition > columnIndex + 1 ? 'stringScoreSide1' : 'stringScoreSide2';
         const positioning = drawPositions.join('|');
+
+        const existingScore = positionedMatchUps[positioning]?.score;
+        const score = resultIsMatchOutcome ? undefined : { [sideString]: result, ...existingScore };
+        const drawPositionSideNumber = drawPositions.indexOf(drawPosition) + 1;
+        const winningSide =
+          resultIsMatchOutcome && profile.winIdentifier
+            ? result.toLowerCase().includes(profile.winIdentifier)
+              ? drawPositionSideNumber
+              : 3 - drawPositionSideNumber
+            : undefined;
+
+        const walkover = profile.matchUpStatuses?.walkover;
+        const matchUpStatus = walkover ? (result.toLowerCase().includes(walkover) ? WALKOVER : undefined) : undefined;
+
         positionedMatchUps[positioning] = {
           drawPositions,
-          result
+          matchUpStatus,
+          winningSide,
+          result,
+          score
         };
       }
     }
