@@ -159,7 +159,7 @@ export const getSheetAnalysis = ({
       });
     });
 
-  const { category } = getCategory({ sheet, sheetName, profile });
+  const category = getCategory({ sheet, sheetName, profile })?.category || info.category;
   const { isQualifying } = getIsQualifying({ sheet, sheetName, profile });
 
   const result = {
