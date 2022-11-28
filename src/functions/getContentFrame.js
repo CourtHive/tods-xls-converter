@@ -24,7 +24,7 @@ export function getContentFrame({ sheet, profile, sheetDefinition }) {
     sheet
   });
   const headerRow = headerRows[0];
-  const headerAvoidRows = headerRows.map((headerRow) => {
+  const headerAvoidRows = headerRows.flatMap((headerRow) => {
     const startRange = +headerRow;
     const endRange = +headerRow + (headerRowDefinition.rows || 0);
     return utilities.generateRange(startRange, endRange);
@@ -37,7 +37,7 @@ export function getContentFrame({ sheet, profile, sheetDefinition }) {
       sheet
     }) || [];
   const footerRow = footerRows[footerRows.length - 1];
-  const footerAvoidRows = footerRows.map((footerRow) => {
+  const footerAvoidRows = footerRows.flatMap((footerRow) => {
     const startRange = +footerRow;
     const endRange = +footerRow + (footerRowDefinition.rows || 0);
     return utilities.generateRange(startRange, endRange);
