@@ -1,6 +1,7 @@
 import { processDirectory } from './src/utilities/processDirectory';
 import { setLoggingActive } from './src/global/state';
 import { it } from 'vitest';
+import { printGlobalLog } from './src/utilities/globalLog';
 
 // import { KNOCKOUT } from './src/constants/sheetTypes';
 
@@ -16,7 +17,16 @@ it('can process a directory', () => {
   const startIndex = 0;
 
   setLoggingActive(true);
-  const result = processDirectory({ readDir, processLimit, startIndex, sheetLimit, sheetTypes, sheetNumbers });
+  const result = processDirectory({
+    readDir,
+    processLimit,
+    startIndex,
+    sheetLimit,
+    sheetTypes,
+    sheetNumbers,
+    logging: true
+  });
   if (result);
+  printGlobalLog();
   // console.log(result.fileResults[0].sheetAnalysis[12].analysis.isQualifying);
 });
