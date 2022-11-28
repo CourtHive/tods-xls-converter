@@ -240,6 +240,8 @@ export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet, o
       return targetRows;
     } else if (firstTargetRow) {
       return Math.min(...targetRows);
+    } else if (rowDefinition.rowBuffer) {
+      return Math.min(...targetRows) + rowDefinition.rowBuffer;
     } else {
       return Math.max(...targetRows);
     }
