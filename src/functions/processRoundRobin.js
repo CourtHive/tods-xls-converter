@@ -24,18 +24,30 @@ export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, i
   // *. attributes are info tournamentName and dateRange
   if (info[TOURNAMENT_NAME]);
 
-  const { structure, participants } = getRoundRobinValues(analysis, profile);
+  const { structure, participants, error } = getRoundRobinValues(analysis, profile);
   if (structure) analysis.structureId = structure.structureId;
+
+  if (error) return { error };
 
   return { analysis, hasValues: true, structures: [structure], participants, ...SUCCESS };
 }
 
 export function getRoundRobinValues(analysis, profile) {
+  const makeHash = (arr) => arr.join('|');
+  const breakHash = (str) => str.split('|');
+
   const frequencyColumns = Object.values(analysis.valuesMap).filter((columns) => columns.length === 2);
-  const firstColumn = frequencyColumns[0][0];
-  const commonFirstColumn = frequencyColumns.every((frequency) => frequency[0] === firstColumn);
-  const resultsColumns = frequencyColumns.map((frequency) => frequency.length === 2 && frequency[1]).filter(Boolean);
-  const uniqueResultsColumns = utilities.unique(resultsColumns).length === frequencyColumns.length;
+  const firstColumn = frequencyColumns.flat(Infinity).sort()[0];
+  const hasFirstColumn = (columns) => columns.includes(firstColumn);
+  const uniqueFreqencyColumns = utilities.unique(frequencyColumns.filter(hasFirstColumn).map(makeHash)).map(breakHash);
+  const commonFirstColumn =
+    uniqueFreqencyColumns.every((frequency) => frequency[0] === firstColumn) && uniqueFreqencyColumns.length > 1;
+  const resultsColumns = uniqueFreqencyColumns
+    .map((frequency) => frequency.length === 2 && frequency[1])
+    .filter(Boolean);
+  const uniqueResultsColumns = utilities.unique(resultsColumns).length === uniqueFreqencyColumns.length;
+  const participantsCount = uniqueFreqencyColumns.length;
+
   if (!uniqueResultsColumns) return { error: 'Round Robin result columns are not unique' };
   if (!commonFirstColumn) return { error: 'Round Robin no common first column' };
 
@@ -66,31 +78,50 @@ export function getRoundRobinValues(analysis, profile) {
       .map((columnProfile) => {
         const keyMap = columnProfile?.keyMap;
         // remove the first row which contains the player names
-        return keyMap ? Object.keys(keyMap).map(getRow).sort(utilities.numericSort).slice(1) : [];
+        // return keyMap ? Object.keys(keyMap).map(getRow).sort(utilities.numericSort).slice(1) : [];
+        return keyMap
+          ? Object.keys(keyMap)
+              .map(getRow)
+              .sort(utilities.numericSort)
+              .filter((row) => row >= minRow)
+          : [];
       })
       .flat(Infinity)
       .sort(utilities.numericSort)
   );
 
   const rowsWithinBounds = resultRows.every((row) => row >= minRow && row <= maxRow);
-  if (!rowsWithinBounds) return { error: 'Results vales out of bounds' };
+  if (!rowsWithinBounds) return { error: 'Results values out of bounds' };
 
   const positionAssignments = [];
   const positionedMatchUps = {};
   const positionNameMap = {};
   const participants = {};
 
-  Object.keys(analysis.valuesMap).forEach((name, positionIndex) => {
+  const nameSeparator = profile.doubles?.nameSeparator || '/';
+  const nameValues = Object.keys(analysis.valuesMap);
+  const isDoubles = nameValues.length / participantsCount === 2;
+  const positionNames = utilities.chunkArray(nameValues, isDoubles ? 2 : 1).map((names) => {
+    const combinedName = names.join(nameSeparator);
+    // create a valuesMap entry for the doubles pair name
+    if (isDoubles) analysis.valuesMap[combinedName] = analysis.valuesMap[names[0]];
+    return combinedName;
+  });
+
+  positionNames.forEach((name, positionIndex) => {
     const drawPosition = positionIndex + 1;
     if (name) {
       const participantName = normalizeName(name);
+
       positionNameMap[drawPosition] = participantName;
+
       const { participantId } = generateParticipantId({ attributes: [participantName] });
       const finishingPosition = finishingPositions?.[positionIndex];
       const positionAssignment = { drawPosition, participantId };
       const extensions = finishingPosition && [{ name: 'participantResults', value: { finishingPosition } }];
       if (extensions) positionAssignment.extensions = extensions;
       positionAssignments.push(positionAssignment);
+
       participants[participantId] = { participantId, participantName };
     }
     const orderedResultsColumns = resultsColumns.sort();
@@ -100,6 +131,8 @@ export function getRoundRobinValues(analysis, profile) {
     for (const column of targetResultColumns) {
       const columnProfile = findColumnProfile(column);
       const columnIndex = orderedResultsColumns.indexOf(column);
+      if (columnIndex + 1 === drawPosition) continue;
+
       const positionRow = positionColumnRows?.[positionIndex];
 
       if (positionRow) {
@@ -152,6 +185,7 @@ export function getRoundRobinValues(analysis, profile) {
 
     return { matchUpId, ...value };
   });
+  // console.log(matchUps);
 
   let attributes = [...matchUpIds, analysis.sheetName, 'CONTAINER'];
   let result = generateStructureId({ attributes });
