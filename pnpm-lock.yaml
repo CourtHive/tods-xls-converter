@@ -10,7 +10,7 @@ specifiers:
   '@rollup/plugin-commonjs': 23.0.3
   '@rollup/plugin-json': 5.0.2
   '@rollup/plugin-node-resolve': 15.0.1
-  '@rollup/plugin-typescript': 10.0.0
+  '@rollup/plugin-typescript': 10.0.1
   '@typescript-eslint/eslint-plugin': ^5.43.0
   '@typescript-eslint/parser': ^5.43.0
   esbuild: ^0.15.15
@@ -56,7 +56,7 @@ devDependencies:
   '@rollup/plugin-commonjs': 23.0.3_rollup@3.3.0
   '@rollup/plugin-json': 5.0.2_rollup@3.3.0
   '@rollup/plugin-node-resolve': 15.0.1_rollup@3.3.0
-  '@rollup/plugin-typescript': 10.0.0_6annma2bj33shm6er7hwi5u4z4
+  '@rollup/plugin-typescript': 10.0.1_6annma2bj33shm6er7hwi5u4z4
   '@typescript-eslint/eslint-plugin': 5.43.0_wze2rj5tow7zwqpgbdx2buoy3m
   '@typescript-eslint/parser': 5.43.0_e3uo4sehh4zr4i6m57mkkxxv7y
   esbuild: 0.15.15
@@ -1510,8 +1510,8 @@ packages:
       rollup: 3.3.0
     dev: true
 
-  /@rollup/plugin-typescript/10.0.0_6annma2bj33shm6er7hwi5u4z4:
-    resolution: {integrity: sha512-iaTcQCbqTBA+vYS8uAVqvZvYXPobHBkz/tPYudqdMIz8QIjlPFNNFLpFX18rHGjLvGT9vUghd6GwE4ZpLhCnfA==}
+  /@rollup/plugin-typescript/10.0.1_6annma2bj33shm6er7hwi5u4z4:
+    resolution: {integrity: sha512-wBykxRLlX7EzL8BmUqMqk5zpx2onnmRMSw/l9M1sVfkJvdwfxogZQVNUM9gVMJbjRLDR5H6U0OMOrlDGmIV45A==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^2.14.0||^3.0.0
