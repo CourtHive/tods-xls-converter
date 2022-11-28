@@ -1,13 +1,36 @@
 import { processDirectory } from './src/utilities/processDirectory';
+import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
 import { setLoggingActive } from './src/global/state';
 import { it } from 'vitest';
-import { printGlobalLog } from './src/utilities/globalLog';
-
-// import { KNOCKOUT } from './src/constants/sheetTypes';
 
 // test without building against sheets in example directory
-it('can process a directory', () => {
-  const readDir = './examples/sheets';
+it('can process passing', () => {
+  const readDir = './examples/sheets/processing';
+
+  const sheetTypes = [];
+  const sheetNumbers = [];
+  const sheetLimit = 0;
+
+  const processLimit = 0;
+  const startIndex = 0;
+
+  // setLoggingActive(true);
+  const result = processDirectory({
+    readDir,
+    processLimit,
+    startIndex,
+    sheetLimit,
+    sheetTypes,
+    sheetNumbers
+  });
+  if (result);
+  printGlobalLog();
+  purgeGlobalLog();
+  // console.log(result.fileResults[0].sheetAnalysis[12].analysis.isQualifying);
+});
+
+it('can process tests', () => {
+  const readDir = './examples/sheets/testing';
 
   const sheetTypes = [];
   const sheetNumbers = [];
@@ -17,14 +40,15 @@ it('can process a directory', () => {
   const startIndex = 0;
 
   setLoggingActive(true);
+  setLoggingActive(true, 'dev');
+
   const result = processDirectory({
     readDir,
     processLimit,
     startIndex,
     sheetLimit,
     sheetTypes,
-    sheetNumbers,
-    logging: true
+    sheetNumbers
   });
   if (result);
   printGlobalLog();

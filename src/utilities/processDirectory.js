@@ -1,4 +1,4 @@
-import { getTournamentRecord, getWorkbook } from '../global/state';
+import { getLoggingActive, getTournamentRecord, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
 import { readdirSync, readFileSync } from 'fs-extra';
 import { loadWorkbook } from '../global/loader';
@@ -14,13 +14,13 @@ export function processDirectory({
   startIndex = 0,
   sheetNumbers,
   sheetTypes,
-  sheetLimit,
-
-  logging
+  sheetLimit
 }) {
   const isXLS = (filename) => filename.split('.').reverse()[0].startsWith('xls');
   let filenames = readdirSync(readDir).filter(isXLS);
   const workbookCount = filenames.length;
+
+  const logging = getLoggingActive('dev');
 
   const processing =
     processLimit && startIndex + processLimit < workbookCount ? processLimit : workbookCount - startIndex;
@@ -57,7 +57,7 @@ export function processDirectory({
     const buf = readFileSync(`${readDir}/${filename}`);
     let result = loadWorkbook(buf, index);
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
-    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes, logging });
+    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
     fileResults[index] = { filename, ...result, ...additionalContent };
     index += 1;
 

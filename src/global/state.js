@@ -1,16 +1,16 @@
 import { SUCCESS } from '../constants/resultConstants';
 
 let tournamentRecord = {},
-  loggingActive,
+  loggingActive = {},
   workbookType,
   workbook;
 
-export function getLoggingActive() {
-  return loggingActive;
+export function getLoggingActive(type = 'global') {
+  return loggingActive[type];
 }
 
-export function setLoggingActive(value) {
-  loggingActive = !!value;
+export function setLoggingActive(value, type = 'global') {
+  loggingActive[type] = !!value;
   return { ...SUCCESS };
 }
 

@@ -4,7 +4,7 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
 import { processKnockOut } from './processKnockout';
 import { identifySheet } from './identifySheet';
-import { getWorkbook } from '../global/state';
+import { getLoggingActive, getWorkbook } from '../global/state';
 import { extractInfo } from './extractInfo';
 
 import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
@@ -16,8 +16,9 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes, logging } = {}) {
+export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes } = {}) {
   const { workbook, workbookType } = getWorkbook();
+  const logging = getLoggingActive('dev');
 
   if (!workbook) return { error: MISSING_WORKBOOK };
   if (!workbookType) return { error: UNKNOWN_WORKBOOK_TYPE };
@@ -60,8 +61,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       sheetName,
       filename,
       workbook,
-      profile,
-      logging
+      profile
     });
 
     const matchUpsCount = sheetStructures?.flatMap(
