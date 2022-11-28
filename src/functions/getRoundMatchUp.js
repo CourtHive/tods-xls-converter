@@ -91,7 +91,7 @@ export function getRoundMatchUps({
       } else if (result === providerWalkover) {
         matchUp.matchUpStatus = DOUBLE_WALKOVER;
         matchUp.winningSide = advancedSide;
-      } else {
+      } else if (advancedSide) {
         matchUp.matchUpStatus = COMPLETED;
         matchUp.winningSide = advancedSide;
       }
@@ -106,7 +106,7 @@ export function getRoundMatchUps({
         }
       }
 
-      matchUps.push(matchUp);
+      if (pairParticipantNames.filter(Boolean).length) matchUps.push(matchUp);
     }
 
     participantDetails.push(...matchUpParticipants);
@@ -114,6 +114,7 @@ export function getRoundMatchUps({
     roundPosition += 1;
   }
 
+  // console.log(matchUps);
   return { matchUps, participantDetails };
 }
 
