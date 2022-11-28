@@ -1,9 +1,16 @@
 import { utilities } from 'tods-competition-factory';
 import { getRow } from './sheetAccess';
 
-export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn }) {
-  const profile = columnProfiles.find((profile) => [positionColumn, preRoundColumn].includes(profile.column));
-  const { column, keyMap, lastNumericValue } = profile;
+export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn, avoidRows }) {
+  const columnProfile = columnProfiles.find((columnProfile) =>
+    [positionColumn, preRoundColumn].includes(columnProfile.column)
+  );
+
+  if (!columnProfile) {
+    return { error: 'no position row found' };
+  }
+
+  const { column, keyMap, lastNumericValue } = columnProfile;
   const getRef = (row) => `${column}${row}`;
 
   const range = utilities.generateRange(1, lastNumericValue + 1);
@@ -18,7 +25,9 @@ export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn
     return { positionRows: knownRows.map(getRef), positionProgression };
   }
 
-  const keyedRows = Object.keys(keyMap).map(getRow);
+  const keyedRows = Object.keys(keyMap)
+    .map(getRow)
+    .filter((row) => !avoidRows.includes(row));
   const minRow = Math.min(...keyedRows);
   const maxRow = Math.max(...keyedRows);
   const rowDifference = maxRow - minRow;
