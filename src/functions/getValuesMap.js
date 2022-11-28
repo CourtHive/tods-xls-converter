@@ -1,16 +1,23 @@
 import { getNonBracketedValue, getSeeding, onlyAlpha } from '../utilities/convenience';
 import { utilities } from 'tods-competition-factory';
 
-export function getValuesMap({ columnProfiles, profile }) {
+export function getValuesMap({ columnProfiles, profile, avoidRows }) {
   const seededParticipants = {};
   const participants = {};
   const valuesMap = {};
 
   for (const columnProfile of columnProfiles) {
-    const { values, column } = columnProfile;
-    const uniqueValues = utilities.unique(values.map(getNonBracketedValue));
+    const { column, rows, values } = columnProfile;
 
-    for (const value of values) {
+    // filter our values which fall on rows to avoid
+    const rowIndicesToAvoid = rows.map((row, index) => avoidRows.includes(row) && index).filter(Boolean);
+    const rangeValues = values
+      .map((value, index) => (rowIndicesToAvoid.includes(index) ? false : value))
+      .filter(Boolean);
+
+    const uniqueValues = utilities.unique(rangeValues.map(getNonBracketedValue));
+
+    for (const value of rangeValues) {
       const seeding = getSeeding(value);
       if (seeding) {
         seededParticipants[getNonBracketedValue(value)] = seeding;

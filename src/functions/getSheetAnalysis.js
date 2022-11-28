@@ -73,7 +73,7 @@ export const getSheetAnalysis = ({
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
 
-  const { valuesMap, participants, seededParticipants } = getValuesMap({ columnProfiles, profile });
+  const { valuesMap, participants, seededParticipants } = getValuesMap({ columnProfiles, profile, avoidRows });
   const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
   const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
