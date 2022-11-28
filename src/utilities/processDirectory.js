@@ -14,7 +14,9 @@ export function processDirectory({
   startIndex = 0,
   sheetNumbers,
   sheetTypes,
-  sheetLimit
+  sheetLimit,
+
+  logging
 }) {
   const isXLS = (filename) => filename.split('.').reverse()[0].startsWith('xls');
   let filenames = readdirSync(readDir).filter(isXLS);
@@ -47,16 +49,19 @@ export function processDirectory({
   const fileResults = {};
   const errorLog = {};
 
+  let totalMatchUps = 0;
+
   let index = 0;
   for (const filename of filenames) {
-    console.log({ filename, index });
+    if (logging) console.log({ filename, index });
     const buf = readFileSync(`${readDir}/${filename}`);
     let result = loadWorkbook(buf, index);
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
-    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
+    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes, logging });
     fileResults[index] = { filename, ...result, ...additionalContent };
     index += 1;
 
+    totalMatchUps += result.totalMatchUps || 0;
     if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
     if (result.resultValues?.length) resultValues.push(...result.resultValues);
 
@@ -80,7 +85,7 @@ export function processDirectory({
   }
 
   const errorKeys = Object.keys(errorLog);
-  const filesWithErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
+  const errorTypes = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
   const totalErrors = errorKeys
     ?.flatMap((key) => errorLog[key].map((file) => file.sheetNames.length))
     .reduce((a, b) => a + b, 0);
@@ -92,6 +97,8 @@ export function processDirectory({
     )
     .reduce((a, b) => a + b, 0);
 
+  if (logging) console.log({ sheetsProcessed, totalMatchUps, errorTypes, totalErrors });
+
   pushGlobalLog({
     method: 'processingComplete',
     keyColors: { attributes: 'brightgreen' },
@@ -101,7 +108,7 @@ export function processDirectory({
     divider: 80,
 
     sheetsProcessed,
-    filesWithErrors,
+    totalMatchUps,
     totalErrors
   });
 
