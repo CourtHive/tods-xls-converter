@@ -1,11 +1,11 @@
 import { genderConstants, matchUpTypes } from 'tods-competition-factory';
 import { isString } from '../utilities/identification';
 
-import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE } from '../constants/sheetTypes';
+import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE, ORDER_OF_PLAY } from '../constants/sheetTypes';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
-const { MALE, FEMALE } = genderConstants;
+const { MALE, FEMALE, ANY } = genderConstants;
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
@@ -45,10 +45,13 @@ const qualifyingIdentifiers = [
   'preclasificados', // TODO: differentiate qualifying and pre-qualifying
   'preclasificadas'
 ];
-const categories = ['U10', 'U12', 'U14', 'U16', 'U18'];
+const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN'];
 const genderIdentifiers = [
+  { searchText: 'open', gender: ANY },
   { searchText: 'varones', gender: MALE },
-  { searchText: 'damas', gender: FEMALE }
+  { searchText: 'damas', gender: FEMALE },
+  { searchText: 'masculino', gender: MALE },
+  { searchText: 'femenino', gender: FEMALE }
 ];
 
 const organization = 'FEDERACION COSTARRICENSE DE TENIS';
@@ -60,6 +63,8 @@ export const config = {
       // TODO: introduce { regex } // which would be an exact match
       'final',
       'medalla',
+      'campeon',
+      'subcampeon',
       ...categories, // use regex
       { text: 'Q1', exact: true },
       { text: 'Q2', exact: true },
@@ -76,6 +81,7 @@ export const config = {
       { text: 'dobles', startsWith: true },
       { text: 'varones', includes: true },
       { text: 'valones', endsWith: true },
+      { text: 'partidos', includes: true },
       { text: 'menu', includes: true },
       { text: 'break', includes: true },
       { text: 'grado', includes: true },
@@ -115,7 +121,7 @@ export const config = {
     matchUpStatuses: { bye: 'BYE', doubleWalkover: 'doble wo', walkover: 'wo' },
     qualifyingIdentifiers,
     doubles: {
-      stringIdentifier: '/'
+      nameSeparator: '/'
     },
     genderIdentifiers,
     matchOutcomes: [
@@ -152,8 +158,9 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos'],
+        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal', 'director'],
         rows: 8,
+        rowBuffer: 2,
         minimumElements: 1
       },
       {
@@ -169,6 +176,13 @@ export const config = {
         elements: [{ text: organization, options: { startsWith: true } }],
         rows: 1,
         minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'programHeader',
+        elements: ['PROGRAMACION DE PARTIDOS'],
+        rows: 1,
+        minimumElements: 1
       }
     ],
     // these should be ordered such that least certain matches are last
@@ -182,6 +196,10 @@ export const config = {
         type: ROUND_ROBIN,
         infoClass: 'drawInfo',
         rowIds: ['roundRobinParticipants', 'drawFooter']
+      },
+      {
+        type: ORDER_OF_PLAY,
+        rowIds: ['programHeader']
       },
       {
         type: MENU,
