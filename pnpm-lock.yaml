@@ -20,7 +20,7 @@ specifiers:
   eslint-plugin-import: ^2.26.0
   eslint-plugin-prettier: ^4.2.1
   esm: ^3.2.25
-  fs-extra: 10.1.0
+  fs-extra: 11.0.0
   hash-sum: ^2.0.0
   husky: 8.0.2
   lint-staged: 13.0.4
@@ -66,7 +66,7 @@ devDependencies:
   eslint-plugin-import: 2.26.0_wbsj7pk5g7hogwvhsif6xntns4
   eslint-plugin-prettier: 4.2.1_v7o5sx5x3wbs57ifz6wc4f76we
   esm: 3.2.25
-  fs-extra: 10.1.0
+  fs-extra: 11.0.0
   husky: 8.0.2
   lint-staged: 13.0.4
   np: 7.6.2
@@ -3256,9 +3256,9 @@ packages:
     engines: {node: '>=0.8'}
     dev: false
 
-  /fs-extra/10.1.0:
-    resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
-    engines: {node: '>=12'}
+  /fs-extra/11.0.0:
+    resolution: {integrity: sha512-4YxRvMi4P5C3WQTvdRfrv5UVqbISpqjORFQAW5QPiKAauaxNCwrEdIi6pG3tDFhKKpMen+enEhHIzB/tvIO+/w==}
+    engines: {node: '>=14.14'}
     dependencies:
       graceful-fs: 4.2.10
       jsonfile: 6.1.0
