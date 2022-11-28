@@ -7,16 +7,19 @@ import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
 export function processKnockOut({ profile, analysis }) {
-  const { columnProfiles } = analysis;
+  const { columnProfiles, avoidRows } = analysis;
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
-  const { positionRows, positionProgression, preRoundParticipantRows } = getPositionRows({
+  const { positionRows, positionProgression, preRoundParticipantRows, error } = getPositionRows({
     columnProfiles,
     positionColumn,
-    preRoundColumn
+    preRoundColumn,
+    avoidRows
   });
+
+  if (error) return { error };
 
   const participants = [],
     structures = [],
