@@ -1,6 +1,8 @@
 import { getNonBracketedValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { matchUpStatusConstants, utilities } from 'tods-competition-factory';
 import { isNumeric } from '../utilities/identification';
+import { pushGlobalLog } from '../utilities/globalLog';
+import { getLoggingActive } from '../global/state';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -31,6 +33,8 @@ export function getRoundMatchUps({
 
   const participantDetails = [];
   const matchUps = [];
+
+  const logging = getLoggingActive('dev');
 
   let roundPosition = 1;
 
@@ -82,6 +86,9 @@ export function getRoundMatchUps({
         matchUp.result = result;
       }
 
+      if (logging) {
+        console.log({ column, pairParticipantNames });
+      }
       const isBye = pairParticipantNames.map((name) => name?.toLowerCase()).includes(providerBye.toLowerCase());
 
       if (isBye) {
@@ -99,10 +106,15 @@ export function getRoundMatchUps({
       if (!result && !isBye) {
         // TODO: in some draws preRound results appear as part of advancedSide participantName
         if (isPreRound) {
-          console.log('check for result at end of advancedSide participantName');
+          const notice = 'check for result at end of advancedSide participantName';
+          pushGlobalLog({
+            method: 'notice',
+            color: 'brightyellow',
+            keyColors: { notice: 'cyan', attributes: 'brightyellow' },
+            notice
+          });
         } else if (matchUp.winningSide) {
-          // console.log('No win reason', { matchUp });
-          console.log('No win reason');
+          if (logging) console.log('No win reason');
         }
       }
 
@@ -114,7 +126,7 @@ export function getRoundMatchUps({
     roundPosition += 1;
   }
 
-  // console.log(matchUps);
+  if (getLoggingActive('matchUps')) console.log(matchUps);
   return { matchUps, participantDetails };
 }
 

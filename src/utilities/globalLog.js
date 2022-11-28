@@ -1,6 +1,6 @@
 import { utilities } from 'tods-competition-factory';
-import { logColors } from '../assets/logColors';
 import { getLoggingActive } from '../global/state';
+import { logColors } from '../assets/logColors';
 import { isString } from './identification';
 
 const namedLogs = {};

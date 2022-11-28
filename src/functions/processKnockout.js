@@ -5,6 +5,7 @@ import { processPreRound } from './processPreRound';
 
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
+import { getLoggingActive } from '../global/state';
 
 export function processKnockOut({ profile, analysis }) {
   const { columnProfiles, avoidRows } = analysis;
@@ -54,6 +55,10 @@ export function processKnockOut({ profile, analysis }) {
 
   const columns = analysis.columnProfiles.map(({ column }) => column).sort();
   const boundaryIndex = Math.max(columns.indexOf(preRoundColumn), columns.indexOf(positionColumn), 0);
+
+  if (getLoggingActive('dev')) {
+    console.log({ boundaryIndex, preRoundColumn, positionColumn });
+  }
 
   const roundColumnsToProcess = analysis.columnProfiles
     .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
