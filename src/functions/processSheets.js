@@ -16,7 +16,7 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes } = {}) {
+export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes, logging } = {}) {
   const { workbook, workbookType } = getWorkbook();
 
   if (!workbook) return { error: MISSING_WORKBOOK };
@@ -38,6 +38,8 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   const resultValues = [];
   const structures = [];
   const errorLog = {};
+
+  let totalMatchUps = 0;
   let sheetNumber = 0;
 
   for (const sheetName of workbook.SheetNames) {
@@ -45,14 +47,12 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (sheetLimit && sheetNumber > sheetLimit) break;
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
 
-    console.log({ sheetName, sheetNumber });
-
+    if (logging) console.log({ sheetName, sheetNumber });
     const {
       participants: structureParticipants,
       structures: sheetStructures,
       hasValues,
       analysis,
-      skipped,
       error
     } = processSheet({
       sheetNumber,
@@ -60,18 +60,30 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       sheetName,
       filename,
       workbook,
-      profile
+      profile,
+      logging
     });
+
+    const matchUpsCount = sheetStructures?.flatMap(
+      (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
+    )?.length;
+    totalMatchUps += matchUpsCount || 0;
 
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
 
     Object.assign(participants, structureParticipants);
 
-    if (!skipped) {
+    if (analysis && (!analysis?.skipped || !hasValues)) {
       if (sheetStructures) structures.push(...sheetStructures);
+      const { isQualifying, category, sheetType } = analysis;
+      const { gender, matchUpType } = analysis?.info || {};
+      if (logging) {
+        console.log({ sheetName, sheetNumber, sheetType, isQualifying, category, matchUpType, gender, matchUpsCount });
+      }
     }
 
     if (error) {
+      if (logging) console.log({ error });
       const method = `processSheet ${sheetNumber}`;
       pushGlobalLog({ method, sheetName, error, keyColors: { error: 'brightred' } });
       if (!errorLog[error]) {
@@ -84,6 +96,11 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (analysis?.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
     if (analysis?.skippedResults) skippedResults.push(...Object.keys(analysis.skippedResults));
   }
+
+  pushGlobalLog({
+    keyColors: { totalMatchUps: 'brightyellow', attributes: 'brightgreen' },
+    totalMatchUps
+  });
 
   /*
     if (analysis?.tournamentDetails) {
@@ -98,7 +115,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
   // Now group structures by category and singles/doubles and generate events/drawDefinitions
 
-  return { sheetAnalysis, errorLog, resultValues, skippedResults, structures, participants, ...SUCCESS };
+  return { sheetAnalysis, errorLog, resultValues, skippedResults, structures, participants, totalMatchUps, ...SUCCESS };
 }
 
 export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, sheetTypes = [] }) {
@@ -108,7 +125,9 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
 
   const sheetType = sheetDefinition?.type;
   const skipped = sheetTypes.length && sheetType && !sheetTypes.includes(sheetType);
-  if (!hasValues || skipped) return { analysis: { skipped }, sheetType, hasValues, ...SUCCESS };
+  if (!hasValues || skipped) {
+    return { analysis: { skipped }, sheetType, hasValues, ...SUCCESS };
+  }
 
   if (sheetDefinition) {
     const method = `processSheet ${sheetNumber}`;

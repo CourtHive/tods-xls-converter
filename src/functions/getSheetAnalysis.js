@@ -1,20 +1,17 @@
 import { hasNumeric, isString } from '../utilities/identification';
-import { getCellValue, getCol, getRow } from './sheetAccess';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getColumnCharacter } from './getColumnCharacter';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
-import { getContentFrame } from './getContentFrame';
 import { getIsQualifying } from './getIsQualifying';
+import { getSheetKeys } from './getSheetKeys';
 import { getValuesMap } from './getValuesMap';
 import { getCategory } from './getCategory';
+import { getCol } from './sheetAccess';
 import {
-  containsExpression,
   getNonBracketedValue,
   getPositionColumn,
   hasBracketedValue,
-  isFloatValue,
-  keyHasSingleAlpha,
   keyRowSort,
   startsWithIterator,
   tidyValue
@@ -32,7 +29,13 @@ export const getSheetAnalysis = ({
   sheet,
   info
 }) => {
-  const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition });
+  const { headerRow, footerRow, avoidRows, filteredKeys, columnKeys } = getSheetKeys({
+    sheetDefinition,
+    ignoreCellRefs,
+    profile,
+    sheet
+  });
+
   const columns = getHeaderColumns({ sheet, profile, headerRow });
 
   const attributeMap = Object.assign(
@@ -46,40 +49,11 @@ export const getSheetAnalysis = ({
     })
   );
 
-  const isNotSkipExpression = (key) => {
-    const value = getCellValue(sheet[key]);
-    const checkFloats = profile.skipProfile?.skipFloatValues;
-    const matchesExpression =
-      profile.skipExpressions &&
-      profile.skipExpressions.reduce((matchesExpression, expression) => {
-        return containsExpression(value, expression) ? true : matchesExpression;
-      }, false);
-    return !matchesExpression && (!checkFloats || !isFloatValue(value));
-  };
-
-  const inRowBand = (key) => {
-    const row = key && getRow(key);
-    return row && row > headerRow && row < footerRow;
-  };
-
-  const isNotIgnored = (key) => !ignoreCellRefs.includes(key);
-
-  const filteredKeys = Object.keys(sheet)
-    .filter(isNotIgnored)
-    .filter(inRowBand)
-    .filter(keyHasSingleAlpha)
-    .filter(isNotSkipExpression);
-
   const assessColumn = (column) => {
     const isColumnKey = (key) => getCol(key) === column;
     const prospectColumnKeys = filteredKeys.filter(isColumnKey).sort(keyRowSort);
     return getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column });
   };
-
-  const columnKeys = filteredKeys.reduce(
-    (keys, key) => (keys.includes(getCol(key)) ? keys : keys.concat(getCol(key))),
-    []
-  );
 
   let columnProfiles = columnKeys
     .sort()
@@ -87,7 +61,9 @@ export const getSheetAnalysis = ({
     .filter(({ values }) => values?.length);
 
   // post-process columnProfiles
-  columnProfiles.forEach((columnProfile) => getColumnCharacter({ columnProfile, attributeMap }));
+  columnProfiles.forEach((columnProfile, columnIndex) =>
+    getColumnCharacter({ sheetType, columnProfile, attributeMap, columnIndex })
+  );
 
   // apply any character processing specified by profile
   if (profile.columnCharacter) {
@@ -97,7 +73,7 @@ export const getSheetAnalysis = ({
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
 
-  const { valuesMap, participants, seededParticipants } = getValuesMap({ columnProfiles, profile });
+  const { valuesMap, participants, seededParticipants } = getValuesMap({ columnProfiles, profile, avoidRows });
   const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
   const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
@@ -112,7 +88,7 @@ export const getSheetAnalysis = ({
     .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
-  const positionColumn = getPositionColumn(columnProfiles);
+  const { positionColumn } = getPositionColumn(columnProfiles);
   const targetColumns = Object.keys(multiColumnFrequency).filter(
     (column) => ![preRoundColumn, positionColumn].includes(column)
   );
@@ -159,13 +135,14 @@ export const getSheetAnalysis = ({
       });
     });
 
-  const { category } = getCategory({ sheet, sheetName, profile });
+  const category = getCategory({ sheet, sheetName, profile })?.category || info.category;
   const { isQualifying } = getIsQualifying({ sheet, sheetName, profile });
 
   const result = {
     potentialResultValues,
     multiColumnFrequency,
     columnResultValues,
+    resultValueColumns,
     seededParticipants,
     multiColumnValues,
     greatestFrequency,
@@ -187,8 +164,7 @@ export const getSheetAnalysis = ({
     headerRow,
     category,
     columns,
-    info,
-    resultValueColumns
+    info
   };
 
   return result;

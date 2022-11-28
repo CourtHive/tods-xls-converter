@@ -1,5 +1,6 @@
-import { getCellValue, getTargetValue, getValueRange } from './sheetAccess';
-import { isSkipWord } from '../utilities/convenience';
+import { getCellValue, getCol, getTargetValue, getValueRange } from './sheetAccess';
+import { isSkipWord, keyHasSingleAlpha } from '../utilities/convenience';
+import { utilities } from 'tods-competition-factory';
 import { postProcessors } from './postProcessors';
 
 import { SUCCESS } from '../constants/resultConstants';
@@ -9,6 +10,8 @@ export function extractInfo({ profile, sheet, infoClass }) {
   const options = { remove: [':'] };
   const extractObject = {};
   const cellRefs = [];
+
+  const columns = utilities.unique(Object.keys(sheet).filter(keyHasSingleAlpha).map(getCol)).sort();
 
   if (infoClass && accessors) {
     accessors.forEach((accessor) => {
@@ -23,7 +26,7 @@ export function extractInfo({ profile, sheet, infoClass }) {
         }
 
         if (accessor.rowCount || accessor.columnCount) {
-          const props = Object.assign({}, accessor, { sheet });
+          const props = Object.assign({}, accessor, { sheet, columns });
           const { values, cellRefs: refs } = getValueRange(props);
           const value = values?.filter(Boolean).filter((value) => !isSkipWord(value, profile));
           if (value) {

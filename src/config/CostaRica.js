@@ -1,8 +1,11 @@
+import { genderConstants, matchUpTypes } from 'tods-competition-factory';
 import { isString } from '../utilities/identification';
 
-import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE } from '../constants/sheetTypes';
+import { KNOCKOUT, ROUND_ROBIN, MENU, INDETERMINATE, ORDER_OF_PLAY } from '../constants/sheetTypes';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
+const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
+const { MALE, FEMALE, ANY } = genderConstants;
 
 // NOTE: Players names are generally LASTNAME, FIRSTNAME in the first column in which they appear
 // however, sometimes the comma is missing... the lastName can be derived from subsequent rounds,
@@ -42,7 +45,14 @@ const qualifyingIdentifiers = [
   'preclasificados', // TODO: differentiate qualifying and pre-qualifying
   'preclasificadas'
 ];
-const categories = ['U10', 'U12', 'U14', 'U16', 'U18'];
+const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN'];
+const genderIdentifiers = [
+  { searchText: 'open', gender: ANY },
+  { searchText: 'varones', gender: MALE },
+  { searchText: 'damas', gender: FEMALE },
+  { searchText: 'masculino', gender: MALE },
+  { searchText: 'femenino', gender: FEMALE }
+];
 
 const organization = 'FEDERACION COSTARRICENSE DE TENIS';
 export const config = {
@@ -53,6 +63,8 @@ export const config = {
       // TODO: introduce { regex } // which would be an exact match
       'final',
       'medalla',
+      'campeon',
+      'subcampeon',
       ...categories, // use regex
       { text: 'Q1', exact: true },
       { text: 'Q2', exact: true },
@@ -69,6 +81,7 @@ export const config = {
       { text: 'dobles', startsWith: true },
       { text: 'varones', includes: true },
       { text: 'valones', endsWith: true },
+      { text: 'partidos', includes: true },
       { text: 'menu', includes: true },
       { text: 'break', includes: true },
       { text: 'grado', includes: true },
@@ -104,27 +117,26 @@ export const config = {
     skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
     considerAlpha: [',', '(', ')', '/'],
-    matchStatuses: ['doble w.o', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
-    matchUpStatuses: { bye: 'BYE' },
+    matchStatuses: ['doble wo', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
+    matchUpStatuses: { bye: 'BYE', doubleWalkover: 'doble wo', walkover: 'wo' },
     qualifyingIdentifiers,
     doubles: {
-      stringIdentifier: '/'
+      nameSeparator: '/'
     },
+    genderIdentifiers,
     matchOutcomes: [
-      'doble w.o',
+      'doble wo',
       'ret',
       'def',
-      'w.o',
       'w/o',
       'wo',
       'abandoned',
-      'gana x w.o',
-      'pierde x w.o',
       'gana x wo',
       'gana wo',
       'pierde x wo',
       'pierde wo'
     ],
+    winIdentifier: 'gana',
     categories,
     columnsMap: {},
     knockOutRounds: roundNames,
@@ -146,8 +158,9 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos'],
+        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal', 'director'],
         rows: 8,
+        rowBuffer: 2,
         minimumElements: 1
       },
       {
@@ -163,6 +176,13 @@ export const config = {
         elements: [{ text: organization, options: { startsWith: true } }],
         rows: 1,
         minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'programHeader',
+        elements: ['PROGRAMACION DE PARTIDOS'],
+        rows: 1,
+        minimumElements: 1
       }
     ],
     // these should be ordered such that least certain matches are last
@@ -176,6 +196,10 @@ export const config = {
         type: ROUND_ROBIN,
         infoClass: 'drawInfo',
         rowIds: ['roundRobinParticipants', 'drawFooter']
+      },
+      {
+        type: ORDER_OF_PLAY,
+        rowIds: ['programHeader']
       },
       {
         type: MENU,
@@ -203,10 +227,25 @@ export const config = {
         columnOffset: 1
       },
       {
+        attribute: 'matchUpType',
+        searchText: 'categoria',
+        columnOffset: 1,
+        instance: 0,
+        postProcessor: 'matchUpTypeParser'
+      },
+      {
+        attribute: 'gender',
+        searchText: 'categoria',
+        columnOffset: 1,
+        instance: 0,
+        postProcessor: 'genderParser'
+      },
+      {
         attribute: 'category',
         searchText: 'categoria',
-        columnOffset: 1
-        // postProcessor: 'categoryParser'
+        columnOffset: 1,
+        instance: 0,
+        postProcessor: 'categoryParser'
       },
       {
         attribute: 'venue',
@@ -257,6 +296,7 @@ export const config = {
       {
         attribute: 'seedNumbers',
         searchText: ['sembrados', 'sembradas'],
+        columnCountMinimum: true,
         stopOnEmpty: true,
         columnOffset: -1,
         rowOffset: 1,
@@ -265,6 +305,7 @@ export const config = {
       {
         attribute: 'seededParticipantNames',
         searchText: ['sembrados', 'sembradas'],
+        columnCountMinimum: true,
         stopOnEmpty: true,
         rowOffset: 1,
         rowCount: 16
@@ -304,10 +345,18 @@ export const config = {
       }
       return result;
     },
+    matchUpTypeParser: (value) => {
+      return value?.toString().toLowerCase().includes('dobles') ? DOUBLES_MATCHUP : SINGLES_MATCHUP;
+    },
     genderParser: (value) => {
-      const male = /^F/.test(value);
-      const female = /^L/.test(value);
-      return { gender: male ? 'M' : female ? 'W' : 'X' };
+      const gender = genderIdentifiers.find((identifier) =>
+        value?.toString().toLowerCase().includes(identifier.searchText.toLowerCase())
+      )?.gender;
+      return gender;
+    },
+    categoryParser: (value) => {
+      const category = categories.find((category) => value.includes(category));
+      return category;
     }
   },
   sheetNameMatcher: (sheetNames) => {

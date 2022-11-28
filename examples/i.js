@@ -28,7 +28,7 @@ const go = () => {
 };
 const print = (props) => x.printGlobalLog(props);
 
-go(props);
+go();
 
 if (print && purge && x) {
   console.log('r for results; modify props; go(), print(), purge(logName)');
