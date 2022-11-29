@@ -1,11 +1,11 @@
 import { getPositionColumn } from '../utilities/convenience';
-import { getRoundMatchUps } from './getRoundMatchUp';
+import { getRoundMatchUps } from './getRoundMatchUps';
 import { getPositionRows } from './getPositionRows';
 import { processPreRound } from './processPreRound';
+import { getLoggingActive } from '../global/state';
 
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
-import { getLoggingActive } from '../global/state';
 
 export function processKnockOut({ profile, analysis }) {
   const { columnProfiles, avoidRows } = analysis;
@@ -58,6 +58,8 @@ export function processKnockOut({ profile, analysis }) {
 
   if (getLoggingActive('dev')) {
     console.log({ boundaryIndex, preRoundColumn, positionColumn });
+    // console.log(analysis.columnProfiles);
+    return { analysis };
   }
 
   const roundColumnsToProcess = analysis.columnProfiles
