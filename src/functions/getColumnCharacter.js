@@ -1,11 +1,12 @@
 import { isNumeric } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
 
+import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
-export function getColumnCharacter({ attributeMap, columnIndex, columnProfile, sheetType }) {
-  const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column, allNumeric } =
+export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, columnProfile, sheetType }) {
+  const { consecutiveNumbers, containsNumeric, containsAlpha, allAlpha, values, lastNumericValue, column, allNumeric } =
     columnProfile;
 
   const numericCheck = consecutiveNumbers && lastNumericValue > 0;
@@ -27,6 +28,19 @@ export function getColumnCharacter({ attributeMap, columnIndex, columnProfile, s
     const lastNumeric = numericMap.lastIndexOf(true);
     const firstAlpha = numericMap.indexOf(false);
     if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
+  }
+
+  if (allAlpha) {
+    const attributes = Object.values(attributeMap);
+    const nameColumnAttributes = attributes.filter((attribute) => [FIRST_NAME, LAST_NAME].includes(attribute));
+    if (nameColumnAttributes.length) {
+      const nameRound = nameColumnAttributes.some((attribute) => {
+        const targetProfile = columnProfiles.find((profile) => profile.attribute === attribute);
+        const isNameRound = values.every((value) => targetProfile.values.includes(value));
+        return isNameRound;
+      });
+      if (nameRound) columnProfile.character = 'round';
+    }
   }
 
   return columnProfile.character;

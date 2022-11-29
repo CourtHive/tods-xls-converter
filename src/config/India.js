@@ -250,7 +250,10 @@ export const config = {
       const allProgressionKeys = values.every(
         (value) => typeof value === 'string' && ['a', 'b', 'as', 'bs'].includes(value.toLowerCase())
       );
-      if (allProgressionKeys) columnProfile.values = [];
+      if (allProgressionKeys) {
+        columnProfile.values = [];
+        columnProfile.character = 'progression';
+      }
     }
   },
   sheetNameMatcher: (sheetNames) => {
