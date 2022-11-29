@@ -196,7 +196,7 @@ export function getRoundRobinValues(analysis, profile) {
   const { structureId: itemStructureId } = result;
 
   const structure = {
-    structures: [{ structureId: itemStructureId, matchUps, positionAssignments }],
+    structures: [{ structureId: itemStructureId, structureType: 'ITEM', matchUps, positionAssignments }],
     structureId: containerStructureId,
     finishingPositions: 'WATERFALL',
     structureType: 'CONTAINER',

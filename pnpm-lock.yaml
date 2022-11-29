@@ -10,7 +10,7 @@ specifiers:
   '@rollup/plugin-commonjs': 23.0.3
   '@rollup/plugin-json': 5.0.2
   '@rollup/plugin-node-resolve': 15.0.1
-  '@rollup/plugin-typescript': 10.0.0
+  '@rollup/plugin-typescript': 10.0.1
   '@typescript-eslint/eslint-plugin': ^5.43.0
   '@typescript-eslint/parser': ^5.43.0
   esbuild: ^0.15.15
@@ -20,7 +20,7 @@ specifiers:
   eslint-plugin-import: ^2.26.0
   eslint-plugin-prettier: ^4.2.1
   esm: ^3.2.25
-  fs-extra: 10.1.0
+  fs-extra: 11.0.0
   hash-sum: ^2.0.0
   husky: 8.0.2
   lint-staged: 13.0.4
@@ -33,7 +33,7 @@ specifiers:
   rollup-plugin-esbuild: 5.0.0
   rollup-plugin-exclude-dependencies-from-bundle: ^1.1.23
   rollup-plugin-terser: 7.0.2
-  tods-competition-factory: ^0.394.0
+  tods-competition-factory: ^0.398.0
   typescript: ^4.9.3
   vite: ^3.2.4
   vitest: ^0.25.2
@@ -43,7 +43,7 @@ dependencies:
   hash-sum: 2.0.0
   node-xlsx: 0.21.0
   normalize-text: 2.4.1
-  tods-competition-factory: 0.394.0
+  tods-competition-factory: 0.398.0
   xlsx: 0.18.5
 
 devDependencies:
@@ -56,7 +56,7 @@ devDependencies:
   '@rollup/plugin-commonjs': 23.0.3_rollup@3.3.0
   '@rollup/plugin-json': 5.0.2_rollup@3.3.0
   '@rollup/plugin-node-resolve': 15.0.1_rollup@3.3.0
-  '@rollup/plugin-typescript': 10.0.0_6annma2bj33shm6er7hwi5u4z4
+  '@rollup/plugin-typescript': 10.0.1_6annma2bj33shm6er7hwi5u4z4
   '@typescript-eslint/eslint-plugin': 5.43.0_wze2rj5tow7zwqpgbdx2buoy3m
   '@typescript-eslint/parser': 5.43.0_e3uo4sehh4zr4i6m57mkkxxv7y
   esbuild: 0.15.15
@@ -66,7 +66,7 @@ devDependencies:
   eslint-plugin-import: 2.26.0_wbsj7pk5g7hogwvhsif6xntns4
   eslint-plugin-prettier: 4.2.1_v7o5sx5x3wbs57ifz6wc4f76we
   esm: 3.2.25
-  fs-extra: 10.1.0
+  fs-extra: 11.0.0
   husky: 8.0.2
   lint-staged: 13.0.4
   np: 7.6.2
@@ -1510,8 +1510,8 @@ packages:
       rollup: 3.3.0
     dev: true
 
-  /@rollup/plugin-typescript/10.0.0_6annma2bj33shm6er7hwi5u4z4:
-    resolution: {integrity: sha512-iaTcQCbqTBA+vYS8uAVqvZvYXPobHBkz/tPYudqdMIz8QIjlPFNNFLpFX18rHGjLvGT9vUghd6GwE4ZpLhCnfA==}
+  /@rollup/plugin-typescript/10.0.1_6annma2bj33shm6er7hwi5u4z4:
+    resolution: {integrity: sha512-wBykxRLlX7EzL8BmUqMqk5zpx2onnmRMSw/l9M1sVfkJvdwfxogZQVNUM9gVMJbjRLDR5H6U0OMOrlDGmIV45A==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^2.14.0||^3.0.0
@@ -3256,9 +3256,9 @@ packages:
     engines: {node: '>=0.8'}
     dev: false
 
-  /fs-extra/10.1.0:
-    resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
-    engines: {node: '>=12'}
+  /fs-extra/11.0.0:
+    resolution: {integrity: sha512-4YxRvMi4P5C3WQTvdRfrv5UVqbISpqjORFQAW5QPiKAauaxNCwrEdIi6pG3tDFhKKpMen+enEhHIzB/tvIO+/w==}
+    engines: {node: '>=14.14'}
     dependencies:
       graceful-fs: 4.2.10
       jsonfile: 6.1.0
@@ -5639,8 +5639,8 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /tods-competition-factory/0.394.0:
-    resolution: {integrity: sha512-4U4RbnPmmi9SodpaTMBis7LxmtgIV37uBcXR04bwkoXAKUJ9tZ/BBuzdRdDNMTYbSWeBiIAnKC4zyAldnz5ZnQ==}
+  /tods-competition-factory/0.398.0:
+    resolution: {integrity: sha512-+iz7IglgVEWkI3neUKNZXeZ0Q/JgLItUDiF0jWMqWRb3HOUeuWeU4MiRLWxoOgZH018rm+Imx1QJCMUudqz4DA==}
     dev: false
 
   /trim-newlines/3.0.1:

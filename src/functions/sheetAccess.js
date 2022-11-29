@@ -87,6 +87,7 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
     const transformedValue = transformValue(value);
 
     const startsWith = (text) => transformedValue.startsWith(text) || transformedValue === text;
+    const separatedIncludes = (text, requiredSeparator) => transformedValue.split(requiredSeparator).includes(text);
     const includes = (text) => transformedValue.includes(text);
     const equals = (text) => transformedValue === text;
 
@@ -105,7 +106,11 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
     if (options?.startsWith) {
       matchFound = textSearchDetails.some(startsWith);
     } else if (options?.includes) {
-      matchFound = textSearchDetails.some(includes);
+      if (options.requiredSeparator) {
+        matchFound = textSearchDetails.some((text) => separatedIncludes(text, options.requiredSeparator));
+      } else {
+        matchFound = textSearchDetails.some(includes);
+      }
     } else {
       matchFound = textSearchDetails.some(equals);
     }

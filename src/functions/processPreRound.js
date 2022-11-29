@@ -1,6 +1,6 @@
 import { generateMatchUpId, generateParticipantId } from '../utilities/hashing';
 import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
-import { getRoundMatchUps } from './getRoundMatchUp';
+import { getRoundMatchUps } from './getRoundMatchUps';
 
 const { QUALIFYING } = drawDefinitionConstants;
 

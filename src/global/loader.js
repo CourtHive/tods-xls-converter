@@ -28,7 +28,7 @@ export function loadWorkbook(buf, index) {
     keyColors: { provider: 'brightyellow', index: 'brightyellow' },
     newLine: true,
 
-    provider: workbookType.organization,
+    provider: workbookType?.organization || 'UNKNOWN',
     index
   });
 
