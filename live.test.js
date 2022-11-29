@@ -17,6 +17,7 @@ it('can process passing', () => {
   const startIndex = 0;
 
   // setLoggingActive(true);
+  // setLoggingActive(true, 'matchUps');
   const result = processDirectory({
     processLimit,
     sheetNumbers,
@@ -46,6 +47,7 @@ it('can process tests', () => {
 
   setLoggingActive(true);
   setLoggingActive(true, 'dev');
+  // setLoggingActive(true, 'matchUps');
 
   const result = processDirectory({
     processStructures: true,

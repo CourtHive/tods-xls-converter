@@ -1,3 +1,4 @@
+import { matchUpStatusConstants, utilities } from 'tods-competition-factory';
 import { getPositionColumn } from '../utilities/convenience';
 import { getRoundMatchUps } from './getRoundMatchUps';
 import { getPositionRefs } from './getPositionRefs';
@@ -7,9 +8,12 @@ import { getEntries } from './getEntries';
 
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
+const { BYE } = matchUpStatusConstants;
 
 export function processKnockOut({ profile, analysis, sheet }) {
   const { columnProfiles, avoidRows } = analysis;
+
+  const logging = getLoggingActive('dev');
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
@@ -66,27 +70,45 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
   participants.push(...firstRoundParticipants);
 
-  if (getLoggingActive('dev')) {
-    console.log({ boundaryIndex, preRoundColumn, positionColumn });
-    return { analysis };
-  }
-
   const roundColumnsToProcess = analysis.columnProfiles
     .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
     .map(({ column }) => column);
 
-  roundColumnsToProcess.forEach((column, i) => {
-    const pairedRowNumbers = positionProgression[i];
+  let roundParticipants =
+    positionAssignments?.length &&
+    utilities.chunkArray(
+      positionAssignments.map(({ drawPosition, bye, participantId }) => {
+        const participant = firstRoundParticipants.find((participant) => participant.participantId === participantId);
+        return { drawPosition, participantName: bye && BYE, ...participant, isByePosition: bye };
+      }),
+      2
+    );
+  if (logging) console.log({ roundColumnsToProcess });
+
+  if (positionAssignments.length) {
+    roundColumnsToProcess.unshift(analysis.columnProfiles[boundaryIndex].column);
+  }
+
+  let roundNumber = 1;
+  // const progressionOffset = positionAssignments.length ? 1 : 0;
+  roundColumnsToProcess.forEach((column) => {
+    // const pairedRowNumbers = positionProgression[roundNumber - 1 + progressionOffset];
+    const pairedRowNumbers = positionProgression[roundNumber - 1];
 
     if (pairedRowNumbers) {
-      const { matchUps: roundMatchUps, participantDetails } = getRoundMatchUps({
+      const result = getRoundMatchUps({
+        roundParticipants,
         pairedRowNumbers,
-        roundNumber: i + 1,
         participants,
+        roundNumber,
         analysis,
         profile,
         column
       });
+
+      const { matchUps: roundMatchUps, participantDetails, advancingParticipants } = result;
+      roundParticipants = advancingParticipants?.length ? utilities.chunkArray(advancingParticipants, 2) : [];
+      roundNumber += 1;
 
       if (participantDetails) {
         participants.push(...participantDetails.filter(({ isByePosition }) => isByePosition));
@@ -94,14 +116,7 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
       if (roundMatchUps) {
         matchUps.push(...roundMatchUps);
-        // console.log({ roundMatchUps });
       }
-    } else {
-      // diagnostics
-      // const profile = analysis.columnProfiles.find((c) => c.column === column);
-      // const keys = Object.keys(profile.keyMap);
-      // console.log({ column, i, profile });
-      // keys.forEach((key) => console.log(sheet[key]));
     }
   });
 
