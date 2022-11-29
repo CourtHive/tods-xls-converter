@@ -7,34 +7,7 @@ import { it } from 'vitest';
 // test without building against sheets in example directory
 it('can process passing', () => {
   const readDir = './examples/sheets/processing';
-
-  const sheetTypes = [];
-  const sheetNumbers = [];
-  const sheetLimit = 0;
-
-  const processLimit = 1;
-  const startIndex = 0;
-
-  // setLoggingActive(true);
-  const result = processDirectory({
-    readDir,
-    processLimit,
-    startIndex,
-    sheetLimit,
-    sheetTypes,
-    sheetNumbers
-  });
-  if (result);
-  printGlobalLog();
-  purgeGlobalLog();
-  console.log(Object.keys(result));
-  // console.log(result.fileResults[0].sheetAnalysis[12].analysis.isQualifying);
-
-  writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[0]), 'UTF-8');
-});
-
-it.skip('can process tests', () => {
-  const readDir = './examples/sheets/testing';
+  const writeResult = false;
 
   const sheetTypes = [];
   const sheetNumbers = [];
@@ -44,15 +17,44 @@ it.skip('can process tests', () => {
   const startIndex = 0;
 
   setLoggingActive(true);
-  setLoggingActive(true, 'dev');
-
   const result = processDirectory({
-    readDir,
     processLimit,
+    sheetNumbers,
     startIndex,
     sheetLimit,
     sheetTypes,
-    sheetNumbers
+    readDir
+  });
+  if (result);
+  printGlobalLog();
+  purgeGlobalLog();
+  console.log('PASSED', Object.keys(result));
+  // console.log(result.fileResults[0].sheetAnalysis[12].analysis.isQualifying);
+
+  if (writeResult) writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[0]), 'UTF-8');
+});
+
+it('can process tests', () => {
+  const readDir = './examples/sheets/testing';
+
+  const sheetTypes = [];
+  const sheetNumbers = [1];
+  const sheetLimit = 0;
+
+  const processLimit = 1;
+  const startIndex = 0;
+
+  setLoggingActive(true);
+  setLoggingActive(true, 'dev');
+
+  const result = processDirectory({
+    processStructures: true,
+    processLimit,
+    sheetNumbers,
+    startIndex,
+    sheetLimit,
+    sheetTypes,
+    readDir
   });
   if (result);
   printGlobalLog();
