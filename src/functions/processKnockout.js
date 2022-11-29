@@ -2,7 +2,7 @@ import { getPositionColumn } from '../utilities/convenience';
 import { getRoundMatchUps } from './getRoundMatchUps';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
-import { getLoggingActive } from '../global/state';
+// import { getLoggingActive } from '../global/state';
 import { getEntries } from './getEntries';
 
 import { PRE_ROUND } from '../constants/columnConstants';
@@ -66,17 +66,13 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
   participants.push(...firstRoundParticipants);
 
-  if (getLoggingActive('dev')) {
-    console.log({ boundaryIndex, preRoundColumn, positionColumn });
-    return { analysis };
-  }
-
   const roundColumnsToProcess = analysis.columnProfiles
     .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
     .map(({ column }) => column);
 
+  const progressionOffset = positionAssignments.length ? 1 : 0;
   roundColumnsToProcess.forEach((column, i) => {
-    const pairedRowNumbers = positionProgression[i];
+    const pairedRowNumbers = positionProgression[i + progressionOffset];
 
     if (pairedRowNumbers) {
       const { matchUps: roundMatchUps, participantDetails } = getRoundMatchUps({

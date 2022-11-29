@@ -1,6 +1,6 @@
-import { getNonBracketedValue, withoutQualifyingDesignator } from '../utilities/convenience';
+import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { matchUpStatusConstants, utilities } from 'tods-competition-factory';
-import { isNumeric } from '../utilities/identification';
+import { isNumeric, isString } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getLoggingActive } from '../global/state';
 
@@ -26,7 +26,7 @@ export function getRoundMatchUps({
   if (!nextColumnProfile) return {};
 
   const providerBye = profile.matchUpStatuses?.bye || BYE;
-  const providerWalkover = profile.matchUpStatuses?.doubleWalkover || WALKOVER;
+  const providerWalkover = profile.matchUpStatuses?.walkover || WALKOVER;
   const providerDoubleWalkover = profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER;
 
   const nextColumnResults = analysis.columnResultValues[nextColumnProfile.column] || [];
@@ -78,7 +78,7 @@ export function getRoundMatchUps({
 
       const resultRow = winningParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber;
       // get potential result
-      const potentialResult = nextColumnProfile.keyMap[`${nextColumn}${resultRow}`];
+      const potentialResult = tidyValue(nextColumnProfile.keyMap[`${nextColumn}${resultRow}`]);
       const result = (nextColumnResults.includes(potentialResult) && potentialResult) || undefined;
 
       const matchUp = { roundNumber, roundPosition, pairParticipantNames };
@@ -86,17 +86,15 @@ export function getRoundMatchUps({
         matchUp.result = result;
       }
 
-      if (logging) {
-        console.log({ column, pairParticipantNames });
-      }
       const isBye = pairParticipantNames.map((name) => name?.toLowerCase()).includes(providerBye.toLowerCase());
+      const lowerResult = isString(result) ? result.toLowerCase() : result;
 
       if (isBye) {
         matchUp.matchUpStatus = BYE;
-      } else if (result === providerDoubleWalkover) {
+      } else if (lowerResult === providerDoubleWalkover) {
         matchUp.matchUpStatus = DOUBLE_WALKOVER;
-      } else if (result === providerWalkover) {
-        matchUp.matchUpStatus = DOUBLE_WALKOVER;
+      } else if (lowerResult === providerWalkover) {
+        matchUp.matchUpStatus = WALKOVER;
         matchUp.winningSide = advancedSide;
       } else if (advancedSide) {
         matchUp.matchUpStatus = COMPLETED;

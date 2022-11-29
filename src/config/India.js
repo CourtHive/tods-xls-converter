@@ -43,6 +43,7 @@ export const config = {
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
     matchStatuses: ['def', 'ret', 'bye', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
+    matchUpStatuses: { bye: 'BYE', walkover: 'w/o' },
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
     entryStatusMap,
     categories,
