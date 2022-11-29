@@ -1,5 +1,6 @@
 import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { matchUpStatusConstants, utilities } from 'tods-competition-factory';
+import { getMatchUpParticipants } from './getMatchUpParticipants';
 import { isNumeric, isString } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getLoggingActive } from '../global/state';
@@ -7,7 +8,7 @@ import { getLoggingActive } from '../global/state';
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
 export function getRoundMatchUps({
-  // participants = [],
+  roundParticipants, // if roundParticipants are provided then they are not sought in column
   pairedRowNumbers,
   roundNumber,
   isPreRound,
@@ -50,30 +51,46 @@ export function getRoundMatchUps({
       return rowNumber;
     }, 0);
 
-    const { matchUpParticipants, pairParticipantNames } = getMatchUpParticipants({
-      roundPosition,
-      columnProfile,
-      derivedPair,
-      roundNumber,
-      profile,
-      groups
-    });
+    let consideredParticipants = roundParticipants?.[roundPosition - 1];
+    let pairParticipantNames = consideredParticipants?.map(({ participantName }) => participantName);
+
+    if (!consideredParticipants?.length) {
+      const result = getMatchUpParticipants({
+        roundPosition,
+        columnProfile,
+        derivedPair,
+        roundNumber,
+        profile,
+        groups
+      });
+      pairParticipantNames = result.pairParticipantNames;
+      consideredParticipants = result.matchUpParticipants;
+    }
 
     if (isWholeNumber(nextColumnRowNumber)) {
+      const isBye =
+        consideredParticipants.find(({ isByePosition }) => isByePosition) ||
+        pairParticipantNames.map((name) => name?.toLowerCase()).includes(providerBye.toLowerCase());
+
       const nextColumn = nextColumnProfile.column;
       const nextColumnRef = `${nextColumn}${nextColumnRowNumber}`;
       const refValue = nextColumnProfile.keyMap[nextColumnRef];
       const isDoubleWalkover = refValue?.toString().toLowerCase().trim() === providerDoubleWalkover.toLowerCase();
       const winningParticipantName = isDoubleWalkover ? undefined : refValue;
-      const { advancedSide } = getAdvancedSide({
-        winningParticipantName,
-        pairParticipantNames,
-        analysis,
-        profile
-      });
+
+      const advancedSide =
+        !isBye &&
+        getAdvancedSide({
+          consideredParticipants,
+          winningParticipantName,
+          pairParticipantNames,
+          analysis,
+          profile
+        })?.advancedSide;
+
       if (advancedSide) {
-        matchUpParticipants[advancedSide - 1].advancedParticipantName = winningParticipantName;
-        matchUpParticipants[advancedSide - 1].advancedPositionRef = nextColumnRef;
+        consideredParticipants[advancedSide - 1].advancedParticipantName = winningParticipantName;
+        consideredParticipants[advancedSide - 1].advancedPositionRef = nextColumnRef;
       }
 
       const resultRow = winningParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber;
@@ -86,7 +103,6 @@ export function getRoundMatchUps({
         matchUp.result = result;
       }
 
-      const isBye = pairParticipantNames.map((name) => name?.toLowerCase()).includes(providerBye.toLowerCase());
       const lowerResult = isString(result) ? result.toLowerCase() : result;
 
       if (isBye) {
@@ -119,7 +135,7 @@ export function getRoundMatchUps({
       if (pairParticipantNames.filter(Boolean).length) matchUps.push(matchUp);
     }
 
-    participantDetails.push(...matchUpParticipants);
+    if (!roundParticipants?.length) participantDetails.push(...consideredParticipants);
 
     roundPosition += 1;
   }
@@ -171,31 +187,6 @@ function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysi
   }, {});
 
   return includes || {};
-}
-
-function getMatchUpParticipants({ profile, columnProfile, derivedPair, roundPosition }) {
-  const matchUpParticipants = [];
-  const providerDoubleWalkover = profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER;
-
-  const pairParticipantNames = derivedPair.map((rowNumber, i) => {
-    const ref = `${columnProfile.column}${rowNumber}`;
-    const refValue = columnProfile.keyMap[ref];
-    const isDoubleWalkover = refValue?.toString().toLowerCase().trim() === providerDoubleWalkover.toLowerCase();
-
-    const participantName = isDoubleWalkover ? undefined : refValue;
-
-    // drawPosition for first round can be derived from (roundPosition - 1) * 2 + sideNumber
-    const isByePosition = participantName === profile.matchUpStatuses?.bye;
-    if (isByePosition) {
-      matchUpParticipants.push({ isByePosition, rowNumber, roundPosition, sideNumber: i + 1 });
-    } else {
-      matchUpParticipants.push({ participantName, rowNumber, roundPosition, sideNumber: i + 1 });
-    }
-
-    return participantName;
-  });
-
-  return { pairParticipantNames, matchUpParticipants };
 }
 
 function getGroupings({ columnProfile }) {
