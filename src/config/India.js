@@ -1,3 +1,4 @@
+import { genderConstants, matchUpTypes } from 'tods-competition-factory';
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
@@ -5,25 +6,41 @@ import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/s
 import { TOURNAMENT_ID, TOURNAMENT_NAME } from '../constants/attributeConstants';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 
+const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
+const { MALE, FEMALE, ANY } = genderConstants;
+
+const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN'];
+
 export const config = {
   organization: 'IND',
   mustContainSheetNames: [],
   profile: {
     providerId: 'IND-0123',
-    skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist'],
+    skipWords: [
+      'winner',
+      'winner;',
+      'winner:',
+      'umpire',
+      'none',
+      'finalist',
+      { text: '\\\\\\', startsWith: true },
+      { text: 'Q', exact: true },
+      { text: 'LL', exact: true }
+    ],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
     matchStatuses: ['def', 'ret', 'bye', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
-    /*
-    doubles: {
-      drawPosition: {
-        rowOffset: -1 // missing drawPosition for doubles partner is on previous line
-      }
-    },
-    */
+    categories,
     rowDefinitions: [
+      {
+        type: HEADER,
+        id: 'notice',
+        elements: ['notice'],
+        rows: 1,
+        minimumElements: 1
+      },
       {
         type: HEADER,
         id: 'knockoutParticipants',
@@ -33,6 +50,7 @@ export const config = {
           'family name',
           'first name',
           'reg.no',
+          'state',
           '2nd round',
           '3rd round',
           'quarterfinals',
@@ -56,7 +74,7 @@ export const config = {
       { attr: 'seedValue', header: 'seed' },
       { attr: 'lastName', header: 'family name' },
       { attr: 'firstName', header: 'first name' },
-      { attr: 'personId', header: 'reg.no' },
+      { attr: 'personId', header: ['reg.no', 'state'], valueRegex: '^\\d{6}$' },
       { attr: ROUND, header: ['2nd round', 'quarterfinals', 'semifinals', 'final'] }
     ],
     sheetDefinitions: [
@@ -73,6 +91,10 @@ export const config = {
         type: ROUND_ROBIN,
         infoClass: 'drawInfo',
         rowIds: ['roundRobinParticipants', 'drawFooter']
+      },
+      {
+        type: INFORMATION,
+        rowIds: ['notice']
       },
       {
         type: PARTICIPANTS,
@@ -169,6 +191,13 @@ export const config = {
         postProcessor: 'categoryParser'
       },
       {
+        attribute: 'matchUpType',
+        searchText: 'main draw',
+        options: { startsWith: true },
+        rowOffset: -1,
+        postProcessor: 'matchUpTypeParser'
+      },
+      {
         attribute: 'gender',
         searchText: 'main draw',
         options: { startsWith: true },
@@ -213,7 +242,10 @@ export const config = {
     genderParser: (value) => {
       const male = /^BOYS/.test(value);
       const female = /^GIRLS/.test(value);
-      return { gender: male ? 'M' : female ? 'W' : 'X' };
+      return male ? MALE : female ? FEMALE : ANY;
+    },
+    matchUpTypeParser: (value) => {
+      return value?.toString().toLowerCase().includes('dobles') ? DOUBLES_MATCHUP : SINGLES_MATCHUP;
     },
     cityParser: (value) => {
       const splitChar = [',', '/'].find((char) => value.includes(char));
@@ -236,8 +268,11 @@ export const config = {
   },
   sheetNameMatcher: (sheetNames) => {
     const potentials = sheetNames.some((sheetName) => {
-      const mTest = /Si Main/.test(sheetName);
-      return mTest;
+      const sMain = /Si Main/.test(sheetName);
+      const sQual = /Si Qual/.test(sheetName);
+      const doMain = /Do Main/.test(sheetName);
+      const doQual = /Do Qual/.test(sheetName);
+      return sMain || doMain || doQual || sQual;
     });
     return potentials;
   }
