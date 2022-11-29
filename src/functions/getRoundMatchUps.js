@@ -106,12 +106,12 @@ export function getRoundMatchUps({
       if (!result && !isBye) {
         // TODO: in some draws preRound results appear as part of advancedSide participantName
         if (isPreRound) {
-          const notice = 'check for result at end of advancedSide participantName';
+          const message = 'check for result at end of advancedSide participantName';
           pushGlobalLog({
             method: 'notice',
             color: 'brightyellow',
-            keyColors: { notice: 'cyan', attributes: 'brightyellow' },
-            notice
+            keyColors: { message: 'cyan', attributes: 'brightyellow' },
+            message
           });
         } else if (matchUp.winningSide) {
           if (logging) console.log('No win reason');

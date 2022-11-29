@@ -1,4 +1,4 @@
-import { genderConstants, matchUpTypes } from 'tods-competition-factory';
+import { genderConstants, matchUpTypes, entryStatusConstants } from 'tods-competition-factory';
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
@@ -21,32 +21,30 @@ import {
   TOURNAMENT_NAME
 } from '../constants/attributeConstants';
 
+const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusConstants;
 const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
 const { MALE, FEMALE, ANY } = genderConstants;
 
 const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN'];
+const entryStatusMap = {
+  DA: DIRECT_ACCEPTANCE,
+  LL: LUCKY_LOSER,
+  Q: QUALIFYING,
+  WC: WILDCARD
+};
 
 export const config = {
   organization: 'IND',
   mustContainSheetNames: [],
   profile: {
     providerId: 'IND-0123',
-    skipWords: [
-      'winner',
-      'winner;',
-      'winner:',
-      'umpire',
-      'none',
-      'finalist',
-      { text: '\\\\\\', startsWith: true },
-      { text: 'Q', exact: true },
-      { text: 'LL', exact: true }
-    ],
+    skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
     matchStatuses: ['def', 'ret', 'bye', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
+    entryStatusMap,
     categories,
     rowDefinitions: [
       {

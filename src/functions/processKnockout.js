@@ -3,12 +3,12 @@ import { getRoundMatchUps } from './getRoundMatchUps';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
 import { getLoggingActive } from '../global/state';
+import { getEntries } from './getEntries';
 
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
-import { getEntries } from './getEntries';
 
-export function processKnockOut({ profile, analysis }) {
+export function processKnockOut({ profile, analysis, sheet }) {
   const { columnProfiles, avoidRows } = analysis;
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
@@ -59,13 +59,15 @@ export function processKnockOut({ profile, analysis }) {
   const {
     participants: firstRoundParticipants,
     positionAssignments,
+    seedAssignments,
     boundaryIndex,
     entries
-  } = getEntries({ analysis, columns, positionRefs, preRoundColumn, positionColumn });
+  } = getEntries({ sheet, analysis, profile, columns, positionRefs, preRoundColumn, positionColumn });
+
+  participants.push(...firstRoundParticipants);
 
   if (getLoggingActive('dev')) {
     console.log({ boundaryIndex, preRoundColumn, positionColumn });
-    console.log({ entries, positionAssignments, firstRoundParticipants });
     return { analysis };
   }
 
@@ -106,6 +108,7 @@ export function processKnockOut({ profile, analysis }) {
   const stage = analysis.isQualifying ? 'QUALIFYING' : 'MAIN';
   const structure = {
     stageSequence: analysis.isQualifying && preRoundParticipantRows?.length ? 2 : 1,
+    positionAssignments,
     stageName: stage,
     matchUps,
     stage
@@ -118,7 +121,7 @@ export function processKnockOut({ profile, analysis }) {
     positionRefs
   });
 
-  return { analysis, links, structures, hasValues: true, ...SUCCESS };
+  return { analysis, links, entries, seedAssignments, structures, hasValues: true, ...SUCCESS };
 
   // NOTES:
   // *. Is there a pre-round
