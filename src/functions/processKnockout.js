@@ -1,19 +1,20 @@
 import { getPositionColumn } from '../utilities/convenience';
 import { getRoundMatchUps } from './getRoundMatchUps';
-import { getPositionRows } from './getPositionRows';
+import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
 import { getLoggingActive } from '../global/state';
+import { getEntries } from './getEntries';
 
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
-export function processKnockOut({ profile, analysis }) {
+export function processKnockOut({ profile, analysis, sheet }) {
   const { columnProfiles, avoidRows } = analysis;
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
-  const { positionRows, positionProgression, preRoundParticipantRows, error } = getPositionRows({
+  const { positionRefs, positionProgression, preRoundParticipantRows, error } = getPositionRefs({
     columnProfiles,
     positionColumn,
     preRoundColumn,
@@ -27,7 +28,7 @@ export function processKnockOut({ profile, analysis }) {
     matchUps = [],
     links = [];
 
-  // *. If preRound, use `preRoundParticipantRows` and positionRows[0] to see whether there are progressed participants and set first roundNumber column
+  // *. If preRound, use `preRoundParticipantRows` and positionRefs[0] to see whether there are progressed participants and set first roundNumber column
   //    - preRound is roundNumber: 0, first round of structure is roundNumber: 1
 
   if (preRoundParticipantRows?.length) {
@@ -48,17 +49,25 @@ export function processKnockOut({ profile, analysis }) {
 
   // const qualifyingParticipants = participants.filter(({ advancedParticipantName }) => advancedParticipantName);
 
-  // *. if no preRound, check whether there are values present in the valuesMap on positionRows[0] of first column after the position round
-  //    - check whether there are progressed particpants in positionRows[1]
+  // *. if no preRound, check whether there are values present in the valuesMap on positionRefs[0] of first column after the position round
+  //    - check whether there are progressed particpants in positionRefs[1]
   //    - in rare cases there may be a preRound column BEFORE the position column... if position column > A this could be true
   //    - if there is a column before positionRound see whether any of the positioned values of roundNumber: 1 are present in that coulmn
 
   const columns = analysis.columnProfiles.map(({ column }) => column).sort();
-  const boundaryIndex = Math.max(columns.indexOf(preRoundColumn), columns.indexOf(positionColumn), 0);
+
+  const {
+    participants: firstRoundParticipants,
+    positionAssignments,
+    seedAssignments,
+    boundaryIndex,
+    entries
+  } = getEntries({ sheet, analysis, profile, columns, positionRefs, preRoundColumn, positionColumn });
+
+  participants.push(...firstRoundParticipants);
 
   if (getLoggingActive('dev')) {
     console.log({ boundaryIndex, preRoundColumn, positionColumn });
-    // console.log(analysis.columnProfiles);
     return { analysis };
   }
 
@@ -99,6 +108,7 @@ export function processKnockOut({ profile, analysis }) {
   const stage = analysis.isQualifying ? 'QUALIFYING' : 'MAIN';
   const structure = {
     stageSequence: analysis.isQualifying && preRoundParticipantRows?.length ? 2 : 1,
+    positionAssignments,
     stageName: stage,
     matchUps,
     stage
@@ -108,15 +118,15 @@ export function processKnockOut({ profile, analysis }) {
   Object.assign(analysis, {
     preRoundParticipantRows,
     positionProgression,
-    positionRows
+    positionRefs
   });
 
-  return { analysis, links, structures, hasValues: true, ...SUCCESS };
+  return { analysis, links, entries, seedAssignments, structures, hasValues: true, ...SUCCESS };
 
   // NOTES:
   // *. Is there a pre-round
   // *. Use preRoundParticipantRows to create Qualifying Structure with matchUps
-  // *. results can be inferred by looking at columngProfile keyMap values which occur between positionRows
+  // *. results can be inferred by looking at columngProfile keyMap values which occur between positionRefs
   // *. Characterize { drawSize: ##, R: 32, 16, 8. 4. 3 }
   // *. For each round, does the previous round have matching names
   // *. Using matching values across rounds calculate where progressing values should occur (to correct for those which have misspellings)

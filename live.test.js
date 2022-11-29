@@ -13,10 +13,10 @@ it('can process passing', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 0;
+  const processLimit = 1;
   const startIndex = 0;
 
-  setLoggingActive(true);
+  // setLoggingActive(true);
   const result = processDirectory({
     processLimit,
     sheetNumbers,
@@ -41,8 +41,8 @@ it('can process tests', () => {
   const sheetNumbers = [1];
   const sheetLimit = 0;
 
-  const processLimit = 1;
-  const startIndex = 0;
+  const processLimit = 0;
+  const startIndex = 3;
 
   setLoggingActive(true);
   setLoggingActive(true, 'dev');

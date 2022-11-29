@@ -1,37 +1,50 @@
-import { genderConstants, matchUpTypes } from 'tods-competition-factory';
+import { genderConstants, matchUpTypes, entryStatusConstants } from 'tods-competition-factory';
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
 import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
-import { TOURNAMENT_ID, TOURNAMENT_NAME } from '../constants/attributeConstants';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
+import {
+  CATEGORY,
+  CITY,
+  ENTRY_STATUS,
+  EVENT_NAME,
+  FIRST_NAME,
+  GENDER,
+  LAST_NAME,
+  PERSON_ID,
+  RANKING,
+  REFEREE,
+  SEED_VALUE,
+  STATE,
+  TOURNAMENT_ID,
+  TOURNAMENT_NAME
+} from '../constants/attributeConstants';
 
+const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusConstants;
 const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
 const { MALE, FEMALE, ANY } = genderConstants;
 
 const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN'];
+const entryStatusMap = {
+  DA: DIRECT_ACCEPTANCE,
+  LL: LUCKY_LOSER,
+  Q: QUALIFYING,
+  WC: WILDCARD
+};
 
 export const config = {
   organization: 'IND',
   mustContainSheetNames: [],
   profile: {
     providerId: 'IND-0123',
-    skipWords: [
-      'winner',
-      'winner;',
-      'winner:',
-      'umpire',
-      'none',
-      'finalist',
-      { text: '\\\\\\', startsWith: true },
-      { text: 'Q', exact: true },
-      { text: 'LL', exact: true }
-    ],
+    skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
     matchStatuses: ['def', 'ret', 'bye', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
+    entryStatusMap,
     categories,
     rowDefinitions: [
       {
@@ -69,12 +82,12 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: 'entryStatus', header: 'st.' },
-      { attr: 'ranking', header: 'rank' },
-      { attr: 'seedValue', header: 'seed' },
-      { attr: 'lastName', header: 'family name' },
-      { attr: 'firstName', header: 'first name' },
-      { attr: 'personId', header: ['reg.no', 'state'], valueRegex: '^\\d{6}$' },
+      { attr: ENTRY_STATUS, header: 'st.' },
+      { attr: RANKING, header: 'rank' },
+      { attr: SEED_VALUE, header: 'seed' },
+      { attr: LAST_NAME, header: 'family name' },
+      { attr: FIRST_NAME, header: 'first name' },
+      { attr: PERSON_ID, header: ['reg.no', 'state'], valueRegex: '^\\d{6}$' },
       { attr: ROUND, header: ['2nd round', 'quarterfinals', 'semifinals', 'final'] }
     ],
     sheetDefinitions: [
@@ -107,34 +120,7 @@ export const config = {
     ],
     gaps: { draw: { term: 'Round 1', gap: 0 } },
     playerRows: { playerNames: true, lastName: true, firstName: true },
-    tournamentInfo: [
-      {
-        attribute: [TOURNAMENT_NAME],
-        searchText: 'A verseny neve',
-        rowOffset: 1
-      },
-      {
-        attribute: 'dates',
-        searchText: 'A verseny dátuma (éééé.hh.nn)',
-        rowOffset: 1,
-        postProcessor: 'dateParser'
-      },
-      { attribute: 'city', searchText: 'Város', rowOffset: 1 },
-      { attribute: 'referee', searchText: 'Versenybíró:', rowOffset: 1 },
-      { attribute: 'doctor', searchText: 'Orvos neve:', rowOffset: 1 },
-      {
-        attribute: 'organizer',
-        searchText: 'Verseny rendezője:',
-        rowOffset: 1
-      },
-      { attribute: 'director', searchText: 'Versenyigazgató', rowOffset: 1 },
-      {
-        attribute: 'categories',
-        searchText: 'Versenyszám 1',
-        rowOffset: 1,
-        columnOffsets: [0, 1, 2, 3, 4]
-      }
-    ],
+    tournamentInfo: [],
     drawInfo: [
       {
         attribute: [TOURNAMENT_NAME],
@@ -157,34 +143,34 @@ export const config = {
         postProcessor: 'dateParser'
       },
       {
-        attribute: 'city',
+        attribute: [CITY],
         searchText: 'city',
         options: { startsWith: true },
         rowOffset: 1,
         postProcessor: 'cityParser'
       },
       {
-        attribute: 'state',
+        attribute: [STATE],
         searchText: 'city',
         options: { startsWith: true },
         rowOffset: 1,
         postProcessor: 'stateParser'
       },
       {
-        attribute: 'referee',
+        attribute: [REFEREE],
         searchText: ['referee', 'refree'],
         options: { includes: true },
         rowOffset: 1,
         columnOffset: 1
       },
       {
-        attribute: 'eventName',
+        attribute: [EVENT_NAME],
         searchText: 'main draw',
         options: { startsWith: true },
         rowOffset: -1
       },
       {
-        attribute: 'category',
+        attribute: [CATEGORY],
         searchText: 'main draw',
         options: { startsWith: true },
         columnOffset: 4,
@@ -198,7 +184,7 @@ export const config = {
         postProcessor: 'matchUpTypeParser'
       },
       {
-        attribute: 'gender',
+        attribute: [GENDER],
         searchText: 'main draw',
         options: { startsWith: true },
         rowOffset: -1,
