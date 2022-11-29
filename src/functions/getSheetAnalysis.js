@@ -61,9 +61,10 @@ export const getSheetAnalysis = ({
     .filter(({ values }) => values?.length);
 
   // post-process columnProfiles
-  columnProfiles.forEach((columnProfile, columnIndex) =>
-    getColumnCharacter({ sheetType, columnProfile, attributeMap, columnIndex })
-  );
+  columnProfiles.forEach((columnProfile, columnIndex) => {
+    const character = getColumnCharacter({ sheetType, columnProfile, attributeMap, columnIndex });
+    if (character && !columns[character]) columns[character] = columnProfile.column;
+  });
 
   // apply any character processing specified by profile
   if (profile.columnCharacter) {

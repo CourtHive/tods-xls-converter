@@ -28,4 +28,6 @@ export function getColumnCharacter({ attributeMap, columnIndex, columnProfile, s
     const firstAlpha = numericMap.indexOf(false);
     if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
   }
+
+  return columnProfile.character;
 }
