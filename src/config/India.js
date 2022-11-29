@@ -253,6 +253,7 @@ export const config = {
       if (allProgressionKeys) {
         columnProfile.values = [];
         columnProfile.character = 'progression';
+        return columnProfile.character;
       }
     }
   },
