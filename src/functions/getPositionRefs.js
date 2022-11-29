@@ -1,7 +1,7 @@
 import { utilities } from 'tods-competition-factory';
 import { getRow } from './sheetAccess';
 
-export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn, avoidRows }) {
+export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn, avoidRows }) {
   const columnProfile = columnProfiles.find((columnProfile) =>
     [positionColumn, preRoundColumn].includes(columnProfile.column)
   );
@@ -22,7 +22,7 @@ export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn
 
   if (!missingPositions) {
     const positionProgression = getPositionProgression(allRows);
-    return { positionRows: knownRows.map(getRef), positionProgression };
+    return { positionRefs: knownRows.map(getRef), positionProgression };
   }
 
   const keyedRows = Object.keys(keyMap)
@@ -38,7 +38,7 @@ export function getPositionRows({ columnProfiles, positionColumn, preRoundColumn
   const preRoundParticipantRows = keyedRows.filter((row) => !knownRows.includes(row));
   const positionProgression = getPositionProgression(allRows);
 
-  return { positionRows: allRows.map(getRef), positionProgression, preRoundParticipantRows };
+  return { positionRefs: allRows.map(getRef), positionProgression, preRoundParticipantRows };
 }
 
 function getPositionProgression(rows) {
