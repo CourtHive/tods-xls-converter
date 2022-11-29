@@ -16,16 +16,25 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes } = {}) {
+export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes, processStructures } = {}) {
   const { workbook, workbookType } = getWorkbook();
   const logging = getLoggingActive('dev');
 
   if (!workbook) return { error: MISSING_WORKBOOK };
-  if (!workbookType) return { error: UNKNOWN_WORKBOOK_TYPE };
+  const sheetCount = workbook.SheetNames.length;
+
+  if (!workbookType) {
+    pushGlobalLog({
+      keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
+      divider: 80,
+      sheetCount,
+      filename
+    });
+    return { error: UNKNOWN_WORKBOOK_TYPE };
+  }
 
   const { profile } = workbookType;
 
-  const sheetCount = workbook.SheetNames.length;
   pushGlobalLog({
     keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
     divider: 80,
@@ -50,11 +59,12 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (logging) console.log({ sheetName, sheetNumber });
     const {
       participants: structureParticipants,
-      structures,
+      structures = [],
       hasValues,
       analysis,
       error
     } = processSheet({
+      processStructures,
       sheetNumber,
       sheetTypes,
       sheetName,
@@ -116,7 +126,15 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   return { sheetAnalysis, errorLog, resultValues, skippedResults, participants, totalMatchUps, ...SUCCESS };
 }
 
-export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, sheetTypes = [] }) {
+export function processSheet({
+  processStructures,
+  sheetTypes = [],
+  sheetNumber,
+  sheetName,
+  filename,
+  workbook,
+  profile
+}) {
   const sheet = workbook.Sheets[sheetName];
 
   const { hasValues, sheetDefinition } = identifySheet({ sheetName, sheet, profile });
@@ -156,6 +174,12 @@ export function processSheet({ workbook, profile, sheetName, sheetNumber, filena
     ignoreCellRefs: cellRefs,
     ...props
   });
+
+  if (!processStructures) {
+    return {
+      analysis
+    };
+  }
 
   if (sheetDefinition.type === KNOCKOUT) {
     return processKnockOut({

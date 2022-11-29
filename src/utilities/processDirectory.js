@@ -10,6 +10,7 @@ export function processDirectory({
   writeDir = './',
   readDir = './',
 
+  processStructures = true,
   includeWorkbooks,
   processLimit = 0,
   startIndex = 0,
@@ -58,12 +59,12 @@ export function processDirectory({
     const buf = readFileSync(`${readDir}/${filename}`);
     let result = loadWorkbook(buf, index);
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
-    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
+    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes, processStructures });
     fileResults[index] = { filename, ...result, ...additionalContent };
     index += 1;
 
     const { participants: participantsMap } = result;
-    const participants = Object.values(participantsMap);
+    const participants = participantsMap ? Object.values(participantsMap) : [];
 
     tournamentEngine.setState({
       tournamentId: filename,
@@ -110,7 +111,7 @@ export function processDirectory({
 
   const sheetsProcessed = Object.values(fileResults)
     .map(
-      ({ sheetAnalysis }) =>
+      ({ sheetAnalysis = {} }) =>
         Object.values(sheetAnalysis).filter(({ hasValues, analysis }) => hasValues && !analysis?.skipped).length
     )
     .reduce((a, b) => a + b, 0);
