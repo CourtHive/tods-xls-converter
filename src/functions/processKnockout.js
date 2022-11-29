@@ -96,7 +96,7 @@ export function processKnockOut({ profile, analysis, sheet }) {
     const pairedRowNumbers = positionProgression[roundNumber - 1];
 
     if (pairedRowNumbers) {
-      const { matchUps: roundMatchUps, participantDetails } = getRoundMatchUps({
+      const result = getRoundMatchUps({
         roundParticipants,
         pairedRowNumbers,
         participants,
@@ -106,7 +106,8 @@ export function processKnockOut({ profile, analysis, sheet }) {
         column
       });
 
-      roundParticipants = [];
+      const { matchUps: roundMatchUps, participantDetails, advancingParticipants } = result;
+      roundParticipants = advancingParticipants?.length ? utilities.chunkArray(advancingParticipants, 2) : [];
       roundNumber += 1;
 
       if (participantDetails) {

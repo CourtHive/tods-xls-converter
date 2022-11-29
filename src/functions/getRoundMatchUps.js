@@ -32,6 +32,7 @@ export function getRoundMatchUps({
 
   const nextColumnResults = analysis.columnResultValues[nextColumnProfile.column] || [];
 
+  const advancingParticipants = [];
   const participantDetails = [];
   const matchUps = [];
 
@@ -67,6 +68,8 @@ export function getRoundMatchUps({
       consideredParticipants = result.matchUpParticipants;
     }
 
+    const drawPositions = consideredParticipants.map(({ drawPosition }) => drawPosition).filter(Boolean);
+
     if (isWholeNumber(nextColumnRowNumber)) {
       const isBye =
         consideredParticipants.find(({ isByePosition }) => isByePosition) ||
@@ -78,19 +81,25 @@ export function getRoundMatchUps({
       const isDoubleWalkover = refValue?.toString().toLowerCase().trim() === providerDoubleWalkover.toLowerCase();
       const winningParticipantName = isDoubleWalkover ? undefined : refValue;
 
-      const advancedSide =
-        !isBye &&
-        getAdvancedSide({
-          consideredParticipants,
-          winningParticipantName,
-          pairParticipantNames,
-          analysis,
-          profile
-        })?.advancedSide;
+      const advancedSide = getAdvancedSide({
+        consideredParticipants,
+        winningParticipantName,
+        pairParticipantNames,
+        analysis,
+        profile
+      })?.advancedSide;
 
       if (advancedSide) {
         consideredParticipants[advancedSide - 1].advancedParticipantName = winningParticipantName;
         consideredParticipants[advancedSide - 1].advancedPositionRef = nextColumnRef;
+
+        if (roundParticipants?.length) {
+          if (advancedSide) {
+            advancingParticipants.push(consideredParticipants[advancedSide - 1]);
+          } else {
+            advancingParticipants.push({});
+          }
+        }
       }
 
       const resultRow = winningParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber;
@@ -98,7 +107,7 @@ export function getRoundMatchUps({
       const potentialResult = tidyValue(nextColumnProfile.keyMap[`${nextColumn}${resultRow}`]);
       const result = (nextColumnResults.includes(potentialResult) && potentialResult) || undefined;
 
-      const matchUp = { roundNumber, roundPosition, pairParticipantNames };
+      const matchUp = { roundNumber, roundPosition, drawPositions, pairParticipantNames };
       if (result) {
         matchUp.result = result;
       }
@@ -141,7 +150,7 @@ export function getRoundMatchUps({
   }
 
   if (getLoggingActive('matchUps')) console.log(matchUps);
-  return { matchUps, participantDetails };
+  return { matchUps, participantDetails, advancingParticipants };
 }
 
 function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysis, profile }) {
