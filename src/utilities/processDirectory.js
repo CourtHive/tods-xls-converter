@@ -1,4 +1,5 @@
 import { getLoggingActive, getTournamentRecord, getWorkbook } from '../global/state';
+import { tournamentEngine } from 'tods-competition-factory';
 import { processSheets } from '../functions/processSheets';
 import { readdirSync, readFileSync } from 'fs-extra';
 import { loadWorkbook } from '../global/loader';
@@ -60,6 +61,23 @@ export function processDirectory({
     result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes });
     fileResults[index] = { filename, ...result, ...additionalContent };
     index += 1;
+
+    const { participants: participantsMap } = result;
+    const participants = Object.values(participantsMap);
+
+    tournamentEngine.setState({
+      tournamentId: filename,
+      participants
+    });
+
+    /*
+    const structures = Object.values(result.sheetAnalysis)[0].structures;
+    const { matchUps } = tournamentEngine.allDrawMatchUps({
+      drawDefinition: { structures },
+      inContext: true
+    });
+    console.log(matchUps[0].sides);
+    */
 
     totalMatchUps += result.totalMatchUps || 0;
     if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);

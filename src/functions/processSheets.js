@@ -37,7 +37,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   const sheetAnalysis = {};
   const participants = {};
   const resultValues = [];
-  const structures = [];
   const errorLog = {};
 
   let totalMatchUps = 0;
@@ -51,7 +50,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (logging) console.log({ sheetName, sheetNumber });
     const {
       participants: structureParticipants,
-      structures: sheetStructures,
+      structures,
       hasValues,
       analysis,
       error
@@ -64,17 +63,16 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       profile
     });
 
-    const matchUpsCount = sheetStructures?.flatMap(
+    const matchUpsCount = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
     )?.length;
     totalMatchUps += matchUpsCount || 0;
 
-    sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis };
+    sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis, structures };
 
     Object.assign(participants, structureParticipants);
 
     if (analysis && (!analysis?.skipped || !hasValues)) {
-      if (sheetStructures) structures.push(...sheetStructures);
       const { isQualifying, category, sheetType } = analysis;
       const { gender, matchUpType } = analysis?.info || {};
       if (logging) {
@@ -115,7 +113,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
   // Now group structures by category and singles/doubles and generate events/drawDefinitions
 
-  return { sheetAnalysis, errorLog, resultValues, skippedResults, structures, participants, totalMatchUps, ...SUCCESS };
+  return { sheetAnalysis, errorLog, resultValues, skippedResults, participants, totalMatchUps, ...SUCCESS };
 }
 
 export function processSheet({ workbook, profile, sheetName, sheetNumber, filename, sheetTypes = [] }) {
