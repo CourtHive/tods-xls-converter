@@ -106,7 +106,17 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        elements: ['acc. ranking', 'seeded players', 'luck losers', 'replacing', 'draw date/time'],
+        elements: [
+          'acc. ranking',
+          'seeded players',
+          'luck losers',
+          'replacing',
+          'draw date/time',
+          'alternates',
+          'qualifiers',
+          'qualifires',
+          'aita representative'
+        ],
         rows: 9,
         minimumElements: 3
       }
