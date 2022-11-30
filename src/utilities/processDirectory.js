@@ -55,7 +55,7 @@ export function processDirectory({
 
   let index = 0;
   for (const filename of filenames) {
-    if (logging) console.log({ filename, index });
+    if (getLoggingActive('sheetNames')) console.log({ filename, index });
     const buf = readFileSync(`${readDir}/${filename}`);
     let result = loadWorkbook(buf, index);
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
