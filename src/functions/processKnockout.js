@@ -107,18 +107,19 @@ export function processKnockOut({ profile, analysis, sheet }) {
   }
 
   let roundNumber = 1;
-  // const progressionOffset = positionAssignments.length ? 1 : 0;
-  roundColumns.forEach((column, i) => {
-    // const pairedRowNumbers = positionProgression[roundNumber - 1 + progressionOffset];
+  roundColumns.forEach((column, columnIndex) => {
     const pairedRowNumbers = positionProgression[roundNumber - 1];
 
     if (pairedRowNumbers) {
       const result = getRoundMatchUps({
-        resultColumn: resultColumns?.[i],
-        nextColumn: roundColumns[i + 1],
+        resultColumn: resultColumns?.[columnIndex],
+        nextColumn: roundColumns[columnIndex + 1],
         roundParticipants,
         pairedRowNumbers,
+        resultColumns,
         participants,
+        roundColumns,
+        columnIndex,
         roundNumber,
         analysis,
         profile,

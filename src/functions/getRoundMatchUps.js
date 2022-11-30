@@ -11,7 +11,10 @@ const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 export function getRoundMatchUps({
   roundParticipants, // if roundParticipants are provided then they are not sought in column
   pairedRowNumbers,
+  resultColumns,
   resultColumn,
+  roundColumns,
+  columnIndex,
   roundNumber,
   nextColumn,
   isPreRound,
@@ -25,10 +28,26 @@ export function getRoundMatchUps({
       return columnProfile || (currentProfile.column === column && { columnProfile: currentProfile, index });
     }, undefined);
 
+  const logging = getLoggingActive('dev');
+  const finalRound = pairedRowNumbers.length === 1;
+
   const { columnProfile } = getColumn(column);
-  const { columnProfile: nextColumnProfile } = getColumn(nextColumn);
-  const resultColumnProfile = resultColumn ? getColumn(resultColumn).columnProfile : nextColumnProfile;
-  if (!nextColumnProfile) return {};
+  let { columnProfile: nextColumnProfile } = getColumn(nextColumn);
+  let resultColumnProfile = resultColumn ? getColumn(resultColumn).columnProfile : nextColumnProfile;
+
+  if (!nextColumnProfile) {
+    const priorResultColumn = columnIndex && resultColumns?.[columnIndex - 1];
+
+    if (priorResultColumn && finalRound) {
+      resultColumnProfile = getColumn(priorResultColumn).columnProfile;
+      nextColumnProfile = columnProfile;
+    } else if (finalRound) {
+      resultColumnProfile = columnProfile;
+      nextColumnProfile = columnProfile;
+    } else {
+      return {};
+    }
+  }
 
   const providerBye = profile.matchUpStatuses?.bye || BYE;
   const providerWalkover = profile.matchUpStatuses?.walkover || WALKOVER;
@@ -37,8 +56,6 @@ export function getRoundMatchUps({
   const advancingParticipants = [];
   const participantDetails = [];
   const matchUps = [];
-
-  const logging = getLoggingActive('dev');
 
   let roundPosition = 1;
 
@@ -104,17 +121,32 @@ export function getRoundMatchUps({
         }
       }
 
-      const resultRow = winningParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber;
-      // get potential result
+      const getResult = (resultColumn) => {
+        const targetProfile = analysis.columnProfiles.find((cp) => cp.column === resultColumn);
+        const potentialResult = targetProfile && tidyValue(targetProfile.keyMap[`${resultColumn}${resultRow}`]);
+        const resultColumnResults = analysis.columnResultValues[resultColumn] || [];
+        const result =
+          ((resultColumn || resultColumnResults.includes(potentialResult)) && potentialResult) || undefined;
+        return result;
+      };
+
+      const resultRow = winningParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber || nextColumnRowTarget;
       const resultColumn = resultColumnProfile?.column;
-      const potentialResult =
-        resultColumnProfile && tidyValue(resultColumnProfile.keyMap[`${resultColumn}${resultRow}`]);
-      const resultColumnResults = analysis.columnResultValues[resultColumn] || [];
-      const result = ((resultColumn || resultColumnResults.includes(potentialResult)) && potentialResult) || undefined;
+      let result = getResult(resultColumn);
 
       const matchUp = { roundNumber, roundPosition, drawPositions, pairParticipantNames };
+
+      if (!result && finalRound && !resultColumns && roundColumns) {
+        const previousColumn = roundColumns[roundColumns.indexOf(resultColumn) - 1];
+        result = getResult(previousColumn);
+      }
+
       if (result) {
         matchUp.result = result;
+      } else {
+        const inColumnResult = tidyValue(columnProfile.keyMap[`${column}${resultRow}`]);
+        const inColumnResults = analysis.columnResultValues[column] || [];
+        if (inColumnResult && inColumnResults.includes(inColumnResult)) console.log({ inColumnResult });
       }
 
       const lowerResult = isString(result) ? result.toLowerCase() : result;
