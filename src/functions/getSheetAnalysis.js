@@ -17,8 +17,6 @@ import {
   tidyValue
 } from '../utilities/convenience';
 
-// import { getLoggingActive } from '../global/state';
-
 export const getSheetAnalysis = ({
   ignoreCellRefs = [],
   sheetDefinition,
@@ -60,6 +58,14 @@ export const getSheetAnalysis = ({
     .map(assessColumn)
     .filter(({ values }) => values?.length);
 
+  // apply any character processing specified by profile
+  if (profile.columnCharacter) {
+    columnProfiles.forEach((columnProfile) => {
+      const character = profile.columnCharacter({ columnProfile, attributeMap });
+      if (character && !columns[character]) columns[character] = columnProfile.column;
+    });
+  }
+
   // post-process columnProfiles
   columnProfiles.forEach((columnProfile, columnIndex) => {
     const character = getColumnCharacter({
@@ -71,14 +77,6 @@ export const getSheetAnalysis = ({
     });
     if (character && !columns[character]) columns[character] = columnProfile.column;
   });
-
-  // apply any character processing specified by profile
-  if (profile.columnCharacter) {
-    columnProfiles.forEach((columnProfile) => {
-      const character = profile.columnCharacter({ columnProfile, attributeMap });
-      if (character && !columns[character]) columns[character] = columnProfile.column;
-    });
-  }
 
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
