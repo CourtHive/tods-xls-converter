@@ -56,14 +56,9 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     if (sheetLimit && sheetNumber > sheetLimit) break;
     if (sheetNumbers?.length && !sheetNumbers.includes(sheetNumber)) continue;
 
-    if (logging) console.log({ sheetName, sheetNumber });
-    const {
-      participants: structureParticipants,
-      structures = [],
-      hasValues,
-      analysis,
-      error
-    } = processSheet({
+    if (getLoggingActive('sheetNames')) console.log({ sheetName, sheetNumber });
+
+    const result = processSheet({
       processStructures,
       sheetNumber,
       sheetTypes,
@@ -72,6 +67,8 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       workbook,
       profile
     });
+
+    const { participants: structureParticipants, structures = [], hasValues, analysis, error } = result;
 
     const matchUpsCount = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
@@ -196,11 +193,10 @@ export function processSheet({
       analysis,
       ...props
     });
-    //
   } else if (sheetDefinition.type === PARTICIPANTS) {
-    //
+    return { analysis };
   } else if (sheetDefinition.type === INFORMATION) {
-    //
+    return { analysis };
   } else {
     return { info: UNKNOWN_SHEET_TYPE };
   }
