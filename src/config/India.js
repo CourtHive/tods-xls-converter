@@ -26,7 +26,19 @@ const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusCons
 const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
 const { MALE, FEMALE, ANY } = genderConstants;
 
-const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN'];
+const roundNames = [
+  '2nd round',
+  '3rd round',
+  'pre-quarters',
+  'round of 32',
+  'quarterfinals',
+  'semifinal',
+  'semifinals',
+  'semi-finals',
+  'finals',
+  'final'
+];
+const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN', 'under-12', 'under-14', 'under-16', 'under-18'];
 const entryStatusMap = {
   DA: DIRECT_ACCEPTANCE,
   LL: LUCKY_LOSER,
@@ -58,6 +70,13 @@ export const config = {
       },
       {
         type: HEADER,
+        id: 'playersList',
+        elements: [`Player's List`],
+        rows: 1,
+        minimumElements: 1
+      },
+      {
+        type: HEADER,
         id: 'notice',
         elements: ['notice'],
         rows: 1,
@@ -80,19 +99,7 @@ export const config = {
       {
         type: HEADER,
         id: 'knockoutParticipants',
-        elements: [
-          'rank',
-          'seed',
-          'family name',
-          'first name',
-          'reg.no',
-          'state',
-          '2nd round',
-          '3rd round',
-          'quarterfinals',
-          'semifinals',
-          'final'
-        ],
+        elements: ['rank', 'seed', 'family name', 'first name', 'reg.no', 'state', ...roundNames],
         rows: 1,
         minimumElements: 5
       },
@@ -110,10 +117,15 @@ export const config = {
       { attr: SEED_VALUE, header: 'seed', limit: 1 },
       { attr: LAST_NAME, header: 'family name', limit: 1 },
       { attr: FIRST_NAME, header: ['first name', 'fisrt name'], limit: 1 },
-      { attr: PERSON_ID, header: ['aita no', 'reg.no', 'state'], limit: 1, valueRegex: '^\\d{6}$' }, // TODO: implement regex check for id
+      {
+        attr: PERSON_ID,
+        header: [{ text: 'reg.', options: { startsWith: true } }, 'aita no', 'reg.no', 'state'],
+        limit: 1,
+        valueRegex: '^\\d{6}$'
+      }, // TODO: implement regex check for id
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
-      { attr: ROUND, header: ['2nd round', 'quarterfinals', 'semifinals', 'final'] }
+      { attr: ROUND, header: [...roundNames] }
     ],
     sheetDefinitions: [
       {
@@ -148,7 +160,7 @@ export const config = {
       },
       {
         type: PARTICIPANTS,
-        rowIds: ['singlesParticipants']
+        rowIds: ['playersList']
       },
       {
         type: PARTICIPANTS,
@@ -291,6 +303,12 @@ export const config = {
         columnProfile.character = 'progression';
         return columnProfile.character;
       }
+    },
+    converters: {
+      category: (value) => {
+        const re = new RegExp('under-', 'g');
+        return value?.replace(re, 'u');
+      }
     }
   },
   sheetNameMatcher: (sheetNames) => {
@@ -302,5 +320,6 @@ export const config = {
       return sMain || doMain || doQual || sQual;
     });
     return potentials;
-  }
+  },
+  identifyingStrings: ['AITA JUNIOR TOUR']
 };
