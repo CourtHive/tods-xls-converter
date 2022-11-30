@@ -144,7 +144,8 @@ export function processKnockOut({ profile, analysis, sheet }) {
   const { resultsCount, nameCount } = matchUps.reduce(
     (assessment, matchUp) => {
       assessment.resultsCount += matchUp.result ? 1 : 0;
-      assessment.nameCount += matchUp.nameCount?.length || 0;
+      assessment.nameCount += matchUp.participantNames?.length || 0;
+      assessment.nameCount += matchUp.pairParticipantNames?.length || 0;
       return assessment;
     },
     { resultsCount: 0, nameCount: 0 }
