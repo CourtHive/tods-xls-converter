@@ -13,4 +13,4 @@ export const GENDER = 'gender';
 export const STATE = 'state';
 export const CITY = 'city';
 
-export const ENTRY_DETAILS = [ENTRY_STATUS, RANKING, SEED_VALUE, FIRST_NAME, LAST_NAME, PERSON_ID];
+export const ENTRY_DETAILS = [ENTRY_STATUS, RANKING, SEED_VALUE, FIRST_NAME, LAST_NAME, PERSON_ID, STATE];

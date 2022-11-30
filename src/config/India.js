@@ -83,12 +83,13 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: ENTRY_STATUS, header: 'st.' },
-      { attr: RANKING, header: 'rank' },
-      { attr: SEED_VALUE, header: 'seed' },
-      { attr: LAST_NAME, header: 'family name' },
-      { attr: FIRST_NAME, header: 'first name' },
-      { attr: PERSON_ID, header: ['reg.no', 'state'], valueRegex: '^\\d{6}$' },
+      { attr: ENTRY_STATUS, header: 'st.', limit: 1 },
+      { attr: RANKING, header: 'rank', limit: 1 },
+      { attr: SEED_VALUE, header: 'seed', limit: 1 },
+      { attr: LAST_NAME, header: 'family name', limit: 1 },
+      { attr: FIRST_NAME, header: ['first name', 'fisrt name'], limit: 1 },
+      { attr: PERSON_ID, header: ['aita no', 'reg.no', 'state'], limit: 1, valueRegex: '^\\d{6}$' }, // TODO: implement regex check for id
+      { attr: 'state', header: 'state', limit: 1 },
       { attr: ROUND, header: ['2nd round', 'quarterfinals', 'semifinals', 'final'] }
     ],
     sheetDefinitions: [

@@ -2,6 +2,7 @@ import { normalizeDiacritics, normalizeWhiteSpaces } from 'normalize-text';
 import { removeBits } from '../utilities/transformers';
 import { isObject } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
+import { tidyValue } from '../utilities/convenience';
 
 const { unique, instanceCount } = utilities;
 
@@ -128,6 +129,9 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
 
     if (options?.remove && Array.isArray(options.remove)) {
       value = removeBits(value, options.remove);
+    }
+    if (options?.tidy) {
+      value = tidyValue(value);
     }
 
     return value;

@@ -11,7 +11,7 @@ export function identifyWorkbook(workbook) {
   const workbookType = workbookTypes.find((currentType) => {
     const { identifyingStrings, mustContainSheetNames, sheetNameMatcher } = currentType;
 
-    if (identifyingStrings) {
+    if (Strings && identifyingStrings) {
       // BEST: search all cells in a workbook for a unique identifying string
       const containsIdentifyingString = Strings.some((str) =>
         identifyingStrings.some((identifier) => str?.t?.startsWith(identifier))

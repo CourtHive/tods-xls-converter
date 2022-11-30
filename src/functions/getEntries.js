@@ -1,7 +1,6 @@
 import { tournamentEngine, utilities, matchUpStatusConstants, entryStatusConstants } from 'tods-competition-factory';
 import { generateParticipantId } from '../utilities/hashing';
 import { isString } from '../utilities/identification';
-// import { getLoggingActive } from '../global/state';
 import { getRow } from './sheetAccess';
 
 import { ENTRY_DETAILS } from '../constants/attributeConstants';

@@ -5,9 +5,10 @@ import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
 import { getEntries } from './getEntries';
 
+import { MISSING_MATCHUP_DETAILS } from '../constants/errorConditions';
+import { RESULT, ROUND } from '../constants/sheetElements';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
-import { RESULT, ROUND } from '../constants/sheetElements';
 const { BYE } = matchUpStatusConstants;
 
 export function processKnockOut({ profile, analysis, sheet }) {
@@ -139,6 +140,19 @@ export function processKnockOut({ profile, analysis, sheet }) {
       }
     }
   });
+
+  const { resultsCount, nameCount } = matchUps.reduce(
+    (assessment, matchUp) => {
+      assessment.resultsCount += matchUp.result ? 1 : 0;
+      assessment.nameCount += matchUp.nameCount?.length || 0;
+      return assessment;
+    },
+    { resultsCount: 0, nameCount: 0 }
+  );
+
+  if (matchUps.length && (!resultsCount || !nameCount)) {
+    return { error: MISSING_MATCHUP_DETAILS };
+  }
 
   const stage = analysis.isQualifying ? 'QUALIFYING' : 'MAIN';
   const structure = {
