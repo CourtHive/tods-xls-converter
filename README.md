@@ -16,6 +16,10 @@ node
 .load i.js
 ```
 
+:::note
+`pnpm build` must be run each time source is modified
+:::
+
 ### Interactive processing
 
 The `i.js` script defines some utilities and saves current results in the global variable `r`.
