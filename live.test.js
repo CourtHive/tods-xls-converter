@@ -12,7 +12,7 @@ it('can process passing', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 0;
+  const processLimit = 1;
   const startIndex = 0;
 
   // setLoggingActive(true);
@@ -40,7 +40,7 @@ it('can process tests', () => {
   const readDir = './examples/sheets/testing';
 
   const sheetTypes = [];
-  const sheetNumbers = [1];
+  const sheetNumbers = [4];
   const sheetLimit = 0;
 
   const processLimit = 1;
