@@ -2,11 +2,12 @@ import { genderConstants, matchUpTypes, entryStatusConstants } from 'tods-compet
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
-import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION } from '../constants/sheetTypes';
+import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION, REPORT, SIGN_UP } from '../constants/sheetTypes';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import {
   CATEGORY,
   CITY,
+  DISTRICT,
   ENTRY_STATUS,
   EVENT_NAME,
   FIRST_NAME,
@@ -50,8 +51,29 @@ export const config = {
     rowDefinitions: [
       {
         type: HEADER,
+        id: 'signup',
+        elements: ['practice courts', { text: 'sign-in', options: { startsWith: true } }],
+        rows: 1,
+        minimumElements: 1
+      },
+      {
+        type: HEADER,
         id: 'notice',
         elements: ['notice'],
+        rows: 1,
+        minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'setup',
+        elements: [{ text: 'setup page', options: { startsWith: true } }],
+        rows: 1,
+        minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'report',
+        elements: [{ text: 'report cover', options: { startsWith: true } }, 'offence report', 'medical certification'],
         rows: 1,
         minimumElements: 1
       },
@@ -89,14 +111,11 @@ export const config = {
       { attr: LAST_NAME, header: 'family name', limit: 1 },
       { attr: FIRST_NAME, header: ['first name', 'fisrt name'], limit: 1 },
       { attr: PERSON_ID, header: ['aita no', 'reg.no', 'state'], limit: 1, valueRegex: '^\\d{6}$' }, // TODO: implement regex check for id
-      { attr: 'state', header: 'state', limit: 1 },
+      { attr: STATE, header: ['state'], limit: 1 },
+      { attr: DISTRICT, header: ['dist'], limit: 1 },
       { attr: ROUND, header: ['2nd round', 'quarterfinals', 'semifinals', 'final'] }
     ],
     sheetDefinitions: [
-      {
-        type: INFORMATION,
-        rowIds: ['tournamentInfo', 'tournamentOrganization']
-      },
       {
         type: KNOCKOUT,
         infoClass: 'drawInfo',
@@ -108,8 +127,24 @@ export const config = {
         rowIds: ['roundRobinParticipants', 'drawFooter']
       },
       {
+        type: REPORT,
+        rowIds: ['report']
+      },
+      {
+        type: SIGN_UP,
+        rowIds: ['signup']
+      },
+      {
         type: INFORMATION,
         rowIds: ['notice']
+      },
+      {
+        type: INFORMATION,
+        rowIds: ['setup']
+      },
+      {
+        type: INFORMATION,
+        rowIds: ['tournamentInfo', 'tournamentOrganization']
       },
       {
         type: PARTICIPANTS,

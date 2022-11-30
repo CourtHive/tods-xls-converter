@@ -226,9 +226,10 @@ export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet, o
   const options = { lowerCase: true, normalize: true, remove: [':'], ...additionalOptions };
   const elementRows = [].concat(
     ...rowElements
-      .map((element) => (options.lowerCase ? toLowerCase(element) : element))
-      .map((element) => (options.normalize ? toNormal(element) : element))
       .map((element) => {
+        element = options.lowerCase ? toLowerCase(element) : element;
+        element = options.normalize ? toNormal(element) : element;
+
         const valueRefs = Array.isArray(element)
           ? element.flatMap((e) => findValueRefs({ searchDetails: e, sheet, options }))
           : findValueRefs({ searchDetails: element, sheet, options });

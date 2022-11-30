@@ -40,7 +40,7 @@ it('can process tests', () => {
   const readDir = './examples/sheets/testing';
 
   const sheetTypes = [];
-  const sheetNumbers = [3];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 0;
@@ -49,7 +49,7 @@ it('can process tests', () => {
   setLoggingActive(true);
   setLoggingActive(true, 'dev');
   setLoggingActive(true, 'sheetNames');
-  setLoggingActive(true, 'matchUps');
+  // setLoggingActive(true, 'matchUps');
 
   const result = processDirectory({
     processStructures: true,
@@ -62,5 +62,5 @@ it('can process tests', () => {
   });
   if (result);
   printGlobalLog();
-  console.log(result.fileResults[0].sheetAnalysis[3].analysis?.columnProfiles.map((p) => p.attribute || p.character));
+  // console.log(result.fileResults[0].sheetAnalysis[3].analysis?.columnProfiles.map((p) => p.attribute || p.character));
 });
