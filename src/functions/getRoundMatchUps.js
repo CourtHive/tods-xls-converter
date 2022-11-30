@@ -1,7 +1,8 @@
 import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
-import { matchUpStatusConstants, utilities } from 'tods-competition-factory';
+import { matchUpStatusConstants } from 'tods-competition-factory';
 import { getMatchUpParticipants } from './getMatchUpParticipants';
-import { isNumeric, isString } from '../utilities/identification';
+import { getDerivedPair, getGroupings } from './columnUtilities';
+import { isString } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getLoggingActive } from '../global/state';
 
@@ -10,7 +11,9 @@ const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 export function getRoundMatchUps({
   roundParticipants, // if roundParticipants are provided then they are not sought in column
   pairedRowNumbers,
+  resultColumn,
   roundNumber,
+  nextColumn,
   isPreRound,
   analysis,
   profile,
@@ -22,15 +25,14 @@ export function getRoundMatchUps({
       return columnProfile || (currentProfile.column === column && { columnProfile: currentProfile, index });
     }, undefined);
 
-  const { columnProfile, index } = getColumn(column);
-  const nextColumnProfile = analysis.columnProfiles[index + 1];
+  const { columnProfile } = getColumn(column);
+  const { columnProfile: nextColumnProfile } = getColumn(nextColumn);
+  const resultColumnProfile = resultColumn ? getColumn(resultColumn).columnProfile : nextColumnProfile;
   if (!nextColumnProfile) return {};
 
   const providerBye = profile.matchUpStatuses?.bye || BYE;
   const providerWalkover = profile.matchUpStatuses?.walkover || WALKOVER;
   const providerDoubleWalkover = profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER;
-
-  const nextColumnResults = analysis.columnResultValues[nextColumnProfile.column] || [];
 
   const advancingParticipants = [];
   const participantDetails = [];
@@ -104,8 +106,11 @@ export function getRoundMatchUps({
 
       const resultRow = winningParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber;
       // get potential result
-      const potentialResult = tidyValue(nextColumnProfile.keyMap[`${nextColumn}${resultRow}`]);
-      const result = (nextColumnResults.includes(potentialResult) && potentialResult) || undefined;
+      const resultColumn = resultColumnProfile?.column;
+      const potentialResult =
+        resultColumnProfile && tidyValue(resultColumnProfile.keyMap[`${resultColumn}${resultRow}`]);
+      const resultColumnResults = analysis.columnResultValues[resultColumn] || [];
+      const result = ((resultColumn || resultColumnResults.includes(potentialResult)) && potentialResult) || undefined;
 
       const matchUp = { roundNumber, roundPosition, drawPositions, pairParticipantNames };
       if (result) {
@@ -196,53 +201,4 @@ function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysi
   }, {});
 
   return includes || {};
-}
-
-function getGroupings({ columnProfile }) {
-  const groupings = [];
-  let grouping;
-  let current;
-
-  let index = -1;
-  for (const row of columnProfile?.rows || []) {
-    index += 1;
-    const value = columnProfile.values[index];
-    if (isNumeric(value)) continue;
-
-    if (row - 1 === current) {
-      grouping.push(row);
-      current = row;
-      continue;
-    } else {
-      current = row;
-      if (grouping) groupings.push(grouping);
-      grouping = [current];
-      continue;
-    }
-  }
-  if (grouping) groupings.push(grouping);
-
-  return groupings;
-}
-
-function getDerivedPair({ profile, columnProfile, pair }) {
-  const diff = Math.abs(pair[1] - pair[0]);
-  if (diff < 4) return { derivedPair: pair, groups: [[pair[0]], [pair[1]]] };
-
-  const searchOffset = 3;
-  const getGroupRange = (group) => {
-    const max = Math.max(...group);
-    const min = Math.min(...group);
-    return utilities.generateRange(min - searchOffset, max + searchOffset);
-  };
-
-  const groups = [];
-  const groupings = getGroupings({ profile, columnProfile });
-  const derivedPair = pair.map((rowNumber) => {
-    const group = groupings.find((group) => getGroupRange(group).includes(rowNumber));
-    if (group) groups.push(group);
-    return group?.[0];
-  });
-
-  return { derivedPair, groups };
 }

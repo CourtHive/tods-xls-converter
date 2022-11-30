@@ -12,7 +12,7 @@ const purge = (logName) => {
 
 const props = {
   readDir: './sheets/testing',
-  processStructures: false,
+  processStructures: true,
   includeWorkbooks: false,
   sheetNumbers: [],
   sheetTypes: [],

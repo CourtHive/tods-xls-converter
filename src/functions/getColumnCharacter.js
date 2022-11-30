@@ -1,12 +1,22 @@
 import { isNumeric } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
 
+import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
+import { RESULT, ROUND } from '../constants/sheetElements';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
-export function getColumnCharacter({ attributeMap, columnIndex, columnProfile, sheetType }) {
-  const { consecutiveNumbers, containsNumeric, containsAlpha, values, lastNumericValue, column, allNumeric } =
-    columnProfile;
+export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, columnProfile, sheetType }) {
+  const {
+    consecutiveNumbers,
+    lastNumericValue,
+    containsNumeric,
+    scoreLikeCount,
+    containsAlpha,
+    allNumeric,
+    values,
+    column
+  } = columnProfile;
 
   const numericCheck = consecutiveNumbers && lastNumericValue > 0;
   const knockOutCheck =
@@ -27,6 +37,28 @@ export function getColumnCharacter({ attributeMap, columnIndex, columnProfile, s
     const lastNumeric = numericMap.lastIndexOf(true);
     const firstAlpha = numericMap.indexOf(false);
     if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
+  }
+
+  let hasNameValue;
+  const attributes = Object.values(attributeMap);
+  const nameColumnAttributes = attributes.filter((attribute) => [FIRST_NAME, LAST_NAME].includes(attribute));
+  if (nameColumnAttributes.length) {
+    const nameRound = nameColumnAttributes.some((attribute) => {
+      const nameColumnProfile = columnProfiles.find((profile) => profile.attribute === attribute);
+      const isNameRound = values.every((value) => {
+        const isNameValue = nameColumnProfile.values.includes(value);
+        if (isNameValue) hasNameValue = true;
+        return isNameValue;
+      });
+      return isNameRound;
+    });
+    if (nameRound) columnProfile.character = 'round';
+  }
+
+  const { character, attribute } = columnProfile;
+
+  if (scoreLikeCount && !hasNameValue && !character && (!attribute || attribute === ROUND)) {
+    columnProfile.character = RESULT;
   }
 
   return columnProfile.character;

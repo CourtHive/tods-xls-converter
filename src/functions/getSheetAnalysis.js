@@ -17,8 +17,6 @@ import {
   tidyValue
 } from '../utilities/convenience';
 
-import { PRE_ROUND } from '../constants/columnConstants';
-
 export const getSheetAnalysis = ({
   ignoreCellRefs = [],
   sheetDefinition,
@@ -60,16 +58,25 @@ export const getSheetAnalysis = ({
     .map(assessColumn)
     .filter(({ values }) => values?.length);
 
-  // post-process columnProfiles
-  columnProfiles.forEach((columnProfile, columnIndex) => {
-    const character = getColumnCharacter({ sheetType, columnProfile, attributeMap, columnIndex });
-    if (character && !columns[character]) columns[character] = columnProfile.column;
-  });
-
   // apply any character processing specified by profile
   if (profile.columnCharacter) {
-    columnProfiles.forEach((columnProfile) => profile.columnCharacter({ columnProfile, attributeMap }));
+    columnProfiles.forEach((columnProfile) => {
+      const character = profile.columnCharacter({ columnProfile, attributeMap });
+      if (character && !columns[character]) columns[character] = columnProfile.column;
+    });
   }
+
+  // post-process columnProfiles
+  columnProfiles.forEach((columnProfile, columnIndex) => {
+    const character = getColumnCharacter({
+      columnProfiles,
+      columnProfile,
+      attributeMap,
+      columnIndex,
+      sheetType
+    });
+    if (character && !columns[character]) columns[character] = columnProfile.column;
+  });
 
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
@@ -88,10 +95,11 @@ export const getSheetAnalysis = ({
     .reverse()
     .flatMap((frequency) => Object.keys(columnFrequency).filter((column) => columnFrequency[column] === frequency));
 
-  const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(columnProfiles);
+  const positionColumnIndex = columnKeys.indexOf(positionColumn);
+
   const targetColumns = Object.keys(multiColumnFrequency).filter(
-    (column) => ![preRoundColumn, positionColumn].includes(column)
+    (column) => columnKeys.indexOf(column) > positionColumnIndex
   );
 
   const skippedResults = {};

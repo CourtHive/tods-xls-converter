@@ -44,7 +44,7 @@ export const config = {
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
     matchStatuses: ['def', 'ret', 'bye', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
     matchUpStatuses: { bye: 'BYE', walkover: 'w/o' },
-    matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
+    matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned', 'default', 'retired'],
     entryStatusMap,
     categories,
     rowDefinitions: [
@@ -250,7 +250,11 @@ export const config = {
       const allProgressionKeys = values.every(
         (value) => typeof value === 'string' && ['a', 'b', 'as', 'bs'].includes(value.toLowerCase())
       );
-      if (allProgressionKeys) columnProfile.values = [];
+      if (allProgressionKeys) {
+        columnProfile.values = [];
+        columnProfile.character = 'progression';
+        return columnProfile.character;
+      }
     }
   },
   sheetNameMatcher: (sheetNames) => {

@@ -4,17 +4,19 @@ import { getRoundMatchUps } from './getRoundMatchUps';
 
 const { QUALIFYING } = drawDefinitionConstants;
 
-export function processPreRound({ preRoundParticipantRows, preRoundColumn, analysis, profile }) {
+export function processPreRound({ preRoundParticipantRows, preRoundColumn, analysis, profile, nextColumn }) {
   const pairedRowNumbers = utilities.chunkArray(preRoundParticipantRows, 2);
   // these matchUps will go into qualifyingStructure
-  const { matchUps, participantDetails } = getRoundMatchUps({
+  const result = getRoundMatchUps({
     column: preRoundColumn,
     isPreRound: true,
     pairedRowNumbers,
     roundNumber: 1,
+    nextColumn,
     analysis,
     profile
   });
+  const { matchUps, participantDetails } = result;
 
   for (const matchUp of matchUps) {
     const { roundPosition } = matchUp;
