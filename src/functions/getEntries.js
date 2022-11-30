@@ -62,6 +62,7 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
       const participantId =
         personId ||
         generateParticipantId({ attributes: [firstName, lastName, ranking, participantName].filter(Boolean) });
+
       const positionAssignment = participantIsBye ? { drawPosition, bye: true } : { drawPosition, participantId };
 
       positionAssignments.push(positionAssignment);
@@ -77,7 +78,7 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
         seedAssignments.push({ seedValue, participantId });
       }
 
-      return !participantIsBye;
+      return !participantIsBye && typeof participantId !== 'object';
     })
     .map((participant) => {
       const { participantId, ranking, personId, firstName, lastName } = participant;
