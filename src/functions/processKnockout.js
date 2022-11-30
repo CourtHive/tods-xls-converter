@@ -3,17 +3,15 @@ import { getPositionColumn } from '../utilities/convenience';
 import { getRoundMatchUps } from './getRoundMatchUps';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
-import { getLoggingActive } from '../global/state';
 import { getEntries } from './getEntries';
 
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
+import { RESULT, ROUND } from '../constants/sheetElements';
 const { BYE } = matchUpStatusConstants;
 
 export function processKnockOut({ profile, analysis, sheet }) {
   const { columnProfiles, avoidRows } = analysis;
-
-  const logging = getLoggingActive('dev');
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
@@ -36,10 +34,15 @@ export function processKnockOut({ profile, analysis, sheet }) {
   //    - preRound is roundNumber: 0, first round of structure is roundNumber: 1
 
   if (preRoundParticipantRows?.length) {
-    const { matchUps, structure, participantDetails } = processPreRound({
+    const columns = analysis.columnProfiles.map(({ column }) => column).sort();
+    const preRoundIndex = columns.indexOf(preRoundColumn);
+    const nextColumn = columns[preRoundIndex + 1];
+
+    const { participantDetails, structure } = processPreRound({
       preRoundParticipantRows,
       preRoundColumn,
       participants,
+      nextColumn,
       analysis,
       profile
     });
@@ -47,8 +50,6 @@ export function processKnockOut({ profile, analysis, sheet }) {
     structures.push(structure);
 
     participants.push(...participantDetails.filter(({ isByePosition }) => isByePosition));
-
-    matchUps.push(...matchUps);
   }
 
   // const qualifyingParticipants = participants.filter(({ advancedParticipantName }) => advancedParticipantName);
@@ -70,7 +71,7 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
   participants.push(...firstRoundParticipants);
 
-  const roundColumnsToProcess = analysis.columnProfiles
+  let roundColumns = analysis.columnProfiles
     .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
     .map(({ column }) => column);
 
@@ -83,20 +84,38 @@ export function processKnockOut({ profile, analysis, sheet }) {
       }),
       2
     );
-  if (logging) console.log({ roundColumnsToProcess });
 
+  const characterAssessment = utilities.instanceCount(
+    analysis.columnProfiles.filter(({ column }) => roundColumns.includes(column)).map(({ character }) => character)
+  );
+  const roundResult = [ROUND, RESULT].every((attribute) => Object.keys(characterAssessment).includes(attribute));
+  const validValues = Object.values(characterAssessment).length === 2 && characterAssessment[ROUND] > 0;
+  const containsRoundsAndResults = roundResult & validValues;
+
+  const resultColumns =
+    containsRoundsAndResults &&
+    analysis.columnProfiles.filter(({ character }) => character === RESULT).map(({ column }) => column);
+
+  if (resultColumns) {
+    // when resultColumns are separate from roundColumns filter out the result columns
+    roundColumns = roundColumns.filter((column) => !resultColumns.includes(column));
+  }
+
+  // if positionAssignments have been determined then push an additional round for processing
   if (positionAssignments.length) {
-    roundColumnsToProcess.unshift(analysis.columnProfiles[boundaryIndex].column);
+    roundColumns.unshift(analysis.columnProfiles[boundaryIndex].column);
   }
 
   let roundNumber = 1;
   // const progressionOffset = positionAssignments.length ? 1 : 0;
-  roundColumnsToProcess.forEach((column) => {
+  roundColumns.forEach((column, i) => {
     // const pairedRowNumbers = positionProgression[roundNumber - 1 + progressionOffset];
     const pairedRowNumbers = positionProgression[roundNumber - 1];
 
     if (pairedRowNumbers) {
       const result = getRoundMatchUps({
+        resultColumn: resultColumns?.[i],
+        nextColumn: roundColumns[i + 1],
         roundParticipants,
         pairedRowNumbers,
         participants,
