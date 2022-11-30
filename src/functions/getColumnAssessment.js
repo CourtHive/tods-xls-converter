@@ -1,5 +1,5 @@
 import { isSkipWord, onlyAlpha, onlyNumeric } from '../utilities/convenience';
-import { isNumeric } from '../utilities/identification';
+import { isNumeric, isScoreLike, isString } from '../utilities/identification';
 import { getCellValue, getRow } from './sheetAccess';
 
 export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column }) {
@@ -33,6 +33,12 @@ export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, p
           assessment.allAlpha = false;
         }
 
+        if (
+          isScoreLike(value) ||
+          (isString(value) && value.split(' ').some((part) => profile.matchOutcomes?.includes(part)))
+        )
+          assessment.scoreLikeCount += 1;
+
         if (value !== '') {
           assessment.values.push(value);
           assessment.keyMap[key] = value;
@@ -50,6 +56,7 @@ export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, p
       allNumeric: truthiness,
       allAlpha: truthiness,
       lastNumericValue: 0,
+      scoreLikeCount: 0,
       keyMap: {},
       values: [],
       rows: [],
