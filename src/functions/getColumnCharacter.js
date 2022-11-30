@@ -3,11 +3,20 @@ import { utilities } from 'tods-competition-factory';
 
 import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
+import { RESULT, ROUND } from '../constants/sheetElements';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
 export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, columnProfile, sheetType }) {
-  const { consecutiveNumbers, containsNumeric, containsAlpha, allAlpha, values, lastNumericValue, column, allNumeric } =
-    columnProfile;
+  const {
+    consecutiveNumbers,
+    lastNumericValue,
+    containsNumeric,
+    scoreLikeCount,
+    containsAlpha,
+    allNumeric,
+    values,
+    column
+  } = columnProfile;
 
   const numericCheck = consecutiveNumbers && lastNumericValue > 0;
   const knockOutCheck =
@@ -30,17 +39,26 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
     if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
   }
 
-  if (allAlpha) {
-    const attributes = Object.values(attributeMap);
-    const nameColumnAttributes = attributes.filter((attribute) => [FIRST_NAME, LAST_NAME].includes(attribute));
-    if (nameColumnAttributes.length) {
-      const nameRound = nameColumnAttributes.some((attribute) => {
-        const targetProfile = columnProfiles.find((profile) => profile.attribute === attribute);
-        const isNameRound = values.every((value) => targetProfile.values.includes(value));
-        return isNameRound;
+  let hasNameValue;
+  const attributes = Object.values(attributeMap);
+  const nameColumnAttributes = attributes.filter((attribute) => [FIRST_NAME, LAST_NAME].includes(attribute));
+  if (nameColumnAttributes.length) {
+    const nameRound = nameColumnAttributes.some((attribute) => {
+      const nameColumnProfile = columnProfiles.find((profile) => profile.attribute === attribute);
+      const isNameRound = values.every((value) => {
+        const isNameValue = nameColumnProfile.values.includes(value);
+        if (isNameValue) hasNameValue = true;
+        return isNameValue;
       });
-      if (nameRound) columnProfile.character = 'round';
-    }
+      return isNameRound;
+    });
+    if (nameRound) columnProfile.character = 'round';
+  }
+
+  const { character, attribute } = columnProfile;
+
+  if (scoreLikeCount && !hasNameValue && !character && (!attribute || attribute === ROUND)) {
+    columnProfile.character = RESULT;
   }
 
   return columnProfile.character;
