@@ -18,7 +18,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
           const re = obj.valueRegex && new RegExp(obj.valueRegex);
           const isValid =
             !re ||
-            columnValues[col].every((value) => {
+            columnValues[col]?.every((value) => {
               const check = re.test(value);
               return !value || check;
             });

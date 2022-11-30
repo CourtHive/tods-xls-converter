@@ -29,14 +29,15 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
     }
     const columnProfile = analysis.columnProfiles.find((profile) => profile.column === attributeColumn);
     const rows = positionRefs.map(getRow).sort(utilities.numericSort);
-    rows.forEach((row, i) => {
-      const cellRef = `${attributeColumn}${row}`;
-      if (!rowParticipants[row]) rowParticipants[row] = {};
-      const value = columnProfile.keyMap[cellRef];
-      // const value = getCellValue(sheet[cellRef]);
-      if (value) rowParticipants[row][attribute] = value;
-      rowParticipants[row].drawPosition = i + 1;
-    });
+    columnProfile &&
+      rows.forEach((row, i) => {
+        const cellRef = `${attributeColumn}${row}`;
+        if (!rowParticipants[row]) rowParticipants[row] = {};
+        const value = columnProfile.keyMap[cellRef];
+        // const value = getCellValue(sheet[cellRef]);
+        if (value) rowParticipants[row][attribute] = value;
+        rowParticipants[row].drawPosition = i + 1;
+      });
   }
 
   const isBye = (participant) =>
