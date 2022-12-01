@@ -93,7 +93,9 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
       return { participantId, participantName, person, ranking };
     });
 
-  if (!firstNameCount) return { error: MISSING_NAMES };
+  if (participants.length && !firstNameCount) {
+    return { error: MISSING_NAMES };
+  }
 
   return { entries, boundaryIndex, participants, positionAssignments, seedAssignments };
 }
