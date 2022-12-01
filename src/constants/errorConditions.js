@@ -9,6 +9,7 @@ export const MISSING_MATCHUP = 'MISSING_MATCHUP';
 export const INVALID_VALUES = 'INVALID_VALUES';
 export const MISSING_VALUES = 'MISSING_VALUES';
 export const VALUE_MISMATCH = 'VALUE_MISMATCH';
+export const MISSING_NAMES = 'MISSING_NAMES';
 
 export const errorConditionConstants = {
   MISSING_SHEET_DEFINITION,
@@ -21,5 +22,6 @@ export const errorConditionConstants = {
   MISSING_MATCHUP,
   INVALID_VALUES,
   MISSING_VALUES,
-  VALUE_MISMATCH
+  VALUE_MISMATCH,
+  MISSING_NAMES
 };
