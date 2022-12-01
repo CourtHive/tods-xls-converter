@@ -62,13 +62,17 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
   const columns = analysis.columnProfiles.map(({ column }) => column).sort();
 
+  const entryResult = getEntries({ sheet, analysis, profile, columns, positionRefs, preRoundColumn, positionColumn });
+
+  if (entryResult.error) return entryResult;
+
   const {
     participants: firstRoundParticipants,
     positionAssignments,
     seedAssignments,
     boundaryIndex,
     entries
-  } = getEntries({ sheet, analysis, profile, columns, positionRefs, preRoundColumn, positionColumn });
+  } = entryResult;
 
   participants.push(...firstRoundParticipants);
 
