@@ -2,6 +2,7 @@ import { workbookTypes } from '../config/workbookTypes';
 
 import { MISSING_WORKBOOK } from '../constants/errorConditions';
 import { SUCCESS } from '../constants/resultConstants';
+import { isString } from '../utilities/identification';
 
 export function identifyWorkbook(workbook) {
   if (!workbook) return { error: MISSING_WORKBOOK };
@@ -9,14 +10,34 @@ export function identifyWorkbook(workbook) {
   const { Strings, SheetNames } = workbook;
 
   let workbookType = workbookTypes.find((currentType) => {
-    const { identifyingStrings } = currentType;
+    const { identifiers: typeIdentifiers } = currentType;
+    const identifiers = typeIdentifiers?.map((identifier) => {
+      const obj = typeof identifier === 'object' ? { ...identifier, text: identifier.text?.toLowerCase() } : identifier;
+      return isString(identifier) ? identifier.toLowerCase() : obj;
+    });
 
-    if (Strings && identifyingStrings) {
+    if (Strings && identifiers) {
       // BEST: search all cells in a workbook for a unique identifying string
-      const containsIdentifyingString = Strings.some((str) =>
-        identifyingStrings.some((identifier) => str?.t?.startsWith(identifier))
-      );
-      if (containsIdentifyingString) return true;
+      const containsIdentifier = Strings.some((str) => {
+        const value = typeof str?.t === 'string' ? str.t.toLowerCase() : str.t;
+        return identifiers.some((identifier) => {
+          if (typeof identifier === 'object') {
+            const { text, ...options } = identifier;
+            if (options.startsWith) {
+              return value?.startsWith(text);
+            } else if (options.includes) {
+              return value?.includes(text);
+            } else if (options.endsWith) {
+              return value?.endsWith(text);
+            } else if (text === value) {
+              return true;
+            }
+          } else {
+            return identifier === value;
+          }
+        });
+      });
+      if (containsIdentifier) return true;
     }
   });
 

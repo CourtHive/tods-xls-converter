@@ -107,9 +107,10 @@ export const config = {
         type: FOOTER,
         id: 'drawFooter',
         elements: [
+          { text: 'lucky losers', options: { includes: true } },
           'acc. ranking',
           'seeded players',
-          'luck losers',
+          'lucky losers',
           'replacing',
           'draw date/time',
           'alternates',
@@ -118,7 +119,7 @@ export const config = {
           'aita representative'
         ],
         rows: 9,
-        minimumElements: 3
+        minimumElements: 2
       }
     ],
     headerColumns: [
@@ -331,5 +332,5 @@ export const config = {
     });
     return potentials;
   },
-  identifyingStrings: ['AITA JUNIOR TOUR']
+  identifiers: ['AITA JUNIOR TOUR', { text: 'SPORTS india', includes: true }]
 };
