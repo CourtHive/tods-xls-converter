@@ -30,7 +30,5 @@ export function identifySheet({ sheet, profile }) {
     return exactMatch;
   });
 
-  console.log({ rowIds });
-
   return { sheetDefinition: identifiedDefinition, hasValues, ...SUCCESS };
 }
