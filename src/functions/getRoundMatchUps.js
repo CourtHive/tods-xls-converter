@@ -190,6 +190,7 @@ export function getRoundMatchUps({
   return { matchUps, participantDetails, advancingParticipants };
 }
 
+// TODO: Handle Bye advancement... require access not just to pairParticipantNames but complete sides
 function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysis, profile }) {
   if (!winningParticipantName) return {};
   const { qualifyingIdentifiers } = profile;
@@ -214,7 +215,7 @@ function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysi
   if (exactMatchSide?.advancedSide) return exactMatchSide;
 
   const startsWith = nonBracketedParticipantNames.reduce((side, participantName, i) => {
-    const condition = participantName.startsWith(nonBracketedWinningParticipantName);
+    const condition = participantName?.startsWith(nonBracketedWinningParticipantName);
     if (condition) {
       return { advancedSide: i + 1, participantName };
     } else {
@@ -224,7 +225,7 @@ function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysi
   if (startsWith?.advancedSide) return startsWith;
 
   const includes = nonBracketedParticipantNames.reduce((side, participantName, i) => {
-    const condition = participantName.includes(nonBracketedWinningParticipantName);
+    const condition = participantName?.includes(nonBracketedWinningParticipantName);
     if (condition) {
       return { advancedSide: i + 1, participantName };
     } else {

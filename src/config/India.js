@@ -99,7 +99,7 @@ export const config = {
       {
         type: HEADER,
         id: 'knockoutParticipants',
-        elements: ['rank', 'seed', 'family name', 'first name', 'reg.no', 'state', ...roundNames],
+        elements: ['rank', 'seed', 'family name', 'first name', 'reg no.', 'reg.no', 'state', ...roundNames],
         rows: 1,
         minimumElements: 5
       },
@@ -107,9 +107,10 @@ export const config = {
         type: FOOTER,
         id: 'drawFooter',
         elements: [
+          { text: 'lucky losers', options: { includes: true } },
           'acc. ranking',
           'seeded players',
-          'luck losers',
+          'lucky losers',
           'replacing',
           'draw date/time',
           'alternates',
@@ -118,7 +119,7 @@ export const config = {
           'aita representative'
         ],
         rows: 9,
-        minimumElements: 3
+        minimumElements: 2
       }
     ],
     headerColumns: [
@@ -129,7 +130,13 @@ export const config = {
       { attr: FIRST_NAME, header: ['first name', 'fisrt name'], limit: 1 },
       {
         attr: PERSON_ID,
-        header: [{ text: 'reg.', options: { startsWith: true } }, 'aita no', 'reg.no', 'state'],
+        header: [
+          { text: 'reg no', options: { startsWith: true } },
+          { text: 'reg.', options: { startsWith: true } },
+          'aita no',
+          'reg.no',
+          'state'
+        ],
         limit: 1,
         valueRegex: '^\\d{6}$'
       }, // TODO: implement regex check for id
@@ -331,5 +338,5 @@ export const config = {
     });
     return potentials;
   },
-  identifyingStrings: ['AITA JUNIOR TOUR']
+  identifiers: ['AITA JUNIOR TOUR', { text: 'SPORTS india', includes: true }]
 };

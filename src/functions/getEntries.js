@@ -5,6 +5,7 @@ import { getRow } from './sheetAccess';
 
 import { ENTRY_DETAILS } from '../constants/attributeConstants';
 import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
+import { MISSING_NAMES } from '../constants/errorConditions';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
 const { BYE } = matchUpStatusConstants;
 
@@ -16,7 +17,7 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
 
   const attributeColumns = Object.keys(analysis.columns);
   const entryDetailAttributes = ENTRY_DETAILS.filter((attribute) => attributeColumns.includes(attribute));
-  const entryDetailColumns = entryDetailAttributes.flatMap((attribute) => analysis.columns[attribute]);
+  const entryDetailColumns = entryDetailAttributes.flatMap((attribute) => analysis.columns[attribute]).sort();
 
   const boundaryColumnsToConsider = [preRoundColumn, positionColumn, ...entryDetailColumns].filter(Boolean);
   const boundaryIndex = Math.max(...boundaryColumnsToConsider.map((column) => columns.indexOf(column)), 0);
@@ -52,6 +53,7 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
     drawSize
   });
 
+  let firstNameCount = 0;
   const participants = Object.values(rowParticipants)
     .filter((participant) => {
       if (participant.seedValue > seedsCount) {
@@ -83,11 +85,17 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
     .map((participant) => {
       const { participantId, ranking, personId, firstName, lastName } = participant;
       const person = { standardFamilyName: lastName, standardGivenName: firstName, personId };
-      const participantName = participant.participantName || `${lastName}, ${firstName}`;
+      const lastFirst = lastName && firstName && `${lastName}, ${firstName}`;
+      const participantName = participant.participantName || lastFirst || lastName || firstName;
+      if (firstName) firstNameCount += 1;
 
       // TODO: ranking should be attached as a timeItem
       return { participantId, participantName, person, ranking };
     });
+
+  if (participants.length && !firstNameCount) {
+    return { error: MISSING_NAMES };
+  }
 
   return { entries, boundaryIndex, participants, positionAssignments, seedAssignments };
 }

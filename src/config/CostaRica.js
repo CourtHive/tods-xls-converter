@@ -367,5 +367,5 @@ export const config = {
     });
     return potentials;
   },
-  identifyingStrings: [organization]
+  identifiers: [organization, { text: 'COSTARRICENSE', includes: true }]
 };

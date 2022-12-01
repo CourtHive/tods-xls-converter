@@ -40,7 +40,7 @@ it('can process tests', () => {
 
   const sheetTypes = [];
   const sheetNumbers = [];
-  const sheetLimit = 0;
+  const sheetLimit = 1;
 
   const processLimit = 0;
   const startIndex = 0;
@@ -48,7 +48,7 @@ it('can process tests', () => {
   setLoggingActive(true);
   setLoggingActive(true, 'dev');
   setLoggingActive(true, 'sheetNames');
-  setLoggingActive(true, 'matchUps');
+  // setLoggingActive(true, 'matchUps');
 
   const result = processDirectory({
     processStructures: true,
