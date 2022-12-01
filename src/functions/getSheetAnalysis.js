@@ -27,14 +27,14 @@ export const getSheetAnalysis = ({
   sheet,
   info
 }) => {
-  const { headerRow, footerRow, avoidRows, filteredKeys, columnKeys } = getSheetKeys({
+  const { headerRow, footerRow, avoidRows, filteredKeys, columnKeys, columnValues } = getSheetKeys({
     sheetDefinition,
     ignoreCellRefs,
     profile,
     sheet
   });
 
-  const columns = getHeaderColumns({ sheet, profile, headerRow });
+  const columns = getHeaderColumns({ sheet, profile, headerRow, columnValues });
 
   const attributeMap = Object.assign(
     {},

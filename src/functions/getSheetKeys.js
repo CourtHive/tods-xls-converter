@@ -4,6 +4,7 @@ import { getContentFrame } from './getContentFrame';
 
 export function getSheetKeys({ sheet, sheetDefinition, profile, ignoreCellRefs = [] }) {
   const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition });
+  const columnValues = {};
 
   const isNotSkipExpression = (key) => {
     const value = getCellValue(sheet[key]);
@@ -27,10 +28,16 @@ export function getSheetKeys({ sheet, sheetDefinition, profile, ignoreCellRefs =
     .filter(keyHasSingleAlpha)
     .filter(isNotSkipExpression);
 
-  const columnKeys = filteredKeys.reduce(
-    (keys, key) => (keys.includes(getCol(key)) ? keys : keys.concat(getCol(key))),
-    []
-  );
+  const columnKeys = filteredKeys.reduce((keys, key) => {
+    const column = getCol(key);
+    const value = getCellValue(sheet[key]);
+    if (!columnValues[column]) {
+      columnValues[column] = [value];
+    } else {
+      columnValues[column].push(value);
+    }
+    return keys.includes(column) ? keys : keys.concat(column);
+  }, []);
 
-  return { filteredKeys, columnKeys, avoidRows, headerRow, footerRow };
+  return { filteredKeys, columnKeys, avoidRows, headerRow, footerRow, columnValues };
 }

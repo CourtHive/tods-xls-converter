@@ -31,7 +31,6 @@ it('can process passing', () => {
   printGlobalLog();
   purgeGlobalLog();
   console.log('PASSED', Object.keys(result));
-  // console.log(result.fileResults[0].sheetAnalysis[12].analysis.isQualifying);
 
   if (writeResult) writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[0]), 'UTF-8');
 });
@@ -40,16 +39,16 @@ it('can process tests', () => {
   const readDir = './examples/sheets/testing';
 
   const sheetTypes = [];
-  const sheetNumbers = [4];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
+  const processLimit = 0;
   const startIndex = 0;
 
   setLoggingActive(true);
   setLoggingActive(true, 'dev');
   setLoggingActive(true, 'sheetNames');
-  // setLoggingActive(true, 'matchUps');
+  setLoggingActive(true, 'matchUps');
 
   const result = processDirectory({
     processStructures: true,
@@ -62,5 +61,5 @@ it('can process tests', () => {
   });
   if (result);
   printGlobalLog();
-  // console.log(result.fileResults[0].sheetAnalysis[12].analysis.isQualifying);
+  // console.log( result.fileResults[0].sheetAnalysis[3].analysis?.columnProfiles.map((p) => [p.column, p.attribute || p.character]));
 });

@@ -28,8 +28,10 @@ export function getCategory({ sheet, sheetName, profile }) {
     return { error: VALUE_MISMATCH };
   }
 
+  const converter = profile.converters?.category;
   const loweredCategory = (sheetCategories[0] || sheetNameCategory)?.toLowerCase();
-  const category = categories.find((c) => loweredCategory?.includes(c.toLowerCase()));
+  const targetCategory = converter ? converter(loweredCategory) : loweredCategory;
+  const category = categories.find((c) => targetCategory?.includes(c.toLowerCase()));
 
   return { category };
 }

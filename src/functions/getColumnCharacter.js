@@ -46,7 +46,7 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
     const nameRound = nameColumnAttributes.some((attribute) => {
       const nameColumnProfile = columnProfiles.find((profile) => profile.attribute === attribute);
       const isNameRound = values.every((value) => {
-        const isNameValue = nameColumnProfile.values.includes(value);
+        const isNameValue = nameColumnProfile?.values?.includes(value);
         if (isNameValue) hasNameValue = true;
         return isNameValue;
       });
