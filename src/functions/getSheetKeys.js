@@ -1,9 +1,13 @@
 import { containsExpression, isFloatValue, keyHasSingleAlpha } from '../utilities/convenience';
 import { getCellValue, getCol, getRow } from './sheetAccess';
+import { utilities } from 'tods-competition-factory';
 import { getContentFrame } from './getContentFrame';
 
 export function getSheetKeys({ sheet, sheetDefinition, profile, ignoreCellRefs = [] }) {
-  const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition });
+  const sheetRows = utilities.unique(Object.keys(sheet).map(getRow).filter(Boolean)).sort(utilities.numericSort);
+  const rowRange = { from: sheetRows[0], to: sheetRows[sheetRows.length - 1] };
+
+  const { headerRow, footerRow, avoidRows } = getContentFrame({ sheet, profile, sheetDefinition, rowRange });
   const columnValues = {};
 
   const isNotSkipExpression = (key) => {
