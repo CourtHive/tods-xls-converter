@@ -2,7 +2,15 @@ import { genderConstants, matchUpTypes, entryStatusConstants } from 'tods-compet
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
-import { KNOCKOUT, ROUND_ROBIN, PARTICIPANTS, INFORMATION, REPORT, SIGN_UP } from '../constants/sheetTypes';
+import {
+  KNOCKOUT,
+  ROUND_ROBIN,
+  PARTICIPANTS,
+  INFORMATION,
+  REPORT,
+  SIGN_UP,
+  INDETERMINATE
+} from '../constants/sheetTypes';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import {
   CATEGORY,
@@ -27,13 +35,17 @@ const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
 const { MALE, FEMALE, ANY } = genderConstants;
 
 const roundNames = [
+  'round 1',
   '2nd round',
   '3rd round',
   'pre-quarters',
+  'pre quarter finals',
   'round of 32',
   'quarterfinals',
+  'quarter finals',
   'semifinal',
   'semifinals',
+  'semi finals',
   'semi-finals',
   'finals',
   'final'
@@ -99,9 +111,20 @@ export const config = {
       {
         type: HEADER,
         id: 'knockoutParticipants',
-        elements: ['rank', 'seed', 'family name', 'first name', 'reg no.', 'reg.no', 'state', ...roundNames],
+        elements: [
+          'rank',
+          'seed',
+          'name',
+          'family name',
+          'first name',
+          'aita no',
+          'reg no.',
+          'reg.no',
+          'state',
+          ...roundNames
+        ],
         rows: 1,
-        minimumElements: 5
+        minimumElements: 4
       },
       {
         type: FOOTER,
@@ -123,7 +146,7 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: ENTRY_STATUS, header: 'st.', limit: 1 },
+      { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: 'seed', limit: 1 },
       { attr: LAST_NAME, header: 'family name', limit: 1 },
@@ -135,9 +158,11 @@ export const config = {
           { text: 'reg.', options: { startsWith: true } },
           'aita no',
           'reg.no',
-          'state'
+          'state',
+          'nationality'
         ],
         limit: 1,
+        skipWords: ['reg'],
         valueRegex: '^\\d{6}$'
       }, // TODO: implement regex check for id
       { attr: STATE, header: ['state'], limit: 1 },
@@ -148,12 +173,20 @@ export const config = {
       {
         type: KNOCKOUT,
         infoClass: 'drawInfo',
-        rowIds: ['knockoutParticipants', 'drawFooter']
+        rowIds: ['knockoutParticipants', 'drawFooter'],
+        minimumElements: 2
       },
       {
         type: ROUND_ROBIN,
         infoClass: 'drawInfo',
-        rowIds: ['roundRobinParticipants', 'drawFooter']
+        rowIds: ['roundRobinParticipants', 'drawFooter'],
+        minimumElements: 2
+      },
+      {
+        type: INDETERMINATE,
+        infoClass: 'drawInfo',
+        rowIds: ['knockoutParticipants'],
+        minimumElements: 2
       },
       {
         type: REPORT,
@@ -338,5 +371,5 @@ export const config = {
     });
     return potentials;
   },
-  identifiers: ['AITA JUNIOR TOUR', { text: 'SPORTS india', includes: true }]
+  identifiers: ['AITA JUNIOR TOUR', { text: 'SPORTS india', includes: true }, { text: 'sportindia', includes: true }]
 };
