@@ -15,7 +15,7 @@ export function processIndeterminate(props) {
   const twoOrMoreColumns = frequencyValues.length >= 2;
   const maxFrequencyValue = Math.max(...frequencyValues);
   const { positionColumnProfile } = getPositionColumn(analysis.columnProfiles);
-  const positionValuesCount = positionColumnProfile.values.length;
+  const positionValuesCount = positionColumnProfile?.values?.length || 0;
   const viableFrequencyColumn = maxFrequencyValue <= positionValuesCount && maxFrequencyValue > positionValuesCount / 2;
 
   if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
