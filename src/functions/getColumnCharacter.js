@@ -57,6 +57,7 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
 
   const { character, attribute } = columnProfile;
 
+  // need to add additional safeguards here so that result column is not before any of the idAttribute columns
   if (scoreLikeCount && !hasNameValue && !character && (!attribute || attribute === ROUND)) {
     columnProfile.character = RESULT;
   }
