@@ -174,7 +174,7 @@ export function getRoundMatchUps({
             message
           });
         } else if (matchUp.winningSide) {
-          if (logging) console.log('No win reason');
+          if (logging) console.log('No win reason', { resultRow, resultColumn });
         }
       }
 
