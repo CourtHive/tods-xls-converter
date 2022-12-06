@@ -1,10 +1,11 @@
-import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { matchUpStatusConstants } from 'tods-competition-factory';
 import { getMatchUpParticipants } from './getMatchUpParticipants';
 import { getDerivedPair, getGroupings } from './columnUtilities';
-import { isString } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
+import { isString } from '../utilities/identification';
+import { tidyValue } from '../utilities/convenience';
 import { getLoggingActive } from '../global/state';
+import { getAdvancedSide } from './getAdvancedSide';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -104,6 +105,8 @@ export function getRoundMatchUps({
         consideredParticipants,
         winningParticipantName,
         pairParticipantNames,
+        roundPosition,
+        roundNumber,
         analysis,
         profile
       })?.advancedSide;
@@ -115,10 +118,10 @@ export function getRoundMatchUps({
         if (roundParticipants?.length) {
           if (advancedSide) {
             advancingParticipants.push(consideredParticipants[advancedSide - 1]);
-          } else {
-            advancingParticipants.push({});
           }
         }
+      } else {
+        advancingParticipants.push({});
       }
 
       const getResult = (resultColumn) => {
@@ -161,6 +164,8 @@ export function getRoundMatchUps({
       } else if (advancedSide) {
         matchUp.matchUpStatus = COMPLETED;
         matchUp.winningSide = advancedSide;
+      } else {
+        console.log('SOMETHING', { lowerResult });
       }
 
       if (!result && !isBye) {
@@ -188,50 +193,4 @@ export function getRoundMatchUps({
 
   if (getLoggingActive('matchUps')) console.log(matchUps);
   return { matchUps, participantDetails, advancingParticipants };
-}
-
-// TODO: Handle Bye advancement... require access not just to pairParticipantNames but complete sides
-function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysis, profile }) {
-  if (!winningParticipantName) return {};
-  const { qualifyingIdentifiers } = profile;
-  if (analysis.isDoubles) {
-    //
-  }
-
-  const nonBracketedParticipantNames = pairParticipantNames.map((name) => {
-    const withoutSeeding = getNonBracketedValue(name);
-    return withoutQualifyingDesignator(withoutSeeding, qualifyingIdentifiers);
-  });
-  const nonBracketedWinningParticipantName = getNonBracketedValue(winningParticipantName);
-
-  const exactMatchSide = nonBracketedParticipantNames.reduce((side, participantName, i) => {
-    const condition = participantName === nonBracketedWinningParticipantName;
-    if (condition) {
-      return { advancedSide: i + 1, participantName };
-    } else {
-      return side;
-    }
-  }, {});
-  if (exactMatchSide?.advancedSide) return exactMatchSide;
-
-  const startsWith = nonBracketedParticipantNames.reduce((side, participantName, i) => {
-    const condition = participantName?.startsWith(nonBracketedWinningParticipantName);
-    if (condition) {
-      return { advancedSide: i + 1, participantName };
-    } else {
-      return side;
-    }
-  }, {});
-  if (startsWith?.advancedSide) return startsWith;
-
-  const includes = nonBracketedParticipantNames.reduce((side, participantName, i) => {
-    const condition = participantName?.includes(nonBracketedWinningParticipantName);
-    if (condition) {
-      return { advancedSide: i + 1, participantName };
-    } else {
-      return side;
-    }
-  }, {});
-
-  return includes || {};
 }
