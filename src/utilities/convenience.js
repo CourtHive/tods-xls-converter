@@ -1,10 +1,11 @@
+import { utilities, matchUpStatusConstants } from 'tods-competition-factory';
 import { isNumeric, isObject, isString } from './identification';
-import { utilities } from 'tods-competition-factory';
 import { getRow } from '../functions/sheetAccess';
 import { getWorkbook } from '../global/state';
 import { removeBits } from './transformers';
 
 import { POSITION } from '../constants/columnConstants';
+const { BYE } = matchUpStatusConstants;
 
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
@@ -21,6 +22,9 @@ export const removeTrailing = (value, remove = ['.', ':', ',']) => {
 export const tidyValue = (value) => (isString(value) ? removeTrailing(value.trim()) : value);
 
 export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
+
+export const isBye = (participant) =>
+  Object.values(participant).some((value) => isString(value) && value.toLowerCase() === BYE.toLowerCase());
 
 const isAlpha = (value) => /^[a-zA-Z- ]+$/.test(value);
 export const onlyAlpha = (value, profile) =>
