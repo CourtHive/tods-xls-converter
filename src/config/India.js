@@ -2,6 +2,7 @@ import { genderConstants, matchUpTypes, entryStatusConstants } from 'tods-compet
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
+import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import {
   KNOCKOUT,
   ROUND_ROBIN,
@@ -11,7 +12,6 @@ import {
   SIGN_UP,
   INDETERMINATE
 } from '../constants/sheetTypes';
-import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import {
   CATEGORY,
   CITY,
@@ -162,7 +162,7 @@ export const config = {
           'nationality'
         ],
         limit: 1,
-        skipWords: ['reg'],
+        skipWords: ['reg', 'umpire'],
         valueRegex: '^\\d{6}$'
       }, // TODO: implement regex check for id
       { attr: STATE, header: ['state'], limit: 1 },
