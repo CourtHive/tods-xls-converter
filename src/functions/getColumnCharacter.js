@@ -1,7 +1,7 @@
 import { isNumeric } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
 
-import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
+import { FIRST_NAME, LAST_NAME, PERSON_ID } from '../constants/attributeConstants';
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { RESULT, ROUND } from '../constants/sheetElements';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
@@ -13,10 +13,20 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
     containsNumeric,
     scoreLikeCount,
     containsAlpha,
+    allProviderId,
     allNumeric,
     values,
     column
   } = columnProfile;
+
+  if (columnProfile.character) return columnProfile.character;
+
+  if (allProviderId) {
+    const character = PERSON_ID;
+    columnProfile.character = character;
+    if (!attributeMap[column]) attributeMap[column] = character;
+    return character;
+  }
 
   const numericCheck = consecutiveNumbers && lastNumericValue > 0;
   const knockOutCheck =
@@ -27,6 +37,7 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
     const character = containsAlpha ? PRE_ROUND : POSITION;
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;
+    return character;
   }
 
   if (containsNumeric && containsAlpha) {
@@ -52,7 +63,11 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
       });
       return isNameRound;
     });
-    if (nameRound) columnProfile.character = 'round';
+    if (nameRound) {
+      const character = ROUND;
+      columnProfile.character = character;
+      return character;
+    }
   }
 
   const { character, attribute } = columnProfile;
