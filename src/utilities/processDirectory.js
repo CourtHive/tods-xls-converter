@@ -72,14 +72,16 @@ export function processDirectory({
     });
 
     const allWorkbookMatchUps = [];
-    Object.values(result.sheetAnalysis).forEach(({ structures = [] }) => {
-      const { matchUps = [] } = tournamentEngine.allDrawMatchUps({
-        drawDefinition: { structures },
-        inContext: true
+    if (result.sheetAnalysis) {
+      Object.values(result.sheetAnalysis).forEach(({ structures = [] }) => {
+        const { matchUps = [] } = tournamentEngine.allDrawMatchUps({
+          drawDefinition: { structures },
+          inContext: true
+        });
+        allWorkbookMatchUps.push(...matchUps);
       });
-      allWorkbookMatchUps.push(...matchUps);
-    });
-    console.log(allWorkbookMatchUps[0]);
+    }
+    // console.log(allWorkbookMatchUps[0]);
 
     totalMatchUps += result.totalMatchUps || 0;
     if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
