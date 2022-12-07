@@ -40,11 +40,11 @@ const roundNames = [
   '3rd round',
   'pre-quarters',
   'pre quarter finals',
+  'quarters',
   'qualifiers',
   'round of 32',
   'quarterfinals',
   'quarter finals',
-  'quarters',
   'semifinal',
   'semifinals',
   'semi finals',
@@ -388,6 +388,8 @@ export const config = {
     'AITA JUNIOR TOUR',
     { text: 'SPORTS india', includes: true },
     { text: 'sportindia', includes: true },
-    { text: 'jyta', splitIncludes: true }
+    { text: 'india ranking', includes: true },
+    { text: 'jyta', splitIncludes: true },
+    { text: 'aita', splitIncludes: true }
   ]
 };
