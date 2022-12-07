@@ -4,7 +4,7 @@ import { setLoggingActive } from './src/global/state';
 import { writeFileSync } from 'fs-extra';
 
 // test without building against sheets in example directory
-it('can process passing', () => {
+it.skip('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeResult = false;
 
@@ -12,7 +12,7 @@ it('can process passing', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
+  const processLimit = 0;
   const startIndex = 0;
 
   setLoggingActive(true);
@@ -35,11 +35,11 @@ it('can process passing', () => {
   if (writeResult) writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[0]), 'UTF-8');
 });
 
-it.skip('can process tests', () => {
+it('can process tests', () => {
   const readDir = './examples/sheets/testing';
 
   const sheetTypes = [];
-  const sheetNumbers = [3];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 1;

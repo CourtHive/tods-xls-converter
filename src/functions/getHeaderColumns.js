@@ -1,7 +1,7 @@
 // function confirms that header columns are in expected position
 
-import { tidyValue } from '../utilities/convenience';
 import { findValueRefs, getCol, getRow } from './sheetAccess';
+import { tidyValue } from '../utilities/convenience';
 
 // and adjusts when possible...
 export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
