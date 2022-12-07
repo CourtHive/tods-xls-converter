@@ -71,14 +71,15 @@ export function processDirectory({
       participants
     });
 
-    /*
-    const structures = Object.values(result.sheetAnalysis)[0].structures;
-    const { matchUps } = tournamentEngine.allDrawMatchUps({
-      drawDefinition: { structures },
-      inContext: true
+    const allWorkbookMatchUps = [];
+    Object.values(result.sheetAnalysis).forEach(({ structures = [] }) => {
+      const { matchUps = [] } = tournamentEngine.allDrawMatchUps({
+        drawDefinition: { structures },
+        inContext: true
+      });
+      allWorkbookMatchUps.push(...matchUps);
     });
-    console.log(matchUps[0].sides);
-    */
+    console.log(allWorkbookMatchUps[0]);
 
     totalMatchUps += result.totalMatchUps || 0;
     if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
