@@ -165,7 +165,7 @@ export function getRoundMatchUps({
         matchUp.matchUpStatus = COMPLETED;
         matchUp.winningSide = advancedSide;
       } else {
-        console.log('SOMETHING', { lowerResult });
+        // console.log('SOMETHING', { lowerResult, roundNumber, roundPosition });
       }
 
       if (!result && !isBye) {
