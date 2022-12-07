@@ -15,7 +15,7 @@ export function maxInstance(values) {
 
 export const isFloatValue = (value) => !isNaN(Number(value)) && !Number.isInteger(Number(value));
 export const removeChars = (str, chars = []) =>
-  chars.reduce((result, char) => (result || str).split(char).join(''), undefined);
+  chars.reduce((result, char) => (result || str).toString().split(char).join(''), undefined);
 
 export const removeTrailing = (value, remove = ['.', ':', ',']) => {
   if (remove.some((r) => value.endsWith(r))) return value.slice(0, value.length - 1);
