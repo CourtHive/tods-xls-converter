@@ -14,12 +14,15 @@ export function maxInstance(values) {
 }
 
 export const isFloatValue = (value) => !isNaN(Number(value)) && !Number.isInteger(Number(value));
+export const removeChars = (str, chars = []) =>
+  chars.reduce((result, char) => (result || str).split(char).join(''), undefined);
 
 export const removeTrailing = (value, remove = ['.', ':', ',']) => {
   if (remove.some((r) => value.endsWith(r))) return value.slice(0, value.length - 1);
   return value;
 };
 export const tidyValue = (value) => (isString(value) ? removeTrailing(value.trim()) : value);
+export const tidyLower = (value) => (isString(value) ? tidyValue(value.trim()).toLowerCase() : value);
 
 export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
 

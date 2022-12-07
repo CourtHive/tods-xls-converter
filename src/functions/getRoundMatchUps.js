@@ -1,11 +1,10 @@
 import { matchUpStatusConstants } from 'tods-competition-factory';
 import { getMatchUpParticipants } from './getMatchUpParticipants';
 import { getDerivedPair, getGroupings } from './columnUtilities';
+import { removeChars, tidyLower, tidyValue } from '../utilities/convenience';
 import { pushGlobalLog } from '../utilities/globalLog';
-import { isString } from '../utilities/identification';
-import { tidyValue } from '../utilities/convenience';
-import { getLoggingActive } from '../global/state';
 import { getAdvancedSide } from './getAdvancedSide';
+import { getLoggingActive } from '../global/state';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -50,9 +49,9 @@ export function getRoundMatchUps({
     }
   }
 
-  const providerBye = profile.matchUpStatuses?.bye || BYE;
-  const providerWalkover = profile.matchUpStatuses?.walkover || WALKOVER;
-  const providerDoubleWalkover = profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER;
+  const providerBye = tidyLower(profile.matchUpStatuses?.bye || BYE);
+  const providerWalkover = tidyLower(profile.matchUpStatuses?.walkover || WALKOVER);
+  const providerDoubleWalkover = tidyLower(profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER);
 
   const advancingParticipants = [];
   const participantDetails = [];
@@ -152,7 +151,7 @@ export function getRoundMatchUps({
         if (inColumnResult && inColumnResults.includes(inColumnResult)) console.log({ inColumnResult });
       }
 
-      const lowerResult = isString(result) ? result.toLowerCase() : result;
+      const lowerResult = result && removeChars(tidyLower(result), ['/', '-', '.']);
 
       if (isBye) {
         matchUp.matchUpStatus = BYE;
