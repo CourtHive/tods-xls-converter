@@ -185,6 +185,8 @@ function processDetailParticipants({ analysis, profile, detailParticipants, posi
       let seedValue;
       const getIndividualParticipant = (row) => {
         const detail = detailParticipants[row];
+        if (!detail) return;
+
         const { personId, firstName, lastName, ranking } = detail;
 
         if (detail.seedValue) seedValue = detail.seedValue;
@@ -201,7 +203,7 @@ function processDetailParticipants({ analysis, profile, detailParticipants, posi
         return { participantId, participantName, person, ranking };
       };
       if (isSeparatedPersonsDoubles) {
-        const individualParticipants = consideredRows.map(getIndividualParticipant);
+        const individualParticipants = consideredRows.map(getIndividualParticipant).filter(Boolean);
 
         const individualParticipantIds = individualParticipants.map(({ participantId }) => participantId);
         participantId = generateParticipantId({ attributes: individualParticipantIds })?.participantId;
