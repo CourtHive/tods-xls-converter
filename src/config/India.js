@@ -40,9 +40,11 @@ const roundNames = [
   '3rd round',
   'pre-quarters',
   'pre quarter finals',
+  'qualifiers',
   'round of 32',
   'quarterfinals',
   'quarter finals',
+  'quarters',
   'semifinal',
   'semifinals',
   'semi finals',
@@ -84,6 +86,13 @@ export const config = {
         type: HEADER,
         id: 'playersList',
         elements: [`Player's List`],
+        rows: 1,
+        minimumElements: 1
+      },
+      {
+        type: HEADER,
+        id: 'overview',
+        elements: ['no show', 'late withdrawals'],
         rows: 1,
         minimumElements: 1
       },
@@ -163,7 +172,7 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['reg', 'umpire'],
-        valueRegex: '^\\d{6}$'
+        valueRegex: '^\\d{6,}$'
       }, // TODO: implement regex check for id
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
@@ -195,6 +204,10 @@ export const config = {
       {
         type: SIGN_UP,
         rowIds: ['signup']
+      },
+      {
+        type: INFORMATION,
+        rowIds: ['overview']
       },
       {
         type: INFORMATION,
@@ -371,5 +384,10 @@ export const config = {
     });
     return potentials;
   },
-  identifiers: ['AITA JUNIOR TOUR', { text: 'SPORTS india', includes: true }, { text: 'sportindia', includes: true }]
+  identifiers: [
+    'AITA JUNIOR TOUR',
+    { text: 'SPORTS india', includes: true },
+    { text: 'sportindia', includes: true },
+    { text: 'jyta', splitIncludes: true }
+  ]
 };
