@@ -10,11 +10,8 @@ import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
 
 export function getEntries({ analysis, profile, positionRefs, columns, preRoundColumn, positionColumn }) {
-  const positionAssignments = [];
   const detailParticipants = {};
-  const seedAssignments = [];
   const rowParticipants = {};
-  const entries = [];
 
   const getColumnProfile = (column) => analysis.columnProfiles.find((columnProfile) => columnProfile.column === column);
 
@@ -60,6 +57,7 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
     entryDetailColumns &&
     processDetailParticipants({ analysis, profile, detailParticipants, positionRows, entryDetailRows });
   if (detailResult?.error) return detailResult;
+  if (detailResult) return { boundaryIndex, ...detailResult };
 
   const participantCount = Object.values(rowParticipants).filter((participant) => !isBye(participant)).length;
   const drawSize = positionRefs.length;
@@ -69,6 +67,10 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
     participantCount,
     drawSize
   });
+
+  const positionAssignments = [];
+  const seedAssignments = [];
+  const entries = [];
 
   let firstNameCount = 0;
   const participants = Object.values(rowParticipants)
@@ -110,8 +112,7 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
     return { error: MISSING_NAMES };
   }
 
-  return { boundaryIndex, ...detailResult };
-  // return { entries, boundaryIndex, participants, positionAssignments, seedAssignments };
+  return { entries, boundaryIndex, participants, positionAssignments, seedAssignments };
 }
 
 function getParticipant(details) {
@@ -127,6 +128,8 @@ function getParticipant(details) {
 // const doublesPairStraddles = isdoubles && check for persons on rows before and after positionRows // two or more rows between each positionRow
 
 function processDetailParticipants({ analysis, profile, detailParticipants, positionRows, entryDetailRows }) {
+  if (!Object.values(detailParticipants).length) return;
+
   const entryDetailsOnPositionRows = positionRows.every((row) => entryDetailRows.includes(row));
   const entryDetailBeforePositionRow = Math.min(...positionRows) > Math.min(...entryDetailRows);
   const entryDetailRowsCount = entryDetailRows.length;
