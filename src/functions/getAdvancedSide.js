@@ -127,7 +127,7 @@ export function getAdvancedSide({
   }
 
   const fuzzyLastSide = tidyLastNames.reduce((side, participantName, i) => {
-    const fuzzyRank = fuzzy(participantName, nonBracketedWinningParticipantName);
+    const fuzzyRank = fuzzy(participantName || '', nonBracketedWinningParticipantName);
     if (!side.fuzzyRank || fuzzyRank > side.fuzzyRank) {
       return { advancedSide: i + 1, participantName, fuzzyRank };
     } else {
@@ -136,7 +136,7 @@ export function getAdvancedSide({
   }, {});
 
   const fuzzyFirstSide = tidyFirstNames?.reduce((side, participantName, i) => {
-    const fuzzyRank = fuzzy(participantName, nonBracketedWinningParticipantName);
+    const fuzzyRank = fuzzy(participantName || '', nonBracketedWinningParticipantName);
     if (!side.fuzzyRank || fuzzyRank > side.fuzzyRank) {
       return { advancedSide: i + 1, participantName, fuzzyRank };
     } else {
