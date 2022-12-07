@@ -1,9 +1,9 @@
-import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { matchUpStatusConstants } from 'tods-competition-factory';
 import { getMatchUpParticipants } from './getMatchUpParticipants';
 import { getDerivedPair, getGroupings } from './columnUtilities';
-import { isString } from '../utilities/identification';
+import { removeChars, tidyLower, tidyValue } from '../utilities/convenience';
 import { pushGlobalLog } from '../utilities/globalLog';
+import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
@@ -49,9 +49,9 @@ export function getRoundMatchUps({
     }
   }
 
-  const providerBye = profile.matchUpStatuses?.bye || BYE;
-  const providerWalkover = profile.matchUpStatuses?.walkover || WALKOVER;
-  const providerDoubleWalkover = profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER;
+  const providerBye = tidyLower(profile.matchUpStatuses?.bye || BYE);
+  const providerWalkover = tidyLower(profile.matchUpStatuses?.walkover || WALKOVER);
+  const providerDoubleWalkover = tidyLower(profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER);
 
   const advancingParticipants = [];
   const participantDetails = [];
@@ -104,6 +104,8 @@ export function getRoundMatchUps({
         consideredParticipants,
         winningParticipantName,
         pairParticipantNames,
+        roundPosition,
+        roundNumber,
         analysis,
         profile
       })?.advancedSide;
@@ -115,10 +117,10 @@ export function getRoundMatchUps({
         if (roundParticipants?.length) {
           if (advancedSide) {
             advancingParticipants.push(consideredParticipants[advancedSide - 1]);
-          } else {
-            advancingParticipants.push({});
           }
         }
+      } else {
+        advancingParticipants.push({});
       }
 
       const getResult = (resultColumn) => {
@@ -149,7 +151,7 @@ export function getRoundMatchUps({
         if (inColumnResult && inColumnResults.includes(inColumnResult)) console.log({ inColumnResult });
       }
 
-      const lowerResult = isString(result) ? result.toLowerCase() : result;
+      const lowerResult = result && removeChars(tidyLower(result), ['/', '-', '.']);
 
       if (isBye) {
         matchUp.matchUpStatus = BYE;
@@ -161,6 +163,8 @@ export function getRoundMatchUps({
       } else if (advancedSide) {
         matchUp.matchUpStatus = COMPLETED;
         matchUp.winningSide = advancedSide;
+      } else {
+        // console.log('SOMETHING', { lowerResult, roundNumber, roundPosition });
       }
 
       if (!result && !isBye) {
@@ -174,7 +178,7 @@ export function getRoundMatchUps({
             message
           });
         } else if (matchUp.winningSide) {
-          if (logging) console.log('No win reason');
+          if (logging) console.log('No win reason', { resultRow, resultColumn });
         }
       }
 
@@ -188,50 +192,4 @@ export function getRoundMatchUps({
 
   if (getLoggingActive('matchUps')) console.log(matchUps);
   return { matchUps, participantDetails, advancingParticipants };
-}
-
-// TODO: Handle Bye advancement... require access not just to pairParticipantNames but complete sides
-function getAdvancedSide({ pairParticipantNames, winningParticipantName, analysis, profile }) {
-  if (!winningParticipantName) return {};
-  const { qualifyingIdentifiers } = profile;
-  if (analysis.isDoubles) {
-    //
-  }
-
-  const nonBracketedParticipantNames = pairParticipantNames.map((name) => {
-    const withoutSeeding = getNonBracketedValue(name);
-    return withoutQualifyingDesignator(withoutSeeding, qualifyingIdentifiers);
-  });
-  const nonBracketedWinningParticipantName = getNonBracketedValue(winningParticipantName);
-
-  const exactMatchSide = nonBracketedParticipantNames.reduce((side, participantName, i) => {
-    const condition = participantName === nonBracketedWinningParticipantName;
-    if (condition) {
-      return { advancedSide: i + 1, participantName };
-    } else {
-      return side;
-    }
-  }, {});
-  if (exactMatchSide?.advancedSide) return exactMatchSide;
-
-  const startsWith = nonBracketedParticipantNames.reduce((side, participantName, i) => {
-    const condition = participantName?.startsWith(nonBracketedWinningParticipantName);
-    if (condition) {
-      return { advancedSide: i + 1, participantName };
-    } else {
-      return side;
-    }
-  }, {});
-  if (startsWith?.advancedSide) return startsWith;
-
-  const includes = nonBracketedParticipantNames.reduce((side, participantName, i) => {
-    const condition = participantName?.includes(nonBracketedWinningParticipantName);
-    if (condition) {
-      return { advancedSide: i + 1, participantName };
-    } else {
-      return side;
-    }
-  }, {});
-
-  return includes || {};
 }

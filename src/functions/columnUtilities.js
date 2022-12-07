@@ -44,7 +44,7 @@ export function getDerivedPair({ profile, columnProfile, pair }) {
   const derivedPair = pair.map((rowNumber) => {
     const group = groupings.find((group) => getGroupRange(group).includes(rowNumber));
     if (group) groups.push(group);
-    return group?.[0];
+    return group?.[0] || rowNumber;
   });
 
   return { derivedPair, groups };

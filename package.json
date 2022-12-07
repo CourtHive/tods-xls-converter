@@ -64,7 +64,7 @@
     "@rollup/plugin-typescript": "10.0.1",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
-    "esbuild": "^0.15.15",
+    "esbuild": "^0.16.0",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-compat": "^4.0.2",
@@ -73,7 +73,7 @@
     "esm": "^3.2.25",
     "fs-extra": "11.1.0",
     "husky": "8.0.2",
-    "lint-staged": "13.0.4",
+    "lint-staged": "13.1.0",
     "np": "7.6.2",
     "prettier": "^2.7.1",
     "rimraf": "3.0.2",
@@ -86,10 +86,11 @@
     "vitest": "^0.25.2"
   },
   "dependencies": {
+    "fast-fuzzy": "^1.12.0",
     "hash-sum": "^2.0.0",
     "node-xlsx": "^0.21.0",
     "normalize-text": "^2.4.1",
-    "tods-competition-factory": "^0.401.0",
+    "tods-competition-factory": "^0.404.0",
     "xlsx": "0.18.5"
   }
 }

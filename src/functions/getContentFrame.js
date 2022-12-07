@@ -4,7 +4,7 @@ import { findRow } from './sheetAccess';
 
 import { FOOTER, HEADER } from '../constants/sheetElements';
 
-export function getContentFrame({ sheet, profile, sheetDefinition }) {
+export function getContentFrame({ sheet, profile, sheetDefinition, rowRange }) {
   const rowDefinitions = profile.rowDefinitions;
   const headerRowDefinition = findRowDefinition({
     rowIds: sheetDefinition.rowIds,
@@ -36,7 +36,7 @@ export function getContentFrame({ sheet, profile, sheetDefinition }) {
       allTargetRows: true,
       sheet
     }) || [];
-  const footerRow = footerRows[footerRows.length - 1];
+  const footerRow = footerRows[footerRows.length - 1] || rowRange.to + 1;
   const footerAvoidRows = footerRows.flatMap((footerRow) => {
     const startRange = +footerRow;
     const endRange = +footerRow + (footerRowDefinition.rows || 0);

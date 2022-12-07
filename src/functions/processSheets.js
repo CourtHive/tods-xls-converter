@@ -70,9 +70,13 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
     const { participants: structureParticipants, structures = [], hasValues, analysis, error } = result;
 
-    const matchUpsCount = structures?.flatMap(
+    const structureMatchUps = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
-    )?.length;
+    );
+    const matchUpsCount = structureMatchUps?.length;
+    const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;
+    const winningSideCount = structureMatchUps?.filter(({ winningSide }) => winningSide).length;
+
     totalMatchUps += matchUpsCount || 0;
 
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis, structures };
@@ -83,7 +87,18 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       const { isQualifying, category, sheetType } = analysis;
       const { gender, matchUpType } = analysis?.info || {};
       if (logging) {
-        console.log({ sheetName, sheetNumber, sheetType, isQualifying, category, matchUpType, gender, matchUpsCount });
+        console.log({
+          sheetName,
+          sheetNumber,
+          sheetType,
+          isQualifying,
+          category,
+          matchUpType,
+          gender,
+          matchUpsCount,
+          twoDrawPositionsCount,
+          winningSideCount
+        });
       }
     }
 

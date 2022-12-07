@@ -15,7 +15,7 @@ it('can process passing', () => {
   const processLimit = 1;
   const startIndex = 0;
 
-  // setLoggingActive(true);
+  setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'matchUps');
@@ -35,20 +35,20 @@ it('can process passing', () => {
   if (writeResult) writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[0]), 'UTF-8');
 });
 
-it('can process tests', () => {
+it.skip('can process tests', () => {
   const readDir = './examples/sheets/testing';
 
   const sheetTypes = [];
-  const sheetNumbers = [];
-  const sheetLimit = 1;
+  const sheetNumbers = [3];
+  const sheetLimit = 0;
 
-  const processLimit = 0;
+  const processLimit = 1;
   const startIndex = 0;
 
   setLoggingActive(true);
   setLoggingActive(true, 'dev');
   setLoggingActive(true, 'sheetNames');
-  // setLoggingActive(true, 'matchUps');
+  setLoggingActive(true, 'matchUps');
 
   const result = processDirectory({
     processStructures: true,
