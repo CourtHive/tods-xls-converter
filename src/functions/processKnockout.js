@@ -63,8 +63,7 @@ export function processKnockOut({ profile, analysis, sheet }) {
   const columns = analysis.columnProfiles.map(({ column }) => column).sort();
 
   const entryResult = getEntries({ sheet, analysis, profile, columns, positionRefs, preRoundColumn, positionColumn });
-
-  if (entryResult.error) return entryResult;
+  if (entryResult?.error) return entryResult;
 
   const {
     participants: firstRoundParticipants,
@@ -89,6 +88,8 @@ export function processKnockOut({ profile, analysis, sheet }) {
       }),
       2
     );
+
+  console.log({ roundParticipants });
 
   const characterAssessment = utilities.instanceCount(
     analysis.columnProfiles.filter(({ column }) => roundColumns.includes(column)).map(({ character }) => character)
