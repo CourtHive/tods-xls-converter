@@ -11,7 +11,15 @@ import { MISSING_NAMES } from '../constants/errorConditions';
 import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
 
-export function getEntries({ analysis, profile, positionRefs, columns, preRoundColumn, positionColumn }) {
+export function getEntries({
+  preRoundParticipants,
+  preRoundColumn,
+  positionColumn,
+  positionRefs,
+  analysis,
+  profile,
+  columns
+}) {
   const detailParticipants = {};
   const rowParticipants = {};
 
@@ -56,11 +64,19 @@ export function getEntries({ analysis, profile, positionRefs, columns, preRoundC
         });
     }
   } else {
-    const rounds = analysis.columns.round;
-    const firstRoundColumn = Array.isArray(rounds) ? rounds[0] : columns[boundaryIndex + 1];
+    const rounds = Array.isArray(analysis.columns.round) && analysis.columns.round;
+    const firstRoundColumn = (rounds && (preRoundColumn ? rounds[1] : rounds[0])) || columns[boundaryIndex + 1];
     const columnProfile = getColumnProfile(firstRoundColumn);
     const entriesOnPositionRows = positionRows.every((row) => columnProfile.rows.includes(row));
-    if (entriesOnPositionRows) return getFirstRoundEntries({ boundaryIndex, columnProfile });
+    if (entriesOnPositionRows)
+      return getFirstRoundEntries({
+        preRoundParticipants,
+        boundaryIndex,
+        columnProfile,
+        positionRows,
+        analysis,
+        profile
+      });
   }
 
   const detailResult =
