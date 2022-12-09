@@ -1,7 +1,7 @@
+import { generateMatchUpId, generateStructureId } from '../utilities/hashing';
 import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
 import { getFirstRoundEntries } from './getFirstRoundEntries';
 import { getRoundParticipants } from './getRoundParticipants';
-import { generateMatchUpId } from '../utilities/hashing';
 import { getRoundMatchUps } from './getRoundMatchUps';
 
 const { QUALIFYING } = drawDefinitionConstants;
@@ -56,7 +56,10 @@ export function processPreRound({ preRoundParticipantRows, preRoundColumn, nextC
   const stage = QUALIFYING;
   const stageSequence = 1;
 
-  const structure = { matchUps, structureName, stage, stageSequence, positionAssignments };
+  const matchUpIds = matchUps?.map(({ matchUpId }) => matchUpId);
+  const attributes = [...matchUpIds, stage, analysis.sheetName];
+  const { structureId } = generateStructureId({ attributes });
+  const structure = { structureId, matchUps, structureName, stage, stageSequence, positionAssignments };
 
   const advancedDrawPositions = advancingParticipants.map(({ drawPosition }) => drawPosition);
   const nonAdvancingParticipants = roundParticipants

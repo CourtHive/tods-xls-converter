@@ -1,14 +1,15 @@
+import { entryStatusConstants, participantConstants } from 'tods-competition-factory';
 import { getNonBracketedValue, getSeeding, isBye } from '../utilities/convenience';
+import { getIndividualParticipant } from './getIndividualParticipant';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
-import { isNumeric, isString } from '../utilities/identification';
-import { entryStatusConstants } from 'tods-competition-factory';
+import { isNumeric } from '../utilities/identification';
 import { generateParticipantId } from '../utilities/hashing';
-import { normalizeName } from 'normalize-text';
 import { getRow } from './sheetAccess';
 
 import { SUCCESS } from '../constants/resultConstants';
 
 const { DIRECT_ACCEPTANCE, QUALIFIER } = entryStatusConstants;
+const { PAIR } = participantConstants;
 
 export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, positionRows, preRoundParticipants }) {
   const positionAssignments = [];
@@ -16,7 +17,7 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
   const participants = [];
   const entries = [];
 
-  const doublesSeparator = profile.doubles?.nameSeparator || '/';
+  const doublesSeparators = profile.doubles?.regexSeparators || ['/'];
 
   const preRoundAdvancedRows =
     preRoundParticipants?.map(({ advancedPositionRef }) => getRow(advancedPositionRef)) || [];
@@ -44,18 +45,24 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
     const isQualifier = qTest(baseName);
     if (isQualifier) baseName = baseName.split(' ').slice(1).join(' ');
 
-    const doublesParticipants = baseName.includes(doublesSeparator);
+    const doublesNameSeparator = doublesSeparators.find((separator) => {
+      const x = new RegExp(separator);
+      return x.test(baseName);
+    });
+
     let participantId;
 
-    if (doublesParticipants) {
-      const individualParticipants = baseName.split(doublesSeparator).map((name) => getIndividualParticipant({ name }));
+    if (doublesNameSeparator) {
+      const individualParticipants = baseName
+        .split(new RegExp(doublesNameSeparator))
+        .map((name) => getIndividualParticipant({ name }));
       const individualParticipantIds = individualParticipants.map(({ participantId }) => participantId);
       participantId = generateParticipantId({ attributes: individualParticipantIds })?.participantId;
       const participantName = individualParticipants.map(({ person }) => person.standardFamilyName).join('/');
 
       const participant = {
         participantRole: 'COMPETITOR',
-        participantType: 'PAIR',
+        participantType: PAIR,
         individualParticipants,
         participantName,
         participantId
@@ -92,36 +99,5 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
     participants,
     entries,
     ...SUCCESS
-  };
-}
-
-function getIndividualParticipant({ name }) {
-  let lastName, firstName;
-
-  if (name.includes(',')) {
-    const parts = name.split(',').map((name) => normalizeName(name));
-    lastName = parts[0];
-    firstName = parts[1];
-  } else {
-    const hasLowerStart = (n) => isString(n) && n[0] === n[0].toLowerCase() && n[0] !== n[0].toUpperCase();
-    const parts = normalizeName(name).split(' ');
-    let division = parts.map((part, index) => hasLowerStart(part) && index !== undefined && index).filter(Boolean)[0];
-    if (!division) division = parts.length === 4 ? 2 : 1;
-    lastName = parts.slice(division).join(' ');
-    firstName = parts.slice(0, division).join(' ');
-  }
-
-  const person = { standardFamilyName: lastName, standardGivenName: firstName };
-  const lastFirst = lastName && firstName && `${lastName}, ${firstName}`;
-  const participantName = lastFirst || lastName || firstName;
-  const idAttributes = [firstName, lastName, participantName].filter(Boolean);
-  const participantId = idAttributes.length && generateParticipantId({ attributes: idAttributes })?.participantId;
-
-  return {
-    participantRole: 'COMPETITOR',
-    participantType: 'INDIVIDUAL',
-    participantName,
-    participantId,
-    person
   };
 }

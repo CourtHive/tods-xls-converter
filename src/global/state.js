@@ -1,7 +1,6 @@
 import { SUCCESS } from '../constants/resultConstants';
 
-let tournamentRecord = {},
-  loggingActive = {},
+let loggingActive = {},
   workbookType,
   workbook;
 
@@ -32,16 +31,7 @@ export function getWorkbookProps() {
   return { ...workbook, workbookType };
 }
 
-export function getTournamentRecord() {
-  return { tournamentRecord };
-}
-
-export function setTournamentRecord(record) {
-  tournamentRecord = record;
-}
-
 export default {
-  getTournamentRecord,
   getLoggingActive,
   setLoggingActive,
   getWorkbookProps,

@@ -1,13 +1,11 @@
-import { setTournamentRecord, setWorkbookType, setWorkbook } from './state';
 import { identifyWorkbook } from '../functions/identifyWorkbook';
+import { setWorkbookType, setWorkbook } from './state';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { read } from 'xlsx';
 
 import { SUCCESS } from '../constants/resultConstants';
 
 export function loadWorkbook(buf, index) {
-  setTournamentRecord({});
-
   let data;
 
   try {

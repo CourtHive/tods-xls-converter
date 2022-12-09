@@ -121,7 +121,7 @@ export const config = {
     matchUpStatuses: { bye: 'BYE', doubleWalkover: 'doble wo', walkover: 'wo' },
     qualifyingIdentifiers,
     doubles: {
-      nameSeparator: '/'
+      regexSeparators: ['/', /\s{3,}/g]
     },
     genderIdentifiers,
     matchOutcomes: [
@@ -132,9 +132,13 @@ export const config = {
       'wo',
       'abandoned',
       'gana x wo',
+      'ganan x wo',
       'gana wo',
+      'ganan wo',
       'pierde x wo',
-      'pierde wo'
+      'pierden x wo',
+      'pierde wo',
+      'pierden wo'
     ],
     winIdentifier: 'gana',
     categories,
