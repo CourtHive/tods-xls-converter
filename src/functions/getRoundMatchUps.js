@@ -6,6 +6,7 @@ import { getPotentialResult } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
+import { generateMatchUpId } from '../utilities/hashing';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -199,7 +200,17 @@ export function getRoundMatchUps({
         }
       }
 
-      if (pairParticipantNames.filter(Boolean).length) matchUps.push(matchUp);
+      if (pairParticipantNames.filter(Boolean).length) {
+        const additionalAttributes = [
+          matchUp.drawPositions.reduce((a, b) => a || 0 + b || 0, 0),
+          roundNumber,
+          roundPosition
+        ];
+        const result = generateMatchUpId({ participantNames: pairParticipantNames, additionalAttributes });
+        matchUp.matchUpId = result.matchUpId;
+        if (result.error) console.log({ error: result.error, matchUp });
+        matchUps.push(matchUp);
+      }
     }
 
     if (!roundParticipants?.length) participantDetails.push(...consideredParticipants);
