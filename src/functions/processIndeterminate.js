@@ -16,7 +16,7 @@ export function processIndeterminate(props) {
   const maxFrequencyValue = Math.max(...frequencyValues);
   const { positionColumnProfile } = getPositionColumn(analysis.columnProfiles);
   const positionValuesCount = positionColumnProfile?.values?.length || 0;
-  const viableFrequencyColumn = maxFrequencyValue <= positionValuesCount && maxFrequencyValue > positionValuesCount / 2;
+  const viableFrequencyColumn = maxFrequencyValue > positionValuesCount / 2;
 
   if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
     analysis.sheetType = KNOCKOUT;

@@ -1,6 +1,7 @@
-import { matchUpStatusConstants, utilities } from 'tods-competition-factory';
+import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
 import { getRoundMatchUps } from './getRoundMatchUps';
+import { utilities } from 'tods-competition-factory';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
 import { getEntries } from './getEntries';
@@ -9,7 +10,6 @@ import { MISSING_MATCHUP_DETAILS } from '../constants/errorConditions';
 import { RESULT, ROUND } from '../constants/sheetElements';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
-const { BYE } = matchUpStatusConstants;
 
 export function processKnockOut({ profile, analysis, sheet }) {
   const { columnProfiles, avoidRows } = analysis;
@@ -26,7 +26,8 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
   if (error) return { error };
 
-  const participants = [],
+  const preRoundParticipants = [],
+    participants = [],
     structures = [],
     matchUps = [],
     links = [];
@@ -39,21 +40,21 @@ export function processKnockOut({ profile, analysis, sheet }) {
     const preRoundIndex = columns.indexOf(preRoundColumn);
     const nextColumn = columns[preRoundIndex + 1];
 
-    const { participantDetails, structure } = processPreRound({
+    const { advancingParticipants, nonAdvancingParticipants, structure } = processPreRound({
       preRoundParticipantRows,
       preRoundColumn,
       participants,
       nextColumn,
       analysis,
+      columns,
       profile
     });
 
     structures.push(structure);
 
-    participants.push(...participantDetails.filter(({ isByePosition }) => isByePosition));
+    participants.push(...nonAdvancingParticipants.filter(({ isByePosition }) => !isByePosition));
+    preRoundParticipants.push(...advancingParticipants.filter(({ isByePosition }) => !isByePosition));
   }
-
-  // const qualifyingParticipants = participants.filter(({ advancedParticipantName }) => advancedParticipantName);
 
   // *. if no preRound, check whether there are values present in the valuesMap on positionRefs[0] of first column after the position round
   //    - check whether there are progressed particpants in positionRefs[1]
@@ -62,9 +63,17 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
   const columns = analysis.columnProfiles.map(({ column }) => column).sort();
 
-  const entryResult = getEntries({ sheet, analysis, profile, columns, positionRefs, preRoundColumn, positionColumn });
-
-  if (entryResult.error) return entryResult;
+  const entryResult = getEntries({
+    preRoundParticipants,
+    preRoundColumn,
+    positionColumn,
+    positionRefs,
+    analysis,
+    profile,
+    columns,
+    sheet
+  });
+  if (entryResult?.error) return entryResult;
 
   const {
     participants: firstRoundParticipants,
@@ -80,15 +89,7 @@ export function processKnockOut({ profile, analysis, sheet }) {
     .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
     .map(({ column }) => column);
 
-  let roundParticipants =
-    positionAssignments?.length &&
-    utilities.chunkArray(
-      positionAssignments.map(({ drawPosition, bye, participantId }) => {
-        const participant = firstRoundParticipants.find((participant) => participant.participantId === participantId);
-        return { drawPosition, participantName: bye && BYE, ...participant, isByePosition: bye };
-      }),
-      2
-    );
+  let roundParticipants = getRoundParticipants({ positionAssignments, participants: firstRoundParticipants });
 
   const characterAssessment = utilities.instanceCount(
     analysis.columnProfiles.filter(({ column }) => roundColumns.includes(column)).map(({ character }) => character)
@@ -108,7 +109,10 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
   // if positionAssignments have been determined then push an additional round for processing
   if (positionAssignments.length) {
-    roundColumns.unshift(analysis.columnProfiles[boundaryIndex].column);
+    const boundaryIndexColumn = analysis.columnProfiles[boundaryIndex].column;
+    if (!roundColumns.includes(boundaryIndexColumn)) {
+      roundColumns.unshift(boundaryIndexColumn);
+    }
   }
 
   let roundNumber = 1;
@@ -175,21 +179,15 @@ export function processKnockOut({ profile, analysis, sheet }) {
     positionRefs
   });
 
-  return { analysis, links, entries, seedAssignments, structures, hasValues: true, ...SUCCESS };
+  return { analysis, links, entries, seedAssignments, structures, hasValues: true, participants, ...SUCCESS };
 
   // NOTES:
   // *. Is there a pre-round
   // *. Use preRoundParticipantRows to create Qualifying Structure with matchUps
   // *. results can be inferred by looking at columngProfile keyMap values which occur between positionRefs
   // *. Characterize { drawSize: ##, R: 32, 16, 8. 4. 3 }
-  // *. For each round, does the previous round have matching names
   // *. Using matching values across rounds calculate where progressing values should occur (to correct for those which have misspellings)
-  // *. For each round, calculate which rows are paired
   // *. Is the structure SINGLES or DOUBLES?
   // *. Was the structure completed? Does the final round have 1 or 3?
-  // *. Does the first round have powerOf2 participants/byes
-  // *. Are there some rounds which have comma separating alpha values and some which do not?
-  // *. Do all rounds have comma separated alpha values?
-  // *. If there is a pre-round, are there results/scores in the first round participant column
   // *. Go back to each round and get date/times which occur on rows between paired paritipants
 }

@@ -1,7 +1,8 @@
+import { getNonBracketedValue, removeChars, tidyLower, tidyValue } from '../utilities/convenience';
 import { matchUpStatusConstants } from 'tods-competition-factory';
 import { getMatchUpParticipants } from './getMatchUpParticipants';
 import { getDerivedPair, getGroupings } from './columnUtilities';
-import { removeChars, tidyLower, tidyValue } from '../utilities/convenience';
+import { getPotentialResult } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
@@ -63,7 +64,12 @@ export function getRoundMatchUps({
     const { derivedPair, groups } = getDerivedPair({ profile, columnProfile, pair });
     const nextColumnGroupings = getGroupings({ columnProfile: nextColumnProfile });
     const nextColumnRowTarget = Math.abs(derivedPair[1] - derivedPair[0]) / 2 + Math.min(...derivedPair);
-    const nextColumnRowNumber = nextColumnGroupings.reduce((rowNumber, grouping) => {
+    const minRow = Math.min(...pair, ...derivedPair);
+    const maxRow = Math.max(...pair, ...derivedPair);
+    const inRowRange = (grouping) => grouping.filter((value) => value >= minRow && value <= maxRow);
+    const filteredGroupings = nextColumnGroupings.map(inRowRange).filter((grouping) => grouping.length);
+    const nextColumnRowNumber = filteredGroupings.reduce((rowNumber, grouping) => {
+      // TODO: instead of grouping[0] select value that is like a participantName, not like a score
       if (grouping.includes(nextColumnRowTarget)) return grouping[0];
       const currentDiff = rowNumber && Math.abs(rowNumber - nextColumnRowTarget);
       const diff = Math.abs(grouping[0] - nextColumnRowTarget);
@@ -98,11 +104,23 @@ export function getRoundMatchUps({
       const nextColumnRef = `${nextColumn}${nextColumnRowNumber}`;
       const refValue = nextColumnProfile.keyMap[nextColumnRef];
       const isDoubleWalkover = refValue?.toString().toLowerCase().trim() === providerDoubleWalkover.toLowerCase();
-      const winningParticipantName = isDoubleWalkover ? undefined : refValue;
+      let advancingParticipantName = isDoubleWalkover ? undefined : getNonBracketedValue(refValue);
+
+      const { leader, potentialResult } = getPotentialResult(advancingParticipantName);
+      if (potentialResult && leader) {
+        advancingParticipantName = leader;
+        const message = 'result found at end of advancedSide participantName';
+        pushGlobalLog({
+          method: 'notice',
+          color: 'brightyellow',
+          keyColors: { message: 'cyan', attributes: 'brightyellow' },
+          message
+        });
+      }
 
       const advancedSide = getAdvancedSide({
+        advancingParticipantName,
         consideredParticipants,
-        winningParticipantName,
         pairParticipantNames,
         roundPosition,
         roundNumber,
@@ -111,13 +129,12 @@ export function getRoundMatchUps({
       })?.advancedSide;
 
       if (advancedSide) {
-        consideredParticipants[advancedSide - 1].advancedParticipantName = winningParticipantName;
+        consideredParticipants[advancedSide - 1].advancedParticipantName =
+          getNonBracketedValue(advancingParticipantName);
         consideredParticipants[advancedSide - 1].advancedPositionRef = nextColumnRef;
 
         if (roundParticipants?.length) {
-          if (advancedSide) {
-            advancingParticipants.push(consideredParticipants[advancedSide - 1]);
-          }
+          advancingParticipants.push(consideredParticipants[advancedSide - 1]);
         }
       } else {
         advancingParticipants.push({});
@@ -132,9 +149,9 @@ export function getRoundMatchUps({
         return result;
       };
 
-      const resultRow = winningParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber || nextColumnRowTarget;
+      const resultRow = advancingParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber || nextColumnRowTarget;
       const resultColumn = resultColumnProfile?.column;
-      let result = getResult(resultColumn);
+      let result = getResult(resultColumn) || potentialResult;
 
       const matchUp = { roundNumber, roundPosition, drawPositions, pairParticipantNames };
 
@@ -190,6 +207,12 @@ export function getRoundMatchUps({
     roundPosition += 1;
   }
 
-  if (getLoggingActive('matchUps')) console.log(matchUps);
+  if (getLoggingActive('matchUps')) {
+    console.log(matchUps);
+  }
+  if (getLoggingActive('missing')) {
+    const missingDrawPosition = matchUps.filter((m) => !m.drawPositions || m.drawPositions.length < 2);
+    if (missingDrawPosition.length) console.log(missingDrawPosition);
+  }
   return { matchUps, participantDetails, advancingParticipants };
 }

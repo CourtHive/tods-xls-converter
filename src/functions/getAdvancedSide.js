@@ -1,18 +1,21 @@
 import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { matchUpStatusConstants } from 'tods-competition-factory';
 import { fuzzy } from 'fast-fuzzy';
+import { isString } from '../utilities/identification';
 
 const { BYE } = matchUpStatusConstants;
 
 export function getAdvancedSide({
   consideredParticipants,
-  winningParticipantName,
+  advancingParticipantName,
   pairParticipantNames,
   // roundPosition, // useful for debugging
   // roundNumber, // useful for debugging
   analysis,
   profile
 }) {
+  // TODO: also use advancedParticipantName(s) to attempt to find matches
+
   const byeAdvancement =
     consideredParticipants?.some((participant) => participant.isByePosition) || pairParticipantNames.includes(BYE);
   if (byeAdvancement) {
@@ -25,7 +28,7 @@ export function getAdvancedSide({
     return { advancedSide };
   }
 
-  if (!winningParticipantName) return {};
+  if (!advancingParticipantName) return {};
 
   const { qualifyingIdentifiers } = profile;
   let tidyFirstNames;
@@ -34,7 +37,7 @@ export function getAdvancedSide({
     name?.split('-').map(tidyValue).join('|').split('/').map(tidyValue).join('|').split(',').map(tidyValue).join('|');
 
   if (analysis.isDoubles) {
-    winningParticipantName = splitTidy(winningParticipantName);
+    advancingParticipantName = splitTidy(advancingParticipantName);
     pairParticipantNames = consideredParticipants.map((participant) => {
       if (participant.individualParticipants) {
         return participant.individualParticipants.map((participant) => participant.person.standardFamilyName).join('|');
@@ -54,9 +57,10 @@ export function getAdvancedSide({
 
   const tidyLastNames = pairParticipantNames.map((name) => {
     const withoutSeeding = getNonBracketedValue(name);
+    // TODO: use Regex qTest from getFirstRoundEntries
     return withoutQualifyingDesignator(withoutSeeding, qualifyingIdentifiers);
   });
-  const nonBracketedWinningParticipantName = getNonBracketedValue(winningParticipantName);
+  const nonBracketedWinningParticipantName = getNonBracketedValue(advancingParticipantName);
 
   const exactMatchSide = tidyLastNames.reduce((side, participantName, i) => {
     const condition = participantName === nonBracketedWinningParticipantName;
@@ -126,28 +130,32 @@ export function getAdvancedSide({
     if (includesSide?.advancedSide) return includesSide || {};
   }
 
-  const fuzzyLastSide = tidyLastNames.reduce((side, participantName, i) => {
-    const fuzzyRank = fuzzy(participantName || '', nonBracketedWinningParticipantName);
-    if (!side.fuzzyRank || fuzzyRank > side.fuzzyRank) {
-      return { advancedSide: i + 1, participantName, fuzzyRank };
-    } else {
-      return side;
-    }
-  }, {});
+  if (isString(nonBracketedWinningParticipantName)) {
+    const fuzzyLastSide = tidyLastNames.reduce((side, participantName, i) => {
+      const fuzzyRank = fuzzy(participantName || '', nonBracketedWinningParticipantName);
+      if (!side.fuzzyRank || fuzzyRank > side.fuzzyRank) {
+        return { advancedSide: i + 1, participantName, fuzzyRank };
+      } else {
+        return side;
+      }
+    }, {});
 
-  const fuzzyFirstSide = tidyFirstNames?.reduce((side, participantName, i) => {
-    const fuzzyRank = fuzzy(participantName || '', nonBracketedWinningParticipantName);
-    if (!side.fuzzyRank || fuzzyRank > side.fuzzyRank) {
-      return { advancedSide: i + 1, participantName, fuzzyRank };
-    } else {
-      return side;
-    }
-  }, {});
+    const fuzzyFirstSide = tidyFirstNames?.reduce((side, participantName, i) => {
+      const fuzzyRank = fuzzy(participantName || '', nonBracketedWinningParticipantName);
+      if (!side.fuzzyRank || fuzzyRank > side.fuzzyRank) {
+        return { advancedSide: i + 1, participantName, fuzzyRank };
+      } else {
+        return side;
+      }
+    }, {});
 
-  if (fuzzyFirstSide && fuzzyLastSide) {
-    if (fuzzyFirstSide.fuzzyRank > fuzzyLastSide.fuzzyRank) {
-      return fuzzyFirstSide || {};
+    if (fuzzyFirstSide && fuzzyLastSide) {
+      if (fuzzyFirstSide.fuzzyRank > fuzzyLastSide.fuzzyRank) {
+        return fuzzyFirstSide || {};
+      }
     }
+    return fuzzyLastSide || {};
   }
-  return fuzzyLastSide || {};
+
+  return {};
 }

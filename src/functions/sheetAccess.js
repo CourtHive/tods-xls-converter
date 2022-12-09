@@ -167,6 +167,7 @@ export function getTargetValue({ searchText, sheet, rowOffset = 0, columnOffset 
 }
 
 export function getValueRange({
+  preserveNonCounter,
   columnCountMinimum,
   columnOffset = 0,
   columnCount = 0,
@@ -201,11 +202,20 @@ export function getValueRange({
       ((column && column.charCodeAt()) || 0) + columnOffset + (columnCount ? increment : 0)
     );
     const targetRef = `${targetColumn}${targetRow}`;
+    let value = getCellValue(sheet[targetRef]);
+
+    if (!value && stopOnEmpty && (!columnCountMinimum || range.indexOf(increment)) >= columns.length - 2) {
+      // columns.length - 2 should be equal to drawPositions / 4
+      // This is to account for data in the round column that is not relevant to progression
+      break;
+    }
+    if (preserveNonCounter) {
+      if (value.includes(' ')) {
+        continue;
+      }
+    }
+
     cellRefs.push(targetRef);
-    const value = getCellValue(sheet[targetRef]);
-
-    if (!value && stopOnEmpty && (!columnCountMinimum || range.indexOf(increment)) >= columns.length) break;
-
     values.push(value);
   }
 

@@ -1,8 +1,9 @@
 import { workbookTypes } from '../config/workbookTypes';
+import { isString } from '../utilities/identification';
 
 import { MISSING_WORKBOOK } from '../constants/errorConditions';
 import { SUCCESS } from '../constants/resultConstants';
-import { isString } from '../utilities/identification';
+import { tidyLower } from '../utilities/convenience';
 
 export function identifyWorkbook(workbook) {
   if (!workbook) return { error: MISSING_WORKBOOK };
@@ -25,6 +26,11 @@ export function identifyWorkbook(workbook) {
             const { text, ...options } = identifier;
             if (options.startsWith) {
               return value?.startsWith(text);
+            } else if (options.splitIncludes) {
+              return value
+                ?.toString()
+                .split(' ')
+                .some((part) => tidyLower(part) === tidyLower(text));
             } else if (options.includes) {
               return value?.includes(text);
             } else if (options.endsWith) {

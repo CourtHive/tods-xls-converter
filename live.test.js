@@ -1,5 +1,5 @@
-import { processDirectory } from './src/utilities/processDirectory';
 import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
+import { processDirectory } from './src/utilities/processDirectory';
 import { setLoggingActive } from './src/global/state';
 import { writeFileSync } from 'fs-extra';
 
@@ -12,7 +12,7 @@ it('can process passing', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
+  const processLimit = 0;
   const startIndex = 0;
 
   setLoggingActive(true);
@@ -39,7 +39,7 @@ it.skip('can process tests', () => {
   const readDir = './examples/sheets/testing';
 
   const sheetTypes = [];
-  const sheetNumbers = [3];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 1;
