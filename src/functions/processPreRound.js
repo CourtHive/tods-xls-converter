@@ -1,22 +1,39 @@
-import { generateMatchUpId, generateParticipantId } from '../utilities/hashing';
 import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
+import { getFirstRoundEntries } from './getFirstRoundEntries';
+import { getRoundParticipants } from './getRoundParticipants';
+import { generateMatchUpId } from '../utilities/hashing';
 import { getRoundMatchUps } from './getRoundMatchUps';
 
 const { QUALIFYING } = drawDefinitionConstants;
 
-export function processPreRound({ preRoundParticipantRows, preRoundColumn, analysis, profile, nextColumn }) {
+export function processPreRound({ preRoundParticipantRows, preRoundColumn, nextColumn, analysis, columns, profile }) {
+  const columnProfile = analysis.columnProfiles.find((columnProfile) => columnProfile.column === preRoundColumn);
+  const boundaryIndex = columns.indexOf(nextColumn);
+  const { participants: preRoundParticpants, positionAssignments } = getFirstRoundEntries({
+    boundaryIndex,
+    columnProfile,
+    analysis,
+    profile
+  });
+
+  const roundParticipants = getRoundParticipants({
+    participants: preRoundParticpants,
+    positionAssignments
+  });
+
   const pairedRowNumbers = utilities.chunkArray(preRoundParticipantRows, 2);
   // these matchUps will go into qualifyingStructure
   const result = getRoundMatchUps({
     column: preRoundColumn,
     isPreRound: true,
+    roundParticipants,
     pairedRowNumbers,
     roundNumber: 1,
     nextColumn,
     analysis,
     profile
   });
-  const { matchUps, participantDetails } = result;
+  const { matchUps, advancingParticipants } = result;
 
   for (const matchUp of matchUps) {
     const { roundPosition } = matchUp;
@@ -26,30 +43,10 @@ export function processPreRound({ preRoundParticipantRows, preRoundColumn, analy
 
   const drawSize = Math.max(...matchUps.flatMap(({ drawPositions }) => drawPositions));
 
-  const positionAssignments = [];
-
-  // preRound should have no BYEs
-  for (const participant of participantDetails) {
-    const { isByePosition, participantName, roundPosition, sideNumber } = participant;
-    const matchUp = matchUps.find((matchUp) => roundPosition === matchUp.roundPosition);
-    const drawPosition = matchUp.drawPositions[sideNumber - 1];
-
-    if (isByePosition) {
-      positionAssignments.push({ bye: true, drawPosition });
-    } else {
-      const { participantId } = generateParticipantId({ attributes: [participantName] });
-      const positionAssignment = { participantId, drawPosition };
-      positionAssignments.push(positionAssignment);
-
-      participant.participantId = participantId;
-    }
-  }
-
   for (const matchUp of matchUps) {
     const { matchUpId } = generateMatchUpId({
       additionalAttributes: [analysis.sheetName, ...analysis.multiColumnValues],
-      // this will be the unique component for this sheet/structure in the generator
-      participantNames: matchUp.pairParticipantNames,
+      participantNames: advancingParticipants.map(({ participantName }) => participantName),
       drawSize
     });
     matchUp.matchUpId = matchUpId;
@@ -61,5 +58,11 @@ export function processPreRound({ preRoundParticipantRows, preRoundColumn, analy
 
   const structure = { matchUps, structureName, stage, stageSequence, positionAssignments };
 
-  return { matchUps, participantDetails, structure };
+  const advancedDrawPositions = advancingParticipants.map(({ drawPosition }) => drawPosition);
+  const nonAdvancingParticipants = roundParticipants
+    .flat()
+    .filter(({ drawPosition }) => !advancedDrawPositions.includes(drawPosition))
+    .map(({ drawPosition, ...participant }) => drawPosition && participant);
+
+  return { matchUps, advancingParticipants, nonAdvancingParticipants, structure };
 }

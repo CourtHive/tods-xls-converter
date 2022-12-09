@@ -1,10 +1,11 @@
-import { tournamentEngine, entryStatusConstants } from 'tods-competition-factory';
+import { limitedSeedAssignments } from './limitedSeedAssignments';
+import { entryStatusConstants } from 'tods-competition-factory';
 import { generateParticipantId } from '../utilities/hashing';
 import { isBye } from '../utilities/convenience';
 
-import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
 import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
+
 // const doublesPartnerFollows = isdoubles && check for person on rows subsequewnt to positionRows
 // const doublesPairStraddles = isdoubles && check for persons on rows before and after positionRows // two or more rows between each positionRow
 
@@ -70,11 +71,18 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         const lastFirst = lastName && firstName && `${lastName}, ${firstName}`;
         const participantName = detail.participantName || lastFirst || lastName || firstName;
 
-        const idAttributes = [firstName, lastName, ranking, participantName].filter(Boolean);
+        const idAttributes = [firstName, lastName, participantName].filter(Boolean);
         const participantId =
           personId || (idAttributes.length && generateParticipantId({ attributes: idAttributes })?.participantId);
 
-        return { participantId, participantName, person, ranking };
+        return {
+          participantRole: 'COMPETITOR',
+          participantType: 'INDIVIDUAL',
+          participantName,
+          participantId,
+          person,
+          ranking
+        };
       };
       if (isSeparatedPersonsDoubles) {
         const individualParticipants = consideredRows.map(getIndividualParticipant).filter(Boolean);
@@ -93,11 +101,7 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         participants.push(participant);
         positionAssignments.push({ drawPosition, participantId });
       } else {
-        const participant = {
-          participantRole: 'COMPETITOR',
-          participantType: 'INDIVIDUAL',
-          ...getIndividualParticipant(consideredRows[0])
-        };
+        const participant = getIndividualParticipant(consideredRows[0]);
         participants.push(participant);
 
         participantId = participant.participantId;
@@ -112,15 +116,8 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
     drawPosition += 1;
   }
 
-  const participantCount = participants.length;
-  const policyDefinitions = { ...POLICY_SEEDING_ITF };
-  const { seedsCount } = tournamentEngine.getSeedsCount({
-    drawSize: positionsCount,
-    policyDefinitions,
-    participantCount
-  });
-
-  seedAssignments = seedAssignments.filter((assignment) => assignment.seedValue <= seedsCount);
+  const drawSize = participants.length;
+  seedAssignments = limitedSeedAssignments({ seedAssignments, participants, drawSize });
 
   return { ...SUCCESS, seedAssignments, positionAssignments, entries, participants };
 }

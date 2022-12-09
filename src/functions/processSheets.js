@@ -81,7 +81,10 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
     sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis, structures };
 
-    Object.assign(participants, structureParticipants);
+    Object.assign(
+      participants,
+      ...structureParticipants.map((participant) => ({ [participant.participantId]: participant }))
+    );
 
     if (analysis && (!analysis?.skipped || !hasValues)) {
       const { isQualifying, category, sheetType } = analysis;

@@ -27,7 +27,9 @@ export const tidyLower = (value) => (isString(value) ? tidyValue(value.trim()).t
 export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
 
 export const isBye = (participant) =>
-  Object.values(participant).some((value) => isString(value) && value.toLowerCase() === BYE.toLowerCase());
+  (typeof participant === 'object' ? Object.values(participant) : [participant]).some(
+    (value) => isString(value) && value.toLowerCase() === BYE.toLowerCase()
+  );
 
 const isAlpha = (value) => /^[a-zA-Z- ]+$/.test(value);
 export const onlyAlpha = (value, profile) =>
