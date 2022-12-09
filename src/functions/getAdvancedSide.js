@@ -7,7 +7,7 @@ const { BYE } = matchUpStatusConstants;
 
 export function getAdvancedSide({
   consideredParticipants,
-  winningParticipantName,
+  advancingParticipantName,
   pairParticipantNames,
   // roundPosition, // useful for debugging
   // roundNumber, // useful for debugging
@@ -28,7 +28,7 @@ export function getAdvancedSide({
     return { advancedSide };
   }
 
-  if (!winningParticipantName) return {};
+  if (!advancingParticipantName) return {};
 
   const { qualifyingIdentifiers } = profile;
   let tidyFirstNames;
@@ -37,7 +37,7 @@ export function getAdvancedSide({
     name?.split('-').map(tidyValue).join('|').split('/').map(tidyValue).join('|').split(',').map(tidyValue).join('|');
 
   if (analysis.isDoubles) {
-    winningParticipantName = splitTidy(winningParticipantName);
+    advancingParticipantName = splitTidy(advancingParticipantName);
     pairParticipantNames = consideredParticipants.map((participant) => {
       if (participant.individualParticipants) {
         return participant.individualParticipants.map((participant) => participant.person.standardFamilyName).join('|');
@@ -60,7 +60,7 @@ export function getAdvancedSide({
     // TODO: use Regex qTest from getFirstRoundEntries
     return withoutQualifyingDesignator(withoutSeeding, qualifyingIdentifiers);
   });
-  const nonBracketedWinningParticipantName = getNonBracketedValue(winningParticipantName);
+  const nonBracketedWinningParticipantName = getNonBracketedValue(advancingParticipantName);
 
   const exactMatchSide = tidyLastNames.reduce((side, participantName, i) => {
     const condition = participantName === nonBracketedWinningParticipantName;

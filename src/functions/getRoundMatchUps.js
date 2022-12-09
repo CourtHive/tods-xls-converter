@@ -5,6 +5,7 @@ import { getNonBracketedValue, removeChars, tidyLower, tidyValue } from '../util
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
+import { getPotentialResult } from '../utilities/identification';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -103,11 +104,16 @@ export function getRoundMatchUps({
       const nextColumnRef = `${nextColumn}${nextColumnRowNumber}`;
       const refValue = nextColumnProfile.keyMap[nextColumnRef];
       const isDoubleWalkover = refValue?.toString().toLowerCase().trim() === providerDoubleWalkover.toLowerCase();
-      const winningParticipantName = isDoubleWalkover ? undefined : getNonBracketedValue(refValue);
+      let advancingParticipantName = isDoubleWalkover ? undefined : getNonBracketedValue(refValue);
+
+      const { leader, potentialResult } = getPotentialResult(advancingParticipantName);
+      if (potentialResult) {
+        advancingParticipantName = leader;
+      }
 
       const advancedSide = getAdvancedSide({
+        advancingParticipantName,
         consideredParticipants,
-        winningParticipantName,
         pairParticipantNames,
         roundPosition,
         roundNumber,
@@ -116,13 +122,12 @@ export function getRoundMatchUps({
       })?.advancedSide;
 
       if (advancedSide) {
-        consideredParticipants[advancedSide - 1].advancedParticipantName = getNonBracketedValue(winningParticipantName);
+        consideredParticipants[advancedSide - 1].advancedParticipantName =
+          getNonBracketedValue(advancingParticipantName);
         consideredParticipants[advancedSide - 1].advancedPositionRef = nextColumnRef;
 
         if (roundParticipants?.length) {
-          if (advancedSide) {
-            advancingParticipants.push(consideredParticipants[advancedSide - 1]);
-          }
+          advancingParticipants.push(consideredParticipants[advancedSide - 1]);
         }
       } else {
         advancingParticipants.push({});
@@ -137,7 +142,7 @@ export function getRoundMatchUps({
         return result;
       };
 
-      const resultRow = winningParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber || nextColumnRowTarget;
+      const resultRow = advancingParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber || nextColumnRowTarget;
       const resultColumn = resultColumnProfile?.column;
       let result = getResult(resultColumn);
 
