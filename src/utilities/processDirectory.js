@@ -81,7 +81,9 @@ export function processDirectory({
         allWorkbookMatchUps.push(...matchUps);
       });
     }
-    // console.log(allWorkbookMatchUps.length);
+    if (allWorkbookMatchUps.length) {
+      // console.log(allWorkbookMatchUps.length);
+    }
 
     totalMatchUps += result.totalMatchUps || 0;
     if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
