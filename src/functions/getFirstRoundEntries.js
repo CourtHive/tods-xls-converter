@@ -40,7 +40,7 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
     }
 
     // Costa Rica Qualifiers
-    const qTest = (name) => /^Q[\d]+\s/.test(name);
+    const qTest = (name) => /^Q\d+\s/.test(name);
     const isQualifier = qTest(baseName);
     if (isQualifier) baseName = baseName.split(' ').slice(1).join(' ');
 
