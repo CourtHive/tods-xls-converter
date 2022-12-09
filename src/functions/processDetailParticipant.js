@@ -1,10 +1,12 @@
+import { entryStatusConstants, participantConstants, participantRoles } from 'tods-competition-factory';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
-import { entryStatusConstants } from 'tods-competition-factory';
 import { generateParticipantId } from '../utilities/hashing';
 import { isBye } from '../utilities/convenience';
 
 import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
+const { PAIR, INDIVIDUAL } = participantConstants;
+const { COMPETITOR } = participantRoles;
 
 // const doublesPartnerFollows = isdoubles && check for person on rows subsequewnt to positionRows
 // const doublesPairStraddles = isdoubles && check for persons on rows before and after positionRows // two or more rows between each positionRow
@@ -76,8 +78,8 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
           personId || (idAttributes.length && generateParticipantId({ attributes: idAttributes })?.participantId);
 
         return {
-          participantRole: 'COMPETITOR',
-          participantType: 'INDIVIDUAL',
+          participantRole: COMPETITOR,
+          participantType: INDIVIDUAL,
           participantName,
           participantId,
           person,
@@ -92,21 +94,21 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         const participantName = individualParticipants.map(({ person }) => person.standardFamilyName).join('/');
 
         const participant = {
-          participantRole: 'COMPETITOR',
-          participantType: 'PAIR',
+          participantRole: COMPETITOR,
+          participantType: PAIR,
           individualParticipants,
           participantName,
           participantId
         };
         participants.push(participant);
-        positionAssignments.push({ drawPosition, participantId });
       } else {
         const participant = getIndividualParticipant(consideredRows[0]);
         participants.push(participant);
 
         participantId = participant.participantId;
-        positionAssignments.push({ drawPosition, participantId });
       }
+
+      positionAssignments.push({ drawPosition, participantId });
 
       if (seedValue) seedAssignments.push({ seedValue, participantId });
       const entry = { participantId, entryStatus };
