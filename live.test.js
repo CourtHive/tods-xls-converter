@@ -9,11 +9,11 @@ it('can process passing', () => {
   const writeResult = false;
 
   const sheetTypes = [];
-  const sheetNumbers = [3];
+  const sheetNumbers = [1];
   const sheetLimit = 0;
 
   const processLimit = 1;
-  const startIndex = 0;
+  const startIndex = 24;
 
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');
