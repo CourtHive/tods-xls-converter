@@ -1,11 +1,11 @@
+import { getNonBracketedValue, removeChars, tidyLower, tidyValue } from '../utilities/convenience';
 import { matchUpStatusConstants } from 'tods-competition-factory';
 import { getMatchUpParticipants } from './getMatchUpParticipants';
 import { getDerivedPair, getGroupings } from './columnUtilities';
-import { getNonBracketedValue, removeChars, tidyLower, tidyValue } from '../utilities/convenience';
+import { getPotentialResult } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
-import { getPotentialResult } from '../utilities/identification';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -107,8 +107,15 @@ export function getRoundMatchUps({
       let advancingParticipantName = isDoubleWalkover ? undefined : getNonBracketedValue(refValue);
 
       const { leader, potentialResult } = getPotentialResult(advancingParticipantName);
-      if (potentialResult) {
+      if (potentialResult && leader) {
         advancingParticipantName = leader;
+        const message = 'result found at end of advancedSide participantName';
+        pushGlobalLog({
+          method: 'notice',
+          color: 'brightyellow',
+          keyColors: { message: 'cyan', attributes: 'brightyellow' },
+          message
+        });
       }
 
       const advancedSide = getAdvancedSide({
@@ -144,7 +151,7 @@ export function getRoundMatchUps({
 
       const resultRow = advancingParticipantName ? nextColumnRowNumber + 1 : nextColumnRowNumber || nextColumnRowTarget;
       const resultColumn = resultColumnProfile?.column;
-      let result = getResult(resultColumn);
+      let result = getResult(resultColumn) || potentialResult;
 
       const matchUp = { roundNumber, roundPosition, drawPositions, pairParticipantNames };
 
