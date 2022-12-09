@@ -1,7 +1,8 @@
-import { getLoggingActive, getTournamentRecord, getWorkbook } from '../global/state';
-import { tournamentEngine } from 'tods-competition-factory';
+import { tournamentEngine, utilities } from 'tods-competition-factory';
+import { readdirSync, readFileSync, writeFileSync } from 'fs-extra';
+import { getLoggingActive, getWorkbook } from '../global/state';
+import { generateDrawId, generateEventId } from './hashing';
 import { processSheets } from '../functions/processSheets';
-import { readdirSync, readFileSync } from 'fs-extra';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
 
@@ -68,23 +69,67 @@ export function processDirectory({
     const tournamentParticipants = participantsMap ? Object.values(participantsMap) : [];
     Object.assign(allParticipantsMap, participantsMap);
 
+    const tournamentId = filename;
+
     tournamentEngine.setState({
       participants: tournamentParticipants,
-      tournamentId: filename
+      tournamentId
     });
 
-    const allWorkbookMatchUps = [];
+    const eventsMap = {};
+    const tournamentInfo = {};
+
     if (result.sheetAnalysis) {
-      Object.values(result.sheetAnalysis).forEach(({ structures = [] }) => {
-        const { matchUps = [] } = tournamentEngine.allDrawMatchUps({
-          drawDefinition: { structures },
-          inContext: true
+      Object.values(result.sheetAnalysis).forEach((sheet) => {
+        const { structures = [], analysis = {} } = sheet;
+        const gender = analysis.gender || analysis.info?.gender;
+        const category = analysis.category || analysis.info?.category;
+        const eventKey = (gender && category && `${gender}|${category}`) || gender || category;
+        const { drawId, error } = generateDrawId({
+          attributes: [...structures.map(({ structureId }) => structureId), tournamentId]
         });
-        allWorkbookMatchUps.push(...matchUps);
+
+        if (drawId) {
+          const drawDefinition = { drawId, structures };
+          if (!eventsMap[eventKey]) {
+            eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category };
+          } else {
+            eventsMap[eventKey].drawDefinitions.push(drawDefinition);
+          }
+        } else {
+          console.log({ error, structures });
+        }
+
+        if (analysis.info) {
+          const { tournamentName } = analysis.info;
+          if (tournamentName) tournamentInfo.tournamentName = tournamentName;
+          const newDate = utilities.dateTime.formatDate(new Date());
+          tournamentEngine.setTournamentDates({ startDate: newDate, endDate: newDate });
+        }
+      });
+
+      Object.values(eventsMap).forEach((event) => {
+        const { category, gender, drawDefinitions } = event;
+        const { eventId } = generateEventId({ attributes: drawDefinitions.map(({ drawId }) => drawId) });
+        const result = tournamentEngine.addEvent({
+          event: { eventId, drawDefinitions, gender, category: { ageCategoryCode: category } }
+        });
+        if (result.error) console.log(result);
       });
     }
-    if (allWorkbookMatchUps.length) {
-      // console.log(allWorkbookMatchUps.length);
+
+    if (tournamentInfo.tournamentName) {
+      tournamentEngine.setTournamentName(tournamentInfo);
+    }
+
+    const tournamentMatchUps = tournamentEngine.allTournamentMatchUps().matchUps;
+    if (tournamentMatchUps.length) {
+      /*
+      const participantId = tournamentMatchUps[0].sides[0].participantId;
+      const participants = tournamentEngine.getTournamentParticipants().tournamentParticipants;
+      const participant = participants.find((p) => p.participantId === participantId);
+      console.log({ participantId, participant });
+      */
     }
 
     totalMatchUps += result.totalMatchUps || 0;
@@ -103,9 +148,10 @@ export function processDirectory({
     }
 
     if (writeTournamentRecords && writeDir) {
-      const { tournamentRecord } = getTournamentRecord();
+      const { tournamentRecord } = tournamentEngine.getState();
       if (tournamentRecord.tournamentId) {
-        // write to file
+        const tournamentId = tournamentRecord.tournamentId;
+        writeFileSync(`${writeDir}/${tournamentId}.json`, JSON.stringify(tournamentRecord), 'UTF-8');
       }
     }
   }
