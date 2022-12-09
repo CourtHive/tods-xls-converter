@@ -216,16 +216,27 @@ export function getRoundRobinValues(analysis, profile, sheet) {
 
   const matchUpIds = [];
   const drawSize = positionAssignments.length;
+
+  const drawPositionRounds = {};
   const matchUps = Object.values(positionedMatchUps).map((matchUp) => {
-    const participantNames = matchUp.drawPositions.map((drawPosition) => positionNameMap[drawPosition]);
+    const { drawPositions } = matchUp;
+    const participantNames = drawPositions.map((drawPosition) => positionNameMap[drawPosition]);
     const { matchUpId } = generateMatchUpId({
       additionalAttributes: [analysis.sheetName, ...analysis.multiColumnValues],
       participantNames, // this will be the unique component for this sheet/structure in the generator
       drawSize
     });
+    drawPositions.forEach((drawPosition) => {
+      if (!drawPositionRounds[drawPosition]) {
+        drawPositionRounds[drawPosition] = [matchUpId];
+      } else {
+        drawPositionRounds[drawPosition].push(matchUpId);
+      }
+    });
+    const roundNumber = Math.max(...drawPositions.map((drawPosition) => drawPositionRounds[drawPosition].length));
     matchUpIds.push(matchUpId);
 
-    return { matchUpId, ...matchUp };
+    return { matchUpId, ...matchUp, roundNumber };
   });
 
   let attributes = [...matchUpIds, analysis.sheetName, 'CONTAINER'];
