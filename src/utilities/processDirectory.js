@@ -46,6 +46,7 @@ export function processDirectory({
     filenames = filenames.slice(startIndex);
   }
 
+  const allParticipantsMap = {};
   const skippedResults = [];
   const resultValues = [];
   const fileResults = {};
@@ -64,11 +65,12 @@ export function processDirectory({
     index += 1;
 
     const { participants: participantsMap } = result;
-    const participants = participantsMap ? Object.values(participantsMap) : [];
+    const tournamentParticipants = participantsMap ? Object.values(participantsMap) : [];
+    Object.assign(allParticipantsMap, participantsMap);
 
     tournamentEngine.setState({
-      tournamentId: filename,
-      participants
+      participants: tournamentParticipants,
+      tournamentId: filename
     });
 
     const allWorkbookMatchUps = [];
@@ -136,5 +138,5 @@ export function processDirectory({
     totalErrors
   });
 
-  return { fileResults, resultValues, skippedResults };
+  return { fileResults, resultValues, skippedResults, participants: Object.values(allParticipantsMap) };
 }
