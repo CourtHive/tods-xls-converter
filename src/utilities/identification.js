@@ -7,12 +7,13 @@ export const isScoreLike = (value) => {
 export const isObject = (value) => typeof value === 'object';
 export function excludeSingleDigits(value) {
   return value
-    .toString()
+    ?.toString()
     .split(' ')
     .filter((p) => !/^\d$/.test(p))
     .join(' ');
 }
 export function splitValueOnFirstDigit(value) {
+  if (!value) return;
   const parts = value.toString().split(' ');
   const firstDigitPart = parts.find((part) => /\d/.test(part));
   const firstDigitIndex = parts.indexOf(firstDigitPart);
@@ -27,7 +28,7 @@ export function digitsCount(value) {
 }
 export function getPotentialResult(value) {
   const splitValue = splitValueOnFirstDigit(value);
-  const potentialResult = excludeSingleDigits(splitValue[1]);
+  const potentialResult = excludeSingleDigits(splitValue?.[1]);
   const isPotential = isScoreLike(potentialResult) && digitsCount(potentialResult) > 1;
-  return { leader: splitValue[0], potentialResult: isPotential && potentialResult };
+  return { leader: splitValue?.[0], potentialResult: isPotential && potentialResult };
 }
