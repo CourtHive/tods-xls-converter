@@ -75,7 +75,7 @@ export const config = {
     entryStatusMap,
     categories,
     doubles: {
-      nameSeparator: '/'
+      regexSeparators: ['/', /\s{3,}/g]
     },
     rowDefinitions: [
       {
