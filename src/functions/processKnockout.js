@@ -1,5 +1,6 @@
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
+import { generateStructureId } from '../utilities/hashing';
 import { getRoundMatchUps } from './getRoundMatchUps';
 import { utilities } from 'tods-competition-factory';
 import { getPositionRefs } from './getPositionRefs';
@@ -163,11 +164,17 @@ export function processKnockOut({ profile, analysis, sheet }) {
     return { error: MISSING_MATCHUP_DETAILS };
   }
 
+  const matchUpIds = matchUps?.map(({ matchUpId }) => matchUpId);
   const stage = analysis.isQualifying ? 'QUALIFYING' : 'MAIN';
+  const attributes = [...matchUpIds, stage, analysis.sheetName];
+  const result = generateStructureId({ attributes });
+  if (result.error) console.log('generateStructureId', result.error);
+  const { structureId } = result;
   const structure = {
     stageSequence: analysis.isQualifying && preRoundParticipantRows?.length ? 2 : 1,
     positionAssignments,
     stageName: stage,
+    structureId,
     matchUps,
     stage
   };
