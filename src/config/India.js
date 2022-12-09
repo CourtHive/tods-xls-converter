@@ -74,6 +74,9 @@ export const config = {
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned', 'default', 'retired'],
     entryStatusMap,
     categories,
+    doubles: {
+      nameSeparator: '/'
+    },
     rowDefinitions: [
       {
         type: HEADER,
