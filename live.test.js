@@ -6,7 +6,8 @@ import { writeFileSync } from 'fs-extra';
 // test without building against sheets in example directory
 it('can process passing', () => {
   const readDir = './examples/sheets/processing';
-  const writeResult = false;
+  const writeParticipants = true;
+  let writeResultIndex;
 
   const sheetTypes = [];
   const sheetNumbers = [];
@@ -15,7 +16,7 @@ it('can process passing', () => {
   const processLimit = 0;
   const startIndex = 0;
 
-  setLoggingActive(true);
+  // setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'matchUps');
@@ -32,7 +33,11 @@ it('can process passing', () => {
   purgeGlobalLog();
   console.log('PASSED', Object.keys(result));
 
-  if (writeResult) writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[0]), 'UTF-8');
+  if (writeParticipants) {
+    writeFileSync('./scratch/participants.json', JSON.stringify(result.participants), 'UTF-8');
+  }
+  if (!isNaN(writeResultIndex))
+    writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 });
 
 it.skip('can process tests', () => {
