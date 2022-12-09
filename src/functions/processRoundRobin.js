@@ -1,6 +1,8 @@
-import { generateMatchUpId, generateParticipantId, generateStructureId } from '../utilities/hashing';
+import { getIndividualParticipant, getPairParticipant } from './getIndividualParticipant';
+import { generateMatchUpId, generateStructureId } from '../utilities/hashing';
 import { utilities, matchUpStatusConstants } from 'tods-competition-factory';
 import { onlyAlpha } from '../utilities/convenience';
+import { getLoggingActive } from '../global/state';
 import { normalizeName } from 'normalize-text';
 import { getRow } from './sheetAccess';
 
@@ -8,6 +10,7 @@ import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import { ROUND } from '../constants/sheetElements';
+import { MISSING_VALUES } from '../constants/errorConditions';
 
 const { WALKOVER } = matchUpStatusConstants;
 
@@ -24,7 +27,7 @@ export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, i
   // *. attributes are info tournamentName and dateRange
   if (info[TOURNAMENT_NAME]);
 
-  const { structure, participants, error } = getRoundRobinValues(analysis, profile);
+  const { structure, participants, error } = getRoundRobinValues(analysis, profile, sheet);
   if (structure) analysis.structureId = structure.structureId;
 
   if (error) return { error };
@@ -32,7 +35,7 @@ export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, i
   return { analysis, hasValues: true, structures: [structure], participants, ...SUCCESS };
 }
 
-export function getRoundRobinValues(analysis, profile) {
+export function getRoundRobinValues(analysis, profile, sheet) {
   const makeHash = (arr) => arr.join('|');
   const breakHash = (str) => str.split('|');
 
@@ -54,6 +57,8 @@ export function getRoundRobinValues(analysis, profile) {
   const positionColumnRows = analysis.columnProfiles.find(({ attribute, character }) => {
     return [attribute, character].includes(POSITION);
   })?.rows;
+
+  if (!positionColumnRows) return { error: MISSING_VALUES, positionColumnRows: false };
 
   const findColumnProfile = (column) =>
     analysis.columnProfiles.find((columnProfile) => columnProfile.column === column);
@@ -96,37 +101,74 @@ export function getRoundRobinValues(analysis, profile) {
   const positionAssignments = [];
   const positionedMatchUps = {};
   const positionNameMap = {};
-  const participants = {};
+  const participantsMap = {};
 
   const nameSeparator = profile.doubles?.nameSeparator || '/';
-  const nameValues = Object.keys(analysis.valuesMap);
-  const isDoubles = nameValues.length / participantsCount === 2;
-  const positionNames = utilities.chunkArray(nameValues, isDoubles ? 2 : 1).map((names) => {
-    const combinedName = names.join(nameSeparator);
-    // create a valuesMap entry for the doubles pair name
-    if (isDoubles) analysis.valuesMap[combinedName] = analysis.valuesMap[names[0]];
-    return combinedName;
+  const doublesSeparators = profile.doubles?.regexSeparators || ['/'];
+
+  // const nameValues = Object.keys(analysis.valuesMap);
+  const nameValues = analysis.multiColumnValues;
+  const keyMap = Object.assign({}, ...analysis.columnProfiles.map(({ keyMap }) => keyMap));
+  const nameValueKeys = Object.keys(keyMap).filter((key) => nameValues.includes(keyMap[key]));
+  const foundSeparators = nameValueKeys.map((key) => {
+    const value = sheet[key].v;
+    const doublesNameSeparator = doublesSeparators.find((separator) => {
+      const x = new RegExp(separator);
+      return x.test(value);
+    });
+    if (doublesNameSeparator) {
+      const pairNames = value.split(new RegExp(doublesNameSeparator));
+      return { doublesNameSeparator, pairNames };
+    }
   });
 
-  positionNames.forEach((name, positionIndex) => {
-    const drawPosition = positionIndex + 1;
-    if (name) {
-      const participantName = normalizeName(name);
+  const uniqueFoundSeparators = utilities.unique(foundSeparators.map((separator) => separator?.doublesNameSeparator));
+  const uniqueSeparator = foundSeparators.length > 1 && uniqueFoundSeparators.length === 1 && uniqueFoundSeparators[0];
+  const pairNames = uniqueSeparator && foundSeparators.map(({ pairNames }) => pairNames);
 
-      positionNameMap[drawPosition] = participantName;
+  let isDoubles = nameValues.length / participantsCount === 2;
+  const parseableNames = isDoubles ? utilities.chunkArray(nameValues, 2) : pairNames || nameValues;
 
-      const { participantId } = generateParticipantId({ attributes: [participantName] });
-      const finishingPosition = finishingPositions?.[positionIndex];
-      const positionAssignment = { drawPosition, participantId };
-      const extensions = finishingPosition && [{ name: 'participantResults', value: { finishingPosition } }];
-      if (extensions) positionAssignment.extensions = extensions;
-      positionAssignments.push(positionAssignment);
+  parseableNames.slice(0, nameValues.length).map((name, positionIndex) => {
+    if (!name) return;
+    let mappedName = name;
+    let participantName;
+    let participantId;
 
-      participants[participantId] = { participantId, participantName };
+    if (Array.isArray(name)) {
+      mappedName = name.join(nameSeparator);
+      const individualParticipants = name.map((n) => getIndividualParticipant({ name: n }));
+      individualParticipants.forEach((participant) => (participantsMap[participant.participantId] = participant));
+      const pairParticipant = getPairParticipant({ individualParticipants });
+      participantName = pairParticipant.participantName;
+      participantId = pairParticipant.participantId;
+      participantsMap[participantId] = pairParticipant;
+
+      // create a valuesMap entry for the doubles pair name
+      analysis.valuesMap[mappedName] = analysis.valuesMap[nameValues[positionIndex]];
+    } else {
+      participantName = normalizeName(name);
+      const participant = getIndividualParticipant({ name });
+      participantId = participant.participantId;
+      participantsMap[participantId] = participant;
     }
+
+    const drawPosition = positionIndex + 1;
+    if (drawPosition > positionColumnRows.length) return;
+
+    positionNameMap[drawPosition] = participantName;
+
+    const finishingPosition = finishingPositions?.[positionIndex];
+    const positionAssignment = { drawPosition, participantId };
+    const extensions = finishingPosition && [{ name: 'participantResults', value: { finishingPosition } }];
+    if (extensions) positionAssignment.extensions = extensions;
+    positionAssignments.push(positionAssignment);
+
     const orderedResultsColumns = resultsColumns.sort();
     // get resultsColumns in which they do not appear
-    const targetResultColumns = orderedResultsColumns.filter((column) => !analysis.valuesMap[name].includes(column));
+    const targetResultColumns = orderedResultsColumns.filter(
+      (column) => !analysis.valuesMap[mappedName].includes(column)
+    );
 
     for (const column of targetResultColumns) {
       const columnProfile = findColumnProfile(column);
@@ -174,8 +216,8 @@ export function getRoundRobinValues(analysis, profile) {
 
   const matchUpIds = [];
   const drawSize = positionAssignments.length;
-  const matchUps = Object.values(positionedMatchUps).map((value) => {
-    const participantNames = value.drawPositions.map((drawPosition) => positionNameMap[drawPosition]);
+  const matchUps = Object.values(positionedMatchUps).map((matchUp) => {
+    const participantNames = matchUp.drawPositions.map((drawPosition) => positionNameMap[drawPosition]);
     const { matchUpId } = generateMatchUpId({
       additionalAttributes: [analysis.sheetName, ...analysis.multiColumnValues],
       participantNames, // this will be the unique component for this sheet/structure in the generator
@@ -183,9 +225,8 @@ export function getRoundRobinValues(analysis, profile) {
     });
     matchUpIds.push(matchUpId);
 
-    return { matchUpId, ...value };
+    return { matchUpId, ...matchUp };
   });
-  // console.log(matchUps);
 
   let attributes = [...matchUpIds, analysis.sheetName, 'CONTAINER'];
   let result = generateStructureId({ attributes });
@@ -202,6 +243,11 @@ export function getRoundRobinValues(analysis, profile) {
     structureType: 'CONTAINER',
     structureName: 'MAIN'
   };
+
+  const participants = Object.values(participantsMap);
+  if (getLoggingActive('matchUps')) {
+    console.log({ matchUps, positionAssignments, participants });
+  }
 
   return {
     participants,
