@@ -18,9 +18,9 @@ export function generateMatchUpId({
   if ([personIds, participantNames].some((arr) => !Array.isArray(arr))) return { error: INVALID_VALUES };
   const participantAttribute = personIds.filter(Boolean).length ? personIds : participantNames;
   const attributes = [
-    ...[roundNumber, roundPosition, drawSize, ...drawPositions, ...additionalAttributes].filter(Boolean),
+    ...[roundNumber, roundPosition, drawSize, ...drawPositions, ...additionalAttributes],
     ...participantAttribute
-  ];
+  ].filter(Boolean);
   const result = generateId({ prepend: 'm', attributes });
   if (result.error) return result;
   return { matchUpId: result.id };
@@ -42,6 +42,17 @@ export function generateStructureId({ attributes }) {
   const result = generateId({ prepend: 's', attributes });
   if (result.error) return result;
   return { structureId: result.id };
+}
+
+export function generateEventId({ attributes }) {
+  const result = generateId({ prepend: 'e', attributes });
+  if (result.error) return result;
+  return { eventId: result.id };
+}
+export function generateDrawId({ attributes }) {
+  const result = generateId({ prepend: 'd', attributes });
+  if (result.error) return result;
+  return { drawId: result.id };
 }
 
 export function generateId({ prepend, attributes = [], defaultAttributes = [] } = {}) {
