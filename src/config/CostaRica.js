@@ -297,6 +297,7 @@ export const config = {
         attribute: 'seedNumbers',
         searchText: ['sembrados', 'sembradas'],
         columnCountMinimum: true,
+        preserveNonCounter: true,
         stopOnEmpty: true,
         columnOffset: -1,
         rowOffset: 1,
