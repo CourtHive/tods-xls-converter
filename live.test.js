@@ -1,14 +1,18 @@
 import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
 import { processDirectory } from './src/utilities/processDirectory';
+import { utilities } from 'tods-competition-factory';
 import { setLoggingActive } from './src/global/state';
 import { writeFileSync } from 'fs-extra';
 
 // test without building against sheets in example directory
 it('can process passing', () => {
   const readDir = './examples/sheets/processing';
-  const writeParticipants = true;
+  const writeDir = './examples/sheets/processed';
+  const writeTournamentRecords = false;
+  const writeParticipants = false;
   let writeResultIndex;
 
+  // const sheetTypes = ['ROUND_ROBIN'];
   const sheetTypes = [];
   const sheetNumbers = [];
   const sheetLimit = 0;
@@ -16,16 +20,18 @@ it('can process passing', () => {
   const processLimit = 0;
   const startIndex = 0;
 
-  // setLoggingActive(true);
+  setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'matchUps');
   const result = processDirectory({
+    writeTournamentRecords,
     processLimit,
     sheetNumbers,
     startIndex,
     sheetLimit,
     sheetTypes,
+    writeDir,
     readDir
   });
   if (result);
@@ -34,7 +40,10 @@ it('can process passing', () => {
   console.log('PASSED', Object.keys(result));
 
   if (writeParticipants) {
-    writeFileSync('./scratch/participants.json', JSON.stringify(result.participants), 'UTF-8');
+    const participants = result.participants.filter(({ participantType }) => participantType === 'INDIVIDUAL');
+    const csvParticipants = utilities.JSON2CSV(participants);
+    writeFileSync('./scratch/participants.json', JSON.stringify(participants), 'UTF-8');
+    writeFileSync('./scratch/participants.csv', csvParticipants, 'UTF-8');
   }
   if (!isNaN(writeResultIndex))
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
