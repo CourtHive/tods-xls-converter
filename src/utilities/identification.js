@@ -20,11 +20,7 @@ export function splitValueOnFirstDigit(value) {
   return [parts.slice(0, firstDigitIndex).join(' '), parts.slice(firstDigitIndex).join(' ')];
 }
 export function digitsCount(value) {
-  return value
-    .toString()
-    .split('')
-    .map((v) => /\d/.test(v))
-    .filter(Boolean).length;
+  return (value.match(/\d/g) || []).length;
 }
 export function getPotentialResult(value) {
   const splitValue = splitValueOnFirstDigit(value);
