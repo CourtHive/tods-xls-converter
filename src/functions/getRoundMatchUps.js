@@ -1,5 +1,5 @@
 import { getNonBracketedValue, removeChars, tidyLower, tidyValue } from '../utilities/convenience';
-import { matchUpStatusConstants } from 'tods-competition-factory';
+import { matchUpStatusConstants, mocksEngine } from 'tods-competition-factory';
 import { getMatchUpParticipants } from './getMatchUpParticipants';
 import { getDerivedPair, getGroupings } from './columnUtilities';
 import { getPotentialResult } from '../utilities/identification';
@@ -7,6 +7,8 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
 import { generateMatchUpId } from '../utilities/hashing';
+import { normalizeScore } from './cleanScore';
+import { tidyScore } from './scoreParser';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -188,6 +190,15 @@ export function getRoundMatchUps({
       if (matchUp.winningSide && result) {
         const sideString = matchUp.winningSide === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
         matchUp.score = { [sideString]: result };
+        const scoreString = normalizeScore(tidyScore(result));
+        const { outcome } = mocksEngine.generateOutcomeFromScoreString({
+          winningSide: matchUp.winningSide,
+          scoreString
+        });
+        const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
+        const score = { ...outcome?.score, ...stringScore };
+        matchUp.score = score;
+        if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });
       }
 
       if (!result && !isBye) {

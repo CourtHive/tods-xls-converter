@@ -1,16 +1,18 @@
-import { utilities, matchUpStatusConstants, entryStatusConstants } from 'tods-competition-factory';
+import { utilities, matchUpStatusConstants, entryStatusConstants, mocksEngine } from 'tods-competition-factory';
 import { getIndividualParticipant, getPairParticipant } from './getIndividualParticipant';
 import { generateMatchUpId, generateStructureId } from '../utilities/hashing';
 import { onlyAlpha } from '../utilities/convenience';
 import { getLoggingActive } from '../global/state';
 import { normalizeName } from 'normalize-text';
+import { normalizeScore } from './cleanScore';
+import { tidyScore } from './scoreParser';
 import { getRow } from './sheetAccess';
 
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
+import { MISSING_VALUES } from '../constants/errorConditions';
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import { ROUND } from '../constants/sheetElements';
-import { MISSING_VALUES } from '../constants/errorConditions';
 
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
 const { WALKOVER } = matchUpStatusConstants;
@@ -184,6 +186,8 @@ export function getRoundRobinValues(analysis, profile, sheet) {
       if (positionRow) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];
+        const scoreString = normalizeScore(tidyScore(result));
+        const { outcome } = mocksEngine.generateOutcomeFromScoreString({ scoreString });
         const resultIsMatchOutcome =
           result &&
           onlyAlpha(result, profile) &&
@@ -194,7 +198,8 @@ export function getRoundRobinValues(analysis, profile, sheet) {
         const positioning = drawPositions.join('|');
 
         const existingScore = positionedMatchUps[positioning]?.score;
-        const score = resultIsMatchOutcome ? undefined : { [sideString]: result, ...existingScore };
+        const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
+        const score = { ...outcome?.score, ...existingScore, ...stringScore };
         const drawPositionSideNumber = drawPositions.indexOf(drawPosition) + 1;
         const winningSide =
           resultIsMatchOutcome && profile.winIdentifier
@@ -202,6 +207,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
               ? drawPositionSideNumber
               : 3 - drawPositionSideNumber
             : undefined;
+        if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });
 
         const walkover = profile.matchUpStatuses?.walkover;
         const matchUpStatus =

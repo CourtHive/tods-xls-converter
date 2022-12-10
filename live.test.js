@@ -23,6 +23,7 @@ it('can process passing', () => {
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');
+  // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'matchUps');
   const result = processDirectory({
     writeTournamentRecords,
