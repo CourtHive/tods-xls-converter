@@ -8,13 +8,13 @@ import { writeFileSync } from 'fs-extra';
 it('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed';
-  const writeTournamentRecords = false;
+  const writeTournamentRecords = true;
   const writeParticipants = false;
   let writeResultIndex;
 
   // const sheetTypes = ['ROUND_ROBIN'];
   const sheetTypes = [];
-  const sheetNumbers = [1];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 1;
