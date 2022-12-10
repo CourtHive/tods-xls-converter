@@ -68,7 +68,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       profile
     });
 
-    const { participants: structureParticipants, structures = [], hasValues, analysis, error } = result;
+    const { participants: structureParticipants, structures = [], entries, hasValues, analysis, error } = result;
 
     const structureMatchUps = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
@@ -79,7 +79,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
     totalMatchUps += matchUpsCount || 0;
 
-    sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis, structures };
+    sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis, structures, entries };
 
     if (structureParticipants?.length) {
       Object.assign(

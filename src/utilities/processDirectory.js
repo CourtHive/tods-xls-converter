@@ -81,7 +81,7 @@ export function processDirectory({
 
     if (result.sheetAnalysis) {
       Object.values(result.sheetAnalysis).forEach((sheet) => {
-        const { structures = [], analysis = {} } = sheet;
+        const { structures = [], analysis = {}, entries } = sheet;
         const gender = analysis.gender || analysis.info?.gender;
         const category = analysis.category || analysis.info?.category;
         const eventKey = (gender && category && `${gender}|${category}`) || gender || category;
@@ -90,7 +90,7 @@ export function processDirectory({
         });
 
         if (drawId) {
-          const drawDefinition = { drawId, structures };
+          const drawDefinition = { drawId, structures, entries };
           if (!eventsMap[eventKey]) {
             eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category };
           } else {
@@ -111,8 +111,15 @@ export function processDirectory({
       Object.values(eventsMap).forEach((event) => {
         const { category, gender, drawDefinitions } = event;
         const { eventId } = generateEventId({ attributes: drawDefinitions.map(({ drawId }) => drawId) });
+        const entriesMap = Object.assign(
+          {},
+          ...drawDefinitions.flatMap(({ entries }) =>
+            entries?.map((entry) => ({ [entry.participantId]: entry })).filter(Boolean)
+          )
+        );
+        const entries = Object.values(entriesMap);
         const result = tournamentEngine.addEvent({
-          event: { eventId, drawDefinitions, gender, category: { ageCategoryCode: category } }
+          event: { eventId, entries, drawDefinitions, gender, category: { ageCategoryCode: category } }
         });
         if (result.error) console.log(result);
       });

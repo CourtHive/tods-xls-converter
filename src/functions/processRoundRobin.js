@@ -1,6 +1,6 @@
+import { utilities, matchUpStatusConstants, entryStatusConstants } from 'tods-competition-factory';
 import { getIndividualParticipant, getPairParticipant } from './getIndividualParticipant';
 import { generateMatchUpId, generateStructureId } from '../utilities/hashing';
-import { utilities, matchUpStatusConstants } from 'tods-competition-factory';
 import { onlyAlpha } from '../utilities/convenience';
 import { getLoggingActive } from '../global/state';
 import { normalizeName } from 'normalize-text';
@@ -12,6 +12,7 @@ import { SUCCESS } from '../constants/resultConstants';
 import { ROUND } from '../constants/sheetElements';
 import { MISSING_VALUES } from '../constants/errorConditions';
 
+const { DIRECT_ACCEPTANCE } = entryStatusConstants;
 const { WALKOVER } = matchUpStatusConstants;
 
 export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, info }) {
@@ -27,12 +28,12 @@ export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, i
   // *. attributes are info tournamentName and dateRange
   if (info[TOURNAMENT_NAME]);
 
-  const { structure, participants, error } = getRoundRobinValues(analysis, profile, sheet);
+  const { entries, structure, participants, error } = getRoundRobinValues(analysis, profile, sheet);
   if (structure) analysis.structureId = structure.structureId;
 
   if (error) return { error };
 
-  return { analysis, hasValues: true, structures: [structure], participants, ...SUCCESS };
+  return { analysis, hasValues: true, structures: [structure], participants, entries, ...SUCCESS };
 }
 
 export function getRoundRobinValues(analysis, profile, sheet) {
@@ -102,6 +103,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
   const positionedMatchUps = {};
   const positionNameMap = {};
   const participantsMap = {};
+  const entries = [];
 
   const nameSeparator = profile.doubles?.nameSeparator || '/';
   const doublesSeparators = profile.doubles?.regexSeparators || ['/'];
@@ -163,6 +165,8 @@ export function getRoundRobinValues(analysis, profile, sheet) {
     const extensions = finishingPosition && [{ name: 'participantResults', value: { finishingPosition } }];
     if (extensions) positionAssignment.extensions = extensions;
     positionAssignments.push(positionAssignment);
+    const entry = { participantId, entryStatus: DIRECT_ACCEPTANCE };
+    entries.push(entry);
 
     const orderedResultsColumns = resultsColumns.sort();
     // get resultsColumns in which they do not appear
@@ -262,6 +266,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
 
   return {
     participants,
-    structure
+    structure,
+    entries
   };
 }
