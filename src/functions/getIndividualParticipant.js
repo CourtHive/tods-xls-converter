@@ -44,8 +44,8 @@ export function getPairParticipant({ individualParticipants }) {
 
   return {
     participantRole: COMPETITOR,
+    individualParticipantIds,
     participantType: PAIR,
-    individualParticipants,
     participantName,
     participantId
   };
