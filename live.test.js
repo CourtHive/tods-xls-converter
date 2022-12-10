@@ -17,8 +17,8 @@ it('can process passing', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
-  const startIndex = 27;
+  const processLimit = 0;
+  const startIndex = 0;
 
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');

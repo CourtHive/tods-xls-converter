@@ -1,6 +1,6 @@
 export const cleanScore = (function () {
   // eslint-disable-next-line no-useless-escape
-  let clean = (score) => score.replace(/\,/g, ' ').replace(/\;/g, ' ').replace(/\./g, ' ');
+  let clean = (score) => score?.replace(/\,/g, ' ').replace(/\;/g, ' ').replace(/\./g, ' ');
 
   let parseScore = (score, tiebreak, ceiling = 7) => {
     let set;
@@ -122,10 +122,10 @@ export const cleanScore = (function () {
   let tiebreakScore = (set_score) => /^\(\d+\)$/.test(set_score);
 
   let normalSets = (set_scores) => {
-    let match_score = set_scores.map(normalSet).filter((f) => f);
-    if (match_score.length === set_scores.length) return match_score;
+    let match_score = set_scores?.map(normalSet).filter((f) => f);
+    if (match_score?.length === set_scores?.length) return match_score;
 
-    if (set_scores.length === 1 && set_scores[0].length === 4) {
+    if (set_scores?.length === 1 && set_scores?.[0].length === 4) {
       let nums = set_scores[0].split('');
       if (+nums[0] === 6 && +nums[2] === 6) {
         set_scores = [nums.slice(0, 2).join(''), nums.slice(2).join('')];
@@ -173,9 +173,9 @@ export const cleanScore = (function () {
   };
 
   let walkout = (set_scores) => {
-    if (set_scores.length < 2) return false;
-    let last2 = set_scores.slice(set_scores.length - 2, set_scores.length);
-    if (last2.join('').toLowerCase() === 'wo') return true;
+    if (set_scores?.length < 2) return false;
+    let last2 = set_scores?.slice(set_scores.length - 2, set_scores.length);
+    if (last2?.join('').toLowerCase() === 'wo') return true;
   };
 
   let wo = (score) =>
@@ -187,12 +187,12 @@ export const cleanScore = (function () {
 
   let okScore = (set_scores) => {
     // all sets are "normal"
-    let test_scores = set_scores.slice();
+    let test_scores = set_scores?.slice();
     let normal = normalSets(test_scores);
     if (normal) return normal;
     if (walkout(set_scores)) return ['wo'];
 
-    let last_set = test_scores.pop();
+    let last_set = test_scores?.pop();
     normal = normalSets(test_scores);
     if (!normal) return false;
 
@@ -213,7 +213,7 @@ export const cleanScore = (function () {
   let normalize = (score) =>
     okScore(
       clean(score)
-        .split(' ')
+        ?.split(' ')
         .filter((f) => f)
     );
 

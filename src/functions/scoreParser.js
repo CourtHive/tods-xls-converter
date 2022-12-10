@@ -60,8 +60,9 @@ export const scoreParser = (function () {
   ];
   */
 
-  fx.tidyScore = (before_score) => {
+  fx.tidyScore = (before_score = '') => {
     let cleaned = before_score
+      ?.toString()
       .replace(zeroZero, '0-0')
       .replace(dashParen, '(')
       .replace(colonDelim, gameDelim)
@@ -84,7 +85,7 @@ export const scoreParser = (function () {
       .replace(closeParen, `)${setDelim}`);
 
     return cleaned
-      .split(setDelim)
+      ?.split(setDelim)
       .filter((f) => f)
       .join(setDelim);
   };
