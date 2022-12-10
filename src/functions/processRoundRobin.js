@@ -1,4 +1,3 @@
-import { utilities, matchUpStatusConstants, entryStatusConstants, mocksEngine } from 'tods-competition-factory';
 import { getIndividualParticipant, getPairParticipant } from './getIndividualParticipant';
 import { generateMatchUpId, generateStructureId } from '../utilities/hashing';
 import { onlyAlpha } from '../utilities/convenience';
@@ -7,6 +6,16 @@ import { normalizeName } from 'normalize-text';
 import { normalizeScore } from './cleanScore';
 import { tidyScore } from './scoreParser';
 import { getRow } from './sheetAccess';
+import {
+  drawDefinitionConstants,
+  matchUpStatusConstants,
+  entryStatusConstants,
+  factoryConstants,
+  matchUpEngine,
+  mocksEngine,
+  drawEngine,
+  utilities
+} from 'tods-competition-factory';
 
 import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 import { MISSING_VALUES } from '../constants/errorConditions';
@@ -14,8 +23,10 @@ import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import { ROUND } from '../constants/sheetElements';
 
+const { CONTAINER, ITEM, MAIN, WATERFALL } = drawDefinitionConstants;
+const { WALKOVER, COMPLETED } = matchUpStatusConstants;
+const { TALLY } = factoryConstants.extensionConstants;
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
-const { WALKOVER } = matchUpStatusConstants;
 
 export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, info }) {
   if (sheetDefinition && profile && sheet);
@@ -164,7 +175,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
 
     const finishingPosition = finishingPositions?.[positionIndex];
     const positionAssignment = { drawPosition, participantId };
-    const extensions = finishingPosition && [{ name: 'participantResults', value: { finishingPosition } }];
+    const extensions = finishingPosition && [{ name: 'participantResults', value: { groupOrder: finishingPosition } }];
     if (extensions) positionAssignment.extensions = extensions;
     positionAssignments.push(positionAssignment);
     const entry = { participantId, entryStatus: DIRECT_ACCEPTANCE };
@@ -187,39 +198,62 @@ export function getRoundRobinValues(analysis, profile, sheet) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];
         const scoreString = normalizeScore(tidyScore(result));
-        const { outcome } = mocksEngine.generateOutcomeFromScoreString({ scoreString });
         const resultIsMatchOutcome =
           result &&
           onlyAlpha(result, profile) &&
           profile.matchOutcomes.some((outcome) => result.toLowerCase().includes(outcome.toString().toLowerCase()));
 
-        const drawPositions = [drawPosition, columnIndex + 1].sort();
-        const sideString = drawPosition > columnIndex + 1 ? 'scoreStringSide2' : 'scoreStringSide1';
-        const positioning = drawPositions.join('|');
+        const drawPositions = [drawPosition, columnIndex + 1];
+        const sidePerspective = drawPosition > columnIndex + 1 ? 2 : 1;
+        const sideString = sidePerspective === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
+        const positioning = drawPositions.slice().sort().join('|');
 
-        const existingScore = positionedMatchUps[positioning]?.score;
-        const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
-        const score = { ...outcome?.score, ...existingScore, ...stringScore };
-        const drawPositionSideNumber = drawPositions.indexOf(drawPosition) + 1;
+        const {
+          outcome: {
+            score: { sets }
+          }
+        } = mocksEngine.generateOutcomeFromScoreString({ scoreString });
+        const winInstances = sets ? utilities.instanceCount(sets.map(({ winningSide }) => winningSide)) : {};
+        const winnerBySets =
+          (winInstances[1] && winInstances[2] && (winInstances[1] > winInstances[2] ? 1 : 2)) ||
+          (winInstances[1] && 1) ||
+          (winInstances[2] && 2);
+
+        const winningSideByPerspective =
+          winnerBySets && (sidePerspective === winnerBySets ? winnerBySets : 3 - winnerBySets);
+
+        const winnerBySortedDrawPositions = winnerBySets && (sidePerspective === 1 ? winnerBySets : 3 - winnerBySets);
+
+        const hasLossIdentifier =
+          result && profile.lossIdentifier && result.toLowerCase().includes(profile.lossIdentifier);
+        const hasWinIdentifier =
+          result && profile.winIdentifier && result.toLowerCase().includes(profile.winIdentifier);
         const winningSide =
-          resultIsMatchOutcome && profile.winIdentifier
-            ? result.toLowerCase().includes(profile.winIdentifier)
-              ? drawPositionSideNumber
-              : 3 - drawPositionSideNumber
-            : undefined;
-        if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });
+          (resultIsMatchOutcome && hasWinIdentifier && (sidePerspective === 1 ? 1 : 2)) ||
+          (resultIsMatchOutcome && hasLossIdentifier && (sidePerspective === 1 ? 2 : 1)) ||
+          winningSideByPerspective ||
+          undefined;
 
         const walkover = profile.matchUpStatuses?.walkover;
-        const matchUpStatus =
-          result && walkover ? (result.toLowerCase().includes(walkover) ? WALKOVER : undefined) : undefined;
+        let matchUpStatus =
+          result && walkover ? (result.toLowerCase().includes(walkover) ? WALKOVER : COMPLETED) : undefined;
+
+        const existingScore = positionedMatchUps[positioning]?.score;
+        const { outcome } = mocksEngine.generateOutcomeFromScoreString({
+          winningSide: winningSide || winningSideByPerspective,
+          scoreString
+        });
+        const stringScore =
+          matchUpStatus !== WALKOVER && !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
+        const score = { ...outcome?.score, ...existingScore, ...stringScore };
 
         positionedMatchUps[positioning] = {
+          winningSide: winnerBySortedDrawPositions || winningSide,
           drawPositions,
           matchUpStatus,
-          winningSide,
-          result,
           score
         };
+        if (getLoggingActive('scores')) console.log(positionedMatchUps[positioning]);
       }
     }
   });
@@ -249,25 +283,38 @@ export function getRoundRobinValues(analysis, profile, sheet) {
     return { matchUpId, ...matchUp, roundNumber };
   });
 
-  let attributes = [...matchUpIds, analysis.sheetName, 'CONTAINER'];
+  let attributes = [...matchUpIds, analysis.sheetName, CONTAINER];
   let result = generateStructureId({ attributes });
   const { structureId: containerStructureId } = result;
 
-  attributes = [...matchUpIds, analysis.sheetName, 'ITEM'];
+  attributes = [...matchUpIds, analysis.sheetName, ITEM];
   result = generateStructureId({ attributes });
   const { structureId: itemStructureId } = result;
 
   const structure = {
     structures: [
-      { structureId: itemStructureId, structureType: 'ITEM', matchUps, positionAssignments, structureName: 'Group 1' }
+      { structureId: itemStructureId, structureType: ITEM, matchUps, positionAssignments, structureName: 'Group 1' }
     ],
     structureId: containerStructureId,
-    finishingPositions: 'WATERFALL',
-    structureType: 'CONTAINER',
-    structureName: 'MAIN'
+    finishingPositions: WATERFALL,
+    structureType: CONTAINER,
+    structureName: MAIN
   };
 
   const participants = Object.values(participantsMap);
+
+  const m = drawEngine.getAllStructureMatchUps({ structure, tournamentParticipants: participants, inContext: true });
+  const { participantResults } = matchUpEngine.tallyParticipantResults(m);
+
+  if (participantResults) {
+    structure.structures[0].positionAssignments.forEach((assignment) => {
+      const { participantId } = assignment;
+      if (participantResults[participantId]) {
+        assignment.extensions = [{ name: TALLY, value: participantResults[participantId] }];
+      }
+    });
+  }
+
   if (getLoggingActive('matchUps')) {
     console.log({ matchUps, positionAssignments, participants });
   }
