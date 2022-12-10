@@ -34,7 +34,7 @@ specifiers:
   rollup-plugin-esbuild: 5.0.0
   rollup-plugin-exclude-dependencies-from-bundle: ^1.1.23
   rollup-plugin-terser: 7.0.2
-  tods-competition-factory: ^0.406.0
+  tods-competition-factory: ^0.409.0
   typescript: ^4.9.3
   vite: ^4.0.0
   vitest: ^0.25.2
@@ -45,7 +45,7 @@ dependencies:
   hash-sum: 2.0.0
   node-xlsx: 0.21.0
   normalize-text: 2.4.1
-  tods-competition-factory: 0.406.0
+  tods-competition-factory: 0.409.0
   xlsx: 0.18.5
 
 devDependencies:
@@ -6131,8 +6131,8 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /tods-competition-factory/0.406.0:
-    resolution: {integrity: sha512-AeqsJ0nWpjFzmDmP1x//veFMIf5bY06+kltwb97YNztkQWxwMsR+2ykz4jm9IGMl5N+t+Dgmf8gcAB6z7HSZkA==}
+  /tods-competition-factory/0.409.0:
+    resolution: {integrity: sha512-KCnjtc4cEk1BxDRE144DWVHXaoSYA23staaMDaC/6Yu5Gw0YHDkTnmGscTsM6iJHvPOhj10msrUBOjyGnacxjA==}
     dev: false
 
   /trim-newlines/3.0.1:
