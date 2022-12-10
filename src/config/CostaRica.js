@@ -116,7 +116,7 @@ export const config = {
     skipProfile: { skipFloatValues: true },
     skipContains: ['página', 'pagina', 'categoria'],
     skipExpressions: [],
-    considerAlpha: [',', '(', ')', '/'],
+    considerAlpha: [',', '(', ')', '/', ':'],
     matchStatuses: ['doble wo', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
     matchUpStatuses: { bye: 'BYE', doubleWalkover: 'doble wo', walkover: 'wo' },
     qualifyingIdentifiers,
@@ -141,6 +141,7 @@ export const config = {
       'pierden wo'
     ],
     winIdentifier: 'gana',
+    lossIdentifier: 'pierde',
     categories,
     columnsMap: {},
     knockOutRounds: roundNames,

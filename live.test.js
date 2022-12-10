@@ -8,7 +8,7 @@ import { writeFileSync } from 'fs-extra';
 it('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed';
-  const writeTournamentRecords = false;
+  const writeTournamentRecords = true;
   const writeParticipants = false;
   let writeResultIndex;
 
@@ -23,6 +23,7 @@ it('can process passing', () => {
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');
+  // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'matchUps');
   const result = processDirectory({
     writeTournamentRecords,

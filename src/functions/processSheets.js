@@ -68,7 +68,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       profile
     });
 
-    const { participants: structureParticipants, structures = [], hasValues, analysis, error } = result;
+    const { participants: structureParticipants, structures = [], entries, hasValues, analysis, error } = result;
 
     const structureMatchUps = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
@@ -79,7 +79,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
     totalMatchUps += matchUpsCount || 0;
 
-    sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis, structures };
+    sheetAnalysis[sheetNumber] = { sheetName, hasValues, analysis, structures, entries };
 
     if (structureParticipants?.length) {
       Object.assign(
@@ -125,19 +125,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     keyColors: { totalMatchUps: 'brightyellow', attributes: 'brightgreen' },
     totalMatchUps
   });
-
-  /*
-    if (analysis?.tournamentDetails) {
-      // this should consider info.tournamentName, info.director if consistent across sheets
-      const { tournamentId } = generateTournamentId({ attributes: [analysis.tournamentDetails] });
-      console.log({ tournamentId });
-    }
-  */
-
-  // TODO: combine structures into drawDefinitions/events
-  // *. requires category which can be parsed from sheetNames or sheet info
-
-  // Now group structures by category and singles/doubles and generate events/drawDefinitions
 
   return { sheetAnalysis, errorLog, resultValues, skippedResults, participants, totalMatchUps, ...SUCCESS };
 }

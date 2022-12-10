@@ -1,7 +1,7 @@
 import { tournamentEngine, utilities } from 'tods-competition-factory';
 import { readdirSync, readFileSync, writeFileSync } from 'fs-extra';
 import { getLoggingActive, getWorkbook } from '../global/state';
-import { generateDrawId, generateEventId } from './hashing';
+import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { processSheets } from '../functions/processSheets';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
@@ -69,7 +69,7 @@ export function processDirectory({
     const tournamentParticipants = participantsMap ? Object.values(participantsMap) : [];
     Object.assign(allParticipantsMap, participantsMap);
 
-    const tournamentId = filename;
+    const { tournamentId } = generateTournamentId({ attributes: [filename] });
 
     tournamentEngine.setState({
       participants: tournamentParticipants,
@@ -81,7 +81,7 @@ export function processDirectory({
 
     if (result.sheetAnalysis) {
       Object.values(result.sheetAnalysis).forEach((sheet) => {
-        const { structures = [], analysis = {} } = sheet;
+        const { structures = [], analysis = {}, entries } = sheet;
         const gender = analysis.gender || analysis.info?.gender;
         const category = analysis.category || analysis.info?.category;
         const eventKey = (gender && category && `${gender}|${category}`) || gender || category;
@@ -90,7 +90,7 @@ export function processDirectory({
         });
 
         if (drawId) {
-          const drawDefinition = { drawId, structures };
+          const drawDefinition = { drawId, structures, entries, drawName: analysis.sheetName };
           if (!eventsMap[eventKey]) {
             eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category };
           } else {
@@ -108,11 +108,38 @@ export function processDirectory({
         }
       });
 
-      Object.values(eventsMap).forEach((event) => {
+      Object.keys(eventsMap).forEach((key) => {
+        const event = eventsMap[key];
         const { category, gender, drawDefinitions } = event;
+        const eventName = (key !== 'undefined' && key.split('|').join(' ')) || drawDefinitions?.[0]?.drawName;
         const { eventId } = generateEventId({ attributes: drawDefinitions.map(({ drawId }) => drawId) });
+        const entriesMap = Object.assign(
+          {},
+          ...drawDefinitions.flatMap(({ entries }) =>
+            entries?.map((entry) => ({ [entry.participantId]: entry })).filter(Boolean)
+          )
+        );
+        const entries = Object.values(entriesMap);
+
+        const flights = drawDefinitions?.map(({ entries, drawId, drawName }, i) => ({
+          drawEntries: entries,
+          flightNumber: i + 1,
+          drawName,
+          drawId
+        }));
+
+        const extensions = flights?.length ? [{ name: 'flightProfile', value: { flights } }] : [];
+
         const result = tournamentEngine.addEvent({
-          event: { eventId, drawDefinitions, gender, category: { ageCategoryCode: category } }
+          event: {
+            category: { ageCategoryCode: category },
+            drawDefinitions,
+            extensions,
+            eventName,
+            eventId,
+            entries,
+            gender
+          }
         });
         if (result.error) console.log(result);
       });
@@ -150,8 +177,10 @@ export function processDirectory({
     if (writeTournamentRecords && writeDir) {
       const { tournamentRecord } = tournamentEngine.getState();
       if (tournamentRecord.tournamentId) {
-        const tournamentId = tournamentRecord.tournamentId;
-        writeFileSync(`${writeDir}/${tournamentId}.json`, JSON.stringify(tournamentRecord), 'UTF-8');
+        let { tournamentId, tournamentName } = tournamentRecord;
+        tournamentName = tournamentName || tournamentId.split('.')[0];
+
+        writeFileSync(`${writeDir}/${tournamentName}.tods.json`, JSON.stringify(tournamentRecord), 'UTF-8');
       }
     }
   }
