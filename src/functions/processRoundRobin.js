@@ -187,10 +187,10 @@ export function getRoundRobinValues(analysis, profile, sheet) {
         const resultIsMatchOutcome =
           result &&
           onlyAlpha(result, profile) &&
-          profile.matchOutcomes.some((outcome) => outcome === result.toLowerCase());
+          profile.matchOutcomes.some((outcome) => result.toLowerCase().includes(outcome.toString().toLowerCase()));
 
         const drawPositions = [drawPosition, columnIndex + 1].sort();
-        const sideString = drawPosition > columnIndex + 1 ? 'stringScoreSide1' : 'stringScoreSide2';
+        const sideString = drawPosition > columnIndex + 1 ? 'scoreStringSide2' : 'scoreStringSide1';
         const positioning = drawPositions.join('|');
 
         const existingScore = positionedMatchUps[positioning]?.score;
@@ -252,7 +252,9 @@ export function getRoundRobinValues(analysis, profile, sheet) {
   const { structureId: itemStructureId } = result;
 
   const structure = {
-    structures: [{ structureId: itemStructureId, structureType: 'ITEM', matchUps, positionAssignments }],
+    structures: [
+      { structureId: itemStructureId, structureType: 'ITEM', matchUps, positionAssignments, structureName: 'Group 1' }
+    ],
     structureId: containerStructureId,
     finishingPositions: 'WATERFALL',
     structureType: 'CONTAINER',
