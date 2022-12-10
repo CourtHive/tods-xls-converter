@@ -126,19 +126,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     totalMatchUps
   });
 
-  /*
-    if (analysis?.tournamentDetails) {
-      // this should consider info.tournamentName, info.director if consistent across sheets
-      const { tournamentId } = generateTournamentId({ attributes: [analysis.tournamentDetails] });
-      console.log({ tournamentId });
-    }
-  */
-
-  // TODO: combine structures into drawDefinitions/events
-  // *. requires category which can be parsed from sheetNames or sheet info
-
-  // Now group structures by category and singles/doubles and generate events/drawDefinitions
-
   return { sheetAnalysis, errorLog, resultValues, skippedResults, participants, totalMatchUps, ...SUCCESS };
 }
 
