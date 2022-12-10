@@ -185,6 +185,11 @@ export function getRoundMatchUps({
         // console.log('SOMETHING', { lowerResult, roundNumber, roundPosition });
       }
 
+      if (matchUp.winningSide && result) {
+        const sideString = matchUp.winningSide === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
+        matchUp.score = { [sideString]: result };
+      }
+
       if (!result && !isBye) {
         // TODO: in some draws preRound results appear as part of advancedSide participantName
         if (isPreRound) {
