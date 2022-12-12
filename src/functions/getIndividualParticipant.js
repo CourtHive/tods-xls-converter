@@ -10,11 +10,17 @@ export function getIndividualParticipant({ name, analysis }) {
   let lastName, firstName;
 
   // Costa Rica Qualifiers
-  const qTest = (name) => /^Q\d+\s/.test(name);
-  const qPositionTest = (name) => /^Q\d+$/.test(name);
+  const qTest = (name) => /^[Q,q]\d+\s/.test(name);
+  const qPositionTest = (name) => /^[Q,q]\d+$/.test(name);
   const isQualifier = qTest(name);
   const isQualifyingPosition = qPositionTest(name);
-  if (isQualifier || isQualifyingPosition) name = name.split(' ').slice(1).join(' ');
+  if (isQualifier || isQualifyingPosition)
+    name = name
+      .split(' ')
+      .slice(1)
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .join(' ');
 
   if (name.includes(',')) {
     const parts = name.split(',').map((name) => normalizeName(name));

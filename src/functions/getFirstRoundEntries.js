@@ -48,9 +48,15 @@ export function getFirstRoundEntries({
     }
 
     // Costa Rica Qualifiers
-    const qTest = (name) => /^Q\d+\s/.test(name);
+    const qTest = (name) => /^[Q,q]\d+\s/.test(name);
     const isQualifier = qTest(baseName);
-    if (isQualifier) baseName = baseName.split(' ').slice(1).join(' ');
+    if (isQualifier)
+      baseName = baseName
+        .split(' ')
+        .slice(1)
+        .map((x) => x.trim())
+        .filter(Boolean)
+        .join(' ');
 
     const doublesNameSeparator = doublesSeparators.find((separator) => {
       const x = new RegExp(separator);
