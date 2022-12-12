@@ -363,6 +363,17 @@ export const config = {
     categoryParser: (value) => {
       const category = categories.find((category) => value.includes(category));
       return category;
+    },
+    fileDateParser: (filename) => {
+      const re = new RegExp('^(\\d{8})[\\s-]{1}');
+      if (re.test(filename)) {
+        const dateParts = filename.match(re)[1].split('');
+        const year = dateParts.slice(0, 4).join('');
+        const month = dateParts.slice(4, 6).join('');
+        const day = dateParts.slice(6).join('');
+        const dateString = [year, month, day].join('-');
+        return dateString;
+      }
     }
   },
   sheetNameMatcher: (sheetNames) => {
