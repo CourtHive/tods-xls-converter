@@ -1,8 +1,17 @@
 import { isSkipWord, onlyAlpha, onlyNumeric } from '../utilities/convenience';
 import { isNumeric, isScoreLike, isString } from '../utilities/identification';
+import { getColumnCharacter } from './getColumnCharacter';
 import { getCellValue, getRow } from './sheetAccess';
 
-export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column }) {
+export function getColumnAssessment({
+  prospectColumnKeys,
+  attributeMap,
+  columnIndex,
+  sheetType,
+  profile,
+  column,
+  sheet
+}) {
   const truthiness = !!prospectColumnKeys.length;
 
   // WARNING: DO NOT SORT KEYS
@@ -79,5 +88,19 @@ export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, p
     assessment.allProviderId = undefined;
   }
 
-  return assessment;
+  // apply any character processing specified by profile
+  if (profile.columnCharacter) {
+    const character = profile.columnCharacter({ columnProfile: assessment, attributeMap });
+    assessment.character = character;
+  }
+
+  const { character, upperRowBound } = getColumnCharacter({
+    columnProfile: assessment,
+    attributeMap,
+    columnIndex,
+    sheetType
+  });
+  if (character && !assessment.character) assessment.character = character;
+
+  return { assessment, upperRowBound };
 }

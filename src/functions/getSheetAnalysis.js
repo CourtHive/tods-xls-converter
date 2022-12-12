@@ -1,7 +1,7 @@
 import { hasNumeric, isString } from '../utilities/identification';
 import { getColumnAssessment } from './getColumnAssessment';
-import { getColumnCharacter } from './getColumnCharacter';
-import { getHeaderColumns } from './getHeaderColumns';
+import { getRoundCharacter } from './getRoundCharacter';
+import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getIsQualifying } from './getIsQualifying';
 import { getCol, getRow } from './sheetAccess';
@@ -27,7 +27,7 @@ export const getSheetAnalysis = ({
   sheet,
   info
 }) => {
-  const { headerRow, footerRow, avoidRows, filteredKeys, columnKeys, columnValues } = getSheetKeys({
+  const { headerRow, footerRow, avoidRows, filteredKeys, columnKeys, columnValues, rowRange } = getSheetKeys({
     sheetDefinition,
     ignoreCellRefs,
     profile,
@@ -47,11 +47,27 @@ export const getSheetAnalysis = ({
     })
   );
 
-  const assessColumn = (column) => {
+  const assessColumn = (column, columnIndex) => {
     const isColumnKey = (key) => getCol(key) === column;
     const isNotAvoidRow = (key) => !avoidRows.includes(getRow(key));
     const prospectColumnKeys = filteredKeys.filter(isNotAvoidRow).filter(isColumnKey).sort(keyRowSort);
-    return getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column });
+    const { assessment, upperRowBound } = getColumnAssessment({
+      prospectColumnKeys,
+      attributeMap,
+      columnIndex,
+      sheetType,
+      profile,
+      column,
+      sheet
+    });
+    if (upperRowBound) {
+      const avoidRange = utilities.generateRange(upperRowBound + 1, rowRange.to);
+      avoidRows.push(...avoidRange);
+    }
+    if (assessment.character) {
+      extendColumnsMap({ columnsMap: columns, attribute: assessment.character, column });
+    }
+    return assessment;
   };
 
   let columnProfiles = columnKeys
@@ -59,24 +75,19 @@ export const getSheetAnalysis = ({
     .map(assessColumn)
     .filter(({ values }) => values?.length);
 
-  // apply any character processing specified by profile
-  if (profile.columnCharacter) {
-    columnProfiles.forEach((columnProfile) => {
-      const character = profile.columnCharacter({ columnProfile, attributeMap });
-      if (character && !columns[character]) columns[character] = columnProfile.column;
-    });
-  }
-
   // post-process columnProfiles
   columnProfiles.forEach((columnProfile, columnIndex) => {
-    const character = getColumnCharacter({
+    const { character } = getRoundCharacter({
       columnProfiles,
       columnProfile,
       attributeMap,
       columnIndex,
       sheetType
     });
-    if (character && !columns[character]) columns[character] = columnProfile.column;
+    if (character && !columns[character]) {
+      if (!columnProfile.character) columnProfile.character = character;
+      extendColumnsMap({ columnsMap: columns, attribute: character, column: columnProfile.column });
+    }
   });
 
   // filter out any columnProfiles which have no values after postProcessing

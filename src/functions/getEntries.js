@@ -71,10 +71,9 @@ export function getEntries({
     const firstRoundColumn = rounds?.[0] || columns[boundaryIndex + 1];
     const columnProfile = getColumnProfile(firstRoundColumn);
     const entriesOnPositionRows = positionRows.every((row) => columnProfile.rows.includes(row));
+    const columnRowsOnPositionRows = columnProfile.rows.every((row) => positionRows.includes(row));
 
-    // console.log({ preRoundColumn, firstRoundColumn, positionRows, rounds }, columnProfile.rows);
-
-    if (entriesOnPositionRows)
+    if (entriesOnPositionRows || columnRowsOnPositionRows)
       return getFirstRoundEntries({
         preRoundParticipants,
         boundaryIndex,

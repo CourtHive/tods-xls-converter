@@ -43,5 +43,5 @@ export function getSheetKeys({ sheet, sheetDefinition, profile, ignoreCellRefs =
     return keys.includes(column) ? keys : keys.concat(column);
   }, []);
 
-  return { filteredKeys, columnKeys, avoidRows, headerRow, footerRow, columnValues };
+  return { filteredKeys, columnKeys, avoidRows, headerRow, footerRow, columnValues, rowRange };
 }

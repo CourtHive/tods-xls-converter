@@ -87,6 +87,7 @@ export const config = {
       { text: 'servicio', includes: true },
       { text: 'clasifica', includes: true },
       { text: 'clasificado', includes: true },
+      { text: 'clasifcado', includes: true },
       { text: 'clasficada', includes: true },
       { text: 'clasificada', includes: true },
       { text: 'claficicada', includes: true },
@@ -97,6 +98,7 @@ export const config = {
       { text: 'sets sin', includes: true },
       { text: 'con ventajas', includes: true },
       { text: 'ganadadora', startsWith: true },
+      { text: 'tba', startsWith: true },
       { text: 'ganadora', startsWith: true },
       { text: 'ganador', startsWith: true },
       { text: 'club', startsWith: true },
@@ -158,8 +160,7 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        // elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal', 'director'],
-        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal'],
+        elements: ['testigos', 'fiscales', 'fiscal'],
         rows: 8,
         rowBuffer: 2,
         minimumElements: 1

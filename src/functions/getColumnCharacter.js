@@ -19,16 +19,18 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
     column
   } = columnProfile;
 
-  if (columnProfile.character) return columnProfile.character;
+  if (columnProfile.character) return { character: columnProfile.character };
 
   if (allProviderId) {
     const character = PERSON_ID;
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;
-    return character;
+    return { character };
   }
 
   const numericCheck = consecutiveNumbers && lastNumericValue > 0;
+
+  // TODO: this would exclude any qualifying rounds which are not power of 2
   const knockOutCheck =
     utilities.isPowerOf2(lastNumericValue) || (lastNumericValue < values.length && utilities.isPowerOf2(values.length));
 
@@ -37,7 +39,8 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
     const character = containsAlpha ? PRE_ROUND : POSITION;
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;
-    return character;
+    const upperRowBound = character === POSITION && Math.max(...columnProfile.rows);
+    return { character, upperRowBound };
   }
 
   if (containsNumeric && containsAlpha) {
@@ -53,7 +56,7 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
   let hasNameValue;
   const attributes = Object.values(attributeMap);
   const nameColumnAttributes = attributes.filter((attribute) => [FIRST_NAME, LAST_NAME].includes(attribute));
-  if (nameColumnAttributes.length) {
+  if (columnProfiles && nameColumnAttributes.length) {
     const nameRound = nameColumnAttributes.some((attribute) => {
       const nameColumnProfile = columnProfiles.find((profile) => profile.attribute === attribute);
       const isNameRound = values.every((value) => {
@@ -66,16 +69,16 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
     if (nameRound) {
       const character = ROUND;
       columnProfile.character = character;
-      return character;
+      return { character };
     }
   }
 
   const { character, attribute } = columnProfile;
 
   // need to add additional safeguards here so that result column is not before any of the idAttribute columns
-  if (scoreLikeCount && !hasNameValue && !character && (!attribute || attribute === ROUND)) {
+  if (scoreLikeCount && !hasNameValue && !character && (!attribute || attribute === ROUND) && !consecutiveNumbers) {
     columnProfile.character = RESULT;
   }
 
-  return columnProfile.character;
+  return { character: columnProfile.character };
 }
