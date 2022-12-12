@@ -37,9 +37,8 @@ export function getFirstRoundEntries({
 
     const isPreRoundParticipant = preRoundAdvancedRows.includes(columnProfile.rows[index]);
     const preRoundParticipantIndex = preRoundAdvancedRows.indexOf(columnProfile.rows[index]);
-    let baseName = isPreRoundParticipant
-      ? preRoundParticipants[preRoundParticipantIndex].participantName
-      : getNonBracketedValue(value);
+    const preRoundParticipant = preRoundParticipants?.[preRoundParticipantIndex];
+    let baseName = isPreRoundParticipant ? preRoundParticipant.participantName : getNonBracketedValue(value);
 
     if (isBye(baseName)) {
       positionAssignments.push({ drawPosition, bye: true });
@@ -66,7 +65,12 @@ export function getFirstRoundEntries({
     let participantId;
 
     let qualifyingPosition;
-    if (doublesNameSeparator) {
+    if (isPreRoundParticipant) {
+      const { drawPosition, advancedPositionRef, ...participant } = preRoundParticipant;
+      if (drawPosition && advancedPositionRef);
+      participants.push(participant);
+      participantId = participant.participantId;
+    } else if (doublesNameSeparator) {
       const individualParticipants = baseName.split(new RegExp(doublesNameSeparator)).map((name) => {
         const { participant, isQualifyingPosition, isQualifier } = getIndividualParticipant({ name, analysis });
         if (isQualifier || isQualifyingPosition) qualifyingPosition = true;
