@@ -2,12 +2,13 @@ import { tournamentEngine, utilities, entryStatusConstants } from 'tods-competit
 import { processDetailParticipants } from './processDetailParticipant';
 import { getFirstRoundEntries } from './getFirstRoundEntries';
 import { generateParticipantId } from '../utilities/hashing';
+import { pushGlobalLog } from '../utilities/globalLog';
 import { isBye } from '../utilities/convenience';
 import { getRow } from './sheetAccess';
 
+import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
 import { ENTRY_DETAILS } from '../constants/attributeConstants';
 import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
-import { MISSING_NAMES } from '../constants/errorConditions';
 import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
 
@@ -64,10 +65,15 @@ export function getEntries({
         });
     }
   } else {
-    const rounds = Array.isArray(analysis.columns.round) && analysis.columns.round;
-    const firstRoundColumn = (rounds && (preRoundColumn ? rounds[1] : rounds[0])) || columns[boundaryIndex + 1];
+    const rounds =
+      Array.isArray(analysis.columns.round) && analysis.columns.round.filter((column) => column !== preRoundColumn);
+
+    const firstRoundColumn = rounds?.[0] || columns[boundaryIndex + 1];
     const columnProfile = getColumnProfile(firstRoundColumn);
     const entriesOnPositionRows = positionRows.every((row) => columnProfile.rows.includes(row));
+
+    // console.log({ preRoundColumn, firstRoundColumn, positionRows, rounds }, columnProfile.rows);
+
     if (entriesOnPositionRows)
       return getFirstRoundEntries({
         preRoundParticipants,
@@ -136,6 +142,16 @@ export function getEntries({
 
   if (participants.length && !firstNameCount) {
     return { error: MISSING_NAMES };
+  }
+
+  if (!participants?.length) {
+    if (!analysis.columns?.round) {
+      return { error: 'NO ROUND COLUMNS IDENTIFIED' };
+    }
+    const error = NO_PARTICIPANTS_FOUND;
+    pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
+    pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } }, 'error');
+    return { error };
   }
 
   return { ...SUCCESS, entries, boundaryIndex, participants, positionAssignments, seedAssignments };
