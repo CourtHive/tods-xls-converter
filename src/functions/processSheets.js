@@ -115,6 +115,19 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       } else {
         errorLog[error].push(sheetName);
       }
+    } else {
+      const method = `processSheet ${sheetNumber}`;
+      pushGlobalLog(
+        {
+          method,
+          keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
+          type: analysis.sheetType,
+          sheetName,
+          matchUpsCount
+        },
+        undefined,
+        method
+      );
     }
 
     if (analysis?.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
@@ -153,7 +166,7 @@ export function processSheet({
     pushGlobalLog({
       method,
       keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
-      type: sheetDefinition.type,
+      type: sheetType,
       sheetName
     });
   } else {

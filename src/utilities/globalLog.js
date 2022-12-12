@@ -4,20 +4,32 @@ import { logColors } from '../assets/logColors';
 import { isString } from './identification';
 
 const namedLogs = {};
-const globalLog = [];
+let globalLog = [];
 
-export function pushGlobalLog(value, logName) {
+export function pushGlobalLog(value, logName, replaceMethod) {
   if (!getLoggingActive()) return;
 
   if (isString(value)) value = { method: value };
   if (isString(logName)) {
     if (namedLogs[logName]) {
-      namedLogs[logName].push(value);
+      if (replaceMethod) {
+        namedLogs[logName] = namedLogs[logName].map((item) => {
+          return item.method === replaceMethod ? value : item;
+        });
+      } else {
+        namedLogs[logName].push(value);
+      }
     } else {
       namedLogs[logName] = [value];
     }
   } else {
-    globalLog.push(value);
+    if (replaceMethod) {
+      globalLog = globalLog.map((item) => {
+        return item.method === replaceMethod ? value : item;
+      });
+    } else {
+      globalLog.push(value);
+    }
   }
 }
 
