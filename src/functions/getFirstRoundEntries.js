@@ -35,7 +35,7 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
       : getNonBracketedValue(value);
 
     if (isBye(baseName)) {
-      positionAssignments.push({ bye: true, drawPosition });
+      positionAssignments.push({ drawPosition, bye: true });
       drawPosition += 1;
       return;
     }
@@ -52,10 +52,13 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
 
     let participantId;
 
+    let qualifyingPosition;
     if (doublesNameSeparator) {
-      const individualParticipants = baseName
-        .split(new RegExp(doublesNameSeparator))
-        .map((name) => getIndividualParticipant({ name }));
+      const individualParticipants = baseName.split(new RegExp(doublesNameSeparator)).map((name) => {
+        const { participant, isQualifyingPosition, isQualifier } = getIndividualParticipant({ name });
+        if (isQualifier || isQualifyingPosition) qualifyingPosition = true;
+        return participant;
+      });
       const individualParticipantIds = individualParticipants.map(({ participantId }) => participantId);
       participantId = generateParticipantId({ attributes: individualParticipantIds })?.participantId;
       const participantName = individualParticipants.map(({ person }) => person.standardFamilyName).join('/');
@@ -67,17 +70,22 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
         participantName,
         participantId
       };
-      participants.push(participant);
+      if (participant.participantName) participants.push(participant);
     } else {
-      const participant = getIndividualParticipant({ name: baseName });
+      const { participant, isQualifier, isQualifyingPosition } = getIndividualParticipant({ name: baseName });
+      if (isQualifier || isQualifyingPosition) qualifyingPosition = true;
       participantId = participant.participantId;
-      participants.push(participant);
+      if (participant.participantName) participants.push(participant);
     }
 
     const seedValue = getSeeding(value);
     if (seedValue) seedAssignments.push({ seedValue, participantId });
 
-    positionAssignments.push({ drawPosition, participantId });
+    if (participantId) {
+      positionAssignments.push({ drawPosition, participantId });
+    } else if (qualifyingPosition) {
+      positionAssignments.push({ drawPosition, qualifer: true });
+    }
 
     const entryStatus = isQualifier ? QUALIFIER : DIRECT_ACCEPTANCE;
     // TODO: const entryStage = qualifyingDraw ? QUALIFYING : MAIN;
