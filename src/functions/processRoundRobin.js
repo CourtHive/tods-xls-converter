@@ -153,7 +153,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
     if (Array.isArray(name)) {
       mappedName = name.join(nameSeparator);
       const individualParticipants = name.map((n) => {
-        const { participant } = getIndividualParticipant({ name: n });
+        const { participant } = getIndividualParticipant({ name: n, analysis });
         return participant;
       });
       individualParticipants.forEach((participant) => (participantsMap[participant.participantId] = participant));
@@ -166,7 +166,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
       analysis.valuesMap[mappedName] = analysis.valuesMap[nameValues[positionIndex]];
     } else {
       participantName = normalizeName(name);
-      const { participant } = getIndividualParticipant({ name });
+      const { participant } = getIndividualParticipant({ name, analysis });
       participantId = participant.participantId;
       if (participant.participantName) participantsMap[participantId] = participant;
     }

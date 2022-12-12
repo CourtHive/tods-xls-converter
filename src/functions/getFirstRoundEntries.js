@@ -11,7 +11,14 @@ import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE, QUALIFIER } = entryStatusConstants;
 const { PAIR } = participantConstants;
 
-export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, positionRows, preRoundParticipants }) {
+export function getFirstRoundEntries({
+  preRoundParticipants,
+  boundaryIndex,
+  columnProfile,
+  positionRows,
+  analysis,
+  profile
+}) {
   const positionAssignments = [];
   let seedAssignments = [];
   const participants = [];
@@ -55,7 +62,7 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
     let qualifyingPosition;
     if (doublesNameSeparator) {
       const individualParticipants = baseName.split(new RegExp(doublesNameSeparator)).map((name) => {
-        const { participant, isQualifyingPosition, isQualifier } = getIndividualParticipant({ name });
+        const { participant, isQualifyingPosition, isQualifier } = getIndividualParticipant({ name, analysis });
         if (isQualifier || isQualifyingPosition) qualifyingPosition = true;
         return participant;
       });
@@ -72,7 +79,7 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
       };
       if (participant.participantName) participants.push(participant);
     } else {
-      const { participant, isQualifier, isQualifyingPosition } = getIndividualParticipant({ name: baseName });
+      const { participant, isQualifier, isQualifyingPosition } = getIndividualParticipant({ name: baseName, analysis });
       if (isQualifier || isQualifyingPosition) qualifyingPosition = true;
       participantId = participant.participantId;
       if (participant.participantName) participants.push(participant);
