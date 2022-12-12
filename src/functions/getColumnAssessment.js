@@ -22,7 +22,7 @@ export function getColumnAssessment({
         profile.exciseWords.forEach(({ regex }) => {
           const re = new RegExp(regex);
           if (re.test(rawValue.toString().toLowerCase())) {
-            rawValue = rawValue.toString().toLowerCase().split(re).join('');
+            rawValue = rawValue.toString().toLowerCase().split(re).join('').trim();
           }
         });
       }
