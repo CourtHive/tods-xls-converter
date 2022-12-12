@@ -101,6 +101,7 @@ export const config = {
       { text: 'con ventajas', includes: true },
       { text: 'ganadadora', startsWith: true },
       { text: 'tba', startsWith: true },
+      { text: 'ota', startsWith: true },
       { text: 'ganadora', startsWith: true },
       { text: 'ganador', startsWith: true },
       { text: 'club', startsWith: true },
