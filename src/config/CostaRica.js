@@ -61,7 +61,7 @@ export const config = {
   organization,
   mustContainSheetNames: [],
   profile: {
-    exciseWords: [{ regex: 'grupo\\s[A-Za-z]' }, { regex: 'grup\\s[A-Za-z]' }],
+    exciseWords: [{ regex: 'grupo\\s[A-Za-z]' }, { regex: 'grup\\s[A-Za-z]' }, { regex: `\\*ll` }],
     skipWords: [
       // TODO: introduce { regex } // which would be an exact match
       'final',
@@ -85,6 +85,7 @@ export const config = {
       { text: 'formato', startsWith: true },
       { text: 'fiscales', startsWith: true },
       { text: 'servicio', includes: true },
+      { text: 'en casto de', includes: true },
       { text: 'clasifica', includes: true },
       { text: 'clasificado', includes: true },
       { text: 'clasifcado', includes: true },
@@ -93,6 +94,7 @@ export const config = {
       { text: 'claficicada', includes: true },
       { text: 'lugar', includes: true },
       { text: 'grupo', includes: true },
+      { text: 'break a', includes: true },
       { text: 'ranking', includes: true },
       { text: 'sets con', includes: true },
       { text: 'sets sin', includes: true },
