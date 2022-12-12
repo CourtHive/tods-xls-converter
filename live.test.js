@@ -10,6 +10,7 @@ it('can process passing', () => {
   const writeDir = './examples/sheets/processed';
   const writeTournamentRecords = false;
   const writeParticipants = false;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   // const sheetTypes = ['ROUND_ROBIN'];
@@ -27,6 +28,7 @@ it('can process passing', () => {
   // setLoggingActive(true, 'matchUps');
   const result = processDirectory({
     writeTournamentRecords,
+    writeMatchUps,
     processLimit,
     sheetNumbers,
     startIndex,
@@ -42,7 +44,9 @@ it('can process passing', () => {
 
   if (writeParticipants) {
     const participants = result.participants.filter(({ participantType }) => participantType === 'INDIVIDUAL');
-    const csvParticipants = utilities.JSON2CSV(participants);
+    const csvParticipants = utilities.JSON2CSV(participants, {
+      columnAccessors: ['participantName', 'person.standardFamilyName', 'person.standardGivenName']
+    });
     writeFileSync('./scratch/participants.json', JSON.stringify(participants), 'UTF-8');
     writeFileSync('./scratch/participants.csv', csvParticipants, 'UTF-8');
   }
