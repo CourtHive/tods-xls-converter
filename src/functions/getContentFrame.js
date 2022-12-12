@@ -25,7 +25,7 @@ export function getContentFrame({ sheet, profile, sheetDefinition, rowRange }) {
   });
   const headerRow = Math.max(...headerRows);
   const headerAvoidRows = headerRows.flatMap((headerRow) => {
-    const startRange = +headerRow;
+    const startRange = 1;
     const endRange = +headerRow + (headerRowDefinition.rows || 0);
     return utilities.generateRange(startRange, endRange);
   });

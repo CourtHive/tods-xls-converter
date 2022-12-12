@@ -8,7 +8,15 @@ export function getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, p
   // WARNING: DO NOT SORT KEYS
   const assessment = prospectColumnKeys.reduce(
     (assessment, key) => {
-      const rawValue = getCellValue(sheet[key]).split('.').join(''); // remove '.'
+      let rawValue = getCellValue(sheet[key]).split('.').join(''); // remove '.'
+      if (profile.exciseWords) {
+        profile.exciseWords.forEach(({ regex }) => {
+          const re = new RegExp(regex);
+          if (re.test(rawValue.toString().toLowerCase())) {
+            rawValue = rawValue.toString().toLowerCase().split(re).join('');
+          }
+        });
+      }
       const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
 
       const skip =

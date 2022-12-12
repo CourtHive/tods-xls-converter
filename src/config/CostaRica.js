@@ -16,8 +16,10 @@ const { MALE, FEMALE, ANY } = genderConstants;
 
 const roundNames = [
   'primera ronda',
+  'prmera ronda',
   'segunda ronda',
   'tercera ronda',
+  'ronda',
   'octavos',
   'cuartos',
   'semifinal',
@@ -59,6 +61,7 @@ export const config = {
   organization,
   mustContainSheetNames: [],
   profile: {
+    exciseWords: [{ regex: 'grupo\\s[A-Za-z]' }, { regex: 'grup\\s[A-Za-z]' }],
     skipWords: [
       // TODO: introduce { regex } // which would be an exact match
       'final',
@@ -66,14 +69,6 @@ export const config = {
       'campeon',
       'subcampeon',
       ...categories, // use regex
-      { text: 'Q1', exact: true },
-      { text: 'Q2', exact: true },
-      { text: 'Q3', exact: true },
-      { text: 'Q4', exact: true },
-      { text: 'Q5', exact: true },
-      { text: 'Q6', exact: true },
-      { text: 'Q7', exact: true },
-      { text: 'Q8', exact: true },
       { text: ' tba', startsWith: true },
       { text: ' pm', endsWith: true },
       { text: 'puntos', endsWith: true },
@@ -163,7 +158,8 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal', 'director'],
+        // elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal', 'director'],
+        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal'],
         rows: 8,
         rowBuffer: 2,
         minimumElements: 1

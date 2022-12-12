@@ -4,10 +4,10 @@ import { getColumnCharacter } from './getColumnCharacter';
 import { getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getIsQualifying } from './getIsQualifying';
+import { getCol, getRow } from './sheetAccess';
 import { getSheetKeys } from './getSheetKeys';
 import { getValuesMap } from './getValuesMap';
 import { getCategory } from './getCategory';
-import { getCol } from './sheetAccess';
 import {
   getNonBracketedValue,
   getPositionColumn,
@@ -49,7 +49,8 @@ export const getSheetAnalysis = ({
 
   const assessColumn = (column) => {
     const isColumnKey = (key) => getCol(key) === column;
-    const prospectColumnKeys = filteredKeys.filter(isColumnKey).sort(keyRowSort);
+    const isNotAvoidRow = (key) => !avoidRows.includes(getRow(key));
+    const prospectColumnKeys = filteredKeys.filter(isNotAvoidRow).filter(isColumnKey).sort(keyRowSort);
     return getColumnAssessment({ sheet, attributeMap, prospectColumnKeys, profile, column });
   };
 

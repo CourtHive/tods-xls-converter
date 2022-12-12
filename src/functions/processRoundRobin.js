@@ -152,20 +152,23 @@ export function getRoundRobinValues(analysis, profile, sheet) {
 
     if (Array.isArray(name)) {
       mappedName = name.join(nameSeparator);
-      const individualParticipants = name.map((n) => getIndividualParticipant({ name: n }));
+      const individualParticipants = name.map((n) => {
+        const { participant } = getIndividualParticipant({ name: n });
+        return participant;
+      });
       individualParticipants.forEach((participant) => (participantsMap[participant.participantId] = participant));
       const pairParticipant = getPairParticipant({ individualParticipants });
       participantName = pairParticipant.participantName;
       participantId = pairParticipant.participantId;
-      participantsMap[participantId] = pairParticipant;
+      if (participantName) participantsMap[participantId] = pairParticipant;
 
       // create a valuesMap entry for the doubles pair name
       analysis.valuesMap[mappedName] = analysis.valuesMap[nameValues[positionIndex]];
     } else {
       participantName = normalizeName(name);
-      const participant = getIndividualParticipant({ name });
+      const { participant } = getIndividualParticipant({ name });
       participantId = participant.participantId;
-      participantsMap[participantId] = participant;
+      if (participant.participantName) participantsMap[participantId] = participant;
     }
 
     const drawPosition = positionIndex + 1;

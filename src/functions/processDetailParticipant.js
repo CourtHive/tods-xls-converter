@@ -77,7 +77,7 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         const participantId =
           personId || (idAttributes.length && generateParticipantId({ attributes: idAttributes })?.participantId);
 
-        return {
+        const participant = {
           participantRole: COMPETITOR,
           participantType: INDIVIDUAL,
           participantName,
@@ -85,9 +85,15 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
           person,
           ranking
         };
+        return { participant };
       };
       if (isSeparatedPersonsDoubles) {
-        const individualParticipants = consideredRows.map(getIndividualParticipant).filter(Boolean);
+        const individualParticipants = consideredRows
+          .map((row) => {
+            const { participant } = getIndividualParticipant(row);
+            return participant;
+          })
+          .filter(Boolean);
 
         const individualParticipantIds = individualParticipants.map(({ participantId }) => participantId);
         participantId = generateParticipantId({ attributes: individualParticipantIds })?.participantId;
@@ -102,7 +108,7 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         };
         participants.push(participant);
       } else {
-        const participant = getIndividualParticipant(consideredRows[0]);
+        const { participant } = getIndividualParticipant(consideredRows[0]);
         participants.push(participant);
 
         participantId = participant.participantId;
