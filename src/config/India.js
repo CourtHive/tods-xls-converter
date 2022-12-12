@@ -174,7 +174,7 @@ export const config = {
           'nationality'
         ],
         limit: 1,
-        skipWords: ['reg', 'umpire'],
+        skipWords: ['reg', 'umpire', 0, '0'],
         valueRegex: '^\\d{6,}$'
       }, // TODO: implement regex check for id
       { attr: STATE, header: ['state'], limit: 1 },
