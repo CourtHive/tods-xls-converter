@@ -14,11 +14,11 @@ it('can process passing', () => {
 
   // const sheetTypes = ['ROUND_ROBIN'];
   const sheetTypes = [];
-  const sheetNumbers = [7];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
-  const startIndex = 6;
+  const processLimit = 0;
+  const startIndex = 0;
 
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');

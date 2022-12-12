@@ -121,7 +121,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
         {
           method,
           keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
-          type: analysis.sheetType,
+          type: analysis?.sheetType,
           sheetName,
           matchUpsCount
         },
