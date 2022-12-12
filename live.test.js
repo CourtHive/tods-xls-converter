@@ -20,9 +20,9 @@ it('can process passing', () => {
   const processLimit = 0;
   const startIndex = 0;
 
-  setLoggingActive(true);
+  // setLoggingActive(true);
   // setLoggingActive(true, 'dev');
-  // setLoggingActive(true, 'sheetNames');
+  //setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'matchUps');
   const result = processDirectory({
