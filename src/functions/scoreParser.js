@@ -61,10 +61,9 @@ export const scoreParser = (function () {
   */
 
   fx.tidyScore = (before_score = '') => {
-    const clean = /^\((.*)\)$/;
-    if (clean.test(before_score)) {
-      before_score = before_score.match(clean)[1];
-      console.log([before_score]);
+    const enclosed = /^\((.*)\)$/;
+    if (enclosed.test(before_score)) {
+      before_score = before_score.match(enclosed)[1];
     }
     let cleaned = before_score
       ?.toString()
