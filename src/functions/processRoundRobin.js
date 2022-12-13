@@ -250,12 +250,18 @@ export function getRoundRobinValues(analysis, profile, sheet) {
           matchUpStatus !== WALKOVER && !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
         const score = { ...outcome?.score, ...existingScore, ...stringScore };
 
-        positionedMatchUps[positioning] = {
+        const matchUp = {
           winningSide: winnerBySortedDrawPositions || winningSide,
           drawPositions,
           matchUpStatus,
+          result,
           score
         };
+        if (!positionedMatchUps[positioning]) {
+          positionedMatchUps[positioning] = matchUp;
+        } else {
+          positionedMatchUps[positioning] = { ...matchUp, ...positionedMatchUps[positioning] };
+        }
         if (getLoggingActive('scores')) console.log(positionedMatchUps[positioning]);
       }
     }
@@ -283,6 +289,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
     const roundNumber = Math.max(...drawPositions.map((drawPosition) => drawPositionRounds[drawPosition].length));
     matchUpIds.push(matchUpId);
 
+    if (!matchUp.winningSide && getLoggingActive('noWinningSide')) console.log(matchUp);
     return { matchUpId, ...matchUp, roundNumber };
   });
 
