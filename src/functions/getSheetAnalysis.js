@@ -17,6 +17,8 @@ import {
   tidyValue
 } from '../utilities/convenience';
 
+import { ROUND_ROBIN } from '../constants/sheetTypes';
+
 export const getSheetAnalysis = ({
   ignoreCellRefs = [],
   sheetDefinition,
@@ -60,8 +62,10 @@ export const getSheetAnalysis = ({
       column,
       sheet
     });
+
     if (upperRowBound) {
-      const avoidRange = utilities.generateRange(upperRowBound + 1, rowRange.to);
+      const upperBoundAdd = sheetType === ROUND_ROBIN ? 2 : 1; // TODO: provider config
+      const avoidRange = utilities.generateRange(upperRowBound + upperBoundAdd, rowRange.to);
       avoidRows.push(...avoidRange);
     }
     if (assessment.character) {
