@@ -1,10 +1,11 @@
+import { getLoggingActive, getWorkbook } from '../global/state';
 import { processIndeterminate } from './processIndeterminate';
+import { tournamentEngine } from 'tods-competition-factory';
 import { processRoundRobin } from './processRoundRobin';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
 import { processKnockOut } from './processKnockout';
 import { identifySheet } from './identifySheet';
-import { getLoggingActive, getWorkbook } from '../global/state';
 import { extractInfo } from './extractInfo';
 
 import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
@@ -15,6 +16,9 @@ import {
   UNKNOWN_SHEET_TYPE,
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
+
+const invalidNames = [];
+const invalidResults = ['RET X LES'];
 
 export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes, processStructures } = {}) {
   const { workbook, workbookType } = getWorkbook();
@@ -34,6 +38,11 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   }
 
   const { profile } = workbookType;
+
+  if (profile?.fileDateParser) {
+    const dateString = profile.fileDateParser(filename);
+    tournamentEngine.setTournamentDates({ startDate: dateString, endDate: dateString });
+  }
 
   pushGlobalLog({
     keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
@@ -70,9 +79,19 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
     const { participants: structureParticipants, structures = [], entries, hasValues, analysis, error } = result;
 
+    const invalidParticipant = structureParticipants?.find(({ participantName }) =>
+      invalidNames.includes(participantName)
+    );
+    if (invalidParticipant)
+      console.log({ sheetName, filename }, invalidParticipant?.individualParticipants || invalidParticipant);
+
     const structureMatchUps = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
     );
+
+    const invalidResult = structureMatchUps.filter(({ result }) => invalidResults.includes(result));
+    if (getLoggingActive('invalidResult')) console.log({ filename, sheetName, invalidResult });
+
     const matchUpsCount = structureMatchUps?.length;
     const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;
     const winningSideCount = structureMatchUps?.filter(({ winningSide }) => winningSide).length;
@@ -115,6 +134,19 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       } else {
         errorLog[error].push(sheetName);
       }
+    } else {
+      const method = `processSheet ${sheetNumber}`;
+      pushGlobalLog(
+        {
+          method,
+          keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
+          type: analysis?.sheetType,
+          sheetName,
+          matchUpsCount
+        },
+        undefined,
+        method
+      );
     }
 
     if (analysis?.potentialResultValues) resultValues.push(...analysis.potentialResultValues);
@@ -153,7 +185,7 @@ export function processSheet({
     pushGlobalLog({
       method,
       keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
-      type: sheetDefinition.type,
+      type: sheetType,
       sheetName
     });
   } else {

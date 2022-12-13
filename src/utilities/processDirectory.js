@@ -1,13 +1,16 @@
-import { tournamentEngine, utilities } from 'tods-competition-factory';
+import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
+import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { readdirSync, readFileSync, writeFileSync } from 'fs-extra';
 import { getLoggingActive, getWorkbook } from '../global/state';
-import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { processSheets } from '../functions/processSheets';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
 
+const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
+
 export function processDirectory({
   writeTournamentRecords = false,
+  writeMatchUps = false,
   writeDir = './',
   readDir = './',
 
@@ -50,9 +53,11 @@ export function processDirectory({
   const allParticipantsMap = {};
   const skippedResults = [];
   const resultValues = [];
+  const allMatchUps = [];
   const fileResults = {};
   const errorLog = {};
 
+  let tournamentRecords = [];
   let totalMatchUps = 0;
 
   let index = 0;
@@ -103,8 +108,6 @@ export function processDirectory({
         if (analysis.info) {
           const { tournamentName } = analysis.info;
           if (tournamentName) tournamentInfo.tournamentName = tournamentName;
-          const newDate = utilities.dateTime.formatDate(new Date());
-          tournamentEngine.setTournamentDates({ startDate: newDate, endDate: newDate });
         }
       });
 
@@ -149,15 +152,8 @@ export function processDirectory({
       tournamentEngine.setTournamentName(tournamentInfo);
     }
 
-    const tournamentMatchUps = tournamentEngine.allTournamentMatchUps().matchUps;
-    if (tournamentMatchUps.length) {
-      /*
-      const participantId = tournamentMatchUps[0].sides[0].participantId;
-      const participants = tournamentEngine.getTournamentParticipants().tournamentParticipants;
-      const participant = participants.find((p) => p.participantId === participantId);
-      console.log({ participantId, participant });
-      */
-    }
+    const matchUps = tournamentEngine.allTournamentMatchUps().matchUps;
+    allMatchUps.push(...matchUps);
 
     totalMatchUps += result.totalMatchUps || 0;
     if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
@@ -174,8 +170,10 @@ export function processDirectory({
       });
     }
 
+    const tournamentRecord = tournamentEngine.getState().tournamentRecord;
+    tournamentRecords.push(tournamentRecord);
+
     if (writeTournamentRecords && writeDir) {
-      const { tournamentRecord } = tournamentEngine.getState();
       if (tournamentRecord.tournamentId) {
         let { tournamentId, tournamentName } = tournamentRecord;
         tournamentName = tournamentName || tournamentId.split('.')[0];
@@ -183,6 +181,14 @@ export function processDirectory({
         writeFileSync(`${writeDir}/${tournamentName}.tods.json`, JSON.stringify(tournamentRecord), 'UTF-8');
       }
     }
+  }
+
+  if (writeMatchUps && writeDir) {
+    const filteredMatchUps = allMatchUps.filter(
+      (matchUp) => ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus)
+    );
+    const csvMatchUps = utilities.JSON2CSV(filteredMatchUps, {});
+    writeFileSync(`${writeDir}/matchUps.csv`, csvMatchUps, 'UTF-8');
   }
 
   const errorKeys = Object.keys(errorLog);
@@ -213,5 +219,12 @@ export function processDirectory({
     totalErrors
   });
 
-  return { fileResults, resultValues, skippedResults, participants: Object.values(allParticipantsMap) };
+  return {
+    participants: Object.values(allParticipantsMap),
+    tournamentRecords,
+    skippedResults,
+    resultValues,
+    allMatchUps,
+    fileResults
+  };
 }

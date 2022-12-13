@@ -6,15 +6,21 @@ import { normalizeName } from 'normalize-text';
 const { INDIVIDUAL, PAIR } = participantConstants;
 const { COMPETITOR } = participantRoles;
 
-export function getIndividualParticipant({ name }) {
+export function getIndividualParticipant({ name, analysis }) {
   let lastName, firstName;
 
   // Costa Rica Qualifiers
-  const qTest = (name) => /^Q\d+\s/.test(name);
-  const qPositionTest = (name) => /^Q\d+$/.test(name);
+  const qTest = (name) => /^[Q,q]\d+\s/.test(name);
+  const qPositionTest = (name) => /^[Q,q]\d+$/.test(name);
   const isQualifier = qTest(name);
   const isQualifyingPosition = qPositionTest(name);
-  if (isQualifier || isQualifyingPosition) name = name.split(' ').slice(1).join(' ');
+  if (isQualifier || isQualifyingPosition)
+    name = name
+      .split(' ')
+      .slice(1)
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .join(' ');
 
   if (name.includes(',')) {
     const parts = name.split(',').map((name) => normalizeName(name));
@@ -27,6 +33,24 @@ export function getIndividualParticipant({ name }) {
     if (!division) division = parts.length === 4 ? 2 : 1;
     lastName = parts.slice(division).join(' ');
     firstName = parts.slice(0, division).join(' ');
+
+    // when there is no separator between first and last names, look for values in other columns which
+    // match part of the name value (found only in the firstName)
+    if (firstName && !lastName) {
+      const consideredValues =
+        analysis?.valuesMap &&
+        Object.keys(analysis.valuesMap)
+          .flatMap((value) => value.split('/'))
+          .map((v) => v.toString().toLowerCase());
+      const fn = firstName.toString().toLowerCase();
+      const validValue = consideredValues?.find((value) => {
+        return fn.length > value.length && (fn.startsWith(value) || fn.endsWith(value));
+      });
+      if (validValue) {
+        lastName = normalizeName(validValue);
+        firstName = normalizeName(fn.split(validValue).join(''));
+      }
+    }
   }
 
   const person = { standardFamilyName: lastName, standardGivenName: firstName };

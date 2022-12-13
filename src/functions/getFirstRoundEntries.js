@@ -11,7 +11,14 @@ import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE, QUALIFIER } = entryStatusConstants;
 const { PAIR } = participantConstants;
 
-export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, positionRows, preRoundParticipants }) {
+export function getFirstRoundEntries({
+  preRoundParticipants,
+  boundaryIndex,
+  columnProfile,
+  positionRows,
+  analysis,
+  profile
+}) {
   const positionAssignments = [];
   let seedAssignments = [];
   const participants = [];
@@ -30,9 +37,8 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
 
     const isPreRoundParticipant = preRoundAdvancedRows.includes(columnProfile.rows[index]);
     const preRoundParticipantIndex = preRoundAdvancedRows.indexOf(columnProfile.rows[index]);
-    let baseName = isPreRoundParticipant
-      ? preRoundParticipants[preRoundParticipantIndex].participantName
-      : getNonBracketedValue(value);
+    const preRoundParticipant = preRoundParticipants?.[preRoundParticipantIndex];
+    let baseName = isPreRoundParticipant ? preRoundParticipant.participantName : getNonBracketedValue(value);
 
     if (isBye(baseName)) {
       positionAssignments.push({ drawPosition, bye: true });
@@ -40,10 +46,22 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
       return;
     }
 
+    const isValidParticipantName = (participantName) => {
+      if (!participantName) return false;
+      if (!profile.matchUpStatuses) return true;
+      return !Object.values(profile.matchUpStatuses).includes(participantName?.toString().toLowerCase());
+    };
+
     // Costa Rica Qualifiers
-    const qTest = (name) => /^Q\d+\s/.test(name);
+    const qTest = (name) => /^[Q,q]\d+\s/.test(name);
     const isQualifier = qTest(baseName);
-    if (isQualifier) baseName = baseName.split(' ').slice(1).join(' ');
+    if (isQualifier)
+      baseName = baseName
+        .split(' ')
+        .slice(1)
+        .map((x) => x.trim())
+        .filter(Boolean)
+        .join(' ');
 
     const doublesNameSeparator = doublesSeparators.find((separator) => {
       const x = new RegExp(separator);
@@ -53,9 +71,23 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
     let participantId;
 
     let qualifyingPosition;
-    if (doublesNameSeparator) {
-      const individualParticipants = baseName.split(new RegExp(doublesNameSeparator)).map((name) => {
-        const { participant, isQualifyingPosition, isQualifier } = getIndividualParticipant({ name });
+    if (isPreRoundParticipant) {
+      const { drawPosition, advancedPositionRef, ...participant } = preRoundParticipant;
+      if (drawPosition && advancedPositionRef);
+      participants.push(participant);
+      participantId = participant.participantId;
+    } else if (doublesNameSeparator) {
+      let splitBaseName = baseName.split(new RegExp(doublesNameSeparator));
+      if (splitBaseName.length > 2) {
+        // if the doublesNameSeparator appears more than once, determine whether to use 1st or last
+        const firstIsFull = splitBaseName[0].includes[' '] || splitBaseName[0].includes(',');
+        const index = firstIsFull ? 1 : splitBaseName.length - 1;
+        const nameOne = splitBaseName.slice(0, index).join(', ');
+        const nameTwo = splitBaseName.slice(index).join(', ');
+        splitBaseName = [nameOne, nameTwo];
+      }
+      const individualParticipants = splitBaseName.map((name) => {
+        const { participant, isQualifyingPosition, isQualifier } = getIndividualParticipant({ name, analysis });
         if (isQualifier || isQualifyingPosition) qualifyingPosition = true;
         return participant;
       });
@@ -70,12 +102,17 @@ export function getFirstRoundEntries({ boundaryIndex, columnProfile, profile, po
         participantName,
         participantId
       };
-      if (participant.participantName) participants.push(participant);
+      if (isValidParticipantName(participantName)) {
+        participants.push(participant);
+      }
     } else {
-      const { participant, isQualifier, isQualifyingPosition } = getIndividualParticipant({ name: baseName });
+      const { participant, isQualifier, isQualifyingPosition } = getIndividualParticipant({ name: baseName, analysis });
       if (isQualifier || isQualifyingPosition) qualifyingPosition = true;
       participantId = participant.participantId;
-      if (participant.participantName) participants.push(participant);
+
+      if (isValidParticipantName(participant.participantName)) {
+        participants.push(participant);
+      }
     }
 
     const seedValue = getSeeding(value);

@@ -61,7 +61,13 @@ export const config = {
   organization,
   mustContainSheetNames: [],
   profile: {
-    exciseWords: [{ regex: 'grupo\\s[A-Za-z]' }, { regex: 'grup\\s[A-Za-z]' }],
+    exciseWords: [
+      { regex: 'grupo\\s[A-Za-z]' },
+      { regex: 'grup\\s[A-Za-z]' },
+      { regex: '\\ssacc' },
+      { regex: `\\*ll` },
+      { regex: 'w:[a-z]{2}' }
+    ],
     skipWords: [
       // TODO: introduce { regex } // which would be an exact match
       'final',
@@ -85,18 +91,22 @@ export const config = {
       { text: 'formato', startsWith: true },
       { text: 'fiscales', startsWith: true },
       { text: 'servicio', includes: true },
+      { text: 'en casto de', includes: true },
       { text: 'clasifica', includes: true },
       { text: 'clasificado', includes: true },
+      { text: 'clasifcado', includes: true },
       { text: 'clasficada', includes: true },
       { text: 'clasificada', includes: true },
       { text: 'claficicada', includes: true },
       { text: 'lugar', includes: true },
       { text: 'grupo', includes: true },
+      { text: 'break a', includes: true },
       { text: 'ranking', includes: true },
       { text: 'sets con', includes: true },
       { text: 'sets sin', includes: true },
       { text: 'con ventajas', includes: true },
       { text: 'ganadadora', startsWith: true },
+      { text: 'tba', startsWith: true },
       { text: 'ganadora', startsWith: true },
       { text: 'ganador', startsWith: true },
       { text: 'club', startsWith: true },
@@ -106,6 +116,12 @@ export const config = {
       { text: 'lluvia', exact: true },
       { text: 'sencillos', includes: true },
       { text: 'nacionales', includes: true },
+      // clubs
+      { text: 'ota', startsWith: true },
+      { text: 'la paz', startsWith: true },
+      { text: 'cnt la paz', startsWith: true },
+      { text: 'club ', startsWith: true },
+
       { startsWithEndsWith: { startsWith: [1, 2, 3, 4, 5, 6, 7, 8, 9], endsWith: 'm' }, remove: ['"."'] }
     ],
     skipProfile: { skipFloatValues: true },
@@ -158,8 +174,7 @@ export const config = {
       {
         type: FOOTER,
         id: 'drawFooter',
-        // elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal', 'director'],
-        elements: [{ text: 'formato', options: { startsWith: true } }, 'testigos', 'fiscales', 'fiscal'],
+        elements: ['testigos', 'fiscales', 'fiscal'],
         rows: 8,
         rowBuffer: 2,
         minimumElements: 1
@@ -359,6 +374,17 @@ export const config = {
     categoryParser: (value) => {
       const category = categories.find((category) => value.includes(category));
       return category;
+    },
+    fileDateParser: (filename) => {
+      const re = new RegExp('^(\\d{8})[\\s-]{1}');
+      if (re.test(filename)) {
+        const dateParts = filename.match(re)[1].split('');
+        const year = dateParts.slice(0, 4).join('');
+        const month = dateParts.slice(4, 6).join('');
+        const day = dateParts.slice(6).join('');
+        const dateString = [year, month, day].join('-');
+        return dateString;
+      }
     }
   },
   sheetNameMatcher: (sheetNames) => {

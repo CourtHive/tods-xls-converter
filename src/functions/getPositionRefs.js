@@ -1,13 +1,15 @@
 import { utilities } from 'tods-competition-factory';
 import { getRow } from './sheetAccess';
 
+import { NO_POSITION_ROWS_ROUND } from '../constants/errorConditions';
+
 export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn, avoidRows }) {
   const columnProfile = columnProfiles.find((columnProfile) =>
     [positionColumn, preRoundColumn].includes(columnProfile.column)
   );
 
   if (!columnProfile) {
-    return { error: 'no position row found' };
+    return { error: NO_POSITION_ROWS_ROUND };
   }
 
   const { column, keyMap, lastNumericValue } = columnProfile;
