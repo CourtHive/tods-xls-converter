@@ -22,8 +22,9 @@ export const cleanScore = (function () {
 
     /* test if any number is greater than ceiling */
     if (scores.map((m) => +m > ceiling).filter((f) => f).length) {
-      if (!supertiebreak(scores)) return false;
-      set = { type: 'supertiebreak', score: scores.join('-') };
+      const tieBreakTest = supertiebreak(scores);
+      if (!tieBreakTest) return false;
+      set = { type: 'supertiebreak', score: tieBreakTest.join('-') };
     } else {
       set = { type: 'normal', score: scores.join('-') };
     }
@@ -52,8 +53,16 @@ export const cleanScore = (function () {
     let gt10 = scores.map((m) => +m >= 10).filter((f) => f).length;
     let diff = scoreDiff(scores);
     if (!gt10) return false;
-    if (gt10 === 2 && diff !== 2) return false;
-    return true;
+    if (gt10 === 2 && diff !== 2) {
+      if (diff > 2 && scores.every((s) => +s >= 10)) {
+        const max = Math.max(...scores);
+        scores = scores.map((s) => (s === max ? s - 10 : s));
+        diff = scoreDiff(scores);
+        if (diff > 2) return scores;
+      }
+      return false;
+    }
+    return scores;
   };
 
   let supertiebreakSet = (set_score) => {
