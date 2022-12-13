@@ -61,6 +61,11 @@ export const scoreParser = (function () {
   */
 
   fx.tidyScore = (before_score = '') => {
+    const clean = /^\((.*)\)$/;
+    if (clean.test(before_score)) {
+      before_score = before_score.match(clean)[1];
+      console.log([before_score]);
+    }
     let cleaned = before_score
       ?.toString()
       .replace(zeroZero, '0-0')
@@ -797,10 +802,40 @@ export const scoreParser = (function () {
   return fx;
 })();
 
+function replaceOh(score) {
+  if (typeof score !== 'string') return score;
+  return score
+    .toLowerCase()
+    .split(' ')
+    .map((part) => {
+      if (/^o[1-9]$/.test(part) || /^[1-9]o$/.test(part)) {
+        part = part.split('o').join('0');
+      }
+      return part;
+    })
+    .join(' ');
+}
+
 export function tidyScore(score) {
-  return scoreParser.tidyScore(score);
+  if (typeof score === 'number') {
+    score = score.toString();
+    if (!(score.length % 2)) {
+      score = chunkArray(score.split(''), 2)
+        .map((part) => part.join(''))
+        .join(' ');
+    }
+  }
+  return scoreParser.tidyScore(replaceOh(score));
 }
 
 export function transformScore(score) {
   return scoreParser.transformScore(score).transformed_score;
+}
+
+export function chunkArray(arr, chunksize) {
+  return arr.reduce((all, one, i) => {
+    const ch = Math.floor(i / chunksize);
+    all[ch] = [].concat(all[ch] || [], one);
+    return all;
+  }, []);
 }

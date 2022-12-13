@@ -65,6 +65,7 @@ export function processDirectory({
     if (getLoggingActive('sheetNames')) console.log({ filename, index });
     const buf = readFileSync(`${readDir}/${filename}`);
     let result = loadWorkbook(buf, index);
+    const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
     result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes, processStructures });
     fileResults[index] = { filename, ...result, ...additionalContent };
@@ -76,10 +77,17 @@ export function processDirectory({
 
     const { tournamentId } = generateTournamentId({ attributes: [filename] });
 
+    const profile = workbookType?.profile;
+
     tournamentEngine.setState({
       participants: tournamentParticipants,
       tournamentId
     });
+
+    if (profile?.fileDateParser) {
+      const dateString = profile.fileDateParser(filename);
+      tournamentEngine.setTournamentDates({ startDate: dateString, endDate: dateString });
+    }
 
     const eventsMap = {};
     const tournamentInfo = {};

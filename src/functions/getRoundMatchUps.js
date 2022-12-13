@@ -190,7 +190,8 @@ export function getRoundMatchUps({
       if (matchUp.winningSide && result && ![WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus)) {
         const sideString = matchUp.winningSide === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
         matchUp.score = { [sideString]: result };
-        const scoreString = normalizeScore(tidyScore(result));
+        const { normalized: scoreString, matchUpStatus } = normalizeScore(tidyScore(result));
+        if (matchUpStatus && !matchUp.matchUpStatus) matchUp.matchUpStatus = matchUpStatus;
         const { outcome } = mocksEngine.generateOutcomeFromScoreString({
           winningSide: matchUp.winningSide,
           scoreString

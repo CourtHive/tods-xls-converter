@@ -1,6 +1,6 @@
 export const cleanScore = (function () {
   // eslint-disable-next-line no-useless-escape
-  let clean = (score) => score?.replace(/\,/g, ' ').replace(/\;/g, ' ').replace(/\./g, ' ');
+  let clean = (score) => score?.toString().toLowerCase().replace(/\,/g, ' ').replace(/\;/g, ' ').replace(/\./g, ' ');
 
   let parseScore = (score, tiebreak, ceiling = 7) => {
     let set;
@@ -17,7 +17,6 @@ export const cleanScore = (function () {
         ? score.split('')
         : [];
     scores = scores.map((m) => +m);
-
     if (scores.filter((p) => isNaN(p)).length) return false;
     if (scores.length !== 2) return false;
 
@@ -33,7 +32,7 @@ export const cleanScore = (function () {
   };
 
   let removeBrackets = (set_score) => {
-    let brackets = /\[(\d+)-(\d+)\]/;
+    let brackets = /[[(](\d+)-(\d+)[\])]/;
     if (!brackets.test(set_score)) return set_score;
     const withoutBrackets = brackets
       .exec(set_score)
@@ -184,7 +183,9 @@ export const cleanScore = (function () {
 
     let last_set = test_scores?.pop();
     normal = normalSets(test_scores);
-    if (!normal) return false;
+    if (!normal) {
+      return false;
+    }
 
     let ended_early = endedEarly(last_set);
     if (ended_early) {
@@ -200,18 +201,27 @@ export const cleanScore = (function () {
     return false;
   };
 
-  let normalize = (score) =>
-    okScore(
-      clean(score)
-        ?.split(' ')
-        .filter((f) => f)
-    );
+  let normalize = (score) => {
+    let cleaned = clean(score);
+    let matchUpStatus;
+
+    const terminatesTest = /(ret|wo)/;
+    const terminates = terminatesTest.test(cleaned);
+    if (terminates) {
+      const parts = cleaned.split(terminatesTest);
+      cleaned = parts[0];
+      matchUpStatus = parts[1] === 'ret' ? 'RETIRED' : 'WALKOVER';
+    }
+
+    const splitScore = cleaned?.split(' ').filter(Boolean);
+
+    const ok = okScore(splitScore) || splitScore;
+    return { normalized: ok?.join(' '), matchUpStatus };
+  };
 
   return { walkout: wo, normalize, endedEarly };
 })();
 
 export function normalizeScore(score) {
-  let clean_score = cleanScore.normalize(score);
-  if (clean_score) return clean_score.join(' ');
-  return score;
+  return cleanScore.normalize(score);
 }

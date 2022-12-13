@@ -1,6 +1,5 @@
 import { getLoggingActive, getWorkbook } from '../global/state';
 import { processIndeterminate } from './processIndeterminate';
-import { tournamentEngine } from 'tods-competition-factory';
 import { processRoundRobin } from './processRoundRobin';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
@@ -38,11 +37,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   }
 
   const { profile } = workbookType;
-
-  if (profile?.fileDateParser) {
-    const dateString = profile.fileDateParser(filename);
-    tournamentEngine.setTournamentDates({ startDate: dateString, endDate: dateString });
-  }
 
   pushGlobalLog({
     keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
