@@ -17,7 +17,8 @@ import {
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
 
-export const invalidNames = [];
+const invalidNames = [];
+const invalidResults = ['RET X LES'];
 
 export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes, processStructures } = {}) {
   const { workbook, workbookType } = getWorkbook();
@@ -87,6 +88,10 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     const structureMatchUps = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
     );
+
+    const invalidResult = structureMatchUps.filter(({ result }) => invalidResults.includes(result));
+    if (getLoggingActive('invalidResult')) console.log({ filename, sheetName, invalidResult });
+
     const matchUpsCount = structureMatchUps?.length;
     const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;
     const winningSideCount = structureMatchUps?.filter(({ winningSide }) => winningSide).length;
