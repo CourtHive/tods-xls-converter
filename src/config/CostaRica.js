@@ -61,7 +61,13 @@ export const config = {
   organization,
   mustContainSheetNames: [],
   profile: {
-    exciseWords: [{ regex: 'grupo\\s[A-Za-z]' }, { regex: 'grup\\s[A-Za-z]' }, { regex: `\\*ll` }],
+    exciseWords: [
+      { regex: 'grupo\\s[A-Za-z]' },
+      { regex: 'grup\\s[A-Za-z]' },
+      { regex: '\\ssacc' },
+      { regex: `\\*ll` },
+      { regex: 'w:[a-z]{2}' }
+    ],
     skipWords: [
       // TODO: introduce { regex } // which would be an exact match
       'final',
@@ -101,7 +107,6 @@ export const config = {
       { text: 'con ventajas', includes: true },
       { text: 'ganadadora', startsWith: true },
       { text: 'tba', startsWith: true },
-      { text: 'ota', startsWith: true },
       { text: 'ganadora', startsWith: true },
       { text: 'ganador', startsWith: true },
       { text: 'club', startsWith: true },
@@ -111,6 +116,12 @@ export const config = {
       { text: 'lluvia', exact: true },
       { text: 'sencillos', includes: true },
       { text: 'nacionales', includes: true },
+      // clubs
+      { text: 'ota', startsWith: true },
+      { text: 'la paz', startsWith: true },
+      { text: 'cnt la paz', startsWith: true },
+      { text: 'club ', startsWith: true },
+
       { startsWithEndsWith: { startsWith: [1, 2, 3, 4, 5, 6, 7, 8, 9], endsWith: 'm' }, remove: ['"."'] }
     ],
     skipProfile: { skipFloatValues: true },
