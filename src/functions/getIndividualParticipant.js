@@ -1,7 +1,7 @@
 import { participantConstants, participantRoles } from 'tods-competition-factory';
 import { generateParticipantId } from '../utilities/hashing';
 import { isString } from '../utilities/identification';
-import { normalizeName } from 'normalize-text';
+import { normalizeDiacritics, normalizeName } from 'normalize-text';
 
 const { INDIVIDUAL, PAIR } = participantConstants;
 const { COMPETITOR } = participantRoles;
@@ -52,6 +52,9 @@ export function getIndividualParticipant({ name, analysis }) {
       }
     }
   }
+
+  lastName = normalizeDiacritics(lastName);
+  firstName = normalizeDiacritics(firstName);
 
   const person = { standardFamilyName: lastName, standardGivenName: firstName };
   const lastFirst = lastName && firstName && `${lastName}, ${firstName}`;

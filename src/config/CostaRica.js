@@ -65,7 +65,10 @@ export const config = {
       { regex: 'grupo\\s[A-Za-z]' },
       { regex: 'grup\\s[A-Za-z]' },
       { regex: '\\ssacc' },
+      { regex: `\\*ll:` },
       { regex: `\\*ll` },
+      { regex: `r:\\s` },
+      { regex: `g:\\s` },
       { regex: 'w:[a-z]{2}' }
     ],
     skipWords: [

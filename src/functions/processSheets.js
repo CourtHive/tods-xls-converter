@@ -1,6 +1,5 @@
 import { getLoggingActive, getWorkbook } from '../global/state';
 import { processIndeterminate } from './processIndeterminate';
-import { tournamentEngine } from 'tods-competition-factory';
 import { processRoundRobin } from './processRoundRobin';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
@@ -18,7 +17,7 @@ import {
 } from '../constants/errorConditions';
 
 const invalidNames = [];
-const invalidResults = ['RET X LES'];
+const invalidResults = ['76(3) 67(5) 60'];
 
 export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes, processStructures } = {}) {
   const { workbook, workbookType } = getWorkbook();
@@ -38,11 +37,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   }
 
   const { profile } = workbookType;
-
-  if (profile?.fileDateParser) {
-    const dateString = profile.fileDateParser(filename);
-    tournamentEngine.setTournamentDates({ startDate: dateString, endDate: dateString });
-  }
 
   pushGlobalLog({
     keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
@@ -90,7 +84,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     );
 
     const invalidResult = structureMatchUps.filter(({ result }) => invalidResults.includes(result));
-    if (getLoggingActive('invalidResult')) console.log({ filename, sheetName, invalidResult });
+    if (invalidResult.length && getLoggingActive('invalidResult')) console.log({ filename, sheetName }, invalidResult);
 
     const matchUpsCount = structureMatchUps?.length;
     const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;

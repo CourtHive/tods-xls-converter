@@ -200,7 +200,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
       if (positionRow) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];
-        const scoreString = normalizeScore(tidyScore(result));
+        const { normalized: scoreString, matchUpStatus: normalizedMatchUpStatus } = normalizeScore(tidyScore(result));
         const resultIsMatchOutcome =
           result &&
           onlyAlpha(result, profile) &&
@@ -239,7 +239,11 @@ export function getRoundRobinValues(analysis, profile, sheet) {
 
         const walkover = profile.matchUpStatuses?.walkover;
         let matchUpStatus =
-          result && walkover ? (result.toLowerCase().includes(walkover) ? WALKOVER : COMPLETED) : undefined;
+          normalizedMatchUpStatus || (result && walkover)
+            ? result.toLowerCase().includes(walkover)
+              ? WALKOVER
+              : COMPLETED
+            : undefined;
 
         const existingScore = positionedMatchUps[positioning]?.score;
         const { outcome } = mocksEngine.generateOutcomeFromScoreString({

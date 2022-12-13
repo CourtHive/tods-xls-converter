@@ -1,6 +1,7 @@
 import { entryStatusConstants, participantConstants, participantRoles } from 'tods-competition-factory';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
 import { generateParticipantId } from '../utilities/hashing';
+import { normalizeDiacritics } from 'normalize-text';
 import { isBye } from '../utilities/convenience';
 
 import { SUCCESS } from '../constants/resultConstants';
@@ -64,7 +65,9 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         const detail = detailParticipants[row];
         if (!detail) return;
 
-        const { personId, firstName, lastName, ranking } = detail;
+        let { personId, firstName, lastName, ranking } = detail;
+        lastName = normalizeDiacritics(lastName);
+        firstName = normalizeDiacritics(firstName);
 
         if (detail.seedValue) seedValue = detail.seedValue;
         if (detail.entryStatus) entryStatus = profile.entryStatusMap?.[detail.entryStatus] || DIRECT_ACCEPTANCE;
