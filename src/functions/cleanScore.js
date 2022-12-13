@@ -17,6 +17,7 @@ export const cleanScore = (function () {
         ? score.split('')
         : [];
     scores = scores.map((m) => +m);
+
     if (scores.filter((p) => isNaN(p)).length) return false;
     if (scores.length !== 2) return false;
 
@@ -34,10 +35,11 @@ export const cleanScore = (function () {
   let removeBrackets = (set_score) => {
     let brackets = /\[(\d+)-(\d+)\]/;
     if (!brackets.test(set_score)) return set_score;
-    return brackets
+    const withoutBrackets = brackets
       .exec(set_score)
       .filter((f, i) => i && i < 3)
       .join('-');
+    return withoutBrackets;
   };
 
   let scoreDiff = (scores) => {
@@ -61,32 +63,20 @@ export const cleanScore = (function () {
     return set && set.type === 'supertiebreak' ? set.score : false;
   };
 
-  /*
-   let proSet = (set_score) => {
-      let set;
-      let tiebreak_score;
-      ({set_score, tiebreak_score} = parseTiebreak(set_score, 17));
-      let scores = set_score.match(/\d/g);
-      let diff = scoreDiff(scores);
-      let proset_tiebreak = scores.filter(f=>['8', '9'].indexOf(f) >= 0).length === 2;
-      if ((scores.indexOf('8') >= 0 && diff >= 2) || proset_tiebreak) {
-         set = parseScore(set_score, tiebreak_score, 9);
-      }
-      return (set && set.type === 'normal') ? set.score : false;
-   };
-   */
-
-  let parseTiebreak = (set_score, total = 13) => {
+  let parseTiebreak = (set_score, totals = [9, 13]) => {
     let tiebreak_score;
     // eslint-disable-next-line no-useless-escape
     let tiebreak = /^([\d\:\.\-\/]+)\((\d+)\)/;
     // eslint-disable-next-line no-useless-escape
     let backwards = /^\((\d+)\)([\d\:\.\-\/]+)/;
-    let validSetScore = (ss) =>
-      ss
+    let validSetScore = (ss) => {
+      const setTotal = ss
         .match(/[\d+]/g)
         .map((m) => +m)
-        .reduce((a, b) => +a + +b) === total;
+        .reduce((a, b) => +a + +b);
+      const valid = totals.includes(setTotal);
+      return valid;
+    };
 
     if (backwards.test(set_score)) {
       let sst = backwards.exec(set_score);
