@@ -9,23 +9,23 @@ it('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed';
   const writeTournamentRecords = false;
-  const writeParticipants = true;
-  const writeMatchUps = true;
+  const writeParticipants = false;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   // const sheetTypes = ['ROUND_ROBIN'];
   const sheetTypes = [];
-  const sheetNumbers = [];
+  const sheetNumbers = [3];
   const sheetLimit = 0;
 
-  const processLimit = 0;
-  const startIndex = 0;
+  const processLimit = 1;
+  const startIndex = 3;
 
-  // setLoggingActive(true);
+  setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'noWinningSide');
-  // setLoggingActive(true, 'invalidResult');
+  setLoggingActive(true, 'invalidResult');
   // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'matchUps');
   const result = processDirectory({
@@ -47,7 +47,7 @@ it('can process passing', () => {
   if (writeParticipants) {
     const participants = result.participants.filter(({ participantType }) => participantType === 'INDIVIDUAL');
     const csvParticipants = utilities.JSON2CSV(participants, {
-      columnAccessors: ['participantName', 'person.standardFamilyName', 'person.standardGivenName']
+      columnAccessors: ['participantId', 'participantName', 'person.standardFamilyName', 'person.standardGivenName']
     });
     writeFileSync('./scratch/participants.json', JSON.stringify(participants), 'UTF-8');
     writeFileSync('./scratch/participants.csv', csvParticipants, 'UTF-8');

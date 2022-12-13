@@ -17,7 +17,7 @@ import {
 } from '../constants/errorConditions';
 
 const invalidNames = [];
-const invalidResults = ['RET X LES'];
+const invalidResults = ['76(3) 67(5) 60'];
 
 export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes, processStructures } = {}) {
   const { workbook, workbookType } = getWorkbook();
@@ -84,7 +84,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
     );
 
     const invalidResult = structureMatchUps.filter(({ result }) => invalidResults.includes(result));
-    if (getLoggingActive('invalidResult')) console.log({ filename, sheetName, invalidResult });
+    if (invalidResult.length && getLoggingActive('invalidResult')) console.log({ filename, sheetName }, invalidResult);
 
     const matchUpsCount = structureMatchUps?.length;
     const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;
