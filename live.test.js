@@ -15,17 +15,17 @@ it('can process passing', () => {
 
   // const sheetTypes = ['ROUND_ROBIN'];
   const sheetTypes = [];
-  const sheetNumbers = [3];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
-  const startIndex = 3;
+  const processLimit = 0;
+  const startIndex = 0;
 
-  setLoggingActive(true);
+  // setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'noWinningSide');
-  setLoggingActive(true, 'invalidResult');
+  // setLoggingActive(true, 'invalidResult');
   // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'matchUps');
   const result = processDirectory({

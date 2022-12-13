@@ -1,6 +1,6 @@
 import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
 import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
-import { readdirSync, readFileSync, writeFileSync } from 'fs-extra';
+import { readdirSync, readFileSync, writeFileSync, existsSync } from 'fs-extra';
 import { getLoggingActive, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
 import { loadWorkbook } from '../global/loader';
@@ -141,18 +141,24 @@ export function processDirectory({
 
         const extensions = flights?.length ? [{ name: 'flightProfile', value: { flights } }] : [];
 
-        const result = tournamentEngine.addEvent({
-          event: {
-            category: { ageCategoryCode: category },
-            drawDefinitions,
-            extensions,
-            eventName,
-            eventId,
-            entries,
-            gender
-          }
-        });
-        if (result.error) console.log(result);
+        const structuresCount = drawDefinitions
+          ?.map(({ structures }) => structures.length)
+          .reduce((a, b) => (a || 0) + (b || 0), 0);
+
+        if (structuresCount) {
+          const result = tournamentEngine.addEvent({
+            event: {
+              category: { ageCategoryCode: category },
+              drawDefinitions,
+              extensions,
+              eventName,
+              eventId,
+              entries,
+              gender
+            }
+          });
+          if (result.error) console.log(result);
+        }
       });
     }
 
@@ -185,6 +191,15 @@ export function processDirectory({
       if (tournamentRecord.tournamentId) {
         let { tournamentId, tournamentName } = tournamentRecord;
         tournamentName = tournamentName || tournamentId.split('.')[0];
+        const startDate = tournamentRecord?.startDate;
+        if (startDate) tournamentName = startDate + '-' + tournamentName;
+
+        while (existsSync(`${writeDir}/${tournamentName}.tods.json`)) {
+          const re = /(.*)\((\d+)\)$/;
+          const parsed = re.test(tournamentName) && tournamentName.match(re);
+          let increment = parsed?.[2] ? +parsed[2] + 1 : 1;
+          tournamentName = (parsed ? parsed[1] : tournamentName) + `(${increment})`;
+        }
 
         writeFileSync(`${writeDir}/${tournamentName}.tods.json`, JSON.stringify(tournamentRecord), 'UTF-8');
       }
