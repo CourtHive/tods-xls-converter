@@ -9,8 +9,8 @@ it('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed';
   const writeTournamentRecords = false;
-  const writeParticipants = false;
-  const writeMatchUps = false;
+  const writeParticipants = true;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   // const sheetTypes = ['ROUND_ROBIN'];
@@ -23,7 +23,9 @@ it('can process passing', () => {
 
   // setLoggingActive(true);
   // setLoggingActive(true, 'dev');
-  //setLoggingActive(true, 'sheetNames');
+  // setLoggingActive(true, 'sheetNames');
+  // setLoggingActive(true, 'noWinningSide');
+  // setLoggingActive(true, 'invalidResult');
   // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'matchUps');
   const result = processDirectory({
