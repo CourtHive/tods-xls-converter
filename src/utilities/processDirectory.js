@@ -104,7 +104,13 @@ export function processDirectory({
         });
 
         if (drawId) {
-          const drawDefinition = { drawId, structures, entries, drawName: analysis.sheetName };
+          const drawDefinition = {
+            drawName: analysis.sheetName,
+            drawType: analysis.drawType,
+            structures,
+            entries,
+            drawId
+          };
           if (!eventsMap[eventKey]) {
             eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category };
           } else {

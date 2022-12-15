@@ -1,5 +1,6 @@
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
+import { ROUND_ROBIN } from '../constants/sheetTypes';
 
 export function writeTODS08CSV({ matchUps, writeDir }) {
   const getPerspectiveScoreString = (matchUp) => {
@@ -8,8 +9,6 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
       !winningSide || winningSide === 1 ? score?.scoreStringSide1 : score?.scoreStringSide2;
   };
   matchUps.forEach(getPerspectiveScoreString);
-
-  console.log(matchUps[0].perspectiveScoreString);
 
   const getFirstChar = (value) => value?.slice(0, 1);
   const config = {
@@ -53,19 +52,18 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
       TournamentEndDate: ['endDate'],
       AgeCategoryCode: ['category.ageCategoryCode'],
       TournamentLevel: ['level'],
-      MatchUpFormat: ['matchUpFormat'],
+      // MatchUpFormat: ['matchUpFormat'],
       Gender: ['gender'],
-      IndoorOutdoor: ['indoorOutdoor'],
       RoundNumber: ['roundNumber'],
       RoundPosition: ['roundPosition'],
       DrawStructure: ['drawType']
     },
-    valueMap: {
+    valuesMap: {
       MatchUpStatus: { COMPLETED: 'CO', RETIRED: 'RET', DEFAULTED: 'DEF', TO_BE_PLAYED: 'TBP' },
-      Gender: { MALE: 'M', FEMALE: 'F', MIXED: 'X', ANY: 'A' },
-      DrawStructure: { ROUND_ROBIN: 'RR', ELIMINATION: 'KO' }
+      Gender: { MALE: 'M', FEMALE: 'F', MIXED: 'X', ANY: 'A' }
     },
     functionMap: {
+      DrawStructure: (value) => (value === ROUND_ROBIN ? 'RR' : 'KO'),
       IndoorOutdoor: (value) => getFirstChar(value),
       MatchUpType: (value) => getFirstChar(value)
     }

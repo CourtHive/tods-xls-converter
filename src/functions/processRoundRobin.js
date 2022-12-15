@@ -21,6 +21,7 @@ import { TOURNAMENT_NAME } from '../constants/attributeConstants';
 import { MISSING_VALUES } from '../constants/errorConditions';
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
+import { ROUND_ROBIN } from '../constants/sheetTypes';
 import { ROUND } from '../constants/sheetElements';
 
 const { CONTAINER, ITEM, MAIN, WATERFALL } = drawDefinitionConstants;
@@ -40,6 +41,8 @@ export function processRoundRobin({ sheetDefinition, sheet, profile, analysis, i
   // TOURNAMENT DETAILS
   // *. attributes are info tournamentName and dateRange
   if (info[TOURNAMENT_NAME]);
+
+  analysis.drawType = ROUND_ROBIN;
 
   const { entries, structure, participants, error } = getRoundRobinValues(analysis, profile, sheet);
   if (structure) analysis.structureId = structure.structureId;
