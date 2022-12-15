@@ -42,17 +42,6 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
 
           if (isValid) {
             extendColumnsMap({ columnsMap, ...obj, column: col });
-            /*
-            if (Array.isArray(columnsMap[obj.attr])) {
-              columnsMap[obj.attr].push(col);
-            } else {
-              if (columnsMap[obj.attr]) {
-                if (!obj.limit) columnsMap[obj.attr] = [columnsMap[obj.attr], col];
-              } else {
-                columnsMap[obj.attr] = col;
-              }
-            }
-            */
           }
         }
       };
@@ -69,14 +58,14 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   return columnsMap;
 }
 
-export function extendColumnsMap({ columnsMap, attribute, column, limit }) {
-  if (Array.isArray(columnsMap[attribute])) {
-    columnsMap[attribute].push(column);
+export function extendColumnsMap({ columnsMap, attr, column, limit }) {
+  if (Array.isArray(columnsMap[attr])) {
+    columnsMap[attr].push(column);
   } else {
-    if (columnsMap[attribute]) {
-      if (!limit) columnsMap[attribute] = [columnsMap[attribute], column];
+    if (columnsMap[attr]) {
+      if (!limit) columnsMap[attr] = [columnsMap[attr], column];
     } else {
-      columnsMap[attribute] = column;
+      columnsMap[attr] = column;
     }
   }
 }
