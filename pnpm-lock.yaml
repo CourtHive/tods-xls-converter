@@ -7,7 +7,7 @@ specifiers:
   '@babel/preset-env': 7.20.2
   '@babel/preset-typescript': 7.18.6
   '@rollup/plugin-babel': 6.0.3
-  '@rollup/plugin-commonjs': 23.0.4
+  '@rollup/plugin-commonjs': 23.0.5
   '@rollup/plugin-json': 5.0.2
   '@rollup/plugin-node-resolve': 15.0.1
   '@rollup/plugin-typescript': 10.0.1
@@ -34,7 +34,7 @@ specifiers:
   rollup-plugin-esbuild: 5.0.0
   rollup-plugin-exclude-dependencies-from-bundle: ^1.1.23
   rollup-plugin-terser: 7.0.2
-  tods-competition-factory: ^0.411.0
+  tods-competition-factory: ^0.413.0
   typescript: ^4.9.3
   vite: ^4.0.0
   vitest: ^0.25.2
@@ -45,7 +45,7 @@ dependencies:
   hash-sum: 2.0.0
   node-xlsx: 0.21.0
   normalize-text: 2.4.1
-  tods-competition-factory: 0.411.0
+  tods-competition-factory: 0.413.0
   xlsx: 0.18.5
 
 devDependencies:
@@ -55,7 +55,7 @@ devDependencies:
   '@babel/preset-env': 7.20.2_@babel+core@7.20.5
   '@babel/preset-typescript': 7.18.6_@babel+core@7.20.5
   '@rollup/plugin-babel': 6.0.3_wk25tilbnppyl7pd6ilgxpftty
-  '@rollup/plugin-commonjs': 23.0.4_rollup@3.3.0
+  '@rollup/plugin-commonjs': 23.0.5_rollup@3.3.0
   '@rollup/plugin-json': 5.0.2_rollup@3.3.0
   '@rollup/plugin-node-resolve': 15.0.1_rollup@3.3.0
   '@rollup/plugin-typescript': 10.0.1_6annma2bj33shm6er7hwi5u4z4
@@ -1859,8 +1859,8 @@ packages:
       rollup: 3.3.0
     dev: true
 
-  /@rollup/plugin-commonjs/23.0.4_rollup@3.3.0:
-    resolution: {integrity: sha512-bOPJeTZg56D2MCm+TT4psP8e8Jmf1Jsi7pFUMl8BN5kOADNzofNHe47+84WVCt7D095xPghC235/YKuNDEhczg==}
+  /@rollup/plugin-commonjs/23.0.5_rollup@3.3.0:
+    resolution: {integrity: sha512-IwI51j5kCmLMYsErEvZAID/pg7Z1qgyVJ+QIPDDIg1AOPbIGbdTCjuHDWIBCtoF1dvMkXfQv7B2eTadjnLRbmA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^2.68.0||^3.0.0
@@ -6131,8 +6131,8 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /tods-competition-factory/0.411.0:
-    resolution: {integrity: sha512-Edz62px7ZdWZcU3ZFtl/3uCpDPqXhiEPPP1NzBopqmQLWIqOA//IrlqVkPO7c2rhRd/YlGfarOMJlROsaJ3sSw==}
+  /tods-competition-factory/0.413.0:
+    resolution: {integrity: sha512-GZMAR4VD053ASVShFb/P+uY/qqCa5FMDYpqXKNgpSaZU37UbETYxh3bEEQ9x/3ouzxxtaHrJkxevWyOni4KAdQ==}
     dev: false
 
   /trim-newlines/3.0.1:
