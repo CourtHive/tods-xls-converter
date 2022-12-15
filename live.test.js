@@ -81,6 +81,7 @@ it.only('can process tests', () => {
 
   const result = processDirectory({
     processStructures: true,
+    includeWorkbooks: true,
     writeTournamentRecords,
     writeMatchUps,
     processLimit,
@@ -106,5 +107,5 @@ it.only('can process tests', () => {
   if (!isNaN(writeResultIndex))
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 
-  // console.log( result.fileResults[0].sheetAnalysis[3].analysis?.columnProfiles.map((p) => [p.column, p.attribute || p.character]));
+  console.log(result.fileResults[0].sheetAnalysis[1].analysis.info);
 });
