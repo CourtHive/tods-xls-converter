@@ -12,7 +12,7 @@ export function numberValue(sheet, reference) {
 export function cellsContaining({ sheet, term }) {
   let references = Object.keys(sheet);
   return references.filter(
-    (ref) => (sheet[ref].v + '').toLowerCase().indexOf(normalizeDiacritics(term).toLowerCase()) >= 0
+    (ref) => (cellValueAttribute(sheet[ref]) + '').toLowerCase().indexOf(normalizeDiacritics(term).toLowerCase()) >= 0
   );
 }
 
@@ -32,10 +32,14 @@ export function isDateCell(cell) {
   return cell?.t === 'n' && containsAlpha(cell.w);
 }
 
+export function cellValueAttribute(cell) {
+  return cell.w || cell.v;
+}
+
 export function getCellValue(cell) {
   if (cell?.t === 'n' && containsAlpha(cell.w)) return '';
 
-  let val = cell ? cell.v + '' : '';
+  let val = cell ? cellValueAttribute(cell) + '' : '';
   val = typeof val === 'string' ? val.trim() : val;
   val = normalizeWhiteSpaces(val);
   val = val.indexOf(',,') >= 0 ? val.replace(',,', ',') : val;

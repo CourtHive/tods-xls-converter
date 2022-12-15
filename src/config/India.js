@@ -293,6 +293,12 @@ export const config = {
         postProcessor: 'categoryParser'
       },
       {
+        attribute: [CATEGORY],
+        searchText: 'grade',
+        columnOffset: 1,
+        rowOffset: 1
+      },
+      {
         attribute: 'matchUpType',
         searchText: 'main draw',
         options: { startsWith: true },
