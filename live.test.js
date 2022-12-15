@@ -10,7 +10,7 @@ it('can process passing', () => {
   const writeDir = './examples/sheets/processed';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = true;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   // const sheetTypes = ['ROUND_ROBIN'];

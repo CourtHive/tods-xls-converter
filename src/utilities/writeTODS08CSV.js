@@ -8,7 +8,8 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
     matchUp.perspectiveScoreString =
       !winningSide || winningSide === 1 ? score?.scoreStringSide1 : score?.scoreStringSide2;
   };
-  matchUps.forEach(getPerspectiveScoreString).filter((m) => m.perspectiveScoreString);
+  matchUps.forEach(getPerspectiveScoreString);
+  matchUps = matchUps.filter((m) => m.perspectiveScoreString);
 
   const getFirstChar = (value) => value?.slice(0, 1);
   const config = {
