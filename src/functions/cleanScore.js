@@ -207,6 +207,15 @@ export const cleanScore = (function () {
       normal.push(supertiebreak);
       return normal;
     }
+
+    if (!normal?.length && set_scores?.length === 1 && set_scores[0].length === 2) {
+      const result = parseScore(set_scores[0], undefined, 9);
+      if (result) {
+        normal.push(result.score);
+        return normal;
+      }
+    }
+
     return false;
   };
 
