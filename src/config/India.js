@@ -65,6 +65,7 @@ export const config = {
   mustContainSheetNames: [],
   profile: {
     providerId: 'IND-0123',
+    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }],
     skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
