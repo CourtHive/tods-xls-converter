@@ -5,7 +5,7 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
   const getPerspectiveScoreString = (matchUp) => {
     const { score, winningSide } = matchUp;
     matchUp.perspectiveScoreString =
-      !winningSide || winningSide === 1 ? score.scoreStringSide1 : score.scoreStringSide2;
+      !winningSide || winningSide === 1 ? score?.scoreStringSide1 : score?.scoreStringSide2;
   };
   matchUps.forEach(getPerspectiveScoreString);
 

@@ -211,7 +211,7 @@ export function processDirectory({
 
   if (writeMatchUps && writeDir) {
     const filteredMatchUps = allMatchUps.filter(
-      (matchUp) => ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus)
+      (matchUp) => ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus) && matchUp.score
     );
     writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
   }
