@@ -9,10 +9,13 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
   };
   matchUps.forEach(getPerspectiveScoreString);
 
+  console.log(matchUps[0].perspectiveScoreString);
+
   const getFirstChar = (value) => value?.slice(0, 1);
   const config = {
     delimiter: '"',
-    includeTransformAccessors: true,
+    includeTransformAccessors: true, // will include columnTransoforms in columnAccessors; otherwise [] value will return all columns
+    columnAccessors: [],
     columnTransform: {
       MatchUpID: ['matchUpId'],
       // SIDE 1
