@@ -60,20 +60,20 @@ it.only('can process tests', () => {
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = false;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   const sheetTypes = [];
-  const sheetNumbers = [1];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 1;
   const startIndex = 0;
 
   setLoggingActive(true);
-  setLoggingActive(true, 'dev');
-  setLoggingActive(true, 'sheetNames');
-  setLoggingActive(true, 'matchUps');
+  // setLoggingActive(true, 'dev');
+  // setLoggingActive(true, 'sheetNames');
+  // setLoggingActive(true, 'matchUps');
   // setLoggingActive(true, 'noWinningSide');
   // setLoggingActive(true, 'invalidResult');
   // setLoggingActive(true, 'scores');
