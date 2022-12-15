@@ -10,7 +10,7 @@ it('can process passing', () => {
   const writeDir = './examples/sheets/processed';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = false;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   // const sheetTypes = ['ROUND_ROBIN'];
@@ -18,10 +18,10 @@ it('can process passing', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 0;
-  const startIndex = 0;
+  const processLimit = 1;
+  const startIndex = 1;
 
-  // setLoggingActive(true);
+  setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'noWinningSide');
