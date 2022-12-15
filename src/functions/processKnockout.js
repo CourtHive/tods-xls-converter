@@ -14,6 +14,7 @@ import { SUCCESS } from '../constants/resultConstants';
 
 export function processKnockOut({ profile, analysis, sheet }) {
   const { columnProfiles, avoidRows } = analysis;
+  analysis.drawType = 'SINGLE_ELIMINATION';
 
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);

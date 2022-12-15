@@ -1,10 +1,11 @@
-import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
+import { matchUpStatusConstants, tournamentEngine } from 'tods-competition-factory';
 import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'fs-extra';
 import { getLoggingActive, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
+import { writeTODS08CSV } from './writeTODS08CSV';
 
 const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
 
@@ -103,7 +104,13 @@ export function processDirectory({
         });
 
         if (drawId) {
-          const drawDefinition = { drawId, structures, entries, drawName: analysis.sheetName };
+          const drawDefinition = {
+            drawName: analysis.sheetName,
+            drawType: analysis.drawType,
+            structures,
+            entries,
+            drawId
+          };
           if (!eventsMap[eventKey]) {
             eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category };
           } else {
@@ -162,11 +169,13 @@ export function processDirectory({
       });
     }
 
-    if (tournamentInfo.tournamentName) {
-      tournamentEngine.setTournamentName(tournamentInfo);
+    const tournamentName = tournamentInfo?.tournamentName;
+
+    if (tournamentName) {
+      tournamentEngine.setTournamentName({ tournamentName });
     }
 
-    const matchUps = tournamentEngine.allTournamentMatchUps().matchUps;
+    const matchUps = tournamentEngine.allTournamentMatchUps({ context: { tournamentName, level: 'REG' } }).matchUps;
     allMatchUps.push(...matchUps);
 
     totalMatchUps += result.totalMatchUps || 0;
@@ -208,10 +217,9 @@ export function processDirectory({
 
   if (writeMatchUps && writeDir) {
     const filteredMatchUps = allMatchUps.filter(
-      (matchUp) => ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus)
+      (matchUp) => ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus) && matchUp.winningSide
     );
-    const csvMatchUps = utilities.JSON2CSV(filteredMatchUps, {});
-    writeFileSync(`${writeDir}/matchUps.csv`, csvMatchUps, 'UTF-8');
+    writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
   }
 
   const errorKeys = Object.keys(errorLog);
