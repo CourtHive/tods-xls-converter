@@ -65,6 +65,7 @@ export const config = {
   mustContainSheetNames: [],
   profile: {
     providerId: 'IND-0123',
+    identifierType: 'NationalID',
     exciseWords: [{ regex: '.*\\d{2,}[ap]m' }],
     skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
@@ -335,6 +336,12 @@ export const config = {
       { attribute: 'seededParticipantNames', searchText: 'Seeded players', rowOffset: 1, rowCount: 8 },
       { attribute: 'luckyLoserPlayerNames', searchText: 'Lucky losers', rowOffset: 1, rowCount: 8 }
     ],
+    dateParser: (date) => {
+      // TODO: check for presence of '/'
+      const parts = date.split('/');
+      const [month, day, year] = parts; // TODO: check for 3 numeric parts
+      return [year, month, day].join('-'); // TODO: use zeroPad utility
+    },
     dateTimeParser: (dateTimeString) => {
       const [iDate, time] = dateTimeString.split(' ');
       const date = postProcessors.dateParser(iDate);

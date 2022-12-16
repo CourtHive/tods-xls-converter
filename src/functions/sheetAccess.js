@@ -33,7 +33,8 @@ export function isDateCell(cell) {
 }
 
 export function cellValueAttribute(cell) {
-  return cell.w || cell.v;
+  if (cell.t === 'e') return ''; // is an error value
+  return (cell.w !== '#REF!' && cell.w) || cell.v;
 }
 
 export function getCellValue(cell) {
