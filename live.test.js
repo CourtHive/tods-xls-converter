@@ -4,7 +4,7 @@ import { utilities } from 'tods-competition-factory';
 import { setLoggingActive } from './src/global/state';
 import { writeFileSync } from 'fs-extra';
 
-it.skip('can process passing', () => {
+it('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed/CR';
   const writeTournamentRecords = false;
@@ -17,8 +17,8 @@ it.skip('can process passing', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 0;
-  const startIndex = 0;
+  const processLimit = 1;
+  const startIndex = 19;
 
   // setLoggingActive(true);
   // setLoggingActive(true, 'dev');
@@ -55,7 +55,7 @@ it.skip('can process passing', () => {
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 });
 
-it.only('can process tests', () => {
+it('can process tests', () => {
   const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
@@ -107,5 +107,5 @@ it.only('can process tests', () => {
   if (!isNaN(writeResultIndex))
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 
-  console.log(result.fileResults[0].sheetAnalysis[1].analysis.info);
+  console.log(result.fileResults[0].sheetAnalysis[2].analysis.info);
 });

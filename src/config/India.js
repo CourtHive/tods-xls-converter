@@ -1,4 +1,4 @@
-import { genderConstants, matchUpTypes, entryStatusConstants } from 'tods-competition-factory';
+import { genderConstants, matchUpTypes, drawDefinitionConstants, entryStatusConstants } from 'tods-competition-factory';
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
@@ -31,6 +31,7 @@ import {
 } from '../constants/attributeConstants';
 
 const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusConstants;
+const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
 const { MALE, FEMALE, ANY } = genderConstants;
 
@@ -249,6 +250,11 @@ export const config = {
         rowOffset: 1
       },
       {
+        attribute: 'stage',
+        regex: '(qualifying)',
+        postProcessor: 'stageParser'
+      },
+      {
         attribute: 'level',
         searchText: 'grade',
         rowOffset: 1
@@ -295,9 +301,8 @@ export const config = {
       },
       {
         attribute: [CATEGORY],
-        searchText: 'grade',
-        columnOffset: 1,
-        rowOffset: 1
+        regex: '(u\\s?\\d{2})',
+        postProcessor: 'categoryParser'
       },
       {
         attribute: 'matchUpType',
@@ -308,9 +313,7 @@ export const config = {
       },
       {
         attribute: [GENDER],
-        searchText: 'main draw',
-        options: { startsWith: true },
-        rowOffset: -1,
+        regex: '(boys|girls)',
         postProcessor: 'genderParser'
       },
       { attribute: 'drawCreationDate', searchText: 'Draw date/time', columnOffset: 2, postProcessor: 'dateTimeParser' },
@@ -336,11 +339,15 @@ export const config = {
       { attribute: 'seededParticipantNames', searchText: 'Seeded players', rowOffset: 1, rowCount: 8 },
       { attribute: 'luckyLoserPlayerNames', searchText: 'Lucky losers', rowOffset: 1, rowCount: 8 }
     ],
+    stageParser: (stage) => {
+      return stage === 'qualifying' ? QUALIFYING_STAGE : MAIN;
+    },
     dateParser: (date) => {
-      // TODO: check for presence of '/'
       const parts = date.split('/');
-      const [month, day, year] = parts; // TODO: check for 3 numeric parts
-      return [year, month, day].join('-'); // TODO: use zeroPad utility
+      if (parts.length < 3 || !parts.every(isNumeric)) return;
+      let [month, day, year] = parts.map((number) => (number.toString()[1] ? number : '0' + number));
+      if (year.length === 2) year = '20' + year;
+      return [year, month, day].join('-');
     },
     dateTimeParser: (dateTimeString) => {
       const [iDate, time] = dateTimeString.split(' ');
@@ -349,14 +356,16 @@ export const config = {
     },
     categoryParser: (value) => {
       value = value
+        .toString()
+        .toLowerCase()
         .split(' ')
         .filter((c) => !['-'].includes(c))
         .join('');
-      return value.includes('U') ? [...value.split('U'), 'U'].join('') : value;
+      return value.includes('u') ? [...value.split('u'), 'U'].join('') : value;
     },
     genderParser: (value) => {
-      const male = /^BOYS/.test(value);
-      const female = /^GIRLS/.test(value);
+      const male = /^boys/.test(value);
+      const female = /^girls/.test(value);
       return male ? MALE : female ? FEMALE : ANY;
     },
     matchUpTypeParser: (value) => {

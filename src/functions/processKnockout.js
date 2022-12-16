@@ -1,12 +1,13 @@
+import { utilities, drawDefinitionConstants } from 'tods-competition-factory';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
 import { generateStructureId } from '../utilities/hashing';
 import { getRoundMatchUps } from './getRoundMatchUps';
-import { utilities } from 'tods-competition-factory';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
 import { getEntries } from './getEntries';
 
+const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 import { MISSING_MATCHUP_DETAILS } from '../constants/errorConditions';
 import { RESULT, ROUND } from '../constants/sheetElements';
 import { PRE_ROUND } from '../constants/columnConstants';
@@ -166,7 +167,7 @@ export function processKnockOut({ profile, analysis, sheet }) {
   }
 
   const matchUpIds = matchUps?.map(({ matchUpId }) => matchUpId);
-  const stage = analysis.isQualifying ? 'QUALIFYING' : 'MAIN';
+  const stage = analysis.info?.stage || analysis.isQualifying ? QUALIFYING_STAGE : MAIN;
   const attributes = [...matchUpIds, stage, analysis.sheetName];
   const result = generateStructureId({ attributes });
   if (result.error) console.log('generateStructureId', result.error);

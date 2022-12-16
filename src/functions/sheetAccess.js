@@ -1,8 +1,8 @@
 import { normalizeDiacritics, normalizeWhiteSpaces } from 'normalize-text';
+import { isSkipWord, tidyValue } from '../utilities/convenience';
 import { removeBits } from '../utilities/transformers';
 import { isObject } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
-import { tidyValue } from '../utilities/convenience';
 
 const { unique, instanceCount } = utilities;
 
@@ -38,7 +38,10 @@ export function cellValueAttribute(cell) {
 }
 
 export function getCellValue(cell) {
-  if (cell?.t === 'n' && containsAlpha(cell.w)) return '';
+  if (cell?.t === 'n' && containsAlpha(cell.w)) {
+    // number where the formatted value is alpha date without year
+    return '';
+  }
 
   let val = cell ? cellValueAttribute(cell) + '' : '';
   val = typeof val === 'string' ? val.trim() : val;
@@ -61,6 +64,25 @@ export function getRow(reference) {
 
 export function getCol(reference) {
   return reference ? reference[0] : undefined;
+}
+
+export function findRegexRefs({ regex, sheet, profile }) {
+  if (!regex || typeof regex !== 'string') return;
+  const re = new RegExp(regex);
+  const values = [];
+  const testedValues = [];
+  const refs = Object.keys(sheet).filter((ref) => {
+    const value = getCellValue(sheet[ref]).toString().toLowerCase();
+
+    if (profile && isSkipWord(value, profile)) return;
+    testedValues.push(value);
+    if (re.test(value)) {
+      values.push(value);
+      return true;
+    }
+  });
+
+  return { values, refs };
 }
 
 export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
@@ -130,7 +152,7 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
 
   function transformValue(value) {
     value = value.toLowerCase();
-    value = normalizeDiacritics(value);
+    // value = normalizeDiacritics(value); // redundant ~ part of getCellValue
 
     if (options?.remove && Array.isArray(options.remove)) {
       value = removeBits(value, options.remove);
