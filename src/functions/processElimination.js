@@ -106,7 +106,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   let roundNumber = 1;
   let columnIndex = 0;
-  const { subsequentColumnLimit } = profile;
+  const subsequentColumnLimit = profile.subsequentColumnLimit || 2;
 
   while (columnIndex < roundColumns.length) {
     const pairedRowNumbers = positionProgression[roundNumber - 1];
@@ -114,6 +114,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       const result = getRound({
         subsequentColumnLimit,
         confidenceThreshold,
+        positionProgression,
         roundParticipants,
         pairedRowNumbers,
         participants,
@@ -132,17 +133,18 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       }
 
       columnIndex += result.columnsConsumed || 0;
-      roundNumber += 1;
 
       if (roundMatchUps) {
         const winningSides = roundMatchUps.reduce((count, matchUp) => count + (matchUp.winningSide ? 1 : 0), 0);
 
         // when there are no winningSides, only push if not the last column to be processed...
         // ... or if there is only one matchUp assume that it is an unfinished Final
-        if (winningSides || columnIndex + 1 < roundColumns.length || matchUps.length === 1) {
+        if (winningSides || columnIndex + 1 < roundColumns.length || roundMatchUps.length === 1) {
           matchUps.push(...roundMatchUps);
         }
       }
+
+      roundNumber += 1;
     }
 
     columnIndex += 1;
@@ -191,6 +193,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     participants,
     structures,
     ...SUCCESS,
+    matchUps,
     analysis,
     entries,
     links

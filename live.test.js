@@ -1,10 +1,12 @@
 import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
+import { resetLogging, setLoggingActive } from './src/global/state';
 import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
-import { setLoggingActive } from './src/global/state';
 import { writeFileSync } from 'fs-extra';
 
-it.skip('can process passing', () => {
+setLoggingActive;
+
+it('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed/CR';
   const writeTournamentRecords = false;
@@ -14,14 +16,16 @@ it.skip('can process passing', () => {
 
   // const sheetTypes = ['ROUND_ROBIN'];
   const sheetTypes = [];
-  const sheetNumbers = [5];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
-  const startIndex = 19;
+  const processLimit = 0;
+  const startIndex = 0;
 
-  // setLoggingActive(true);
+  resetLogging();
+  setLoggingActive(true);
   // setLoggingActive(true, 'dev');
+  // setLoggingActive(true, 'fileNames');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'noWinningSide');
   // setLoggingActive(true, 'invalidResult');
@@ -70,6 +74,7 @@ it('can process tests', () => {
   const processLimit = 1;
   const startIndex = 0;
 
+  resetLogging();
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'sheetNames');

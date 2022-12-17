@@ -192,7 +192,15 @@ export function processKnockOut({ profile, analysis, sheet }) {
 
   const matchUpsCount = matchUps.length;
   if (matchUpsCount !== eliminationResult.matchUpsCount) {
+    const missingMatchUps = matchUps.filter(
+      ({ roundNumber, roundPosition }) =>
+        !eliminationResult.matchUps.find(
+          (matchUp) => matchUp.roundNumber === roundNumber && matchUp.roundPosition === roundPosition
+        )
+    );
     console.log({ sheetName: analysis.sheetName, matchUpsCount, e: eliminationResult.matchUpsCount });
+    console.log({ missingMatchUps });
+    console.log({ matchUps }, eliminationResult.matchUps);
   }
 
   return { analysis, links, entries, seedAssignments, structures, hasValues: true, participants, ...SUCCESS };
