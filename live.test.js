@@ -4,7 +4,7 @@ import { utilities } from 'tods-competition-factory';
 import { setLoggingActive } from './src/global/state';
 import { writeFileSync } from 'fs-extra';
 
-it('can process passing', () => {
+it.skip('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed/CR';
   const writeTournamentRecords = false;
@@ -14,7 +14,7 @@ it('can process passing', () => {
 
   // const sheetTypes = ['ROUND_ROBIN'];
   const sheetTypes = [];
-  const sheetNumbers = [];
+  const sheetNumbers = [5];
   const sheetLimit = 0;
 
   const processLimit = 1;
@@ -107,5 +107,5 @@ it('can process tests', () => {
   if (!isNaN(writeResultIndex))
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 
-  console.log(result.fileResults[0].sheetAnalysis[2].analysis.info);
+  // console.log(result.fileResults[0].sheetAnalysis[2].analysis.info);
 });
