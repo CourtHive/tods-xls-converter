@@ -75,6 +75,7 @@ export const config = {
     matchStatuses: ['def', 'ret', 'bye', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
     matchUpStatuses: { bye: 'BYE', walkover: 'wo', retired: 'cons' },
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned', 'default', 'retired'],
+    subsequentColumnLimit: 2, // elimination structure outcome look ahead
     entryStatusMap,
     categories,
     doubles: {
