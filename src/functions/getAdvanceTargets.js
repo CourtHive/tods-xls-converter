@@ -3,6 +3,8 @@ import { getPotentialResult, isScoreLike } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { fuzzy } from 'fast-fuzzy';
 
+const joiners = ['-', '/'];
+
 export function getAdvanceTargets({
   confidenceThreshold = 0.7,
   consideredParticipants,
@@ -14,6 +16,7 @@ export function getAdvanceTargets({
   profile
 }) {
   roundNumber && roundPosition;
+
   const qualifyingIdentifiers = profile.qualifyingIdentifiers?.map((identifier) => identifier.toString().toLowerCase());
   let columnsConsumed;
 
@@ -56,6 +59,7 @@ export function getAdvanceTargets({
     const sideWeights = !isDoubleWalkover
       ? consideredParticipants?.map((participant, index) => {
           const { participantName, person, individualParticipants } = participant;
+
           let pValues = [participantName];
           if (person) {
             const { standardFamilyName, standardGivenName } = person;
@@ -64,18 +68,30 @@ export function getAdvanceTargets({
             const splitFamilyName = standardFamilyName.split(' ');
             if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
           }
+          const doublesFirstNames = [];
+          const doublesLastNames = [];
           individualParticipants?.forEach(({ person }) => {
             if (person) {
-              pValues.push(person.standardFamilyName);
+              const { standardFamilyName, standardGivenName } = person;
+              doublesFirstNames.push(standardGivenName?.toLowerCase());
+              doublesLastNames.push(standardFamilyName?.toLowerCase());
+
+              pValues.push(standardFamilyName);
               // handle multiple last names where only one of the last names is progressed
-              const splitFamilyName = person.standardFamilyName.split(' ');
-              if (splitFamilyName !== person.standardFamilyName) pValues.push(...splitFamilyName);
+              const splitFamilyName = standardFamilyName.split(' ');
+              if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
             }
           });
 
+          // for those rare occations where first names are advanced rather than last names
+          if (doublesFirstNames.length > 1) {
+            const combinations = joiners.flatMap((joiner) => doublesFirstNames.join(joiner));
+            pValues.push(...combinations);
+          }
+
           const pRank = pValues.reduce(
             (result, v) => {
-              const confidence = fuzzy(v || '', value.toString());
+              const confidence = v ? fuzzy(v, value.toString()) : 0;
               return confidence > confidenceThreshold && confidence > result.confidence
                 ? { confidence, match: v }
                 : result;
@@ -120,9 +136,11 @@ export function getAdvanceTargets({
     const sideMatches = columnResult
       .filter(({ side }) => side?.confidence)
       .map(({ side, value }) => ({ ...side, value }));
+
     const bestSideMatch = sideMatches.reduce((best, side) => (side.confidence > best.confidence ? side : best), {
       confidence: 0
     });
+
     if (bestSideMatch) {
       if (!side || bestSideMatch.confidence > side.confidence) {
         if (columnResultIndex) {
@@ -133,7 +151,72 @@ export function getAdvanceTargets({
     }
   });
 
+  if (result && !side.confidence && consideredParticipants.length === 2) {
+    const consideredPotentialValues = potentialValues
+      .flat()
+      .filter((value) => value.toString().length >= 4)
+      .map((value) => value.toString().toLowerCase());
+
+    let match, sideNumber;
+
+    const sideStartsWith = consideredParticipants.find((participant, pIndex) => {
+      const pValues = getPvalues(participant);
+
+      const matchFound = pValues.find((pValue) =>
+        consideredPotentialValues.flat().some((value) => {
+          const matchFound = pValue.startsWith(value);
+          if (matchFound) match = value;
+          return matchFound;
+        })
+      );
+
+      if (matchFound) sideNumber = pIndex + 1;
+
+      return matchFound;
+    });
+
+    if (sideStartsWith) {
+      console.log('----------- side starts with:', sideStartsWith.participantName);
+      side = { match, sideNumber, confidence: 0.7 };
+    }
+  }
+
   const advancedSide = side?.confidence && side.sideNumber;
 
   return { advancedSide, side, result, columnsConsumed };
+}
+
+function getPvalues(participant) {
+  const { participantName, person, individualParticipants } = participant;
+
+  let pValues = [participantName];
+  if (person) {
+    const { standardFamilyName, standardGivenName } = person;
+    pValues.push(standardFamilyName, standardGivenName);
+    // handle multiple last names where only one of the last names is progressed
+    const splitFamilyName = standardFamilyName.split(' ');
+    if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
+  }
+  const doublesFirstNames = [];
+  const doublesLastNames = [];
+  individualParticipants?.forEach(({ person }) => {
+    if (person) {
+      const { standardFamilyName, standardGivenName } = person;
+      doublesFirstNames.push(standardGivenName);
+      doublesLastNames.push(standardFamilyName);
+
+      pValues.push(standardFamilyName);
+      // handle multiple last names where only one of the last names is progressed
+      const splitFamilyName = standardFamilyName.split(' ');
+      if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
+    }
+  });
+
+  // for those rare occations where first names are advanced rather than last names
+  if (doublesFirstNames.length > 1) {
+    const combinations = joiners.flatMap((joiner) => doublesFirstNames.join(joiner));
+    pValues.push(...combinations);
+  }
+
+  return pValues.filter(Boolean).map((v) => v.toString().toLowerCase());
 }

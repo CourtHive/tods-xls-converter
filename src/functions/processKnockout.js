@@ -16,6 +16,8 @@ import { processElimination } from './processElimination';
 
 export function processKnockOut({ profile, analysis, sheet }) {
   const eliminationResult = processElimination({ profile, analysis, sheet });
+  if (profile) return eliminationResult;
+
   const { columnProfiles, avoidRows } = analysis;
   analysis.drawType = 'SINGLE_ELIMINATION';
 

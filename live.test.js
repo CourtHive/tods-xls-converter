@@ -11,7 +11,7 @@ it('can process passing', () => {
   const writeDir = './examples/sheets/processed/CR';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = false;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   // const sheetTypes = ['ROUND_ROBIN'];
@@ -59,7 +59,7 @@ it('can process passing', () => {
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 });
 
-it('can process tests', () => {
+it.skip('can process tests', () => {
   const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;

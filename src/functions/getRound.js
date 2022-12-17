@@ -93,14 +93,9 @@ export function getRound({
         }
 
         if (advancedSide) {
-          /*
-        consideredParticipants[advancedSide - 1].advancedParticipantName =
-          getNonBracketedValue(advancingParticipantName);
-        consideredParticipants[advancedSide - 1].advancedPositionRef = nextColumnRef;
-	*/
-
           if (roundParticipants?.length) {
-            advancingParticipants.push(consideredParticipants[advancedSide - 1]);
+            const advancingParticipant = consideredParticipants[advancedSide - 1];
+            advancingParticipants.push(advancingParticipant);
           }
         } else {
           advancingParticipants.push({});
