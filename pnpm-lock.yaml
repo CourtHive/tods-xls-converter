@@ -7,8 +7,8 @@ specifiers:
   '@babel/preset-env': 7.20.2
   '@babel/preset-typescript': 7.18.6
   '@rollup/plugin-babel': 6.0.3
-  '@rollup/plugin-commonjs': 23.0.5
-  '@rollup/plugin-json': 5.0.2
+  '@rollup/plugin-commonjs': 23.0.7
+  '@rollup/plugin-json': 6.0.0
   '@rollup/plugin-node-resolve': 15.0.1
   '@rollup/plugin-typescript': 10.0.1
   '@typescript-eslint/eslint-plugin': ^5.43.0
@@ -34,7 +34,7 @@ specifiers:
   rollup-plugin-esbuild: 5.0.0
   rollup-plugin-exclude-dependencies-from-bundle: ^1.1.23
   rollup-plugin-terser: 7.0.2
-  tods-competition-factory: ^0.416.0
+  tods-competition-factory: ^0.417.0
   typescript: ^4.9.3
   vite: ^4.0.0
   vitest: ^0.25.2
@@ -45,7 +45,7 @@ dependencies:
   hash-sum: 2.0.0
   node-xlsx: 0.21.0
   normalize-text: 2.4.1
-  tods-competition-factory: 0.416.0
+  tods-competition-factory: 0.417.0
   xlsx: 0.18.5
 
 devDependencies:
@@ -55,8 +55,8 @@ devDependencies:
   '@babel/preset-env': 7.20.2_@babel+core@7.20.5
   '@babel/preset-typescript': 7.18.6_@babel+core@7.20.5
   '@rollup/plugin-babel': 6.0.3_wk25tilbnppyl7pd6ilgxpftty
-  '@rollup/plugin-commonjs': 23.0.5_rollup@3.3.0
-  '@rollup/plugin-json': 5.0.2_rollup@3.3.0
+  '@rollup/plugin-commonjs': 23.0.7_rollup@3.3.0
+  '@rollup/plugin-json': 6.0.0_rollup@3.3.0
   '@rollup/plugin-node-resolve': 15.0.1_rollup@3.3.0
   '@rollup/plugin-typescript': 10.0.1_6annma2bj33shm6er7hwi5u4z4
   '@typescript-eslint/eslint-plugin': 5.43.0_wze2rj5tow7zwqpgbdx2buoy3m
@@ -1859,8 +1859,8 @@ packages:
       rollup: 3.3.0
     dev: true
 
-  /@rollup/plugin-commonjs/23.0.5_rollup@3.3.0:
-    resolution: {integrity: sha512-IwI51j5kCmLMYsErEvZAID/pg7Z1qgyVJ+QIPDDIg1AOPbIGbdTCjuHDWIBCtoF1dvMkXfQv7B2eTadjnLRbmA==}
+  /@rollup/plugin-commonjs/23.0.7_rollup@3.3.0:
+    resolution: {integrity: sha512-hsSD5Qzyuat/swzrExGG5l7EuIlPhwTsT7KwKbSCQzIcJWjRxiimi/0tyMYY2bByitNb3i1p+6JWEDGa0NvT0Q==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^2.68.0||^3.0.0
@@ -1873,12 +1873,12 @@ packages:
       estree-walker: 2.0.2
       glob: 8.0.3
       is-reference: 1.2.1
-      magic-string: 0.26.7
+      magic-string: 0.27.0
       rollup: 3.3.0
     dev: true
 
-  /@rollup/plugin-json/5.0.2_rollup@3.3.0:
-    resolution: {integrity: sha512-D1CoOT2wPvadWLhVcmpkDnesTzjhNIQRWLsc3fA49IFOP2Y84cFOOJ+nKGYedvXHKUsPeq07HR4hXpBBr+CHlA==}
+  /@rollup/plugin-json/6.0.0_rollup@3.3.0:
+    resolution: {integrity: sha512-i/4C5Jrdr1XUarRhVu27EEwjt4GObltD7c+MkCIpO2QIbojw8MUs+CCTqOphQi3Qtg1FLmYt+l+6YeoIf51J7w==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0
@@ -4766,11 +4766,11 @@ packages:
       yallist: 4.0.0
     dev: true
 
-  /magic-string/0.26.7:
-    resolution: {integrity: sha512-hX9XH3ziStPoPhJxLq1syWuZMxbDvGNbVchfrdCtanC7D13888bMFow61x8axrx+GfHLtVeAx2kxL7tTGRl+Ow==}
+  /magic-string/0.27.0:
+    resolution: {integrity: sha512-8UnnX2PeRAPZuN12svgR9j7M1uWMovg/CEnIwIG0LFkXSJJe4PdfUGiTGl8V9bsBHFUtfVINcSyYxd7q+kx9fA==}
     engines: {node: '>=12'}
     dependencies:
-      sourcemap-codec: 1.4.8
+      '@jridgewell/sourcemap-codec': 1.4.14
     dev: true
 
   /make-dir/3.1.0:
@@ -5846,11 +5846,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /sourcemap-codec/1.4.8:
-    resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
-    deprecated: Please use @jridgewell/sourcemap-codec instead
-    dev: true
-
   /spdx-correct/3.1.1:
     resolution: {integrity: sha512-cOYcUWwhCuHCXi49RhFRCyJEK3iPj1Ziz9DpViV3tbZOwXD49QzIN3MpOLJNxh2qwq2lJJZaKMVw9qNi4jTC0w==}
     dependencies:
@@ -6131,8 +6126,8 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /tods-competition-factory/0.416.0:
-    resolution: {integrity: sha512-H7d55GaL3tb2mDYvJEtKkANPyLfqAqoDb3kJMwcdv9xmQM2M14CgWoLlu6MCYOhCfywnYGHOf6yZsCLEDCg9Uw==}
+  /tods-competition-factory/0.417.0:
+    resolution: {integrity: sha512-V8Nu8FtGyIK1Maiq55jqOx6wKt9UaL3OxV9z8KftJhGg5TL59qnqgSuQA7utMgUpBB/RUbKR2tK1tQKJEJckNA==}
     dev: false
 
   /trim-newlines/3.0.1:

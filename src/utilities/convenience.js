@@ -63,7 +63,6 @@ export const withoutQualifyingDesignator = (value, qualifyingIdentifiers = []) =
   for (const identifier of qualifyingIdentifiers) {
     if (value.toLowerCase().startsWith(`${identifier.toLowerCase()} `)) {
       const withoutIdentifier = value.split(' ').slice(1).join(' ');
-      // console.log({ value, withoutIdentifier });
       return withoutIdentifier;
     }
   }

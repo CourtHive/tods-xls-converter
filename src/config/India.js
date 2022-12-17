@@ -1,4 +1,4 @@
-import { genderConstants, matchUpTypes, entryStatusConstants } from 'tods-competition-factory';
+import { genderConstants, matchUpTypes, drawDefinitionConstants, entryStatusConstants } from 'tods-competition-factory';
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
@@ -31,6 +31,7 @@ import {
 } from '../constants/attributeConstants';
 
 const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusConstants;
+const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
 const { MALE, FEMALE, ANY } = genderConstants;
 
@@ -65,6 +66,8 @@ export const config = {
   mustContainSheetNames: [],
   profile: {
     providerId: 'IND-0123',
+    identifierType: 'NationalID',
+    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }],
     skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
@@ -72,6 +75,7 @@ export const config = {
     matchStatuses: ['def', 'ret', 'bye', 'w.o', 'w/o', 'wo', 'cons', 'abandoned'],
     matchUpStatuses: { bye: 'BYE', walkover: 'wo', retired: 'cons' },
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned', 'default', 'retired'],
+    subsequentColumnLimit: 2, // elimination structure outcome look ahead
     entryStatusMap,
     categories,
     doubles: {
@@ -174,7 +178,7 @@ export const config = {
           'nationality'
         ],
         limit: 1,
-        skipWords: ['reg', 'umpire', 0, '0'],
+        skipWords: ['reg', 'umpire', '0'],
         valueRegex: '^\\d{6,}$'
       }, // TODO: implement regex check for id
       { attr: STATE, header: ['state'], limit: 1 },
@@ -247,6 +251,11 @@ export const config = {
         rowOffset: 1
       },
       {
+        attribute: 'stage',
+        regex: '(qualifying)',
+        postProcessor: 'stageParser'
+      },
+      {
         attribute: 'level',
         searchText: 'grade',
         rowOffset: 1
@@ -292,6 +301,11 @@ export const config = {
         postProcessor: 'categoryParser'
       },
       {
+        attribute: [CATEGORY],
+        regex: '(u\\s?\\d{2})',
+        postProcessor: 'categoryParser'
+      },
+      {
         attribute: 'matchUpType',
         searchText: 'main draw',
         options: { startsWith: true },
@@ -300,9 +314,7 @@ export const config = {
       },
       {
         attribute: [GENDER],
-        searchText: 'main draw',
-        options: { startsWith: true },
-        rowOffset: -1,
+        regex: '(boys|girls)',
         postProcessor: 'genderParser'
       },
       { attribute: 'drawCreationDate', searchText: 'Draw date/time', columnOffset: 2, postProcessor: 'dateTimeParser' },
@@ -328,6 +340,16 @@ export const config = {
       { attribute: 'seededParticipantNames', searchText: 'Seeded players', rowOffset: 1, rowCount: 8 },
       { attribute: 'luckyLoserPlayerNames', searchText: 'Lucky losers', rowOffset: 1, rowCount: 8 }
     ],
+    stageParser: (stage) => {
+      return stage === 'qualifying' ? QUALIFYING_STAGE : MAIN;
+    },
+    dateParser: (date) => {
+      const parts = date.split('/');
+      if (parts.length < 3 || !parts.every(isNumeric)) return;
+      let [month, day, year] = parts.map((number) => (number.toString()[1] ? number : '0' + number));
+      if (year.length === 2) year = '20' + year;
+      return [year, month, day].join('-');
+    },
     dateTimeParser: (dateTimeString) => {
       const [iDate, time] = dateTimeString.split(' ');
       const date = postProcessors.dateParser(iDate);
@@ -335,14 +357,16 @@ export const config = {
     },
     categoryParser: (value) => {
       value = value
+        .toString()
+        .toLowerCase()
         .split(' ')
         .filter((c) => !['-'].includes(c))
         .join('');
-      return value.includes('U') ? [...value.split('U'), 'U'].join('') : value;
+      return value.includes('u') ? [...value.split('u'), 'U'].join('') : value;
     },
     genderParser: (value) => {
-      const male = /^BOYS/.test(value);
-      const female = /^GIRLS/.test(value);
+      const male = /^boys/.test(value);
+      const female = /^girls/.test(value);
       return male ? MALE : female ? FEMALE : ANY;
     },
     matchUpTypeParser: (value) => {

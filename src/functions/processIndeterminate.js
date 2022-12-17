@@ -1,5 +1,4 @@
 import { getPositionColumn } from '../utilities/convenience';
-import { pushGlobalLog } from '../utilities/globalLog';
 import { processKnockOut } from './processKnockout';
 
 import { POSITION } from '../constants/columnConstants';
@@ -7,7 +6,7 @@ import { SUCCESS } from '../constants/resultConstants';
 import { KNOCKOUT } from '../constants/sheetTypes';
 
 export function processIndeterminate(props) {
-  const { sheetDefinition, sheet, sheetNumber, sheetName, profile, analysis, info } = props;
+  const { sheetDefinition, sheet, sheetNumber, profile, analysis, info } = props;
   if (sheetDefinition && sheetNumber && profile && sheet);
 
   const hasPosition = Object.values(analysis.attributeMap).includes(POSITION);
@@ -20,15 +19,6 @@ export function processIndeterminate(props) {
 
   if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
     analysis.sheetType = KNOCKOUT;
-
-    pushGlobalLog({
-      method: 'identified',
-      color: 'mustard',
-      keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
-      type: KNOCKOUT,
-      sheetName
-    });
-
     return processKnockOut(props);
   }
 

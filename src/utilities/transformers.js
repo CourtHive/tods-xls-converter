@@ -14,6 +14,6 @@ export const removeBits = (value, remove = []) => {
 
 export function contextAnalisys(fileResults) {
   return Object.values(fileResults).flatMap((f) =>
-    Object.values(f.sheetAnalysis).map((s) => ({ filename: f.filename, sheetName: s.sheetName, ...s.analysis }))
+    Object.values(f.sheetAnalysis).map((s) => ({ fileName: f.fileName, sheetName: s.sheetName, ...s.analysis }))
   );
 }

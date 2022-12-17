@@ -23,9 +23,9 @@ export function processDirectory({
   sheetTypes,
   sheetLimit
 }) {
-  const isXLS = (filename) => filename.split('.').reverse()[0].startsWith('xls');
-  let filenames = readdirSync(readDir).filter(isXLS);
-  const workbookCount = filenames.length;
+  const isXLS = (fileName) => fileName.split('.').reverse()[0].startsWith('xls');
+  let fileNames = readdirSync(readDir).filter(isXLS);
+  const workbookCount = fileNames.length;
 
   const logging = getLoggingActive('dev');
 
@@ -46,9 +46,9 @@ export function processDirectory({
   });
 
   if (processLimit) {
-    filenames = filenames.slice(startIndex, startIndex + processLimit);
+    fileNames = fileNames.slice(startIndex, startIndex + processLimit);
   } else if (startIndex) {
-    filenames = filenames.slice(startIndex);
+    fileNames = fileNames.slice(startIndex);
   }
 
   const allParticipantsMap = {};
@@ -62,21 +62,21 @@ export function processDirectory({
   let totalMatchUps = 0;
 
   let index = 0;
-  for (const filename of filenames) {
-    if (getLoggingActive('sheetNames')) console.log({ filename, index });
-    const buf = readFileSync(`${readDir}/${filename}`);
+  for (const fileName of fileNames) {
+    if (getLoggingActive('sheetNames') || getLoggingActive('fileNames')) console.log({ fileName, index });
+    const buf = readFileSync(`${readDir}/${fileName}`);
     let result = loadWorkbook(buf, index);
     const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
-    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes, processStructures });
-    fileResults[index] = { filename, ...result, ...additionalContent };
+    result = processSheets({ fileName, sheetNumbers, sheetLimit, sheetTypes, processStructures });
+    fileResults[index] = { fileName, ...result, ...additionalContent };
     index += 1;
 
     const { participants: participantsMap } = result;
     const tournamentParticipants = participantsMap ? Object.values(participantsMap) : [];
     Object.assign(allParticipantsMap, participantsMap);
 
-    const { tournamentId } = generateTournamentId({ attributes: [filename] });
+    const { tournamentId } = generateTournamentId({ attributes: [fileName] });
 
     const profile = workbookType?.profile;
 
@@ -86,7 +86,7 @@ export function processDirectory({
     });
 
     if (profile?.fileDateParser) {
-      const dateString = profile.fileDateParser(filename);
+      const dateString = profile.fileDateParser(fileName);
       tournamentEngine.setTournamentDates({ startDate: dateString, endDate: dateString });
     }
 
@@ -96,6 +96,7 @@ export function processDirectory({
     if (result.sheetAnalysis) {
       Object.values(result.sheetAnalysis).forEach((sheet) => {
         const { structures = [], analysis = {}, entries } = sheet;
+        const startDate = analysis.info?.startDate;
         const gender = analysis.gender || analysis.info?.gender;
         const category = analysis.category || analysis.info?.category;
         const eventKey = (gender && category && `${gender}|${category}`) || gender || category;
@@ -112,7 +113,7 @@ export function processDirectory({
             drawId
           };
           if (!eventsMap[eventKey]) {
-            eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category };
+            eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category, startDate };
           } else {
             eventsMap[eventKey].drawDefinitions.push(drawDefinition);
           }
@@ -121,14 +122,15 @@ export function processDirectory({
         }
 
         if (analysis.info) {
-          const { tournamentName } = analysis.info;
+          const { tournamentName, startDate } = analysis.info;
           if (tournamentName) tournamentInfo.tournamentName = tournamentName;
+          if (startDate && !tournamentInfo.startDate) tournamentInfo.startDate = startDate;
         }
       });
 
       Object.keys(eventsMap).forEach((key) => {
         const event = eventsMap[key];
-        const { category, gender, drawDefinitions } = event;
+        const { category, gender, startDate, drawDefinitions } = event;
         const eventName = (key !== 'undefined' && key.split('|').join(' ')) || drawDefinitions?.[0]?.drawName;
         const { eventId } = generateEventId({ attributes: drawDefinitions.map(({ drawId }) => drawId) });
         const entriesMap = Object.assign(
@@ -156,9 +158,11 @@ export function processDirectory({
           const result = tournamentEngine.addEvent({
             event: {
               category: { ageCategoryCode: category },
+              endDate: startDate,
               drawDefinitions,
               extensions,
               eventName,
+              startDate,
               eventId,
               entries,
               gender
@@ -169,13 +173,19 @@ export function processDirectory({
       });
     }
 
-    const tournamentName = tournamentInfo?.tournamentName;
+    const { tournamentName, startDate } = tournamentInfo || {};
 
     if (tournamentName) {
       tournamentEngine.setTournamentName({ tournamentName });
     }
+    if (startDate) {
+      const { startDate: existingStartDate } = tournamentEngine.getTournamentInfo();
+      if (!existingStartDate) tournamentEngine.setTournamentDates({ startDate, endDate: startDate });
+    }
 
-    const matchUps = tournamentEngine.allTournamentMatchUps({ context: { tournamentName, level: 'REG' } }).matchUps;
+    const matchUps = tournamentEngine.allTournamentMatchUps({
+      context: { tournamentName, level: 'REG', identifierType: profile.identifierType }
+    }).matchUps;
     allMatchUps.push(...matchUps);
 
     totalMatchUps += result.totalMatchUps || 0;
@@ -186,9 +196,9 @@ export function processDirectory({
       Object.keys(result.errorLog).forEach((key) => {
         const sheetNames = result.errorLog[key];
         if (!errorLog[key]) {
-          errorLog[key] = [{ filename, sheetNames }];
+          errorLog[key] = [{ fileName, sheetNames }];
         } else {
-          errorLog[key].push({ filename, sheetNames });
+          errorLog[key].push({ fileName, sheetNames });
         }
       });
     }

@@ -1,6 +1,6 @@
 // node
 // ..then..
-// .load build.js
+// .load i.js
 
 const { xlsTODS: x } = require('../dist');
 x.setLoggingActive(true);
