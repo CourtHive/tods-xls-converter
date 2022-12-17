@@ -67,9 +67,9 @@ export const config = {
       { regex: '\\ssacc' },
       { regex: `\\*ll:` },
       { regex: `\\*ll` },
-      { regex: `r:\\s` },
-      { regex: `g:\\s` },
-      { regex: 'w:[a-z]{2}' }
+      { regex: `^r:\\s` },
+      { regex: `^g:\\s` },
+      { regex: '^w:[a-z]{2}' }
     ],
     skipWords: [
       // TODO: introduce { regex } // which would be an exact match
@@ -86,6 +86,7 @@ export const config = {
       { text: 'varones', includes: true },
       { text: 'valones', endsWith: true },
       { text: 'partidos', includes: true },
+      { text: 'punto en el ranking', includes: true },
       { text: 'menu', includes: true },
       { text: 'break', includes: true },
       { text: 'grado', includes: true },
@@ -133,6 +134,7 @@ export const config = {
     considerAlpha: [',', '(', ')', '/', ':'],
     matchStatuses: ['doble wo', 'ret', 'def', 'bye', 'w.o', 'w/o', 'wo', 'abandoned'],
     matchUpStatuses: { bye: 'BYE', doubleWalkover: 'doble wo', walkover: 'wo' },
+    subsequentColumnLimit: 1, // elimination structure outcome look ahead
     qualifyingIdentifiers,
     doubles: {
       regexSeparators: ['/', /\s{3,}/g]
