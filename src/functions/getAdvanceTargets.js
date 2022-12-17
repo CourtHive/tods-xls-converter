@@ -46,31 +46,31 @@ export function getAdvanceTargets({
     value = getNonBracketedValue(value) || '';
     isDoubleWalkover = isDoubleWalkover || value === providerDoubleWalkover.toLowerCase();
 
-    const sideWeights =
-      !isDoubleWalkover &&
-      consideredParticipants?.map((participant, index) => {
-        const { participantName, person, individualParticipants } = participant;
-        let pValues = [participantName];
-        if (person) {
-          const { standardFamilyName, standardGivenName } = person;
-          pValues.push(standardFamilyName, standardGivenName);
-        }
-        individualParticipants?.forEach(({ person }) => {
-          person && pValues.push(person.standardFamilyName);
-        });
+    const sideWeights = !isDoubleWalkover
+      ? consideredParticipants?.map((participant, index) => {
+          const { participantName, person, individualParticipants } = participant;
+          let pValues = [participantName];
+          if (person) {
+            const { standardFamilyName, standardGivenName } = person;
+            pValues.push(standardFamilyName, standardGivenName);
+          }
+          individualParticipants?.forEach(({ person }) => {
+            person && pValues.push(person.standardFamilyName);
+          });
 
-        const pRank = pValues.reduce(
-          (result, v) => {
-            const confidence = fuzzy(v || '', value.toString());
-            return confidence > confidenceThreshold && confidence > result.confidence
-              ? { confidence, match: v }
-              : result;
-          },
-          { confidence: 0 }
-        );
+          const pRank = pValues.reduce(
+            (result, v) => {
+              const confidence = fuzzy(v || '', value.toString());
+              return confidence > confidenceThreshold && confidence > result.confidence
+                ? { confidence, match: v }
+                : result;
+            },
+            { confidence: 0 }
+          );
 
-        return { sideNumber: index + 1, ...pRank };
-      });
+          return { sideNumber: index + 1, ...pRank };
+        })
+      : undefined;
 
     const side = sideWeights?.reduce((side, weight) => (weight.confidence > side.confidence ? weight : side), {
       confidence: 0
@@ -99,7 +99,7 @@ export function getAdvanceTargets({
       }
     }
     const sideMatches = columnResult
-      .filter(({ side }) => side.confidence)
+      .filter(({ side }) => side?.confidence)
       .map(({ side, value }) => ({ ...side, value }));
     const bestSideMatch = sideMatches.reduce((best, side) => (side.confidence > best.confidence ? side : best), {
       confidence: 0
