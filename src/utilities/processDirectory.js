@@ -96,6 +96,7 @@ export function processDirectory({
     if (result.sheetAnalysis) {
       Object.values(result.sheetAnalysis).forEach((sheet) => {
         const { structures = [], analysis = {}, entries } = sheet;
+        const startDate = analysis.info?.startDate;
         const gender = analysis.gender || analysis.info?.gender;
         const category = analysis.category || analysis.info?.category;
         const eventKey = (gender && category && `${gender}|${category}`) || gender || category;
@@ -112,7 +113,7 @@ export function processDirectory({
             drawId
           };
           if (!eventsMap[eventKey]) {
-            eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category };
+            eventsMap[eventKey] = { drawDefinitions: [drawDefinition], gender, category, startDate };
           } else {
             eventsMap[eventKey].drawDefinitions.push(drawDefinition);
           }
@@ -121,14 +122,15 @@ export function processDirectory({
         }
 
         if (analysis.info) {
-          const { tournamentName } = analysis.info;
+          const { tournamentName, startDate } = analysis.info;
           if (tournamentName) tournamentInfo.tournamentName = tournamentName;
+          if (startDate && !tournamentInfo.startDate) tournamentInfo.startDate = startDate;
         }
       });
 
       Object.keys(eventsMap).forEach((key) => {
         const event = eventsMap[key];
-        const { category, gender, drawDefinitions } = event;
+        const { category, gender, startDate, drawDefinitions } = event;
         const eventName = (key !== 'undefined' && key.split('|').join(' ')) || drawDefinitions?.[0]?.drawName;
         const { eventId } = generateEventId({ attributes: drawDefinitions.map(({ drawId }) => drawId) });
         const entriesMap = Object.assign(
@@ -156,9 +158,11 @@ export function processDirectory({
           const result = tournamentEngine.addEvent({
             event: {
               category: { ageCategoryCode: category },
+              endDate: startDate,
               drawDefinitions,
               extensions,
               eventName,
+              startDate,
               eventId,
               entries,
               gender
@@ -169,13 +173,19 @@ export function processDirectory({
       });
     }
 
-    const tournamentName = tournamentInfo?.tournamentName;
+    const { tournamentName, startDate } = tournamentInfo || {};
 
     if (tournamentName) {
       tournamentEngine.setTournamentName({ tournamentName });
     }
+    if (startDate) {
+      const { startDate: existingStartDate } = tournamentEngine.getTournamentInfo();
+      if (!existingStartDate) tournamentEngine.setTournamentDates({ startDate, endDate: startDate });
+    }
 
-    const matchUps = tournamentEngine.allTournamentMatchUps({ context: { tournamentName, level: 'REG' } }).matchUps;
+    const matchUps = tournamentEngine.allTournamentMatchUps({
+      context: { tournamentName, level: 'REG', identifierType: profile.identifierType }
+    }).matchUps;
     allMatchUps.push(...matchUps);
 
     totalMatchUps += result.totalMatchUps || 0;

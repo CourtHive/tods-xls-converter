@@ -5,7 +5,7 @@ import { getLoggingActive } from '../global/state';
 import { normalizeName } from 'normalize-text';
 import { normalizeScore } from './cleanScore';
 import { tidyScore } from './scoreParser';
-import { getRow } from './sheetAccess';
+import { cellValueAttribute, getRow } from './sheetAccess';
 import {
   drawDefinitionConstants,
   matchUpStatusConstants,
@@ -129,7 +129,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
   const keyMap = Object.assign({}, ...analysis.columnProfiles.map(({ keyMap }) => keyMap));
   const nameValueKeys = Object.keys(keyMap).filter((key) => nameValues.includes(keyMap[key]));
   const foundSeparators = nameValueKeys.map((key) => {
-    const value = sheet[key].v;
+    const value = cellValueAttribute(sheet[key]);
     const doublesNameSeparator = doublesSeparators.find((separator) => {
       const x = new RegExp(separator);
       return x.test(value);

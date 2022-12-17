@@ -3,10 +3,10 @@ import { matchUpStatusConstants, mocksEngine } from 'tods-competition-factory';
 import { getMatchUpParticipants } from './getMatchUpParticipants';
 import { getDerivedPair, getGroupings } from './columnUtilities';
 import { getPotentialResult } from '../utilities/identification';
+import { generateMatchUpId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
-import { generateMatchUpId } from '../utilities/hashing';
 import { normalizeScore } from './cleanScore';
 import { tidyScore } from './scoreParser';
 
@@ -84,6 +84,7 @@ export function getRoundMatchUps({
     let pairParticipantNames = consideredParticipants?.map(({ participantName }) => participantName);
 
     if (!consideredParticipants?.length) {
+      console.log('Missing Participants', { pair, column, columnIndex }, analysis.sheetName);
       const result = getMatchUpParticipants({
         roundPosition,
         columnProfile,

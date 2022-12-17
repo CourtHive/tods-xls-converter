@@ -13,9 +13,15 @@ export function pushGlobalLog(value, logName, replaceMethod) {
   if (isString(logName)) {
     if (namedLogs[logName]) {
       if (replaceMethod) {
-        namedLogs[logName] = namedLogs[logName].map((item) => {
-          return item.method === replaceMethod ? value : item;
-        });
+        let index = namedLogs[logName].length - 1;
+        while (index >= 0) {
+          if (namedLogs[logName][index].method === replaceMethod) {
+            namedLogs[logName][index] = value;
+            index = -1;
+          } else {
+            index -= 1;
+          }
+        }
       } else {
         namedLogs[logName].push(value);
       }
@@ -24,9 +30,15 @@ export function pushGlobalLog(value, logName, replaceMethod) {
     }
   } else {
     if (replaceMethod) {
-      globalLog = globalLog.map((item) => {
-        return item.method === replaceMethod ? value : item;
-      });
+      let index = globalLog.length - 1;
+      while (index >= 0) {
+        if (globalLog[index].method === replaceMethod) {
+          globalLog[index] = value;
+          index = -1;
+        } else {
+          index -= 1;
+        }
+      }
     } else {
       globalLog.push(value);
     }

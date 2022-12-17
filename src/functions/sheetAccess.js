@@ -1,8 +1,8 @@
 import { normalizeDiacritics, normalizeWhiteSpaces } from 'normalize-text';
+import { isSkipWord, tidyValue } from '../utilities/convenience';
 import { removeBits } from '../utilities/transformers';
 import { isObject } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
-import { tidyValue } from '../utilities/convenience';
 
 const { unique, instanceCount } = utilities;
 
@@ -12,7 +12,7 @@ export function numberValue(sheet, reference) {
 export function cellsContaining({ sheet, term }) {
   let references = Object.keys(sheet);
   return references.filter(
-    (ref) => (sheet[ref].v + '').toLowerCase().indexOf(normalizeDiacritics(term).toLowerCase()) >= 0
+    (ref) => (cellValueAttribute(sheet[ref]) + '').toLowerCase().indexOf(normalizeDiacritics(term).toLowerCase()) >= 0
   );
 }
 
@@ -32,10 +32,18 @@ export function isDateCell(cell) {
   return cell?.t === 'n' && containsAlpha(cell.w);
 }
 
-export function getCellValue(cell) {
-  if (cell?.t === 'n' && containsAlpha(cell.w)) return '';
+export function cellValueAttribute(cell) {
+  if (cell.t === 'e') return ''; // is an error value
+  return (cell.w !== '#REF!' && cell.w) || cell.v;
+}
 
-  let val = cell ? cell.v + '' : '';
+export function getCellValue(cell) {
+  if (cell?.t === 'n' && containsAlpha(cell.w)) {
+    // number where the formatted value is alpha date without year
+    return '';
+  }
+
+  let val = cell ? cellValueAttribute(cell) + '' : '';
   val = typeof val === 'string' ? val.trim() : val;
   val = normalizeWhiteSpaces(val);
   val = val.indexOf(',,') >= 0 ? val.replace(',,', ',') : val;
@@ -56,6 +64,25 @@ export function getRow(reference) {
 
 export function getCol(reference) {
   return reference ? reference[0] : undefined;
+}
+
+export function findRegexRefs({ regex, sheet, profile }) {
+  if (!regex || typeof regex !== 'string') return;
+  const re = new RegExp(regex);
+  const values = [];
+  const testedValues = [];
+  const refs = Object.keys(sheet).filter((ref) => {
+    const value = getCellValue(sheet[ref]).toString().toLowerCase();
+
+    if (profile && isSkipWord(value, profile)) return;
+    testedValues.push(value);
+    if (re.test(value)) {
+      values.push(value);
+      return true;
+    }
+  });
+
+  return { values, refs };
 }
 
 export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
@@ -125,7 +152,7 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
 
   function transformValue(value) {
     value = value.toLowerCase();
-    value = normalizeDiacritics(value);
+    // value = normalizeDiacritics(value); // redundant ~ part of getCellValue
 
     if (options?.remove && Array.isArray(options.remove)) {
       value = removeBits(value, options.remove);

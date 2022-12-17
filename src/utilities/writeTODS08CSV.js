@@ -57,7 +57,8 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
       Gender: ['gender'],
       RoundNumber: ['roundNumber'],
       RoundPosition: ['roundPosition'],
-      DrawStructure: ['drawType']
+      DrawStructure: ['drawType'],
+      IdentifierType: ['identifierType']
     },
     valuesMap: {
       MatchUpStatus: { COMPLETED: 'CO', RETIRED: 'RET', DEFAULTED: 'DEF', TO_BE_PLAYED: 'TBP' },

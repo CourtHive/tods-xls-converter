@@ -1,4 +1,4 @@
-import { getCellValue, getCol, getTargetValue, getValueRange } from './sheetAccess';
+import { findRegexRefs, getCellValue, getCol, getTargetValue, getValueRange } from './sheetAccess';
 import { isSkipWord, keyHasSingleAlpha } from '../utilities/convenience';
 import { utilities } from 'tods-competition-factory';
 import { postProcessors } from './postProcessors';
@@ -18,6 +18,20 @@ export function extractInfo({ profile, sheet, infoClass }) {
       if (accessor.cellRef) {
         const result = getCellValue(sheet[accessor.cellRef]);
         extractObject[accessor.attribute] = result;
+      } else if (accessor.regex) {
+        const { values } = findRegexRefs({ sheet, ...accessor, profile });
+        if (values.length) {
+          const re = new RegExp(accessor.regex);
+          const extractedValues = utilities.unique(
+            values.map((value) => value.match(re)?.[1]).map((value) => processValue({ accessor, value }))
+          );
+
+          if (accessor.multipleValues) {
+            extractObject[accessor.attribute] = extractedValues;
+          } else if (extractedValues.length === 1) {
+            extractObject[accessor.attribute] = extractedValues[0];
+          }
+        }
       } else {
         if (accessor.options) {
           Object.assign(accessor.options, options);

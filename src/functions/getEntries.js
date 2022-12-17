@@ -26,7 +26,7 @@ export function getEntries({
 
   const getColumnProfile = (column) => analysis.columnProfiles.find((columnProfile) => columnProfile.column === column);
 
-  const attributeColumns = Object.keys(analysis.columns);
+  const attributeColumns = Object.keys(analysis.columns).filter(Boolean);
   const entryDetailAttributes = ENTRY_DETAILS.filter((attribute) => attributeColumns.includes(attribute));
   const entryDetailColumns = entryDetailAttributes.flatMap((attribute) => analysis.columns[attribute]).sort();
 
@@ -42,7 +42,7 @@ export function getEntries({
     for (const attribute of entryDetailAttributes) {
       const attributeColumn = analysis.columns[attribute];
       if (Array.isArray(attributeColumn)) {
-        console.log('error: multipple attribute columns');
+        console.log('error: multiple attribute columns');
         continue;
       }
       const columnProfile = getColumnProfile(attributeColumn);

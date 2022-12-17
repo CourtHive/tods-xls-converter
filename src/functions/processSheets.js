@@ -7,14 +7,9 @@ import { processKnockOut } from './processKnockout';
 import { identifySheet } from './identifySheet';
 import { extractInfo } from './extractInfo';
 
-import { INFORMATION, PARTICIPANTS, KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
+import { MISSING_SHEET_DEFINITION, MISSING_WORKBOOK, UNKNOWN_WORKBOOK_TYPE } from '../constants/errorConditions';
+import { KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
 import { SUCCESS } from '../constants/resultConstants';
-import {
-  MISSING_SHEET_DEFINITION,
-  MISSING_WORKBOOK,
-  UNKNOWN_SHEET_TYPE,
-  UNKNOWN_WORKBOOK_TYPE
-} from '../constants/errorConditions';
 
 const invalidNames = [];
 const invalidResults = ['76(3) 67(5) 60'];
@@ -130,6 +125,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       }
     } else {
       const method = `processSheet ${sheetNumber}`;
+      if (!result.analysis) console.log({ result });
       pushGlobalLog(
         {
           method,
@@ -225,11 +221,7 @@ export function processSheet({
       analysis,
       ...props
     });
-  } else if (sheetDefinition.type === PARTICIPANTS) {
-    return { analysis };
-  } else if (sheetDefinition.type === INFORMATION) {
-    return { analysis };
   } else {
-    return { info: UNKNOWN_SHEET_TYPE };
+    return { analysis };
   }
 }
