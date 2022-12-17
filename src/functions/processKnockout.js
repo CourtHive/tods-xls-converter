@@ -15,7 +15,7 @@ import { SUCCESS } from '../constants/resultConstants';
 import { processElimination } from './processElimination';
 
 export function processKnockOut({ profile, analysis, sheet }) {
-  processElimination({ profile, analysis, sheet });
+  const eliminationResult = processElimination({ profile, analysis, sheet });
   const { columnProfiles, avoidRows } = analysis;
   analysis.drawType = 'SINGLE_ELIMINATION';
 
@@ -189,6 +189,11 @@ export function processKnockOut({ profile, analysis, sheet }) {
     positionProgression,
     positionRefs
   });
+
+  const matchUpsCount = matchUps.length;
+  if (matchUpsCount !== eliminationResult.matchUpsCount) {
+    console.log({ sheetName: analysis.sheetName, matchUpsCount, e: eliminationResult.matchUpsCount });
+  }
 
   return { analysis, links, entries, seedAssignments, structures, hasValues: true, participants, ...SUCCESS };
 

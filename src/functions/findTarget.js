@@ -27,12 +27,12 @@ function processFilesObject(resultsObject, target) {
 }
 
 function processFileResult(fileResult, target) {
-  const { filename, sheetAnalysis } = fileResult;
+  const { fileName, sheetAnalysis } = fileResult;
   const results = [];
 
   for (const sheet of Object.values(sheetAnalysis)) {
     const sheetResults = processSheet(sheet, target);
-    if (sheetResults.length) results.push({ filename, results: sheetResults });
+    if (sheetResults.length) results.push({ fileName, results: sheetResults });
   }
 
   return results;

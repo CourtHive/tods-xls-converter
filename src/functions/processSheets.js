@@ -14,7 +14,7 @@ import { SUCCESS } from '../constants/resultConstants';
 const invalidNames = [];
 const invalidResults = ['76(3) 67(5) 60'];
 
-export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTypes, processStructures } = {}) {
+export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTypes, processStructures } = {}) {
   const { workbook, workbookType } = getWorkbook();
   const logging = getLoggingActive('dev');
 
@@ -23,10 +23,10 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
 
   if (!workbookType) {
     pushGlobalLog({
-      keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
+      keyColors: { fileName: 'brightgreen', sheetCount: 'brightgreen' },
       divider: 80,
       sheetCount,
-      filename
+      fileName
     });
     return { error: UNKNOWN_WORKBOOK_TYPE };
   }
@@ -34,10 +34,10 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
   const { profile } = workbookType;
 
   pushGlobalLog({
-    keyColors: { filename: 'brightgreen', sheetCount: 'brightgreen' },
+    keyColors: { fileName: 'brightgreen', sheetCount: 'brightgreen' },
     divider: 80,
     sheetCount,
-    filename
+    fileName
   });
 
   const skippedResults = [];
@@ -61,7 +61,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       sheetNumber,
       sheetTypes,
       sheetName,
-      filename,
+      fileName,
       workbook,
       profile
     });
@@ -72,14 +72,14 @@ export function processSheets({ sheetLimit, sheetNumbers = [], filename, sheetTy
       invalidNames.includes(participantName)
     );
     if (invalidParticipant)
-      console.log({ sheetName, filename }, invalidParticipant?.individualParticipants || invalidParticipant);
+      console.log({ sheetName, fileName }, invalidParticipant?.individualParticipants || invalidParticipant);
 
     const structureMatchUps = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
     );
 
     const invalidResult = structureMatchUps.filter(({ result }) => invalidResults.includes(result));
-    if (invalidResult.length && getLoggingActive('invalidResult')) console.log({ filename, sheetName }, invalidResult);
+    if (invalidResult.length && getLoggingActive('invalidResult')) console.log({ fileName, sheetName }, invalidResult);
 
     const matchUpsCount = structureMatchUps?.length;
     const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;
@@ -156,7 +156,7 @@ export function processSheet({
   sheetTypes = [],
   sheetNumber,
   sheetName,
-  filename,
+  fileName,
   workbook,
   profile
 }) {
@@ -189,7 +189,7 @@ export function processSheet({
     sheetNumber,
     sheetName,
     sheetType,
-    filename,
+    fileName,
     profile,
     sheet,
     info

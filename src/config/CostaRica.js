@@ -378,10 +378,10 @@ export const config = {
       const category = categories.find((category) => value.includes(category));
       return category;
     },
-    fileDateParser: (filename) => {
+    fileDateParser: (fileName) => {
       const re = new RegExp('^(\\d{8})[\\s-]{1}');
-      if (re.test(filename)) {
-        const dateParts = filename.match(re)[1].split('');
+      if (re.test(fileName)) {
+        const dateParts = fileName.match(re)[1].split('');
         const year = dateParts.slice(0, 4).join('');
         const month = dateParts.slice(4, 6).join('');
         const day = dateParts.slice(6).join('');

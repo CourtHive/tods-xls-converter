@@ -182,5 +182,17 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     positionRefs
   });
 
-  return { analysis, links, entries, seedAssignments, structures, hasValues: true, participants, ...SUCCESS };
+  const matchUpsCount = matchUps.length;
+
+  return {
+    hasValues: true,
+    seedAssignments,
+    matchUpsCount,
+    participants,
+    structures,
+    ...SUCCESS,
+    analysis,
+    entries,
+    links
+  };
 }

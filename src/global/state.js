@@ -4,6 +4,10 @@ let loggingActive = {},
   workbookType,
   workbook;
 
+export function resetLogging() {
+  loggingActive = {};
+}
+
 export function getLoggingActive(type = 'global') {
   return loggingActive[type];
 }

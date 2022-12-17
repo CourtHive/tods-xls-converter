@@ -23,9 +23,9 @@ export function processDirectory({
   sheetTypes,
   sheetLimit
 }) {
-  const isXLS = (filename) => filename.split('.').reverse()[0].startsWith('xls');
-  let filenames = readdirSync(readDir).filter(isXLS);
-  const workbookCount = filenames.length;
+  const isXLS = (fileName) => fileName.split('.').reverse()[0].startsWith('xls');
+  let fileNames = readdirSync(readDir).filter(isXLS);
+  const workbookCount = fileNames.length;
 
   const logging = getLoggingActive('dev');
 
@@ -46,9 +46,9 @@ export function processDirectory({
   });
 
   if (processLimit) {
-    filenames = filenames.slice(startIndex, startIndex + processLimit);
+    fileNames = fileNames.slice(startIndex, startIndex + processLimit);
   } else if (startIndex) {
-    filenames = filenames.slice(startIndex);
+    fileNames = fileNames.slice(startIndex);
   }
 
   const allParticipantsMap = {};
@@ -62,21 +62,21 @@ export function processDirectory({
   let totalMatchUps = 0;
 
   let index = 0;
-  for (const filename of filenames) {
-    if (getLoggingActive('sheetNames')) console.log({ filename, index });
-    const buf = readFileSync(`${readDir}/${filename}`);
+  for (const fileName of fileNames) {
+    if (getLoggingActive('sheetNames') || getLoggingActive('fileNames')) console.log({ fileName, index });
+    const buf = readFileSync(`${readDir}/${fileName}`);
     let result = loadWorkbook(buf, index);
     const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
-    result = processSheets({ filename, sheetNumbers, sheetLimit, sheetTypes, processStructures });
-    fileResults[index] = { filename, ...result, ...additionalContent };
+    result = processSheets({ fileName, sheetNumbers, sheetLimit, sheetTypes, processStructures });
+    fileResults[index] = { fileName, ...result, ...additionalContent };
     index += 1;
 
     const { participants: participantsMap } = result;
     const tournamentParticipants = participantsMap ? Object.values(participantsMap) : [];
     Object.assign(allParticipantsMap, participantsMap);
 
-    const { tournamentId } = generateTournamentId({ attributes: [filename] });
+    const { tournamentId } = generateTournamentId({ attributes: [fileName] });
 
     const profile = workbookType?.profile;
 
@@ -86,7 +86,7 @@ export function processDirectory({
     });
 
     if (profile?.fileDateParser) {
-      const dateString = profile.fileDateParser(filename);
+      const dateString = profile.fileDateParser(fileName);
       tournamentEngine.setTournamentDates({ startDate: dateString, endDate: dateString });
     }
 
@@ -196,9 +196,9 @@ export function processDirectory({
       Object.keys(result.errorLog).forEach((key) => {
         const sheetNames = result.errorLog[key];
         if (!errorLog[key]) {
-          errorLog[key] = [{ filename, sheetNames }];
+          errorLog[key] = [{ fileName, sheetNames }];
         } else {
-          errorLog[key].push({ filename, sheetNames });
+          errorLog[key].push({ fileName, sheetNames });
         }
       });
     }
