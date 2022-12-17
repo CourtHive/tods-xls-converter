@@ -1,13 +1,13 @@
 import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { matchUpStatusConstants } from 'tods-competition-factory';
-import { fuzzy } from 'fast-fuzzy';
 import { isString } from '../utilities/identification';
+import { fuzzy } from 'fast-fuzzy';
 
 const { BYE } = matchUpStatusConstants;
 
 export function getAdvancedSide({
-  consideredParticipants,
   advancingParticipantName,
+  consideredParticipants,
   pairParticipantNames,
   // roundPosition, // useful for debugging
   // roundNumber, // useful for debugging
@@ -151,7 +151,7 @@ export function getAdvancedSide({
 
     if (fuzzyFirstSide && fuzzyLastSide) {
       if (fuzzyFirstSide.fuzzyRank > fuzzyLastSide.fuzzyRank) {
-        return fuzzyFirstSide || {};
+        return fuzzyFirstSide;
       }
     }
     return fuzzyLastSide || {};
