@@ -42,7 +42,6 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     const preRoundIndex = columns.indexOf(preRoundColumn);
     const nextColumn = columns[preRoundIndex + 1];
 
-    // TODO: convert processPreRound to use getRound() instead of getRoundMatchUps();
     const { advancingParticipants, nonAdvancingParticipants, structure } = processPreRound({
       subsequentColumnLimit: 1, // value for getRound()
       preRoundParticipantRows,
