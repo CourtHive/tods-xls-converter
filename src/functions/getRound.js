@@ -7,6 +7,7 @@ import { getLoggingActive } from '../global/state';
 import { normalizeScore } from './cleanScore';
 import { tidyScore } from './scoreParser';
 import { getRow } from './sheetAccess';
+import { getPotentialResult } from '../utilities/identification';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -39,24 +40,45 @@ export function getRound({
 
   const prospectiveResults = finalRound || relevantSubsequentColumns.length;
 
-  let roundPosition = 1;
-
   if (prospectiveResults) {
-    for (const pair of pairedRowNumbers) {
-      const consideredParticipants = roundParticipants?.[roundPosition - 1];
-      let pairParticipantNames = consideredParticipants?.map(({ participantName }) => participantName);
-      const isBye = consideredParticipants?.find(({ isByePosition }) => isByePosition);
-
+    // TODO: consider proactively characterizing all values to facilitate meta analysis before pulling values
+    // process all subsequent column values to determine whether there are results with participantNames
+    const potentialResults = [];
+    let columnValues = pairedRowNumbers.map((pair) => {
       const rowRange = utilities.generateRange(pair[0], pair[1] + 1);
-      let potentialValues = relevantSubsequentColumns.map((relevantColumn) => {
+      let pv = relevantSubsequentColumns.map((relevantColumn) => {
         const keyMap = analysis.columnProfiles.find(({ column }) => column === relevantColumn).keyMap;
         return Object.keys(keyMap)
           .filter((key) => rowRange.includes(getRow(key)))
           .map((key) => keyMap[key]);
       });
 
+      const pr = pv[0]
+        .map((value) => {
+          const { leader, potentialResult } = getPotentialResult(value);
+          return leader && potentialResult;
+        })
+        .filter(Boolean);
+      if (pr.length) potentialResults.push(pr);
+
+      return pv;
+    });
+
+    if (potentialResults.length > 1) {
+      // IF: there are participantNames combined with results
+      // THEN: limit the column look ahead to only one subsequent column
+      columnValues = columnValues.map((c) => c.slice(0, 1));
+    }
+
+    pairedRowNumbers.forEach((_, pairIndex) => {
+      const consideredParticipants = roundParticipants?.[pairIndex];
+      let pairParticipantNames = consideredParticipants?.map(({ participantName }) => participantName);
+      const isBye = consideredParticipants?.find(({ isByePosition }) => isByePosition);
+      let potentialValues = columnValues[pairIndex];
+
       let advancedSide, result;
 
+      const roundPosition = pairIndex + 1;
       if (consideredParticipants) {
         if (finalMatchUp) {
           const relevantColumns = roundColumns.slice(columnIndex - 1).reverse();
@@ -72,6 +94,7 @@ export function getRound({
               .map((key) => keyMap[key]);
           });
         }
+
         const advanceTargets = getAdvanceTargets({
           providerDoubleWalkover,
           consideredParticipants,
@@ -159,9 +182,7 @@ export function getRound({
         if (result.error) console.log({ error: result.error, matchUp });
         matchUps.push(matchUp);
       }
-
-      roundPosition += 1;
-    }
+    });
   }
 
   if (getLoggingActive('matchUps')) {

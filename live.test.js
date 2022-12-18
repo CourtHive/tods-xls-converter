@@ -6,7 +6,7 @@ import { writeFileSync } from 'fs-extra';
 
 setLoggingActive;
 
-it('can process passing', () => {
+it.skip('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed/CR';
   const writeTournamentRecords = false;
@@ -59,7 +59,7 @@ it('can process passing', () => {
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 });
 
-it.skip('can process tests', () => {
+it('can process tests', () => {
   const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
@@ -71,7 +71,7 @@ it.skip('can process tests', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
+  const processLimit = 0;
   const startIndex = 0;
 
   resetLogging();

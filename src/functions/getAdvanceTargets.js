@@ -15,8 +15,6 @@ export function getAdvanceTargets({
   roundNumber, // useful for debugging
   profile
 }) {
-  roundNumber && roundPosition;
-
   const qualifyingIdentifiers = profile.qualifyingIdentifiers?.map((identifier) => identifier.toString().toLowerCase());
   let columnsConsumed;
 
@@ -45,7 +43,7 @@ export function getAdvanceTargets({
     const { leader, potentialResult } = getPotentialResult(value);
     if (potentialResult && leader) {
       value = leader;
-      const message = 'result found at end of advancedSide participantName';
+      const message = `participantName (result) ${roundNumber}-${roundPosition}: ${potentialResult}`;
       pushGlobalLog({
         method: 'notice',
         color: 'brightyellow',
@@ -109,7 +107,7 @@ export function getAdvanceTargets({
 
     const scoreLike = isLikeScore(value);
 
-    return { value, scoreLike, side };
+    return { value, scoreLike, side, potentialResult };
   };
 
   const characterizeColumn = (values) => values.map(characterizeValue);
@@ -120,6 +118,8 @@ export function getAdvanceTargets({
   let side, result;
   columnResults.forEach((columnResult, columnResultIndex) => {
     const results = columnResult.filter(({ scoreLike }) => scoreLike).map(({ value }) => value);
+    const potentialResults = columnResult.map(({ potentialResult }) => potentialResult);
+
     if (results.length > 1) {
       console.log('MULTIPLE RESULTS');
       results.map((result) =>
@@ -132,7 +132,11 @@ export function getAdvanceTargets({
         }
         result = results[0];
       }
+    } else if (potentialResults.length) {
+      console.log({ potentialResults });
+      if (potentialResults[0]) result = potentialResults[0];
     }
+
     const sideMatches = columnResult
       .filter(({ side }) => side?.confidence)
       .map(({ side, value }) => ({ ...side, value }));
@@ -176,7 +180,13 @@ export function getAdvanceTargets({
     });
 
     if (sideStartsWith) {
-      console.log('----------- side starts with:', sideStartsWith.participantName);
+      const message = `side starts with to match ${sideStartsWith.participantName}`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow' },
+        message
+      });
       side = { match, sideNumber, confidence: 0.7 };
     }
   }
