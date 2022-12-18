@@ -3,6 +3,7 @@ import { tidyScore } from '../functions/scoreParser';
 import { expect, it } from 'vitest';
 
 // '7-5 6-7 (6) 6-3' =>  '7-5 6-7 [8-6] 6-3',
+// '6-7 (5), 7-6 (6), 10-7' => '6-7 (5) 7-6 (6) 10-7'
 
 const scores = [
   { score: '93', expectation: { score: '9-3' } },
