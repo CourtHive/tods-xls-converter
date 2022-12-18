@@ -25,6 +25,7 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
   // separated persons doubles occurs when paired participants appear on separate rows
   // as opposed to doubles where participant names are separated by "/"
   const isSeparatedPersonsDoubles = entryDetailRowsCount > positionsCount;
+
   const separationFactor =
     isSeparatedPersonsDoubles &&
     Math.ceil((Math.max(...entryDetailRows) - Math.min(...entryDetailRows)) / positionsCount);
@@ -84,8 +85,8 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         if (!detail) return;
 
         let { personId, firstName, lastName, ranking } = detail;
-        lastName = normalizeDiacritics(lastName || '');
-        firstName = normalizeDiacritics(firstName || '');
+        lastName = lastName ? normalizeDiacritics(lastName.toString()) : '';
+        firstName = firstName ? normalizeDiacritics(firstName.toString()) : '';
 
         if (detail.seedValue) seedValue = detail.seedValue;
         if (detail.entryStatus) entryStatus = profile.entryStatusMap?.[detail.entryStatus] || DIRECT_ACCEPTANCE;
