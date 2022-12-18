@@ -14,7 +14,7 @@ const scores = [
   { score: '93', expectation: { normalized: '9-3' } },
   { score: '103', expectation: { normalized: '10-3' } },
   { score: '63', expectation: { normalized: '6-3' } },
-  { score: '9-8 (3)' }
+  { score: '98(3)', expectation: { normalized: '9-8(3)' } }
 ];
 it.each(scores)('can nomralize scores', ({ score, expectation }) => {
   const { normalized, matchUpStatus } = normalizeScore(score);

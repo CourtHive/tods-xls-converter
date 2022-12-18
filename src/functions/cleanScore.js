@@ -71,7 +71,7 @@ export const cleanScore = (function () {
     return set && set.type === 'supertiebreak' ? set.score : false;
   };
 
-  let parseTiebreak = (set_score, totals = [9, 13]) => {
+  let parseTiebreak = (set_score, totals = [9, 13, 17]) => {
     let tiebreak_score;
     // eslint-disable-next-line no-useless-escape
     let tiebreak = /^([\d\:\.\-\/]+)\((\d+)\)/;
@@ -112,7 +112,7 @@ export const cleanScore = (function () {
     ({ set_score, tiebreak_score } = parseTiebreak(set_score));
 
     set_score = removeBrackets(set_score);
-    let set = parseScore(set_score, tiebreak_score);
+    let set = parseScore(set_score, tiebreak_score, 9);
     return set && set.type === 'normal' ? set.score : false;
   };
 
@@ -142,6 +142,7 @@ export const cleanScore = (function () {
         set_scores[2] = `[${set_scores[2]}-${score}]`;
       }
     }
+
     match_score = set_scores.map(normalSet).filter((f) => f);
     if (match_score.length === set_scores.length) return match_score;
 

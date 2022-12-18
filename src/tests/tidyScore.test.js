@@ -3,9 +3,9 @@ import { tidyScore } from '../functions/scoreParser';
 import { expect, it } from 'vitest';
 
 const scores = [
-  { score: '93' },
+  { score: '93', expectation: { score: '9-3' } },
   { score: '103' },
-  { score: '9-8 (3)' },
+  { score: '9-8 (3)', expectation: { score: '9-8(3)' } },
   { score: '67 (3)', expectation: { score: '6-7(3)' } },
   { score: '61 26 10-13', expectation: { score: '6-1 2-6 10-3' } },
   { score: '61 26 10-5', expectation: { score: '6-1 2-6 10-5' } },
