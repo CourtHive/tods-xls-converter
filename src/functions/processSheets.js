@@ -1,9 +1,9 @@
 import { getLoggingActive, getWorkbook } from '../global/state';
 import { processIndeterminate } from './processIndeterminate';
+import { processElimination } from './processElimination';
 import { processRoundRobin } from './processRoundRobin';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getSheetAnalysis } from './getSheetAnalysis';
-import { processKnockOut } from './processKnockout';
 import { identifySheet } from './identifySheet';
 import { extractInfo } from './extractInfo';
 
@@ -207,7 +207,7 @@ export function processSheet({
   }
 
   if (sheetDefinition.type === KNOCKOUT) {
-    return processKnockOut({
+    return processElimination({
       analysis,
       ...props
     });

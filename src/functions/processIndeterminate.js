@@ -1,5 +1,5 @@
 import { getPositionColumn } from '../utilities/convenience';
-import { processKnockOut } from './processKnockout';
+import { processElimination } from './processElimination';
 
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
@@ -19,7 +19,7 @@ export function processIndeterminate(props) {
 
   if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
     analysis.sheetType = KNOCKOUT;
-    return processKnockOut(props);
+    return processElimination(props);
   }
 
   return { analysis, info, hasValues: true, ...SUCCESS };
