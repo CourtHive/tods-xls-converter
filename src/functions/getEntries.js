@@ -37,27 +37,7 @@ export function getEntries({
   const entryDetailColumnProfiles = entryDetailColumns.map(getColumnProfile).filter(Boolean);
 
   const positionRows = positionRefs.map(getRow).sort(utilities.numericSort);
-  const entryDetailRows = utilities.unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows));
-
-  const isSeparatedPersonsDoubles = entryDetailRows.length > positionRows.length;
-  if (isSeparatedPersonsDoubles) {
-    // NOTE: necessary to get row values past final positionRow
-    const missingEntryDetailRow = Math.max(...positionRows) + 1;
-    detailParticipants[missingEntryDetailRow] = {};
-    entryDetailColumnProfiles.forEach(({ attribute, column }) => {
-      const cellRef = `${column}${missingEntryDetailRow}`;
-      const value = getCellValue(sheet[cellRef]);
-      detailParticipants[missingEntryDetailRow][attribute] = value;
-    });
-    entryDetailRows.push(missingEntryDetailRow);
-    const message = `adding participant detail row: ${missingEntryDetailRow}`;
-    pushGlobalLog({
-      method: 'notice',
-      color: 'brightyellow',
-      keyColors: { message: 'cyan', attributes: 'brightyellow' },
-      message
-    });
-  }
+  let entryDetailRows = utilities.unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows));
 
   if (entryDetailAttributes?.length) {
     for (const attribute of entryDetailAttributes) {
@@ -103,6 +83,37 @@ export function getEntries({
         analysis,
         profile
       });
+  }
+
+  const bogusRows = Object.keys(detailParticipants).filter((key) => {
+    const detailParticipant = detailParticipants[key];
+    const participantKeys = Object.keys(detailParticipant);
+    const relevantKeys = participantKeys.filter((key) => !['ranking', 'seedValue', 'entryStatus'].includes(key));
+    return !relevantKeys.length;
+  });
+
+  bogusRows.forEach((row) => delete detailParticipants[row]);
+  entryDetailRows = entryDetailRows.filter((row) => !bogusRows.includes(row.toString()));
+
+  const isSeparatedPersonsDoubles = Object.values(detailParticipants).length > positionRows.length;
+
+  if (isSeparatedPersonsDoubles) {
+    // NOTE: necessary to get row values past final positionRow
+    const missingEntryDetailRow = Math.max(...positionRows) + 1;
+    detailParticipants[missingEntryDetailRow] = {};
+    entryDetailColumnProfiles.forEach(({ attribute, column }) => {
+      const cellRef = `${column}${missingEntryDetailRow}`;
+      const value = getCellValue(sheet[cellRef]);
+      detailParticipants[missingEntryDetailRow][attribute] = value;
+    });
+    entryDetailRows.push(missingEntryDetailRow);
+    const message = `adding participant detail row: ${missingEntryDetailRow}`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
   }
 
   const detailResult =
