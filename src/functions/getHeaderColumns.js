@@ -35,7 +35,9 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
               const check = re.test(value);
               return (
                 !value ||
-                skipWords.some((word) => word.toLowerCase() === tidyValue(value.toString()).toLowerCase()) ||
+                skipWords.some(
+                  (word) => word?.toString().toLowerCase() === tidyValue(value.toString()).toLowerCase()
+                ) ||
                 check
               );
             });
