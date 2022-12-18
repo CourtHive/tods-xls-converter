@@ -28,6 +28,7 @@ export function getRound({
   const finalMatchUp = finalRound && columnIndex + 1 === roundColumns.length;
 
   let columnsConsumed = 0; // additional columns processed (when result data spans multiple columns)
+  let rangeAdjustment;
 
   const providerWalkover = tidyLower(profile.matchUpStatuses?.walkover || WALKOVER);
   const providerDoubleWalkover = tidyLower(profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER);
@@ -46,7 +47,18 @@ export function getRound({
     // TODO: consider proactively characterizing all values to facilitate meta analysis before pulling values
     const potentialResults = [];
     let columnValues = pairedRowNumbers.map((pair) => {
-      const rowRange = utilities.generateRange(pair[0], pair[1] + 1);
+      let start = pair[0];
+      let end = pair[1] + 1;
+      if (analysis.separationFactor > 2) {
+        rangeAdjustment = true;
+        start += 1;
+      }
+      if (analysis.isSeparatedPersonsDoubles) {
+        rangeAdjustment = true;
+        end += 1;
+      }
+
+      const rowRange = utilities.generateRange(start, end);
       let pv = relevantSubsequentColumns.map((relevantColumn) => {
         const keyMap = analysis.columnProfiles.find(({ column }) => column === relevantColumn).keyMap;
         return Object.keys(keyMap)
@@ -225,5 +237,15 @@ export function getRound({
     if (missingDrawPosition.length) console.log(missingDrawPosition);
   }
 
-  return { matchUps, participantDetails, advancingParticipants, columnsConsumed };
+  if (columnsConsumed) {
+    const message = `results in multiple columns { roundNumber: ${roundNumber} }`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
+  }
+
+  return { matchUps, participantDetails, advancingParticipants, columnsConsumed, rangeAdjustment };
 }
