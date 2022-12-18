@@ -15,9 +15,10 @@ const { COMPETITOR } = participantRoles;
 export function processDetailParticipants({ analysis, profile, detailParticipants, positionRows, entryDetailRows }) {
   if (!Object.values(detailParticipants).length) return;
 
-  const entryDetailsOnPositionRows = positionRows.every((row) => entryDetailRows.includes(row));
+  const entryDetailsOnPositionRows = positionRows.some((row) => entryDetailRows.includes(row));
   const entryDetailBeforePositionRow = Math.min(...positionRows) > Math.min(...entryDetailRows);
   const entryDetailRowsCount = entryDetailRows.length;
+  const maxPositionRow = Math.max(...positionRows);
   const positionsCount = positionRows.length;
 
   // separated persons doubles occurs when paired participants appear on separate rows
@@ -53,6 +54,8 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       const nextRow = positionRow + 1;
       if (entryDetailRows.includes(nextRow)) {
         consideredRows.push(nextRow);
+      } else if (nextRow > maxPositionRow) {
+        console.log('entry detail in avoidRows', { nextRow });
       }
     }
 

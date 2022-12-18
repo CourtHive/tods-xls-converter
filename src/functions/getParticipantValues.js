@@ -1,4 +1,4 @@
-const joiners = ['-', '/'];
+const joiners = ['-', '/', ' / '];
 
 // extract all the various participant values that will be compared to advanced participant string
 export function getParticipantValues(participant) {

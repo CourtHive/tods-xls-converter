@@ -4,7 +4,7 @@ import { getFirstRoundEntries } from './getFirstRoundEntries';
 import { generateParticipantId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { isBye } from '../utilities/convenience';
-import { getRow } from './sheetAccess';
+import { getCellValue, getRow } from './sheetAccess';
 
 import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
 import { ENTRY_DETAILS } from '../constants/attributeConstants';
@@ -19,7 +19,8 @@ export function getEntries({
   positionRefs,
   analysis,
   profile,
-  columns
+  columns,
+  sheet
 }) {
   const detailParticipants = {};
   const rowParticipants = {};
@@ -37,6 +38,19 @@ export function getEntries({
 
   const positionRows = positionRefs.map(getRow).sort(utilities.numericSort);
   const entryDetailRows = utilities.unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows));
+
+  const isSeparatedPersonsDoubles = entryDetailRows.length > positionRows.length;
+  if (isSeparatedPersonsDoubles) {
+    // NOTE: necessary to get row values past final positionRow
+    const missingEntryDetailRow = Math.max(...positionRows) + 1;
+    detailParticipants[missingEntryDetailRow] = {};
+    entryDetailColumnProfiles.forEach(({ attribute, column }) => {
+      const cellRef = `${column}${missingEntryDetailRow}`;
+      const value = getCellValue(sheet[cellRef]);
+      detailParticipants[missingEntryDetailRow][attribute] = value;
+    });
+    entryDetailRows.push(missingEntryDetailRow);
+  }
 
   if (entryDetailAttributes?.length) {
     for (const attribute of entryDetailAttributes) {

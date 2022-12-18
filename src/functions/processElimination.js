@@ -4,6 +4,7 @@ import { getPositionColumn } from '../utilities/convenience';
 import { generateStructureId } from '../utilities/hashing';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
+import { getLoggingActive } from '../global/state';
 import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
@@ -184,6 +185,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   });
 
   const matchUpsCount = matchUps.length;
+
+  if (getLoggingActive('participants')) console.log(participants);
 
   return {
     hasValues: true,

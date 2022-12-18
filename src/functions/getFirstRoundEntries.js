@@ -2,8 +2,8 @@ import { entryStatusConstants, participantConstants } from 'tods-competition-fac
 import { getNonBracketedValue, getSeeding, isBye } from '../utilities/convenience';
 import { getIndividualParticipant } from './getIndividualParticipant';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
-import { isNumeric } from '../utilities/identification';
 import { generateParticipantId } from '../utilities/hashing';
+import { isNumeric } from '../utilities/identification';
 import { getRow } from './sheetAccess';
 
 import { SUCCESS } from '../constants/resultConstants';
