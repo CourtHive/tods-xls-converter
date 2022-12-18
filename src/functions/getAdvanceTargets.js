@@ -1,24 +1,15 @@
-import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
-import { getPotentialResult, isScoreLike } from '../utilities/identification';
+import { getParticipantValues } from './getParticipantValues';
+import { isScoreLike } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
-import { getLoggingActive } from '../global/state';
-import { fuzzy } from 'fast-fuzzy';
+import { getColumnResults } from './getColumnResults';
 
-const joiners = ['-', '/'];
-
-export function getAdvanceTargets({
-  confidenceThreshold = 0.7,
-  consideredParticipants,
-  providerDoubleWalkover,
-  providerWalkover,
-  potentialValues,
-  roundPosition, // useful for debugging
-  roundNumber, // useful for debugging
-  profile
-}) {
-  const qualifyingIdentifiers = profile.qualifyingIdentifiers?.map((identifier) => identifier.toString().toLowerCase());
+export function getAdvanceTargets(params) {
   let columnsConsumed;
 
+  const { consideredParticipants, potentialValues } = params;
+
+  // -------------------------------------------------------------------------------------------------
+  // ACTION: check to see whether one of the advanced sides is a BYE
   const byeAdvancement = consideredParticipants?.some((participant) => participant.isByePosition);
   if (byeAdvancement) {
     const advancedSide = consideredParticipants?.reduce((sideNumber, participant, index) => {
@@ -27,99 +18,16 @@ export function getAdvanceTargets({
     }, {});
     return { advancedSide, confidence: 1 };
   }
+  // -------------------------------------------------------------------------------------------------
 
+  // if no potentialValues have been provided, return
   if (!potentialValues) return {};
 
-  let isDoubleWalkover;
+  // process all of the potentialValues (potentially multiple columns)
+  const { columnResults, isLikeScore } = getColumnResults(params);
 
-  const isLikeResult = (value) => {
-    if (qualifyingIdentifiers?.includes(value)) return false;
-    const result = isDoubleWalkover || [providerWalkover, 'retiro', 'retired'].includes(tidyValue(value));
-    return result;
-  };
-  const isLikeScore = (value) => isScoreLike(value) || isLikeResult(value);
-
-  const characterizeValue = (value) => {
-    value = withoutQualifyingDesignator(value?.toString().toLowerCase(), qualifyingIdentifiers);
-    const { leader, potentialResult } = getPotentialResult(value);
-    if (potentialResult && leader) {
-      value = leader;
-
-      if (getLoggingActive('potentialResults')) {
-        const message = `participantName (result) ${roundNumber}-${roundPosition}: ${potentialResult}`;
-        pushGlobalLog({
-          method: 'notice',
-          color: 'brightyellow',
-          keyColors: { message: 'cyan', attributes: 'brightyellow' },
-          message
-        });
-      }
-    }
-
-    value = getNonBracketedValue(value) || '';
-    isDoubleWalkover = isDoubleWalkover || value === providerDoubleWalkover.toLowerCase();
-
-    const sideWeights = !isDoubleWalkover
-      ? consideredParticipants?.map((participant, index) => {
-          const { participantName, person, individualParticipants } = participant;
-
-          let pValues = [participantName];
-          if (person) {
-            const { standardFamilyName, standardGivenName } = person;
-            pValues.push(standardFamilyName, standardGivenName);
-            // handle multiple last names where only one of the last names is progressed
-            const splitFamilyName = standardFamilyName.split(' ');
-            if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
-          }
-          const doublesFirstNames = [];
-          const doublesLastNames = [];
-          individualParticipants?.forEach(({ person }) => {
-            if (person) {
-              const { standardFamilyName, standardGivenName } = person;
-              doublesFirstNames.push(standardGivenName?.toLowerCase());
-              doublesLastNames.push(standardFamilyName?.toLowerCase());
-
-              pValues.push(standardFamilyName);
-              // handle multiple last names where only one of the last names is progressed
-              const splitFamilyName = standardFamilyName.split(' ');
-              if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
-            }
-          });
-
-          // for those rare occations where first names are advanced rather than last names
-          if (doublesFirstNames.length > 1) {
-            const combinations = joiners.flatMap((joiner) => doublesFirstNames.join(joiner));
-            pValues.push(...combinations);
-          }
-
-          const pRank = pValues.reduce(
-            (result, v) => {
-              const confidence = v ? fuzzy(v, value.toString()) : 0;
-              return confidence > confidenceThreshold && confidence > result.confidence
-                ? { confidence, match: v }
-                : result;
-            },
-            { confidence: 0 }
-          );
-
-          return { sideNumber: index + 1, ...pRank };
-        })
-      : undefined;
-
-    const side = sideWeights?.reduce((side, weight) => (weight.confidence > side.confidence ? weight : side), {
-      confidence: 0
-    });
-
-    const scoreLike = isLikeScore(value);
-
-    return { value, scoreLike, side, potentialResult };
-  };
-
-  const characterizeColumn = (values) => values.map(characterizeValue);
-
-  // potentialValues is an array of columns each with array of columnValues
-  const columnResults = potentialValues.map(characterizeColumn);
-
+  // -------------------------------------------------------------------------------------------------
+  // ACTION: search for viable side and result detail in the columnResults
   let side, result;
   columnResults.forEach((columnResult, columnResultIndex) => {
     const results = columnResult.filter(({ scoreLike }) => scoreLike).map(({ value }) => value);
@@ -159,7 +67,12 @@ export function getAdvanceTargets({
       }
     }
   });
+  // -------------------------------------------------------------------------------------------------
 
+  // -------------------------------------------------------------------------------------------------
+  // IF: a result was found but no side has been identified and there are two participants to consider
+  // THEN: compare the potential values to the participants looking for a match
+  // WHERE: the participant name starts with a potential value
   if (result && !side.confidence && consideredParticipants.length === 2) {
     const consideredPotentialValues = potentialValues
       .flat()
@@ -169,7 +82,7 @@ export function getAdvanceTargets({
     let match, sideNumber;
 
     const sideStartsWith = consideredParticipants.find((participant, pIndex) => {
-      const pValues = getPvalues(participant);
+      const pValues = getParticipantValues(participant);
 
       const matchFound = pValues.find((pValue) =>
         consideredPotentialValues.flat().some((value) => {
@@ -195,43 +108,9 @@ export function getAdvanceTargets({
       side = { match, sideNumber, confidence: 0.7 };
     }
   }
+  // -------------------------------------------------------------------------------------------------
 
   const advancedSide = side?.confidence && side.sideNumber;
 
   return { advancedSide, side, result, columnsConsumed };
-}
-
-function getPvalues(participant) {
-  const { participantName, person, individualParticipants } = participant;
-
-  let pValues = [participantName];
-  if (person) {
-    const { standardFamilyName, standardGivenName } = person;
-    pValues.push(standardFamilyName, standardGivenName);
-    // handle multiple last names where only one of the last names is progressed
-    const splitFamilyName = standardFamilyName.split(' ');
-    if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
-  }
-  const doublesFirstNames = [];
-  const doublesLastNames = [];
-  individualParticipants?.forEach(({ person }) => {
-    if (person) {
-      const { standardFamilyName, standardGivenName } = person;
-      doublesFirstNames.push(standardGivenName);
-      doublesLastNames.push(standardFamilyName);
-
-      pValues.push(standardFamilyName);
-      // handle multiple last names where only one of the last names is progressed
-      const splitFamilyName = standardFamilyName.split(' ');
-      if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
-    }
-  });
-
-  // for those rare occations where first names are advanced rather than last names
-  if (doublesFirstNames.length > 1) {
-    const combinations = joiners.flatMap((joiner) => doublesFirstNames.join(joiner));
-    pValues.push(...combinations);
-  }
-
-  return pValues.filter(Boolean).map((v) => v.toString().toLowerCase());
 }
