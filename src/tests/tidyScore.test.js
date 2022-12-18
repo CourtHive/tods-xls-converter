@@ -2,6 +2,8 @@ import { normalizeScore } from '../functions/cleanScore';
 import { tidyScore } from '../functions/scoreParser';
 import { expect, it } from 'vitest';
 
+// '7-5 6-7 (6) 6-3' =>  '7-5 6-7 [8-6] 6-3',
+
 const scores = [
   { score: '93', expectation: { score: '9-3' } },
   { score: '103' },
