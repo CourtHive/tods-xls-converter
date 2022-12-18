@@ -53,6 +53,7 @@ const roundNames = [
   'finals',
   'final'
 ];
+const qualifyingIdentifiers = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8'];
 const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN', 'under-12', 'under-14', 'under-16', 'under-18'];
 const entryStatusMap = {
   DA: DIRECT_ACCEPTANCE,
@@ -67,7 +68,7 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
-    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }],
+    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }],
     skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
@@ -76,6 +77,7 @@ export const config = {
     matchUpStatuses: { bye: 'BYE', walkover: 'wo', retired: 'cons' },
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned', 'default', 'retired'],
     subsequentColumnLimit: 2, // elimination structure outcome look ahead
+    qualifyingIdentifiers,
     entryStatusMap,
     categories,
     doubles: {
