@@ -1,6 +1,5 @@
 import { utilities, matchUpStatusConstants } from 'tods-competition-factory';
 import { isNumeric, isObject, isString } from './identification';
-import { getRow } from '../functions/sheetAccess';
 import { getWorkbook } from '../global/state';
 import { removeBits } from './transformers';
 
@@ -23,8 +22,6 @@ export const removeTrailing = (value, remove = ['.', ':', ',']) => {
 };
 export const tidyValue = (value) => (isString(value) ? removeTrailing(value.trim()) : value);
 export const tidyLower = (value) => (isString(value) ? tidyValue(value.trim()).toLowerCase() : value);
-
-export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
 
 export const isBye = (participant) =>
   (typeof participant === 'object' ? Object.values(participant) : [participant]).some(

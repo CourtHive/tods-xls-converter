@@ -6,6 +6,8 @@ import { utilities } from 'tods-competition-factory';
 
 const { unique, instanceCount } = utilities;
 
+export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
+
 export function numberValue(sheet, reference) {
   return !isNaN(parseInt(getCellValue(sheet[reference]))) ? parseInt(getCellValue(sheet[reference])) : '';
 }

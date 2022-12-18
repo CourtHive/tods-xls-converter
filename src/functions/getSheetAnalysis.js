@@ -1,10 +1,10 @@
+import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
 import { hasNumeric, isString } from '../utilities/identification';
 import { getColumnAssessment } from './getColumnAssessment';
+import { getCol, getRow, keyRowSort } from './sheetAccess';
 import { getRoundCharacter } from './getRoundCharacter';
-import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getIsQualifying } from './getIsQualifying';
-import { getCol, getRow } from './sheetAccess';
 import { getSheetKeys } from './getSheetKeys';
 import { getValuesMap } from './getValuesMap';
 import { getCategory } from './getCategory';
@@ -12,7 +12,6 @@ import {
   getNonBracketedValue,
   getPositionColumn,
   hasBracketedValue,
-  keyRowSort,
   startsWithIterator,
   tidyValue
 } from '../utilities/convenience';
