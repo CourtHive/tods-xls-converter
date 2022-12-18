@@ -4,7 +4,7 @@ import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
 
-setLoggingActive;
+setLoggingActive();
 
 it.skip('can process passing', () => {
   const readDir = './examples/sheets/processing';
