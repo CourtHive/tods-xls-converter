@@ -55,7 +55,7 @@ export function getRound({
       });
 
       const pr = pv[0]
-        .map((value) => {
+        ?.map((value) => {
           const { leader, potentialResult } = getPotentialResult(value);
 
           if (leader && !potentialResult) {
@@ -65,7 +65,7 @@ export function getRound({
           return leader && potentialResult;
         })
         .filter(Boolean);
-      if (pr.length) potentialResults.push(pr);
+      if (pr?.length) potentialResults.push(pr);
 
       return pv;
     });
