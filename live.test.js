@@ -1,5 +1,5 @@
 import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
-import { resetLogging, setLoggingActive } from './src/global/state';
+import { getAudit, getLoggingActive, resetLogging, setLoggingActive } from './src/global/state';
 import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
@@ -82,6 +82,7 @@ it('can process tests', () => {
   // setLoggingActive(true, 'noWinningSide');
   // setLoggingActive(true, 'invalidResult');
   // setLoggingActive(true, 'scores');
+  setLoggingActive(true, 'score-audit');
   // setLoggingActive(true, 'matchUps');
 
   const result = processDirectory({
@@ -100,6 +101,12 @@ it('can process tests', () => {
   if (result);
   printGlobalLog();
   purgeGlobalLog();
+
+  if (getLoggingActive('score-audit')) {
+    const auditLog = getAudit();
+    const csvScores = utilities.JSON2CSV(auditLog);
+    writeFileSync('./scratch/scoreParsing.csv', csvScores, 'UTF-8');
+  }
 
   if (writeParticipants) {
     const participants = result.participants.filter(({ participantType }) => participantType === 'INDIVIDUAL');

@@ -257,7 +257,9 @@ export function findRow({ firstTargetRow, allTargetRows, rowDefinition, sheet, o
   const toLowerCase = (element) => (Array.isArray(element) ? element.map(toLower) : toLower(element));
 
   const normal = (e) =>
-    typeof e === 'object' ? { text: normalizeDiacritics(e.text), options: e.options } : normalizeDiacritics(e);
+    typeof e === 'object'
+      ? { text: normalizeDiacritics(e.text || ''), options: e.options }
+      : normalizeDiacritics(e || '');
   const toNormal = (element) => (Array.isArray(element) ? element.map(normal) : normal(element));
 
   const options = { lowerCase: true, normalize: true, remove: [':'], ...additionalOptions };

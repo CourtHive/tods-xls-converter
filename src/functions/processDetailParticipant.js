@@ -66,8 +66,8 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         if (!detail) return;
 
         let { personId, firstName, lastName, ranking } = detail;
-        lastName = normalizeDiacritics(lastName);
-        firstName = normalizeDiacritics(firstName);
+        lastName = normalizeDiacritics(lastName || '');
+        firstName = normalizeDiacritics(firstName || '');
 
         if (detail.seedValue) seedValue = detail.seedValue;
         if (detail.entryStatus) entryStatus = profile.entryStatusMap?.[detail.entryStatus] || DIRECT_ACCEPTANCE;
