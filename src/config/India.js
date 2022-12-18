@@ -168,7 +168,12 @@ export const config = {
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: 'seed', limit: 1 },
       { attr: LAST_NAME, header: 'family name', limit: 1 },
-      { attr: FIRST_NAME, header: ['first name', 'fisrt name'], limit: 1 },
+      {
+        attr: FIRST_NAME,
+        header: ['first name', 'fisrt name'],
+        limit: 1,
+        valueRegex: `[A-Za-z]+|0`
+      },
       {
         attr: PERSON_ID,
         header: [
@@ -177,7 +182,8 @@ export const config = {
           'aita no',
           'reg.no',
           'state',
-          'nationality'
+          'nationality',
+          'first name'
         ],
         limit: 1,
         skipWords: ['reg', 'umpire', '0'],
