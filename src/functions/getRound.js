@@ -68,6 +68,14 @@ export function getRound({
       // IF: there are participantNames combined with results
       // THEN: limit the column look ahead to only one subsequent column
       columnValues = columnValues.map((c) => c.slice(0, 1));
+
+      const message = `participantName (result) ${roundNumber}`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow' },
+        message
+      });
     }
 
     pairedRowNumbers.forEach((_, pairIndex) => {

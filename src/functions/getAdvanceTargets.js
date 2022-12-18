@@ -1,6 +1,7 @@
 import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { getPotentialResult, isScoreLike } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
+import { getLoggingActive } from '../global/state';
 import { fuzzy } from 'fast-fuzzy';
 
 const joiners = ['-', '/'];
@@ -43,14 +44,18 @@ export function getAdvanceTargets({
     const { leader, potentialResult } = getPotentialResult(value);
     if (potentialResult && leader) {
       value = leader;
-      const message = `participantName (result) ${roundNumber}-${roundPosition}: ${potentialResult}`;
-      pushGlobalLog({
-        method: 'notice',
-        color: 'brightyellow',
-        keyColors: { message: 'cyan', attributes: 'brightyellow' },
-        message
-      });
+
+      if (getLoggingActive('potentialResults')) {
+        const message = `participantName (result) ${roundNumber}-${roundPosition}: ${potentialResult}`;
+        pushGlobalLog({
+          method: 'notice',
+          color: 'brightyellow',
+          keyColors: { message: 'cyan', attributes: 'brightyellow' },
+          message
+        });
+      }
     }
+
     value = getNonBracketedValue(value) || '';
     isDoubleWalkover = isDoubleWalkover || value === providerDoubleWalkover.toLowerCase();
 
