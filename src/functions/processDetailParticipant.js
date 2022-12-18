@@ -130,10 +130,11 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         };
         if (participant.participantName !== 'BYE') participants.push(participant);
       } else {
-        const { participant } = getIndividualParticipant(consideredRows[0]);
-        participants.push(participant);
-
-        participantId = participant.participantId;
+        const participant = getIndividualParticipant(consideredRows[0])?.participant;
+        if (participant) {
+          participants.push(participant);
+          participantId = participant.participantId;
+        }
       }
 
       positionAssignments.push({ drawPosition, participantId });
