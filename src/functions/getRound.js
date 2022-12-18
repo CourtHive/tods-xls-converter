@@ -149,7 +149,7 @@ export function getRound({
         matchUp.matchUpStatus = BYE;
       } else if (result === providerDoubleWalkover) {
         matchUp.matchUpStatus = DOUBLE_WALKOVER;
-      } else if (result === providerWalkover || result === WALKOVER) {
+      } else if ([providerWalkover, WALKOVER, 'w/o'].includes(result)) {
         matchUp.matchUpStatus = WALKOVER;
         matchUp.winningSide = advancedSide;
       } else if (advancedSide) {
@@ -159,6 +159,9 @@ export function getRound({
         // console.log('SOMETHING', { lowerResult, roundNumber, roundPosition });
       }
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      // SANITY check!
+      // if (roundNumber === 2 && roundPosition === 2) console.log(matchUp);
 
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       // IF: a result exists and the matchUpStatus is NOT a WALKOVER

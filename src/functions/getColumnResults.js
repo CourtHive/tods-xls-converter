@@ -21,7 +21,8 @@ export function getColumnResults({
   const qualifyingIdentifiers = profile.qualifyingIdentifiers?.map((identifier) => identifier.toString().toLowerCase());
   const isLikeResult = (value) => {
     if (qualifyingIdentifiers?.includes(value)) return false;
-    const result = isDoubleWalkover || [providerWalkover, 'retiro', 'retired'].includes(tidyValue(value));
+    const result =
+      isDoubleWalkover || ['w/o', 'walkover', providerWalkover, 'retiro', 'retired'].includes(tidyValue(value));
     return result;
   };
   const isLikeScore = (value) => isScoreLike(value) || isLikeResult(value);
