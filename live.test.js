@@ -68,7 +68,7 @@ it('can process tests', () => {
   let writeResultIndex;
 
   const sheetTypes = [];
-  const sheetNumbers = [3];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 0;

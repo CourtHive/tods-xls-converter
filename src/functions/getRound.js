@@ -172,9 +172,6 @@ export function getRound({
       }
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      // SANITY check!
-      // if (roundNumber === 2 && roundPosition === 2) console.log(matchUp);
-
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       // IF: a result exists and the matchUpStatus is NOT a WALKOVER
       // THEN: parse the result to create a TODS score object
@@ -194,6 +191,9 @@ export function getRound({
         if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });
       }
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+      // SANITY check!
+      // if (roundNumber === 2 && roundPosition === 5) console.log(matchUp, potentialValues, { advanceTargets, result });
 
       if (!result && !isBye) {
         // TODO: in some draws preRound results appear as part of advancedSide participantName
