@@ -14,7 +14,7 @@ export function excludeSingleDigits(value) {
 }
 export function splitValueOnFirstDigit(value) {
   if (!value) return;
-  const parts = value.toString().split(' ');
+  const parts = value.toString().toLowerCase().split(' ');
   const firstDigitPart = parts.find((part) => /\d/.test(part));
   const firstDigitIndex = parts.indexOf(firstDigitPart);
   return [parts.slice(0, firstDigitIndex).join(' '), parts.slice(firstDigitIndex).join(' ')];
@@ -24,7 +24,15 @@ export function digitsCount(value) {
 }
 export function getPotentialResult(value) {
   const splitValue = splitValueOnFirstDigit(value);
-  const potentialResult = excludeSingleDigits(splitValue?.[1]);
-  const isPotential = isScoreLike(potentialResult) && digitsCount(potentialResult) > 1;
+  let potentialResult = excludeSingleDigits(splitValue?.[1]);
+  let isPotential = isScoreLike(potentialResult) && digitsCount(potentialResult) > 1;
+
+  const lastPart = value.toString().toLowerCase().split(' ').reverse()[0];
+
+  if (['walkover', 'wo', 'w/o'].includes(lastPart)) {
+    potentialResult = 'WALKOVER';
+    isPotential = true;
+  }
+
   return { leader: splitValue?.[0], potentialResult: isPotential && potentialResult };
 }

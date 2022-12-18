@@ -46,7 +46,6 @@ export function getAdvanceTargets(params) {
         result = results[0];
       }
     } else if (potentialResults.length) {
-      console.log({ potentialResults });
       if (potentialResults[0]) result = potentialResults[0];
     }
 

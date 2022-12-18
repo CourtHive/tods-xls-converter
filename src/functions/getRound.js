@@ -1,4 +1,5 @@
 import { matchUpStatusConstants, mocksEngine, utilities } from 'tods-competition-factory';
+import { getPotentialResult } from '../utilities/identification';
 import { generateMatchUpId } from '../utilities/hashing';
 import { getAdvanceTargets } from './getAdvanceTargets';
 import { pushGlobalLog } from '../utilities/globalLog';
@@ -7,7 +8,6 @@ import { getLoggingActive } from '../global/state';
 import { normalizeScore } from './cleanScore';
 import { tidyScore } from './scoreParser';
 import { getRow } from './sheetAccess';
-import { getPotentialResult } from '../utilities/identification';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -56,6 +56,11 @@ export function getRound({
       const pr = pv[0]
         .map((value) => {
           const { leader, potentialResult } = getPotentialResult(value);
+
+          if (leader && !potentialResult) {
+            console.log({ value, leader, potentialResult });
+          }
+
           return leader && potentialResult;
         })
         .filter(Boolean);
