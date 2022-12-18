@@ -237,15 +237,5 @@ export function getRound({
     if (missingDrawPosition.length) console.log(missingDrawPosition);
   }
 
-  if (columnsConsumed) {
-    const message = `results in multiple columns { roundNumber: ${roundNumber} }`;
-    pushGlobalLog({
-      method: 'notice',
-      color: 'brightyellow',
-      keyColors: { message: 'cyan', attributes: 'brightyellow' },
-      message
-    });
-  }
-
   return { matchUps, participantDetails, advancingParticipants, columnsConsumed, rangeAdjustment };
 }

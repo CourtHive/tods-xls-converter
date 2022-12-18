@@ -105,10 +105,11 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     }
   }
 
+  const subsequentColumnLimit = profile.subsequentColumnLimit || 2;
   const rangeAdjustments = [];
+  const consumedColumns = [];
   let roundNumber = 1;
   let columnIndex = 0;
-  const subsequentColumnLimit = profile.subsequentColumnLimit || 2;
 
   while (columnIndex < roundColumns.length) {
     const pairedRowNumbers = positionProgression[roundNumber - 1];
@@ -136,9 +137,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
       columnIndex += result.columnsConsumed || 0;
 
-      if (result.rangeAdjustment) {
-        rangeAdjustments.push(roundNumber);
-      }
+      if (result.columnsConsumed) consumedColumns.push(roundNumber);
+      if (result.rangeAdjustment) rangeAdjustments.push(roundNumber);
 
       if (roundMatchUps) {
         const winningSides = roundMatchUps.reduce((count, matchUp) => count + (matchUp.winningSide ? 1 : 0), 0);
@@ -154,6 +154,16 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     }
 
     columnIndex += 1;
+  }
+
+  if (consumedColumns.length) {
+    const message = `results in multiple columns{ roundNumbers: ${rangeAdjustments.join(',')} }`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
   }
 
   if (rangeAdjustments.length) {
