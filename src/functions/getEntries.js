@@ -3,8 +3,8 @@ import { processDetailParticipants } from './processDetailParticipant';
 import { getFirstRoundEntries } from './getFirstRoundEntries';
 import { generateParticipantId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
-import { isBye } from '../utilities/convenience';
 import { getCellValue, getRow } from './sheetAccess';
+import { isBye } from '../utilities/convenience';
 
 import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
 import { ENTRY_DETAILS } from '../constants/attributeConstants';
@@ -50,6 +50,13 @@ export function getEntries({
       detailParticipants[missingEntryDetailRow][attribute] = value;
     });
     entryDetailRows.push(missingEntryDetailRow);
+    const message = `adding participant detail row: ${missingEntryDetailRow}`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
   }
 
   if (entryDetailAttributes?.length) {

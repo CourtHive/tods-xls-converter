@@ -2,6 +2,7 @@ import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
 import { generateStructureId } from '../utilities/hashing';
+import { pushGlobalLog } from '../utilities/globalLog';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
 import { getLoggingActive } from '../global/state';
@@ -104,6 +105,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     }
   }
 
+  const rangeAdjustments = [];
   let roundNumber = 1;
   let columnIndex = 0;
   const subsequentColumnLimit = profile.subsequentColumnLimit || 2;
@@ -134,6 +136,10 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
       columnIndex += result.columnsConsumed || 0;
 
+      if (result.rangeAdjustment) {
+        rangeAdjustments.push(roundNumber);
+      }
+
       if (roundMatchUps) {
         const winningSides = roundMatchUps.reduce((count, matchUp) => count + (matchUp.winningSide ? 1 : 0), 0);
 
@@ -148,6 +154,16 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     }
 
     columnIndex += 1;
+  }
+
+  if (rangeAdjustments.length) {
+    const message = `result range modified { roundNumbers: ${rangeAdjustments.join(',')} }`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
   }
 
   const { resultsCount } = matchUps.reduce(

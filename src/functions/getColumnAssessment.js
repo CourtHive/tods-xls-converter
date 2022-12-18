@@ -5,6 +5,7 @@ import { getCellValue, getRow } from './sheetAccess';
 
 export function getColumnAssessment({
   prospectColumnKeys,
+  positionIndex,
   attributeMap,
   columnIndex,
   sheetType,
@@ -96,6 +97,7 @@ export function getColumnAssessment({
 
   const { character, upperRowBound } = getColumnCharacter({
     columnProfile: assessment,
+    positionIndex,
     attributeMap,
     columnIndex,
     sheetType
