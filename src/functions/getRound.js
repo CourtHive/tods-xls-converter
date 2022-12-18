@@ -1,10 +1,10 @@
 import { matchUpStatusConstants, mocksEngine, utilities } from 'tods-competition-factory';
 import { getPotentialResult } from '../utilities/identification';
+import { audit, getLoggingActive } from '../global/state';
 import { generateMatchUpId } from '../utilities/hashing';
 import { getAdvanceTargets } from './getAdvanceTargets';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { tidyLower } from '../utilities/convenience';
-import { getLoggingActive } from '../global/state';
 import { normalizeScore } from './cleanScore';
 import { tidyScore } from './scoreParser';
 import { getRow } from './sheetAccess';
@@ -57,10 +57,6 @@ export function getRound({
       const pr = pv[0]
         ?.map((value) => {
           const { leader, potentialResult } = getPotentialResult(value);
-
-          if (leader && !potentialResult) {
-            console.log({ value, leader, potentialResult });
-          }
 
           return leader && potentialResult;
         })
@@ -179,6 +175,7 @@ export function getRound({
         const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
         const score = { ...outcome?.score, ...stringScore };
         matchUp.score = score;
+        if (getLoggingActive('score-audit')) audit({ result, scoreString });
         if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });
       }
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

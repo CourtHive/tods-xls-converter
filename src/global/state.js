@@ -1,8 +1,19 @@
 import { SUCCESS } from '../constants/resultConstants';
 
 let loggingActive = {},
+  auditLog = [],
   workbookType,
   workbook;
+
+export function audit(value) {
+  auditLog.push(value);
+}
+
+export function getAudit() {
+  const auditCopy = auditLog.slice();
+  auditLog = [];
+  return auditCopy;
+}
 
 export function resetLogging() {
   loggingActive = {};
