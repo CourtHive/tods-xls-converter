@@ -22,9 +22,12 @@ export function getAdvanceTargets(params) {
     const potentialResults = columnResult.map(({ potentialResult }) => potentialResult);
 
     if (results.length > 1) {
-      console.log('MULTIPLE RESULTS', params.analysis.sheetName, {
-        roundNumber: params.roundNumber,
-        roundPosition: params.roundPosition
+      const message = `Multiple Results, roundNumber: ${params.roundNumber}`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow' },
+        message
       });
       results.map((result) =>
         console.log({ result, isLikeScore: isLikeScore(result), isScoreLike: isScoreLike(result) })
