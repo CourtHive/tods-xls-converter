@@ -157,7 +157,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   }
 
   if (consumedColumns.length) {
-    const message = `results in multiple columns{ roundNumbers: ${rangeAdjustments.join(',')} }`;
+    const message = `results in multiple columns{ roundNumbers: ${consumedColumns.join(',')} }`;
     pushGlobalLog({
       method: 'notice',
       color: 'brightyellow',
