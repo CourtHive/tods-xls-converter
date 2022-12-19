@@ -100,7 +100,7 @@ export function getRound({
         .filter(({ confidence }) => confidence);
       // ~~~~
 
-      if (withConfidence.length) {
+      if (withConfidence?.length) {
         columnValues = columnValues.map((c) => c.slice(0, 1));
 
         const message = `participantName (result) { roundNumber: ${roundNumber} }`;

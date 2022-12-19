@@ -13,7 +13,7 @@ export function processIndeterminate(props) {
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
   const { columnProfiles } = analysis;
 
-  const { maxPositionWithValues } = getMaxPositionWithValues({ columnProfiles, positionColumn });
+  const { maxPositionWithValues } = getMaxPositionWithValues({ columnProfiles, positionColumn, analysis });
 
   const hasPosition = Object.values(analysis.attributeMap).includes(POSITION);
   const frequencyValues = Object.values(analysis.columnFrequency);
