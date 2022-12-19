@@ -35,13 +35,11 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
           searchDetails = details;
         }
 
-        const ref = findValueRefs({ searchDetails, sheet, options }).reduce(
-          (p, c) => (getRow(c) === parseInt(headerRow) ? c : p),
-          undefined
-        );
-        const col = ref && getCol(ref);
+        const cols = findValueRefs({ searchDetails, sheet, options })
+          .filter((f) => getRow(f) === parseInt(headerRow))
+          .map(getCol);
 
-        if (col) {
+        cols.forEach((col) => {
           const re = obj.valueRegex && new RegExp(obj.valueRegex);
           const skipWords = obj.skipWords || profile.skipWords || [];
           const isValid =
@@ -62,7 +60,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
           } else {
             invalidValueColumns.push(col);
           }
-        }
+        });
       };
 
       const searchText = obj.header;
@@ -79,6 +77,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   const unmappedColumns = Object.keys(headerValueMap)
     .filter((column) => !mappedColumns.includes(column))
     .map((column) => headerValueMap[column]);
+  console.log({ columnsMap, headerValueMap, unmappedColumns });
 
   if (unmappedColumns.length) {
     const message = `Unknown Header Columns`;
