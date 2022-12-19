@@ -1,5 +1,6 @@
 import { getColumnParticpantConfidence } from './getColumnParticipantConfidenc';
 import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
+import { getMaxPositionWithValues } from './getMaxPositionWithValues';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
 import { generateStructureId } from '../utilities/hashing';
@@ -22,13 +23,13 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
-  const positionProfile = columnProfiles.find(({ column }) => column === positionColumn);
-  const valuesColumns = columnProfiles.filter(({ column }) => column !== positionColumn);
-  const maxValueRow = Math.max(...valuesColumns.flatMap(({ rows }) => rows));
-  const maxPositionRow = Math.max(...positionProfile.rows.filter((row) => row <= maxValueRow));
-  const index = positionProfile.rows.indexOf(maxPositionRow);
-  const maxPositionWithValues = positionProfile.values[index];
-  const maxPosition = Math.max(...positionProfile.values);
+  const { positionProfile, maxPositionWithValues, maxPosition, maxPositionRow, maxValueRow } = getMaxPositionWithValues(
+    {
+      columnProfiles,
+      positionColumn,
+      analysis
+    }
+  );
 
   const noValues = maxValueRow === -Infinity;
 
@@ -262,6 +263,31 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   });
 
   const matchUpsCount = matchUps.length;
+
+  console.log({ maxPositionWithValues });
+
+  if (utilities.isPowerOf2(maxPositionWithValues)) {
+    const roundCounts = [];
+    let roundCount = maxPositionWithValues / 2;
+    while (roundCount >= 1) {
+      roundCounts.push(roundCount);
+      roundCount = roundCount / 2;
+    }
+    const roundTotals = roundCounts.reduce(
+      (totals, count) => totals.concat((totals[totals.length - 1] || 0) + count),
+      []
+    );
+
+    if (!roundTotals.includes(matchUpsCount)) {
+      const message = `matchUpsTotal indicates incomplete round`;
+      pushGlobalLog({
+        method: 'warning',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow' },
+        message
+      });
+    }
+  }
 
   if (getLoggingActive('participants')) console.log(participants);
 
