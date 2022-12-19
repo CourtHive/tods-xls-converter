@@ -131,12 +131,14 @@ export const config = {
       {
         type: HEADER,
         id: 'knockoutParticipants',
+        extractColumns: true,
         elements: [
           'rank',
           'seed',
           'name',
           'family name',
           'first name',
+          'nationality',
           'aita no',
           'reg no.',
           'reg.no',

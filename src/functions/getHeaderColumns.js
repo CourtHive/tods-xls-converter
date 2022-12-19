@@ -87,6 +87,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
       color: 'brightred',
       keyColors: { message: 'brightyellow', columns: 'cyan' },
       message,
+      headerRow,
       columns: unmappedColumns.join(', ')
     });
   }
