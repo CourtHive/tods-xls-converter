@@ -100,13 +100,19 @@ export function getEntries({
   if (isSeparatedPersonsDoubles) {
     // NOTE: necessary to get row values past final positionRow
     const missingEntryDetailRow = Math.max(...positionRows) + 1;
-    detailParticipants[missingEntryDetailRow] = {};
+    // detailParticipants[missingEntryDetailRow] = {};
+    const missingDetail = {};
     entryDetailColumnProfiles.forEach(({ attribute, column }) => {
       const cellRef = `${column}${missingEntryDetailRow}`;
       const value = getCellValue(sheet[cellRef]);
-      detailParticipants[missingEntryDetailRow][attribute] = value;
+      // detailParticipants[missingEntryDetailRow][attribute] = value;
+      missingDetail[attribute] = value;
     });
-    entryDetailRows.push(missingEntryDetailRow);
+    const missingEntryValues = Object.values(missingDetail).filter(Boolean);
+    if (missingEntryValues.length) {
+      detailParticipants[missingEntryDetailRow] = missingDetail;
+      entryDetailRows.push(missingEntryDetailRow);
+    }
     const message = `adding participant detail row: ${missingEntryDetailRow}`;
     pushGlobalLog({
       method: 'notice',
