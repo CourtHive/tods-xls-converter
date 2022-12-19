@@ -42,3 +42,18 @@ it.each(scores)('can tidy scores', ({ score, expectation }) => {
 
 // '(7, 5)(2, 1)con'
 // '(2, 6)(7, 6)[7, 2](6, 3'
+
+/*
+{ result: '(6, 4)(3, 6)(10, 6', isLikeScore: true, isScoreLike: true }
+{ result: ')', isLikeScore: true, isScoreLike: true }
+{ result: '17', isLikeScore: true, isScoreLike: true }
+{ result: '(6-1)(6-0)', isLikeScore: true, isScoreLike: true }
+{ result: '25', isLikeScore: true, isScoreLike: true }
+{ result: '(6-0)(6-0)', isLikeScore: true, isScoreLike: true }
+{ result: '17', isLikeScore: true, isScoreLike: true }
+{ result: 'w/o', isLikeScore: true, isScoreLike: false }
+{ result: '2-6, 7-6(7-4), 11-9', isLikeScore: true, isScoreLike: true }
+{ result: '12', isLikeScore: true, isScoreLike: true }
+{ result: '13', isLikeScore: true, isScoreLike: true }
+{ result: '(6-4)(6-3) 6', isLikeScore: true, isScoreLike: true }
+*/
