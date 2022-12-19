@@ -30,6 +30,7 @@ import {
   TOURNAMENT_ID,
   TOURNAMENT_NAME
 } from '../constants/attributeConstants';
+import { POSITION } from '../constants/columnConstants';
 
 const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusConstants;
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
@@ -168,6 +169,7 @@ export const config = {
       }
     ],
     headerColumns: [
+      { attr: POSITION, header: '#' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: 'seed', limit: 1 },

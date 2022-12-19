@@ -182,6 +182,7 @@ export function getEntries({
     const error = NO_PARTICIPANTS_FOUND;
     pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
     pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } }, 'error');
+
     return { error };
   }
 

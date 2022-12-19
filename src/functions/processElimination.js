@@ -21,6 +21,25 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
+  const positions = columnProfiles.find(({ column }) => column === positionColumn).values;
+  const valuesColumns = columnProfiles.filter(({ column }) => column !== positionColumn);
+  const maxValueRow = Math.max(...valuesColumns.flatMap(({ rows }) => rows));
+  const noValues = maxValueRow === -Infinity;
+
+  if (noValues) {
+    const message = 'Blank Draw';
+    pushGlobalLog({
+      method: 'notice',
+      color: 'cyan',
+      keyColors: { message: 'brightblue', attributes: 'cyan' },
+      message
+    });
+
+    return {};
+  }
+
+  console.log(positions.length, maxValueRow);
+
   const { positionRefs, positionProgression, preRoundParticipantRows, error } = getPositionRefs({
     columnProfiles,
     positionColumn,
