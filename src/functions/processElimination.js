@@ -1,3 +1,4 @@
+import { getColumnParticpantConfidence } from './getColumnParticipantConfidenc';
 import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
@@ -143,10 +144,27 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   let roundNumber = 1;
   let columnIndex = 0;
 
+  // -------------------------------------------------------------------------------------------------
+  // ACTION: profile all roundColumns to determine how many contain participants withConfidence
+  const columnsWithParticipants = roundColumns
+    .map((targetColumn) => {
+      const withConfidence = getColumnParticpantConfidence({
+        confidenceThreshold,
+        roundParticipants,
+        targetColumn,
+        analysis
+      }).length;
+      return withConfidence && targetColumn;
+    })
+    .filter(Boolean);
+  const resultRounds = [];
+  // -------------------------------------------------------------------------------------------------
+
   while (columnIndex < roundColumns.length) {
     const pairedRowNumbers = positionProgression[roundNumber - 1];
     if (pairedRowNumbers) {
       const result = getRound({
+        columnsWithParticipants,
         subsequentColumnLimit,
         confidenceThreshold,
         positionProgression,
@@ -167,6 +185,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
         participants.push(...participantDetails.filter(({ isByePosition }) => isByePosition));
       }
 
+      resultRounds.push(roundColumns[columnIndex]);
       columnIndex += result.columnsConsumed || 0;
 
       if (result.columnsConsumed) consumedColumns.push(roundNumber);
