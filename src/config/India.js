@@ -173,7 +173,7 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: '#' },
+      { attr: POSITION, header: ['#', 'sr. no'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: 'seed', limit: 1 },
@@ -193,14 +193,16 @@ export const config = {
           'reg.no',
           'state',
           'first name',
+          'city',
           'nationality'
         ],
         limit: 1,
         skipWords: ['reg', 'umpire', '0'],
-        valueRegex: '^\\d{6,}$'
+        valueRegex: '^\\d{4,}$'
       },
       { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '[A-Za-z]*' },
       { attr: STATE, header: ['state'], limit: 1 },
+      { attr: CITY, header: ['city'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
       { attr: ROUND, header: [...roundNames] }
     ],
