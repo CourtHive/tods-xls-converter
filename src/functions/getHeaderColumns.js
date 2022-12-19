@@ -19,6 +19,8 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
       .filter(Boolean)
   );
 
+  const invalidValueColumns = [];
+
   if (profile.headerColumns) {
     profile.headerColumns.forEach((obj) => {
       const getRef = (details) => {
@@ -57,6 +59,8 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
 
           if (isValid) {
             extendColumnsMap({ columnsMap, ...obj, column: col });
+          } else {
+            invalidValueColumns.push(col);
           }
         }
       };
@@ -70,7 +74,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
     });
   }
 
-  const mappedColumns = utilities.unique(Object.values(columnsMap).flat());
+  const mappedColumns = invalidValueColumns.concat(utilities.unique(Object.values(columnsMap).flat()));
 
   const unmappedColumns = Object.keys(headerValueMap)
     .filter((column) => !mappedColumns.includes(column))
