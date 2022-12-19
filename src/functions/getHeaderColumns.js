@@ -77,7 +77,6 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   const unmappedColumns = Object.keys(headerValueMap)
     .filter((column) => !mappedColumns.includes(column))
     .map((column) => headerValueMap[column]);
-  console.log({ columnsMap, headerValueMap, unmappedColumns });
 
   if (unmappedColumns.length) {
     const message = `Unknown Header Columns`;
