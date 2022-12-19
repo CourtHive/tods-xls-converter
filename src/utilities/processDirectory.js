@@ -184,7 +184,7 @@ export function processDirectory({
     }
 
     const matchUps = tournamentEngine.allTournamentMatchUps({
-      context: { tournamentName, level: 'REG', identifierType: profile.identifierType }
+      context: { tournamentName, level: 'REG', identifierType: profile?.identifierType }
     }).matchUps;
     allMatchUps.push(...matchUps);
 

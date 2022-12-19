@@ -60,7 +60,7 @@ export function generateId({ prepend, attributes = [], defaultAttributes = [] } 
   if (attributes.includes(undefined)) return { error: MISSING_VALUES };
 
   const { Author, CreatedDate, workbookType } = getWorkbookProps();
-  const { organization } = workbookType;
+  const organization = workbookType?.organization;
 
   const filteredAttributes = attributes.filter(Boolean);
   const consideredAttributes = filteredAttributes.length ? filteredAttributes : defaultAttributes;
