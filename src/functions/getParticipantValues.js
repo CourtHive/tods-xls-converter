@@ -4,7 +4,7 @@ const joiners = ['-', '/', ' / '];
 export function getParticipantValues(participant, roundNumber, roundPosition) {
   roundNumber && roundPosition; // usefult for debugging
 
-  const { participantName, person, individualParticipants } = participant;
+  const { participantName, person, individualParticipants } = participant || {};
 
   let pValues = [participantName];
   if (person) {
