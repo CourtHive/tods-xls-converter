@@ -406,6 +406,8 @@ export const config = {
       if (allProgressionKeys) {
         columnProfile.values = [];
         columnProfile.character = 'progression';
+        columnProfile.keyMap = {};
+        columnProfile.rows = [];
         return columnProfile.character;
       }
     },
