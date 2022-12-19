@@ -176,7 +176,7 @@ export const config = {
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: 'seed', limit: 1 },
-      { attr: LAST_NAME, header: 'family name', limit: 1, valueRegex: '[A-Za-z]*' },
+      { attr: LAST_NAME, header: ['name', 'family name'], limit: 1, valueRegex: '[A-Za-z]*' },
       {
         attr: FIRST_NAME,
         header: ['first name', 'fisrt name'],
