@@ -82,7 +82,7 @@ it('can process tests', () => {
   // setLoggingActive(true, 'noWinningSide');
   // setLoggingActive(true, 'invalidResult');
   // setLoggingActive(true, 'scores');
-  setLoggingActive(true, 'score-audit');
+  // setLoggingActive(true, 'score-audit');
   // setLoggingActive(true, 'matchUps');
   // setLoggingActive(true, 'participants');
 
