@@ -49,6 +49,7 @@ const roundNames = [
   'pre-quarters',
   'pre quarter finals',
   'quarters',
+  'quarter',
   'qualifiers',
   'round of 32',
   'quarterfinals',
@@ -125,7 +126,10 @@ export const config = {
       {
         type: HEADER,
         id: 'setup',
-        elements: [{ text: 'setup page', options: { includes: true } }],
+        elements: [
+          { text: 'setup page', options: { includes: true } },
+          { text: 'preparation', options: { startsWith: true } }
+        ],
         rows: 1,
         minimumElements: 1
       },
@@ -197,8 +201,8 @@ export const config = {
           'aita regn No',
           'aita no',
           'reg.no',
+          's.no',
           'sl no',
-          'state itn',
           'itn',
           'state',
           'first name',
