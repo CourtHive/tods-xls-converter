@@ -39,6 +39,10 @@ const { MALE, FEMALE, ANY } = genderConstants;
 
 const roundNames = [
   'round 1',
+  'round of 64',
+  'round of 32',
+  'round of 16',
+  'round of 8',
   '1st round',
   '2nd round',
   '3rd round',
@@ -176,8 +180,8 @@ export const config = {
       { attr: POSITION, header: ['#', 'sr. no'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
-      { attr: SEED_VALUE, header: 'seed', limit: 1 },
-      { attr: LAST_NAME, header: ['name', 'family name'], limit: 1, valueRegex: '[A-Za-z]*' },
+      { attr: SEED_VALUE, header: ['seed', 'seed no'], limit: 1 },
+      { attr: LAST_NAME, header: ['name', 'surname', 'player name', 'family name'], limit: 1, valueRegex: '[A-Za-z]*' },
       {
         attr: FIRST_NAME,
         header: ['first name', 'fisrt name'],
@@ -189,8 +193,12 @@ export const config = {
         header: [
           { text: 'reg no', options: { startsWith: true } },
           { text: 'reg', options: { startsWith: true } },
+          { text: 'regn no', options: { includes: true } },
+          'aita regn No',
           'aita no',
           'reg.no',
+          'sl no',
+          'itn',
           'state',
           'first name',
           'city',
