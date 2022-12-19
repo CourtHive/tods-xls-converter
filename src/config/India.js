@@ -47,6 +47,8 @@ const roundNames = [
   '2nd round',
   '3rd round',
   'pre-quarters',
+  'pre- quarters',
+  'quarter- finals',
   'preqtrs',
   'qtrs',
   'pre quarter finals',
@@ -183,14 +185,19 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'sr. no'] },
+      { attr: POSITION, header: ['#', 'sr. no', 'sno'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: ['seed', 'seed no'], limit: 1 },
-      { attr: LAST_NAME, header: ['name', 'surname', 'player name', 'family name'], limit: 1, valueRegex: '[A-Za-z]*' },
+      {
+        attr: LAST_NAME,
+        header: ['name', 'surname', 'player name', 'family name', 'familiy name', 'famlily name'],
+        limit: 1,
+        valueRegex: '[A-Za-z]*'
+      },
       {
         attr: FIRST_NAME,
-        header: ['first name', 'fisrt name'],
+        header: ['first name', 'fiirst name', 'fisrt name'],
         limit: 1,
         valueRegex: `[A-Za-z]+|0`
       },
