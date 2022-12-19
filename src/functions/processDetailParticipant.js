@@ -1,4 +1,4 @@
-import { entryStatusConstants, participantConstants, participantRoles } from 'tods-competition-factory';
+import { entryStatusConstants, participantConstants, participantRoles, utilities } from 'tods-competition-factory';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
 import { generateParticipantId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
@@ -33,7 +33,15 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
   analysis.separationFactor = separationFactor;
 
   if (!entryDetailsOnPositionRows && !isSeparatedPersonsDoubles) {
-    console.log('some kind of error');
+    if (positionRows.length === entryDetailRows.length) {
+      // ACTION: check whether there is an offset
+      const offsets = utilities.unique(positionRows.map((pRow, i) => Math.abs(pRow - entryDetailRows[i])));
+      if (offsets.length !== 1) {
+        console.log('some kind of error', analysis.sheetName, { positionRows, entryDetailRows });
+      }
+    } else {
+      console.log('some kind of error', analysis.sheetName, { positionRows, entryDetailRows });
+    }
   }
 
   if (isSeparatedPersonsDoubles) {
