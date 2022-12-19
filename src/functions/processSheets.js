@@ -125,7 +125,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       }
     } else {
       const method = `processSheet ${sheetNumber}`;
-      if (!result.analysis) console.log({ result });
       pushGlobalLog(
         {
           method,
