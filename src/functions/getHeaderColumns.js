@@ -1,8 +1,9 @@
 // function confirms that header columns are in expected position
 
 import { findValueRefs, getCellValue, getCol, getRow } from './sheetAccess';
-import { tidyValue } from '../utilities/convenience';
 import { pushGlobalLog } from '../utilities/globalLog';
+import { tidyValue } from '../utilities/convenience';
+import { utilities } from 'tods-competition-factory';
 
 // and adjusts when possible...
 export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
@@ -69,7 +70,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
     });
   }
 
-  const mappedColumns = Object.values(columnsMap).flat();
+  const mappedColumns = utilities.unique(Object.values(columnsMap).flat());
 
   const unmappedColumns = Object.keys(headerValueMap)
     .filter((column) => !mappedColumns.includes(column))
