@@ -21,9 +21,13 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
-  const positions = columnProfiles.find(({ column }) => column === positionColumn).values;
+  const positionProfile = columnProfiles.find(({ column }) => column === positionColumn);
   const valuesColumns = columnProfiles.filter(({ column }) => column !== positionColumn);
   const maxValueRow = Math.max(...valuesColumns.flatMap(({ rows }) => rows));
+  const maxPositionRow = Math.max(...positionProfile.rows.filter((row) => row <= maxValueRow));
+  const index = positionProfile.rows.indexOf(maxPositionRow);
+  const maxPosition = positionProfile.values[index];
+
   const noValues = maxValueRow === -Infinity;
 
   if (noValues) {
@@ -38,7 +42,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     return {};
   }
 
-  console.log(positions.length, maxValueRow);
+  if (maxValueRow < maxPositionRow) console.log({ maxPosition, maxPositionRow, maxValueRow });
 
   const { positionRefs, positionProgression, preRoundParticipantRows, error } = getPositionRefs({
     columnProfiles,
