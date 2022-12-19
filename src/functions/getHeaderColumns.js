@@ -1,11 +1,23 @@
 // function confirms that header columns are in expected position
 
-import { findValueRefs, getCol, getRow } from './sheetAccess';
+import { findValueRefs, getCellValue, getCol, getRow } from './sheetAccess';
 import { tidyValue } from '../utilities/convenience';
+import { pushGlobalLog } from '../utilities/globalLog';
 
 // and adjusts when possible...
 export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   const columnsMap = Object.assign({}, profile.columnsMap);
+
+  const headerValueMap = Object.assign(
+    {},
+    ...Object.keys(columnValues)
+      .map((column) => {
+        const value = getCellValue(sheet[`${column}${headerRow}`]);
+        return value && { [column]: value };
+      })
+      .filter(Boolean)
+  );
+
   if (profile.headerColumns) {
     profile.headerColumns.forEach((obj) => {
       const getRef = (details) => {
@@ -54,6 +66,23 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
       } else {
         getRef(searchText);
       }
+    });
+  }
+
+  const mappedColumns = Object.values(columnsMap).flat();
+
+  const unmappedColumns = Object.keys(headerValueMap)
+    .filter((column) => !mappedColumns.includes(column))
+    .map((column) => headerValueMap[column]);
+
+  if (unmappedColumns.length) {
+    const message = `Unknown Header Columns`;
+    pushGlobalLog({
+      method: 'warning',
+      color: 'brightred',
+      keyColors: { message: 'brightyellow', columns: 'cyan' },
+      message,
+      columns: unmappedColumns.join(', ')
     });
   }
 
