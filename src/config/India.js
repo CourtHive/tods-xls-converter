@@ -21,6 +21,7 @@ import {
   FIRST_NAME,
   GENDER,
   LAST_NAME,
+  NATIONALITY,
   PERSON_ID,
   RANKING,
   REFEREE,
@@ -188,7 +189,8 @@ export const config = {
         limit: 1,
         skipWords: ['reg', 'umpire', '0'],
         valueRegex: '^\\d{6,}$'
-      }, // TODO: implement regex check for id
+      },
+      { attr: NATIONALITY, header: ['nationality'], limit: 1 },
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
       { attr: ROUND, header: [...roundNames] }
