@@ -64,7 +64,7 @@ it('can process tests', () => {
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = true;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   const sheetTypes = [];
