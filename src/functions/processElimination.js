@@ -26,11 +26,12 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const maxValueRow = Math.max(...valuesColumns.flatMap(({ rows }) => rows));
   const maxPositionRow = Math.max(...positionProfile.rows.filter((row) => row <= maxValueRow));
   const index = positionProfile.rows.indexOf(maxPositionRow);
-  const maxPosition = positionProfile.values[index];
+  const maxPositionWithValues = positionProfile.values[index];
+  const maxPosition = Math.max(...positionProfile.values);
 
   const noValues = maxValueRow === -Infinity;
 
-  if (noValues) {
+  const blankDraw = () => {
     const message = 'Blank Draw';
     pushGlobalLog({
       method: 'notice',
@@ -38,19 +39,27 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       keyColors: { message: 'brightblue', attributes: 'cyan' },
       message
     });
-
     return {};
-  }
+  };
 
-  if (maxValueRow < maxPositionRow) console.log({ maxPosition, maxPositionRow, maxValueRow });
+  if (noValues || maxPositionWithValues < 2) return blankDraw();
+
+  let positionLimit;
+  if (maxPositionWithValues < maxPosition) {
+    positionLimit = maxPositionWithValues;
+    const positionAvoidanceRange = utilities.generateRange(maxPositionRow + 1, Math.max(...positionProfile.rows) + 1);
+    avoidRows.push(...positionAvoidanceRange);
+  }
 
   const { positionRefs, positionProgression, preRoundParticipantRows, error } = getPositionRefs({
     columnProfiles,
     positionColumn,
     preRoundColumn,
+    positionLimit,
     avoidRows
   });
 
+  if (positionRefs.length < maxPositionWithValues) return blankDraw();
   if (error) return { error };
 
   const preRoundParticipants = [],

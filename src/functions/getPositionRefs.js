@@ -3,7 +3,7 @@ import { getRow } from './sheetAccess';
 
 import { NO_POSITION_ROWS_ROUND } from '../constants/errorConditions';
 
-export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn, avoidRows }) {
+export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn, avoidRows, positionLimit }) {
   const columnProfile = columnProfiles.find((columnProfile) =>
     [positionColumn, preRoundColumn].includes(columnProfile.column)
   );
@@ -12,14 +12,16 @@ export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn
     return { error: NO_POSITION_ROWS_ROUND };
   }
 
-  const { column, keyMap, lastNumericValue } = columnProfile;
+  const { column, keyMap } = columnProfile;
+  const lastPosition = positionLimit || columnProfile.lastNumericValue;
   const getRef = (row) => `${column}${row}`;
 
-  const range = utilities.generateRange(1, lastNumericValue + 1);
+  const range = utilities.generateRange(1, lastPosition + 1);
   const existingPositions = Object.values(keyMap).filter((value) => range.includes(value));
   const missingPositions = range.filter((position) => !existingPositions.includes(position));
   const knownRows = Object.keys(keyMap)
     .map((key) => !isNaN(parseInt(keyMap[key])) && getRow(key))
+    .filter((row) => !avoidRows.includes(row))
     .filter(Boolean);
 
   if (!missingPositions) {
@@ -27,13 +29,15 @@ export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn
     return { positionRefs: knownRows.map(getRef), positionProgression };
   }
 
+  // difference between knownRows and keyedRows is that keyedRows could include non-numeric (preRound) values
   const keyedRows = Object.keys(keyMap)
     .map(getRow)
     .filter((row) => !avoidRows.includes(row));
+
   const minRow = Math.min(...keyedRows);
   const maxRow = Math.max(...keyedRows);
   const rowDifference = maxRow - minRow;
-  const rowStep = rowDifference / (lastNumericValue - 1);
+  const rowStep = rowDifference / (lastPosition - 1);
   const missingPositionRows = missingPositions.map((position) => (position - 1) * rowStep + minRow);
   const allRows = [...knownRows, ...missingPositionRows].sort(utilities.numericSort);
 
