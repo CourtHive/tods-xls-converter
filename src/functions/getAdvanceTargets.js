@@ -8,18 +8,6 @@ export function getAdvanceTargets(params) {
 
   const { consideredParticipants, potentialValues } = params;
 
-  // -------------------------------------------------------------------------------------------------
-  // ACTION: check to see whether one of the advanced sides is a BYE
-  const byeAdvancement = consideredParticipants?.some((participant) => participant.isByePosition);
-  if (byeAdvancement) {
-    const advancedSide = consideredParticipants?.reduce((sideNumber, participant, index) => {
-      if (!participant.isByePosition) return index + 1;
-      return sideNumber;
-    }, {});
-    return { advancedSide, confidence: 1 };
-  }
-  // -------------------------------------------------------------------------------------------------
-
   // if no potentialValues have been provided, return
   if (!potentialValues) return {};
 
@@ -66,6 +54,20 @@ export function getAdvanceTargets(params) {
       }
     }
   });
+  // -------------------------------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------------------------------
+  // ACTION: check to see whether one of the advanced sides is a BYE
+  // POSSIBILITY: checking for BYE after checking for sides with results to provide error checking
+  const byeAdvancement = consideredParticipants?.some((participant) => participant.isByePosition);
+  if (byeAdvancement) {
+    const advancedSide = consideredParticipants?.reduce((sideNumber, participant, index) => {
+      if (!participant.isByePosition) return index + 1;
+      return sideNumber;
+    }, {});
+
+    return { advancedSide, confidence: 1 };
+  }
   // -------------------------------------------------------------------------------------------------
 
   // -------------------------------------------------------------------------------------------------
