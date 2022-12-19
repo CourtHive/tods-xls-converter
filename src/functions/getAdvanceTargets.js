@@ -22,7 +22,10 @@ export function getAdvanceTargets(params) {
     const potentialResults = columnResult.map(({ potentialResult }) => potentialResult);
 
     if (results.length > 1) {
-      console.log('MULTIPLE RESULTS', params.analysis.sheetName, { roundNumber: params.roundNumber });
+      console.log('MULTIPLE RESULTS', params.analysis.sheetName, {
+        roundNumber: params.roundNumber,
+        roundPosition: params.roundPosition
+      });
       results.map((result) =>
         console.log({ result, isLikeScore: isLikeScore(result), isScoreLike: isScoreLike(result) })
       );
