@@ -136,7 +136,12 @@ export function getRound({
           const relevantProgression = positionProgression[positionProgression.length - relevantIndex - 1].flat();
           const pairCount = relevantProgression.length / 2;
           const relevantPair = relevantProgression.slice(pairCount - 1, pairCount + 1);
-          const pairRange = utilities.generateRange(relevantPair[0] + 3, relevantPair[1] + 1 - 3);
+
+          // NOTE: add buffer to avoid multiple result values
+          const pairRange = utilities.generateRange(
+            relevantPair[0] + 3 + (relevantIndex ? 0 : 2),
+            relevantPair[1] + 1 - 3 - (relevantIndex ? 0 : 2)
+          );
           const keyMap = analysis.columnProfiles.find(({ column }) => column === relevantColumn).keyMap;
 
           return Object.keys(keyMap)
