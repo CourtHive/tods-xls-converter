@@ -61,7 +61,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     avoidRows
   });
 
-  if (positionRefs.length < maxPositionWithValues) return blankDraw();
+  if (positionRefs?.length < maxPositionWithValues) return blankDraw();
   if (error) return { error };
 
   const preRoundParticipants = [],
