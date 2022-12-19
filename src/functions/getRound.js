@@ -1,11 +1,13 @@
 import { matchUpStatusConstants, mocksEngine, utilities } from 'tods-competition-factory';
 import { getPotentialResult } from '../utilities/identification';
+import { getParticipantValues } from './getParticipantValues';
 import { audit, getLoggingActive } from '../global/state';
 import { generateMatchUpId } from '../utilities/hashing';
 import { getAdvanceTargets } from './getAdvanceTargets';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { tidyLower } from '../utilities/convenience';
 import { normalizeScore } from './cleanScore';
+import { pRankReducer } from './pRankReducer';
 import { tidyScore } from './scoreParser';
 import { getRow } from './sheetAccess';
 
@@ -80,16 +82,29 @@ export function getRound({
 
     if (potentialResults.length > 1) {
       // IF: there are participantNames combined with results
+      // AND: the subsequent column contains potentialParticipants
       // THEN: limit the column look ahead to only one subsequent column
-      columnValues = columnValues.map((c) => c.slice(0, 1));
+      const nextColumn = roundColumns[columnIndex + 2];
+      const nextColumnProfile = analysis.columnProfiles.find(({ column }) => column === nextColumn);
+      const nextColumnValues = nextColumnProfile?.values;
+      const roundParticipantValues = roundParticipants.flat().map(getParticipantValues);
+      const withConfidence = nextColumnValues
+        ?.flatMap((value) =>
+          roundParticipantValues.map((pValues) => pRankReducer({ pValues, value, confidenceThreshold }))
+        )
+        .filter(({ confidence }) => confidence);
 
-      const message = `participantName (result) { roundNumber: ${roundNumber} }`;
-      pushGlobalLog({
-        method: 'notice',
-        color: 'brightyellow',
-        keyColors: { message: 'cyan', attributes: 'brightyellow' },
-        message
-      });
+      if (withConfidence.length) {
+        columnValues = columnValues.map((c) => c.slice(0, 1));
+
+        const message = `participantName (result) { roundNumber: ${roundNumber} }`;
+        pushGlobalLog({
+          method: 'notice',
+          color: 'brightyellow',
+          keyColors: { message: 'cyan', attributes: 'brightyellow' },
+          message
+        });
+      }
     }
     // -------------------------------------------------------------------------------------------------
 
