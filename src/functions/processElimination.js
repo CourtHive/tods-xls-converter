@@ -264,8 +264,6 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   const matchUpsCount = matchUps.length;
 
-  console.log({ maxPositionWithValues });
-
   if (utilities.isPowerOf2(maxPositionWithValues)) {
     const roundCounts = [];
     let roundCount = maxPositionWithValues / 2;
