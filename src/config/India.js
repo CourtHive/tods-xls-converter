@@ -39,6 +39,7 @@ const { MALE, FEMALE, ANY } = genderConstants;
 
 const roundNames = [
   'round 1',
+  '1st round',
   '2nd round',
   '3rd round',
   'pre-quarters',
@@ -52,6 +53,7 @@ const roundNames = [
   'semifinals',
   'semi finals',
   'semi-finals',
+  'final round',
   'winners',
   'finals',
   'final'
@@ -143,6 +145,7 @@ export const config = {
           'aita no',
           'reg no.',
           'reg.no',
+          'reg',
           'state',
           ...roundNames
         ],
@@ -184,7 +187,7 @@ export const config = {
         attr: PERSON_ID,
         header: [
           { text: 'reg no', options: { startsWith: true } },
-          { text: 'reg.', options: { startsWith: true } },
+          { text: 'reg', options: { startsWith: true } },
           'aita no',
           'reg.no',
           'state',
