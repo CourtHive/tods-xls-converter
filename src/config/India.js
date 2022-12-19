@@ -51,6 +51,7 @@ const roundNames = [
   'semifinals',
   'semi finals',
   'semi-finals',
+  'winners',
   'finals',
   'final'
 ];
