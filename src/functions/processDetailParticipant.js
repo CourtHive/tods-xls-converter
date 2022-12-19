@@ -51,13 +51,14 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
   const positionAssignments = [];
   const splitDetailRows = [];
   let seedAssignments = [];
+  const processedRows = [];
   const participants = [];
   const entries = [];
 
   let drawPosition = 1;
 
   for (const positionRow of positionRows) {
-    const consideredRows = [];
+    let consideredRows = [];
     let participantId;
     let entryStatus;
 
@@ -72,7 +73,13 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       if (entryDetailRows.includes(nextRow)) {
         consideredRows.push(nextRow);
       } else if (nextRow > maxPositionRow) {
-        console.log('entry detail in avoidRows', { nextRow });
+        const message = `No participant detail in final row: ${nextRow}`;
+        pushGlobalLog({
+          method: 'notice',
+          color: 'brightyellow',
+          keyColors: { message: 'cyan', attributes: 'brightyellow' },
+          message
+        });
       }
     }
 
@@ -81,10 +88,15 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       positionAssignments.push({ drawPosition, bye: true });
     } else {
       let seedValue;
-      const getIndividualParticipant = (row, secondParticipant) => {
+
+      const getIndividualParticipant = (row, secondParticipant, orphanedRows) => {
         let detail = detailParticipants[row];
         const splitDetails =
-          !secondParticipant && separationFactor && separationFactor > 2 && detailParticipants[row - 1];
+          !secondParticipant &&
+          separationFactor &&
+          separationFactor > 2 &&
+          detailParticipants[row - 1] &&
+          !orphanedRows.length; // avoid when an orphan row is included
 
         if (splitDetails) {
           detail = Object.assign(detail || {}, detailParticipants[row - 1]);
@@ -102,6 +114,7 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         const person = { standardFamilyName: lastName, standardGivenName: firstName, personId };
         const lastFirst = lastName && firstName && `${lastName}, ${firstName}`;
         const participantName = detail.participantName || lastFirst || lastName || firstName;
+        if (!participantName) return;
 
         const idAttributes = [firstName, lastName, participantName].filter(Boolean);
         const participantId =
@@ -119,9 +132,16 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       };
 
       if (isSeparatedPersonsDoubles) {
-        const individualParticipants = consideredRows
+        const orphanedRows = entryDetailRows.filter(
+          (row) => !processedRows.includes(row) && row < Math.max(...consideredRows)
+        );
+        if (consideredRows.length === 1 && orphanedRows.length) {
+          consideredRows = [...consideredRows, ...orphanedRows].slice(0, 2).sort();
+        }
+
+        let individualParticipants = consideredRows
           .map((row, rowIndex) => {
-            const participant = getIndividualParticipant(row, rowIndex)?.participant;
+            const participant = getIndividualParticipant(row, rowIndex, orphanedRows)?.participant;
             return participant;
           })
           .filter(Boolean);
@@ -153,6 +173,7 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       entries.push(entry);
     }
 
+    processedRows.push(...consideredRows);
     drawPosition += 1;
   }
 
