@@ -166,44 +166,45 @@ export const config = {
         type: HEADER,
         id: 'knockoutParticipants',
         elements: [...roundNames],
-        rows: 1,
-        minimumElements: 2
+        extractColumns: true,
+        minimumElements: 2,
+        rows: 1
       },
       {
         type: HEADER,
         id: 'roundRobinParticipants',
         elements: ['1', '2', '3', '4'],
-        rows: 1,
-        minimumElements: 3
+        minimumElements: 3,
+        rows: 1
       },
       {
         type: FOOTER,
         id: 'drawFooter',
         elements: ['testigos', 'fiscales', 'fiscal'],
-        rows: 8,
+        minimumElements: 1,
         rowBuffer: 2,
-        minimumElements: 1
+        rows: 8
       },
       {
         type: HEADER,
         id: 'menuHeader',
         elements: [{ text: 'panel de navegacion', options: { includes: true } }],
-        rows: 1,
-        minimumElements: 1
+        minimumElements: 1,
+        rows: 1
       },
       {
         type: HEADER,
         id: 'federationHeader',
         elements: [{ text: organization, options: { startsWith: true } }],
-        rows: 1,
-        minimumElements: 1
+        minimumElements: 1,
+        rows: 1
       },
       {
         type: HEADER,
         id: 'programHeader',
         elements: ['PROGRAMACION DE PARTIDOS'],
-        rows: 1,
-        minimumElements: 1
+        minimumElements: 1,
+        rows: 1
       }
     ],
     // these should be ordered such that least certain matches are last

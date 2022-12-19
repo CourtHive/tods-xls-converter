@@ -21,6 +21,7 @@ import {
   FIRST_NAME,
   GENDER,
   LAST_NAME,
+  NATIONALITY,
   PERSON_ID,
   RANKING,
   REFEREE,
@@ -50,9 +51,11 @@ const roundNames = [
   'semifinals',
   'semi finals',
   'semi-finals',
+  'winners',
   'finals',
   'final'
 ];
+const qualifyingIdentifiers = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8'];
 const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN', 'under-12', 'under-14', 'under-16', 'under-18'];
 const entryStatusMap = {
   DA: DIRECT_ACCEPTANCE,
@@ -67,7 +70,7 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
-    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }],
+    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }],
     skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
@@ -76,6 +79,7 @@ export const config = {
     matchUpStatuses: { bye: 'BYE', walkover: 'wo', retired: 'cons' },
     matchOutcomes: ['def', 'ret', 'w.o', 'w/o', 'wo', 'cons', 'abandoned', 'default', 'retired'],
     subsequentColumnLimit: 2, // elimination structure outcome look ahead
+    qualifyingIdentifiers,
     entryStatusMap,
     categories,
     doubles: {
@@ -127,12 +131,14 @@ export const config = {
       {
         type: HEADER,
         id: 'knockoutParticipants',
+        extractColumns: true,
         elements: [
           'rank',
           'seed',
           'name',
           'family name',
           'first name',
+          'nationality',
           'aita no',
           'reg no.',
           'reg.no',
@@ -165,8 +171,13 @@ export const config = {
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: 'seed', limit: 1 },
-      { attr: LAST_NAME, header: 'family name', limit: 1 },
-      { attr: FIRST_NAME, header: ['first name', 'fisrt name'], limit: 1 },
+      { attr: LAST_NAME, header: 'family name', limit: 1, valueRegex: '[A-Za-z]+' },
+      {
+        attr: FIRST_NAME,
+        header: ['first name', 'fisrt name'],
+        limit: 1,
+        valueRegex: `[A-Za-z]+|0`
+      },
       {
         attr: PERSON_ID,
         header: [
@@ -175,12 +186,14 @@ export const config = {
           'aita no',
           'reg.no',
           'state',
+          'first name',
           'nationality'
         ],
         limit: 1,
         skipWords: ['reg', 'umpire', '0'],
         valueRegex: '^\\d{6,}$'
-      }, // TODO: implement regex check for id
+      },
+      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '[A-Za-z]+' },
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
       { attr: ROUND, header: [...roundNames] }

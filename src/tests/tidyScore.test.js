@@ -2,9 +2,16 @@ import { normalizeScore } from '../functions/cleanScore';
 import { tidyScore } from '../functions/scoreParser';
 import { expect, it } from 'vitest';
 
+// '7-5 6-7 (6) 6-3' =>  '7-5 6-7 [8-6] 6-3',
+// '6-7 (5), 7-6 (6), 10-7' => '6-7 (5) 7-6 (6) 10-7'
+// '9/8 [7/0]' => '9-8 7-0'
+// '5/4 [7-4], 5/4 [12-11]' => '5-4 [7-4] 5-4 [12-11]'
+// '6/0, 7/6[7]' => '6-0 7-6[7]'
+
 const scores = [
-  { score: '93' },
+  { score: '93', expectation: { score: '9-3' } },
   { score: '103' },
+  { score: '9-8 (3)', expectation: { score: '9-8(3)' } },
   { score: '67 (3)', expectation: { score: '6-7(3)' } },
   { score: '61 26 10-13', expectation: { score: '6-1 2-6 10-3' } },
   { score: '61 26 10-5', expectation: { score: '6-1 2-6 10-5' } },
@@ -31,3 +38,19 @@ it.each(scores)('can tidy scores', ({ score, expectation }) => {
     console.log({ score, tidy, normalized, matchUpStatus });
   }
 });
+
+/*
+(6, 1)(6, 2)
+(6, 0)(7, 5)
+(7, 5)(6, 2)
+(7, 5)(2, 1)con
+(6, 3)(2, 6)(6, 1)
+(3, 6)(6, 3)(10, 8)
+(6, 3)(5, 7)(10, 4)
+(2, 6)(7, 6)[7, 2](6, 3
+(6, 3)(1, 6)(7, 6)[7, 4]
+(6, 4)(7, 6)[9, 7]
+(7, 6)[7, 4](6, 1)
+(3, 6)(7, 6)[7, 2](7, 6)[7, 5]
+(7, 6)[11, 9](6, 7)[4, 7)(10, 6)
+*/

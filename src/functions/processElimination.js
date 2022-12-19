@@ -2,8 +2,10 @@ import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
 import { generateStructureId } from '../utilities/hashing';
+import { pushGlobalLog } from '../utilities/globalLog';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
+import { getLoggingActive } from '../global/state';
 import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
@@ -42,7 +44,6 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     const preRoundIndex = columns.indexOf(preRoundColumn);
     const nextColumn = columns[preRoundIndex + 1];
 
-    // TODO: convert processPreRound to use getRound() instead of getRoundMatchUps();
     const { advancingParticipants, nonAdvancingParticipants, structure } = processPreRound({
       subsequentColumnLimit: 1, // value for getRound()
       preRoundParticipantRows,
@@ -104,9 +105,11 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     }
   }
 
+  const subsequentColumnLimit = profile.subsequentColumnLimit || 2;
+  const rangeAdjustments = [];
+  const consumedColumns = [];
   let roundNumber = 1;
   let columnIndex = 0;
-  const subsequentColumnLimit = profile.subsequentColumnLimit || 2;
 
   while (columnIndex < roundColumns.length) {
     const pairedRowNumbers = positionProgression[roundNumber - 1];
@@ -134,6 +137,9 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
       columnIndex += result.columnsConsumed || 0;
 
+      if (result.columnsConsumed) consumedColumns.push(roundNumber);
+      if (result.rangeAdjustment) rangeAdjustments.push(roundNumber);
+
       if (roundMatchUps) {
         const winningSides = roundMatchUps.reduce((count, matchUp) => count + (matchUp.winningSide ? 1 : 0), 0);
 
@@ -148,6 +154,26 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     }
 
     columnIndex += 1;
+  }
+
+  if (consumedColumns.length) {
+    const message = `results in multiple columns{ roundNumbers: ${consumedColumns.join(',')} }`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
+  }
+
+  if (rangeAdjustments.length) {
+    const message = `result range modified { roundNumbers: ${rangeAdjustments.join(',')} }`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
   }
 
   const { resultsCount } = matchUps.reduce(
@@ -185,6 +211,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   });
 
   const matchUpsCount = matchUps.length;
+
+  if (getLoggingActive('participants')) console.log(participants);
 
   return {
     hasValues: true,

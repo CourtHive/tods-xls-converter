@@ -1,6 +1,5 @@
 import { utilities, matchUpStatusConstants } from 'tods-competition-factory';
 import { isNumeric, isObject, isString } from './identification';
-import { getRow } from '../functions/sheetAccess';
 import { getWorkbook } from '../global/state';
 import { removeBits } from './transformers';
 
@@ -24,8 +23,6 @@ export const removeTrailing = (value, remove = ['.', ':', ',']) => {
 export const tidyValue = (value) => (isString(value) ? removeTrailing(value.trim()) : value);
 export const tidyLower = (value) => (isString(value) ? tidyValue(value.trim()).toLowerCase() : value);
 
-export const keyRowSort = (a, b) => parseInt(getRow(a)) - parseInt(getRow(b));
-
 export const isBye = (participant) =>
   (typeof participant === 'object' ? Object.values(participant) : [participant]).some(
     (value) => isString(value) && value.toLowerCase() === BYE.toLowerCase()
@@ -39,7 +36,7 @@ export const isSkipWord = (value, profile) =>
   (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));
 
 export const startsWithIterator = (value) => isString(value) && /^\d\s/.test(value.trim());
-export const hasBracketedValue = (value) => isString(value) && /\(\d+\)$/.test(value.trim());
+export const hasBracketedValue = (value) => isString(value) && /^[A-Za-z]+.*\(\d+\)$/.test(value.trim());
 export const matchSeeding = (value) => value.match(/^(.+)\((\d+)\)$/);
 export const getSeeding = (value) => {
   if (typeof value !== 'string') return;

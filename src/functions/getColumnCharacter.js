@@ -6,7 +6,14 @@ import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { RESULT, ROUND } from '../constants/sheetElements';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
-export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, columnProfile, sheetType }) {
+export function getColumnCharacter({
+  columnProfiles,
+  columnProfile,
+  positionIndex,
+  attributeMap,
+  columnIndex,
+  sheetType
+}) {
   const {
     consecutiveNumbers,
     lastNumericValue,
@@ -35,7 +42,12 @@ export function getColumnCharacter({ attributeMap, columnProfiles, columnIndex, 
     utilities.isPowerOf2(lastNumericValue) || (lastNumericValue < values.length && utilities.isPowerOf2(values.length));
 
   // preRound and position columns cannot occur beyond 4th column
-  if (columnIndex < 4 && numericCheck && (sheetType === ROUND_ROBIN ? allNumeric : knockOutCheck)) {
+  if (
+    (sheetType === ROUND_ROBIN ? allNumeric : knockOutCheck) &&
+    positionIndex === undefined &&
+    columnIndex < 4 &&
+    numericCheck
+  ) {
     const character = containsAlpha ? PRE_ROUND : POSITION;
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;

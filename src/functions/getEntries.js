@@ -3,8 +3,8 @@ import { processDetailParticipants } from './processDetailParticipant';
 import { getFirstRoundEntries } from './getFirstRoundEntries';
 import { generateParticipantId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
+import { getCellValue, getRow } from './sheetAccess';
 import { isBye } from '../utilities/convenience';
-import { getRow } from './sheetAccess';
 
 import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
 import { ENTRY_DETAILS } from '../constants/attributeConstants';
@@ -19,7 +19,8 @@ export function getEntries({
   positionRefs,
   analysis,
   profile,
-  columns
+  columns,
+  sheet
 }) {
   const detailParticipants = {};
   const rowParticipants = {};
@@ -36,7 +37,7 @@ export function getEntries({
   const entryDetailColumnProfiles = entryDetailColumns.map(getColumnProfile).filter(Boolean);
 
   const positionRows = positionRefs.map(getRow).sort(utilities.numericSort);
-  const entryDetailRows = utilities.unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows));
+  let entryDetailRows = utilities.unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows));
 
   if (entryDetailAttributes?.length) {
     for (const attribute of entryDetailAttributes) {
@@ -82,6 +83,37 @@ export function getEntries({
         analysis,
         profile
       });
+  }
+
+  const bogusRows = Object.keys(detailParticipants).filter((key) => {
+    const detailParticipant = detailParticipants[key];
+    const participantKeys = Object.keys(detailParticipant);
+    const relevantKeys = participantKeys.filter((key) => !['ranking', 'seedValue', 'entryStatus'].includes(key));
+    return !relevantKeys.length;
+  });
+
+  bogusRows.forEach((row) => delete detailParticipants[row]);
+  entryDetailRows = entryDetailRows.filter((row) => !bogusRows.includes(row.toString()));
+
+  const isSeparatedPersonsDoubles = Object.values(detailParticipants).length > positionRows.length;
+
+  if (isSeparatedPersonsDoubles) {
+    // NOTE: necessary to get row values past final positionRow
+    const missingEntryDetailRow = Math.max(...positionRows) + 1;
+    detailParticipants[missingEntryDetailRow] = {};
+    entryDetailColumnProfiles.forEach(({ attribute, column }) => {
+      const cellRef = `${column}${missingEntryDetailRow}`;
+      const value = getCellValue(sheet[cellRef]);
+      detailParticipants[missingEntryDetailRow][attribute] = value;
+    });
+    entryDetailRows.push(missingEntryDetailRow);
+    const message = `adding participant detail row: ${missingEntryDetailRow}`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
   }
 
   const detailResult =

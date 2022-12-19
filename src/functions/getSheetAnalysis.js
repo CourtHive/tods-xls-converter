@@ -1,10 +1,10 @@
+import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
 import { hasNumeric, isString } from '../utilities/identification';
 import { getColumnAssessment } from './getColumnAssessment';
+import { getCol, getRow, keyRowSort } from './sheetAccess';
 import { getRoundCharacter } from './getRoundCharacter';
-import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
 import { utilities } from 'tods-competition-factory';
 import { getIsQualifying } from './getIsQualifying';
-import { getCol, getRow } from './sheetAccess';
 import { getSheetKeys } from './getSheetKeys';
 import { getValuesMap } from './getValuesMap';
 import { getCategory } from './getCategory';
@@ -12,12 +12,12 @@ import {
   getNonBracketedValue,
   getPositionColumn,
   hasBracketedValue,
-  keyRowSort,
   startsWithIterator,
   tidyValue
 } from '../utilities/convenience';
 
 import { ROUND_ROBIN } from '../constants/sheetTypes';
+import { POSITION } from '../constants/columnConstants';
 
 export const getSheetAnalysis = ({
   ignoreCellRefs = [],
@@ -49,12 +49,15 @@ export const getSheetAnalysis = ({
     })
   );
 
+  let positionIndex;
+
   const assessColumn = (column, columnIndex) => {
     const isColumnKey = (key) => getCol(key) === column;
     const isNotAvoidRow = (key) => !avoidRows.includes(getRow(key));
     const prospectColumnKeys = filteredKeys.filter(isNotAvoidRow).filter(isColumnKey).sort(keyRowSort);
     const { assessment, upperRowBound } = getColumnAssessment({
       prospectColumnKeys,
+      positionIndex,
       attributeMap,
       columnIndex,
       sheetType,
@@ -62,6 +65,8 @@ export const getSheetAnalysis = ({
       column,
       sheet
     });
+
+    if (assessment.character === POSITION) positionIndex = columnIndex;
 
     if (upperRowBound) {
       const upperBoundAdd = sheetType === ROUND_ROBIN ? 2 : 1; // TODO: provider config

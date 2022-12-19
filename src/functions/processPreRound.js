@@ -6,6 +6,7 @@ import { getRoundMatchUps } from './getRoundMatchUps';
 
 const { QUALIFYING } = drawDefinitionConstants;
 
+// TODO: convert processPreRound to use getRound() instead of getRoundMatchUps();
 export function processPreRound({ preRoundParticipantRows, preRoundColumn, nextColumn, analysis, columns, profile }) {
   const columnProfile = analysis.columnProfiles.find((columnProfile) => columnProfile.column === preRoundColumn);
   const boundaryIndex = columns.indexOf(nextColumn);

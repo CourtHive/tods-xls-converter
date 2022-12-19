@@ -45,5 +45,5 @@ export function getContentFrame({ sheet, profile, sheetDefinition, rowRange }) {
 
   const avoidRows = [].concat(...headerAvoidRows, ...footerAvoidRows);
 
-  return { headerRow, footerRow, avoidRows };
+  return { headerRow: headerRowDefinition?.extractColumns && headerRow, footerRow, avoidRows };
 }

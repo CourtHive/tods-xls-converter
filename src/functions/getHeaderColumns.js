@@ -1,11 +1,26 @@
 // function confirms that header columns are in expected position
 
-import { findValueRefs, getCol, getRow } from './sheetAccess';
+import { findValueRefs, getCellValue, getCol, getRow } from './sheetAccess';
+import { pushGlobalLog } from '../utilities/globalLog';
 import { tidyValue } from '../utilities/convenience';
+import { utilities } from 'tods-competition-factory';
 
 // and adjusts when possible...
 export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   const columnsMap = Object.assign({}, profile.columnsMap);
+
+  const headerValueMap = Object.assign(
+    {},
+    ...Object.keys(columnValues)
+      .map((column) => {
+        const value = getCellValue(sheet[`${column}${headerRow}`]);
+        return value && { [column]: value };
+      })
+      .filter(Boolean)
+  );
+
+  const invalidValueColumns = [];
+
   if (profile.headerColumns) {
     profile.headerColumns.forEach((obj) => {
       const getRef = (details) => {
@@ -35,13 +50,17 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
               const check = re.test(value);
               return (
                 !value ||
-                skipWords.some((word) => word.toLowerCase() === tidyValue(value.toString()).toLowerCase()) ||
+                skipWords.some(
+                  (word) => word?.toString().toLowerCase() === tidyValue(value.toString()).toLowerCase()
+                ) ||
                 check
               );
             });
 
           if (isValid) {
             extendColumnsMap({ columnsMap, ...obj, column: col });
+          } else {
+            invalidValueColumns.push(col);
           }
         }
       };
@@ -52,6 +71,24 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
       } else {
         getRef(searchText);
       }
+    });
+  }
+
+  const mappedColumns = invalidValueColumns.concat(utilities.unique(Object.values(columnsMap).flat()));
+
+  const unmappedColumns = Object.keys(headerValueMap)
+    .filter((column) => !mappedColumns.includes(column))
+    .map((column) => headerValueMap[column]);
+
+  if (unmappedColumns.length) {
+    const message = `Unknown Header Columns`;
+    pushGlobalLog({
+      method: 'warning',
+      color: 'brightred',
+      keyColors: { message: 'brightyellow', columns: 'cyan' },
+      message,
+      headerRow,
+      columns: unmappedColumns.join(', ')
     });
   }
 

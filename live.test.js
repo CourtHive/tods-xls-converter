@@ -1,12 +1,12 @@
 import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
-import { resetLogging, setLoggingActive } from './src/global/state';
+import { getAudit, getLoggingActive, resetLogging, setLoggingActive } from './src/global/state';
 import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
 
-setLoggingActive;
+setLoggingActive();
 
-it('can process passing', () => {
+it.skip('can process passing', () => {
   const readDir = './examples/sheets/processing';
   const writeDir = './examples/sheets/processed/CR';
   const writeTournamentRecords = false;
@@ -59,7 +59,7 @@ it('can process passing', () => {
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 });
 
-it.skip('can process tests', () => {
+it('can process tests', () => {
   const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
@@ -71,7 +71,7 @@ it.skip('can process tests', () => {
   const sheetNumbers = [];
   const sheetLimit = 0;
 
-  const processLimit = 1;
+  const processLimit = 0;
   const startIndex = 0;
 
   resetLogging();
@@ -82,7 +82,9 @@ it.skip('can process tests', () => {
   // setLoggingActive(true, 'noWinningSide');
   // setLoggingActive(true, 'invalidResult');
   // setLoggingActive(true, 'scores');
+  // setLoggingActive(true, 'score-audit');
   // setLoggingActive(true, 'matchUps');
+  // setLoggingActive(true, 'participants');
 
   const result = processDirectory({
     processStructures: true,
@@ -100,6 +102,12 @@ it.skip('can process tests', () => {
   if (result);
   printGlobalLog();
   purgeGlobalLog();
+
+  if (getLoggingActive('score-audit')) {
+    const auditLog = getAudit();
+    const csvScores = utilities.JSON2CSV(auditLog);
+    writeFileSync('./scratch/scoreParsing.csv', csvScores, 'UTF-8');
+  }
 
   if (writeParticipants) {
     const participants = result.participants.filter(({ participantType }) => participantType === 'INDIVIDUAL');

@@ -1,6 +1,7 @@
 import { entryStatusConstants, participantConstants, participantRoles } from 'tods-competition-factory';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
 import { generateParticipantId } from '../utilities/hashing';
+import { pushGlobalLog } from '../utilities/globalLog';
 import { normalizeDiacritics } from 'normalize-text';
 import { isBye } from '../utilities/convenience';
 
@@ -15,14 +16,21 @@ const { COMPETITOR } = participantRoles;
 export function processDetailParticipants({ analysis, profile, detailParticipants, positionRows, entryDetailRows }) {
   if (!Object.values(detailParticipants).length) return;
 
-  const entryDetailsOnPositionRows = positionRows.every((row) => entryDetailRows.includes(row));
+  const entryDetailsOnPositionRows = positionRows.some((row) => entryDetailRows.includes(row));
   const entryDetailBeforePositionRow = Math.min(...positionRows) > Math.min(...entryDetailRows);
   const entryDetailRowsCount = entryDetailRows.length;
+  const maxPositionRow = Math.max(...positionRows);
   const positionsCount = positionRows.length;
 
   // separated persons doubles occurs when paired participants appear on separate rows
-  const isSeparatedPersonsDoubles = entryDetailRowsCount > positionsCount;
   // as opposed to doubles where participant names are separated by "/"
+  const isSeparatedPersonsDoubles = entryDetailRowsCount > positionsCount;
+
+  const separationFactor =
+    isSeparatedPersonsDoubles &&
+    Math.ceil((Math.max(...entryDetailRows) - Math.min(...entryDetailRows)) / positionsCount);
+  analysis.isSeparatedPersonsDoubles = isSeparatedPersonsDoubles;
+  analysis.separationFactor = separationFactor;
 
   if (!entryDetailsOnPositionRows && !isSeparatedPersonsDoubles) {
     console.log('some kind of error');
@@ -33,11 +41,13 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
   }
 
   const positionAssignments = [];
+  const splitDetailRows = [];
   let seedAssignments = [];
   const participants = [];
   const entries = [];
 
   let drawPosition = 1;
+
   for (const positionRow of positionRows) {
     const consideredRows = [];
     let participantId;
@@ -53,6 +63,8 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       const nextRow = positionRow + 1;
       if (entryDetailRows.includes(nextRow)) {
         consideredRows.push(nextRow);
+      } else if (nextRow > maxPositionRow) {
+        console.log('entry detail in avoidRows', { nextRow });
       }
     }
 
@@ -61,13 +73,20 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       positionAssignments.push({ drawPosition, bye: true });
     } else {
       let seedValue;
-      const getIndividualParticipant = (row) => {
-        const detail = detailParticipants[row];
+      const getIndividualParticipant = (row, secondParticipant) => {
+        let detail = detailParticipants[row];
+        const splitDetails =
+          !secondParticipant && separationFactor && separationFactor > 2 && detailParticipants[row - 1];
+
+        if (splitDetails) {
+          detail = Object.assign(detail || {}, detailParticipants[row - 1]);
+          splitDetailRows.push(row);
+        }
         if (!detail) return;
 
         let { personId, firstName, lastName, ranking } = detail;
-        lastName = normalizeDiacritics(lastName);
-        firstName = normalizeDiacritics(firstName);
+        lastName = lastName ? normalizeDiacritics(lastName.toString()) : '';
+        firstName = firstName ? normalizeDiacritics(firstName.toString()) : '';
 
         if (detail.seedValue) seedValue = detail.seedValue;
         if (detail.entryStatus) entryStatus = profile.entryStatusMap?.[detail.entryStatus] || DIRECT_ACCEPTANCE;
@@ -90,10 +109,11 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         };
         return { participant };
       };
+
       if (isSeparatedPersonsDoubles) {
         const individualParticipants = consideredRows
-          .map((row) => {
-            const { participant } = getIndividualParticipant(row);
+          .map((row, rowIndex) => {
+            const participant = getIndividualParticipant(row, rowIndex)?.participant;
             return participant;
           })
           .filter(Boolean);
@@ -109,12 +129,13 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
           participantName,
           participantId
         };
-        participants.push(participant);
+        if (participant.participantName !== 'BYE') participants.push(participant);
       } else {
-        const { participant } = getIndividualParticipant(consideredRows[0]);
-        participants.push(participant);
-
-        participantId = participant.participantId;
+        const participant = getIndividualParticipant(consideredRows[0])?.participant;
+        if (participant) {
+          participants.push(participant);
+          participantId = participant.participantId;
+        }
       }
 
       positionAssignments.push({ drawPosition, participantId });
@@ -127,6 +148,15 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
     drawPosition += 1;
   }
 
+  if (splitDetailRows?.length) {
+    const message = `split participant detail rows: ${splitDetailRows.join(',')}`;
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      message
+    });
+  }
   const drawSize = participants.length;
   seedAssignments = limitedSeedAssignments({ seedAssignments, participants, drawSize });
 

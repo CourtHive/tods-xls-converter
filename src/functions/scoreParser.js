@@ -837,7 +837,7 @@ function joinFloatingTiebreak(score) {
   const floatingTiebreak = parts.find((part) => /^\(\d+\)$/.test(part));
   if (floatingTiebreak) {
     const index = parts.indexOf(floatingTiebreak);
-    const prior = parts[index - 1];
+    const prior = parts[index - 1].split('-').join('');
     if (/^\d+$/.test(prior) && prior.length === 2) {
       const scores = prior.split('');
       const diff = Math.abs(scores.reduce((a, b) => +a - +b));
