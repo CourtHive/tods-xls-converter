@@ -47,6 +47,8 @@ const roundNames = [
   '2nd round',
   '3rd round',
   'pre-quarters',
+  'preqtrs',
+  'qtrs',
   'pre quarter finals',
   'quarters',
   'quarter',
