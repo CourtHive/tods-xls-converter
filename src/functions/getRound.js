@@ -110,8 +110,8 @@ export function getRound({
 
     // -------------------------------------------------------------------------------------------------
     // ACTION: process all roundPositions
-    pairedRowNumbers.forEach((_, pairIndex) => {
-      const consideredParticipants = roundParticipants?.[pairIndex];
+    pairedRowNumbers?.forEach((_, pairIndex) => {
+      const consideredParticipants = roundParticipants?.[pairIndex].filter(Boolean);
       if (!consideredParticipants) return;
 
       const isBye = consideredParticipants?.find(({ isByePosition }) => isByePosition);
