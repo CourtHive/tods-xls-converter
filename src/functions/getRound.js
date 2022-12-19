@@ -14,6 +14,7 @@ import { getRow } from './sheetAccess';
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
 export function getRound({
+  columnsWithParticipants,
   subsequentColumnLimit,
   confidenceThreshold,
   positionProgression,
@@ -40,6 +41,7 @@ export function getRound({
   const matchUps = [];
 
   const relevantSubsequentColumns = roundColumns.slice(columnIndex + 1).slice(0, subsequentColumnLimit);
+  const overlap = utilities.intersection(relevantSubsequentColumns, columnsWithParticipants);
 
   const prospectiveResults = finalRound || relevantSubsequentColumns.length;
 
@@ -84,8 +86,11 @@ export function getRound({
       // IF: there are participantNames combined with results
       // AND: the subsequent column contains potentialParticipants
       // THEN: limit the column look ahead to only one subsequent column
-      const nextColumn = roundColumns[columnIndex + 2];
-      const nextColumnProfile = analysis.columnProfiles.find(({ column }) => column === nextColumn);
+      const targetColumn = roundColumns[columnIndex + 2];
+
+      // ~~~~
+      // TODO: replace with getColumnParticipantConfidence({ targetColumn, confidenceThreshold, roundParticipants, analysis})
+      const nextColumnProfile = analysis.columnProfiles.find(({ column }) => column === targetColumn);
       const nextColumnValues = nextColumnProfile?.values;
       const roundParticipantValues = roundParticipants.flat().map(getParticipantValues);
       const withConfidence = nextColumnValues
@@ -93,6 +98,7 @@ export function getRound({
           roundParticipantValues.map((pValues) => pRankReducer({ pValues, value, confidenceThreshold }))
         )
         .filter(({ confidence }) => confidence);
+      // ~~~~
 
       if (withConfidence.length) {
         columnValues = columnValues.map((c) => c.slice(0, 1));
@@ -105,6 +111,8 @@ export function getRound({
           message
         });
       }
+    } else if (overlap.length > 1) {
+      columnValues = columnValues.map((c) => c.slice(0, 1));
     }
     // -------------------------------------------------------------------------------------------------
 
@@ -146,6 +154,7 @@ export function getRound({
         potentialValues,
         roundPosition,
         roundNumber,
+        analysis,
         profile
       });
       if (advanceTargets.columnsConsumed > columnsConsumed) columnsConsumed = advanceTargets.columnsConsumed;
