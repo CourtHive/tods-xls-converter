@@ -26,7 +26,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       keyColors: { fileName: 'brightgreen', sheetCount: 'brightgreen' },
       divider: 80,
       sheetCount,
-      fileName
+      fileName: fileName.slice(0, 40)
     });
     return { error: UNKNOWN_WORKBOOK_TYPE };
   }
@@ -37,7 +37,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     keyColors: { fileName: 'brightgreen', sheetCount: 'brightgreen' },
     divider: 80,
     sheetCount,
-    fileName
+    fileName: fileName.slice(0, 40)
   });
 
   const skippedResults = [];
