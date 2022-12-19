@@ -125,7 +125,7 @@ export const config = {
       {
         type: HEADER,
         id: 'setup',
-        elements: [{ text: 'setup page', options: { startsWith: true } }],
+        elements: [{ text: 'setup page', options: { includes: true } }],
         rows: 1,
         minimumElements: 1
       },
@@ -198,6 +198,7 @@ export const config = {
           'aita no',
           'reg.no',
           'sl no',
+          'state itn',
           'itn',
           'state',
           'first name',
