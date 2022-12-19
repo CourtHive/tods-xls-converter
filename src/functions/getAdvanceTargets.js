@@ -26,7 +26,7 @@ export function getAdvanceTargets(params) {
       pushGlobalLog({
         method: 'notice',
         color: 'brightyellow',
-        keyColors: { message: 'cyan', attributes: 'brightyellow' },
+        keyColors: { message: 'yellow', attributes: 'brightyellow' },
         message
       });
       results.map((result) =>
