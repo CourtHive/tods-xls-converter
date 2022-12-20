@@ -85,7 +85,7 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
-    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }],
+    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }, { regex: '^[0-9:]+[a|p]{1}m$' }],
     skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
