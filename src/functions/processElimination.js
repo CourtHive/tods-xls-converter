@@ -65,6 +65,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   if (error) return { error };
 
   const preRoundParticipants = [],
+    ignoredMatchUps = [],
     participants = [],
     structures = [],
     matchUps = [],
@@ -199,6 +200,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
         // ... or if there is only one matchUp assume that it is an unfinished Final
         if (winningSides || columnIndex + 1 < roundColumns.length || roundMatchUps.length === 1) {
           matchUps.push(...roundMatchUps);
+        } else {
+          ignoredMatchUps.push(...roundMatchUps);
         }
       }
 
@@ -291,6 +294,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   return {
     hasValues: true,
+    ignoredMatchUps,
     seedAssignments,
     matchUpsCount,
     participants,
