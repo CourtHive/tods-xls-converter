@@ -6,6 +6,7 @@ import { FOOTER, HEADER } from '../constants/sheetElements';
 
 export function getContentFrame({ sheet, profile, sheetDefinition, rowRange }) {
   const rowDefinitions = profile.rowDefinitions;
+
   const headerRowDefinition = findRowDefinition({
     rowIds: sheetDefinition.rowIds,
     rowDefinitions,
