@@ -5,6 +5,7 @@ import { processElimination } from './processElimination';
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import { KNOCKOUT } from '../constants/sheetTypes';
+import { pushGlobalLog } from '../utilities/globalLog';
 
 export function processIndeterminate(props) {
   const { sheetDefinition, sheet, sheetNumber, profile, analysis, info } = props;
@@ -23,6 +24,17 @@ export function processIndeterminate(props) {
 
   if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
     analysis.sheetType = KNOCKOUT;
+    const method = `processSheet ${sheetNumber}`;
+    pushGlobalLog(
+      {
+        method,
+        keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
+        type: analysis?.sheetType,
+        sheetName: analysis?.sheetName
+      },
+      undefined,
+      method
+    );
     return processElimination(props);
   }
 
