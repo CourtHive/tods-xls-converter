@@ -15,6 +15,7 @@ export function processDirectory({
   writeDir = './',
   readDir = './',
 
+  captureProcessedData = true,
   processStructures = true,
   includeWorkbooks,
   processLimit = 0,
@@ -69,12 +70,17 @@ export function processDirectory({
     const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
     result = processSheets({ fileName, sheetNumbers, sheetLimit, sheetTypes, processStructures });
-    fileResults[index] = { fileName, ...result, ...additionalContent };
+    if (captureProcessedData) {
+      fileResults[index] = { fileName, ...result, ...additionalContent };
+    }
     index += 1;
 
     const { participants: participantsMap } = result;
     const tournamentParticipants = participantsMap ? Object.values(participantsMap) : [];
-    Object.assign(allParticipantsMap, participantsMap);
+
+    if (captureProcessedData) {
+      Object.assign(allParticipantsMap, participantsMap);
+    }
 
     const { tournamentId } = generateTournamentId({ attributes: [fileName] });
 
@@ -186,11 +192,17 @@ export function processDirectory({
     const matchUps = tournamentEngine.allTournamentMatchUps({
       context: { tournamentName, level: 'REG', identifierType: profile?.identifierType }
     }).matchUps;
-    allMatchUps.push(...matchUps);
+
+    if (captureProcessedData) {
+      allMatchUps.push(...matchUps);
+    }
 
     totalMatchUps += result.totalMatchUps || 0;
-    if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
-    if (result.resultValues?.length) resultValues.push(...result.resultValues);
+
+    if (captureProcessedData) {
+      if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
+      if (result.resultValues?.length) resultValues.push(...result.resultValues);
+    }
 
     if (result.errorLog) {
       Object.keys(result.errorLog).forEach((key) => {
@@ -204,7 +216,10 @@ export function processDirectory({
     }
 
     const tournamentRecord = tournamentEngine.getState().tournamentRecord;
-    tournamentRecords.push(tournamentRecord);
+
+    if (captureProcessedData) {
+      tournamentRecords.push(tournamentRecord);
+    }
 
     if (writeTournamentRecords && writeDir) {
       if (tournamentRecord.tournamentId) {
