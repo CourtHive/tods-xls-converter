@@ -105,7 +105,7 @@ export function getAdvanceTargets(params) {
     });
 
     if (sideStartsWith) {
-      const message = `side starts with to match ${sideStartsWith.participantName}`;
+      const message = `Side starts with to match: ${sideStartsWith.participantName}`;
       pushGlobalLog({
         method: 'notice',
         color: 'brightyellow',
