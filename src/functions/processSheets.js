@@ -66,7 +66,15 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       profile
     });
 
-    const { participants: structureParticipants, structures = [], entries, hasValues, analysis, error } = result;
+    const {
+      participants: structureParticipants,
+      structures = [],
+      entries,
+      hasValues,
+      analysis,
+      warning,
+      error
+    } = result;
 
     const invalidParticipant = structureParticipants?.find(({ participantName }) =>
       invalidNames.includes(participantName)
@@ -123,6 +131,9 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       } else {
         errorLog[error].push(sheetName);
       }
+    } else if (warning) {
+      if (logging) console.log({ warning });
+      pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'yellow' } });
     } else {
       const method = `processSheet ${sheetNumber}`;
       pushGlobalLog(
