@@ -15,6 +15,9 @@ export function processDirectory({
   writeDir = './',
   readDir = './',
 
+  tournamentContext = {},
+  matchUpContext = {},
+
   captureProcessedData = true,
   processStructures = true,
   includeWorkbooks,
@@ -88,6 +91,7 @@ export function processDirectory({
 
     tournamentEngine.setState({
       participants: tournamentParticipants,
+      ...tournamentContext,
       tournamentId
     });
 
@@ -190,7 +194,7 @@ export function processDirectory({
     }
 
     const matchUps = tournamentEngine.allTournamentMatchUps({
-      context: { tournamentName, level: 'REG', identifierType: profile?.identifierType }
+      context: { tournamentName, level: 'REG', identifierType: profile?.identifierType, ...matchUpContext }
     }).matchUps;
 
     if (captureProcessedData) {
