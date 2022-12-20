@@ -160,6 +160,7 @@ export const config = {
           'rank',
           'seed',
           'name',
+          'time',
           'family name',
           'player name',
           'first name',
