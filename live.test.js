@@ -88,6 +88,7 @@ it('can process tests', () => {
 
   const result = processDirectory({
     captureProcessedData: true, // set to false to bulk process > 200 files
+    // tournamentContext: { startDate: '2022-06-06' },
     processStructures: true,
     includeWorkbooks: true,
     writeTournamentRecords,
