@@ -87,6 +87,7 @@ it('can process tests', () => {
   // setLoggingActive(true, 'participants');
 
   const result = processDirectory({
+    captureProcessedData: true, // set to false to bulk process > 200 files
     processStructures: true,
     includeWorkbooks: true,
     writeTournamentRecords,
