@@ -12,7 +12,7 @@ import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
-import { MISSING_MATCHUP_DETAILS } from '../constants/errorConditions';
+import { NO_RESULTS_FOUND } from '../constants/errorConditions';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
@@ -239,8 +239,11 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     { resultsCount: 0, nameCount: 0 }
   );
 
-  if (matchUps.length && !resultsCount) {
-    return { error: MISSING_MATCHUP_DETAILS };
+  const withDrawPositionsNotBye = matchUps.filter(
+    ({ drawPositions, matchUpStatus }) => drawPositions?.length === 2 && matchUpStatus !== 'BYE'
+  );
+  if (withDrawPositionsNotBye.length && !resultsCount) {
+    return { warning: NO_RESULTS_FOUND };
   }
 
   const matchUpIds = matchUps?.map(({ matchUpId }) => matchUpId);
