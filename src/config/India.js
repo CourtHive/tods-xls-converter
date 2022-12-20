@@ -58,6 +58,8 @@ const roundNames = [
   'round of 32',
   'quarterfinals',
   'quarter finals',
+  'final qualifying',
+  'final qualifing',
   'semifinal',
   'semifinals',
   'semi finals',
@@ -140,7 +142,13 @@ export const config = {
       {
         type: HEADER,
         id: 'report',
-        elements: [{ text: 'report cover', options: { startsWith: true } }, 'offence report', 'medical certification'],
+        elements: [
+          { text: 'report cover', options: { startsWith: true } },
+          { text: 'compatibility', options: { startsWith: true } },
+          { text: 'acceptance sheet', options: { startsWith: true } },
+          'offence report',
+          'medical certification'
+        ],
         rows: 1,
         minimumElements: 1
       },
@@ -153,11 +161,15 @@ export const config = {
           'seed',
           'name',
           'family name',
+          'player name',
           'first name',
           'nationality',
           'aita no',
+          'sl no',
+          'aita reg no',
           'reg no.',
           'reg.no',
+          'sr.no',
           'reg',
           'state',
           ...roundNames
@@ -185,32 +197,40 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'sr. no', 'sno'] },
+      { attr: POSITION, header: ['#', 'sr. no', 'sno', 's.n'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
-      { attr: SEED_VALUE, header: ['seed', 'seed no'], limit: 1 },
+      { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1 },
       {
         attr: LAST_NAME,
-        header: ['name', 'surname', 'player name', 'family name', 'familiy name', 'famlily name'],
+        header: [
+          'name',
+          'surname',
+          'player name',
+          'family name',
+          'familiy name',
+          'famlily name',
+          'name of the players'
+        ],
         limit: 1,
         valueRegex: '[A-Za-z]*'
       },
       {
         attr: FIRST_NAME,
-        header: ['first name', 'fiirst name', 'fisrt name'],
+        header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
         limit: 1,
         valueRegex: `[A-Za-z]+|0`
       },
       {
         attr: PERSON_ID,
         header: [
+          { text: 'aita', options: { startsWith: true } },
           { text: 'reg no', options: { startsWith: true } },
           { text: 'reg', options: { startsWith: true } },
           { text: 'regn no', options: { includes: true } },
-          'aita regn No',
-          'aita no',
           'reg.no',
           's.no',
+          'sr.no',
           'sl no',
           'itn',
           'state',
