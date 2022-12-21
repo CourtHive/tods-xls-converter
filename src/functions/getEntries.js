@@ -185,11 +185,17 @@ export function getEntries({
     if (!analysis.columns?.round) {
       return { error: 'NO ROUND COLUMNS IDENTIFIED' };
     }
-    const error = NO_PARTICIPANTS_FOUND;
-    pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
-    pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } }, 'error');
+    const roundValues = analysis.columns.round
+      .flatMap((roundColumn) => analysis.columnProfiles.find((column) => column === roundColumn)?.values)
+      .filter(Boolean);
 
-    return { error };
+    if (roundValues.length) {
+      const error = NO_PARTICIPANTS_FOUND;
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } }, 'error');
+
+      return { error };
+    }
   }
 
   return { ...SUCCESS, entries, boundaryIndex, participants, positionAssignments, seedAssignments };
