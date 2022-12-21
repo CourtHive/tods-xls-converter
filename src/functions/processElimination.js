@@ -1,4 +1,4 @@
-import { getColumnParticpantConfidence } from './getColumnParticipantConfidenc';
+import { getColumnParticipantConfidence } from './getColumnParticipantConfidence';
 import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
 import { getMaxPositionWithValues } from './getMaxPositionWithValues';
 import { getRoundParticipants } from './getRoundParticipants';
@@ -148,17 +148,24 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   // -------------------------------------------------------------------------------------------------
   // ACTION: profile all roundColumns to determine how many contain participants withConfidence
+  // NOTE: for this check the FIRST ROUND PARTICIPANTS are always used
   const columnsWithParticipants = roundColumns
     .map((targetColumn) => {
-      const withConfidence = getColumnParticpantConfidence({
+      const { confidence: withConfidence, valuesCount } = getColumnParticipantConfidence({
         confidenceThreshold,
         roundParticipants,
         targetColumn,
         analysis
-      }).length;
-      return withConfidence && targetColumn;
+      });
+
+      // confidence is the percentage of values in the column with confident matches
+      // in some cases inconsistent use of two column results leads to parsing errors
+      const confidence = withConfidence.length / valuesCount;
+
+      return withConfidence.length && confidence > 0.2 && targetColumn;
     })
     .filter(Boolean);
+
   const resultRounds = [];
   // -------------------------------------------------------------------------------------------------
 
@@ -301,6 +308,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     seedAssignments,
     matchUpsCount,
     participants,
+    resultRounds, // currently unused
     structures,
     ...SUCCESS,
     matchUps,
