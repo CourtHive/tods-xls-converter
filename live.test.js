@@ -64,7 +64,7 @@ it('can process tests', () => {
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = false;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   const sheetTypes = [];
@@ -77,10 +77,12 @@ it('can process tests', () => {
   resetLogging();
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');
+  // setLoggingActive(true, 'fileNames');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'matchUps');
   // setLoggingActive(true, 'noWinningSide');
   // setLoggingActive(true, 'invalidResult');
+  // setLoggingActive(true, 'multiple results');
   // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'score-audit');
   // setLoggingActive(true, 'matchUps');
