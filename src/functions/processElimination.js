@@ -130,7 +130,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
     .map(({ column }) => column);
 
-  let roundParticipants = getRoundParticipants({ positionAssignments, participants: firstRoundParticipants });
+  let roundParticipants = getRoundParticipants({ positionAssignments, participants: firstRoundParticipants }) || [];
 
   // if positionAssignments have been determined then push an additional round for processing
   if (positionAssignments.length) {
@@ -162,7 +162,9 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       // in some cases inconsistent use of two column results leads to parsing errors
       const confidence = withConfidence.length / valuesCount;
 
-      return withConfidence.length && confidence > 0.2 && targetColumn;
+      // console.log({ targetColumn, confidence });
+
+      return withConfidence.length && confidence > 0.3 && targetColumn;
     })
     .filter(Boolean);
 

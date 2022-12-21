@@ -119,7 +119,7 @@ export function getRound({
     // -------------------------------------------------------------------------------------------------
     // ACTION: process all roundPositions
     pairedRowNumbers?.forEach((_, pairIndex) => {
-      const consideredParticipants = roundParticipants?.[pairIndex].filter(Boolean);
+      const consideredParticipants = roundParticipants?.[pairIndex]?.filter(Boolean);
       if (!consideredParticipants) return;
 
       const isBye = consideredParticipants?.find(({ isByePosition }) => isByePosition);
@@ -265,6 +265,8 @@ export function getRound({
     const missingDrawPosition = matchUps.filter((m) => !m.drawPositions || m.drawPositions.length < 2);
     if (missingDrawPosition.length) console.log(missingDrawPosition);
   }
+
+  // console.log(roundColumns[columnIndex], { columnsConsumed });
 
   return { matchUps, participantDetails, advancingParticipants, columnsConsumed, rangeAdjustment };
 }
