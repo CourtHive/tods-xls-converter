@@ -1,15 +1,17 @@
 import { getMaxPositionWithValues } from './getMaxPositionWithValues';
 import { getPositionColumn } from '../utilities/convenience';
 import { processElimination } from './processElimination';
+import { pushGlobalLog } from '../utilities/globalLog';
 
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import { KNOCKOUT } from '../constants/sheetTypes';
-import { pushGlobalLog } from '../utilities/globalLog';
 
 export function processIndeterminate(props) {
   const { sheetDefinition, sheet, sheetNumber, profile, analysis, info } = props;
-  sheetDefinition && sheetNumber && profile && sheet; // for the future
+  if (sheetDefinition && sheetNumber && profile && sheet) {
+    // for the future
+  }
 
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
   const { columnProfiles } = analysis;
@@ -20,7 +22,7 @@ export function processIndeterminate(props) {
   const frequencyValues = Object.values(analysis.columnFrequency);
   const twoOrMoreColumns = frequencyValues.length >= 2;
   const maxFrequencyValue = Math.max(...frequencyValues);
-  const viableFrequencyColumn = maxFrequencyValue > maxPositionWithValues / 2;
+  const viableFrequencyColumn = maxFrequencyValue >= maxPositionWithValues / 2;
 
   if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
     analysis.sheetType = KNOCKOUT;
