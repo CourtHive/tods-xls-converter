@@ -2,6 +2,7 @@ import { getParticipantValues } from './getParticipantValues';
 import { isScoreLike } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getColumnResults } from './getColumnResults';
+import { getLoggingActive } from '../global/state';
 
 export function getAdvanceTargets(params) {
   let columnsConsumed;
@@ -29,9 +30,11 @@ export function getAdvanceTargets(params) {
         keyColors: { message: 'yellow', attributes: 'brightyellow' },
         message
       });
-      results.map((result) =>
-        console.log({ result, isLikeScore: isLikeScore(result), isScoreLike: isScoreLike(result) })
-      );
+      if (getLoggingActive('multiple results')) {
+        results.map((result, i) =>
+          console.log({ result, isLikeScore: isLikeScore(result), isScoreLike: isScoreLike(result), i })
+        );
+      }
     } else if (results.length) {
       if (!result) {
         if (columnResultIndex) {
