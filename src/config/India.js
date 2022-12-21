@@ -146,6 +146,7 @@ export const config = {
           { text: 'report cover', options: { startsWith: true } },
           { text: 'compatibility', options: { startsWith: true } },
           { text: 'acceptance sheet', options: { startsWith: true } },
+          { text: 'acceptance list', options: { startsWith: true } },
           'offence report',
           'medical certification'
         ],
@@ -201,7 +202,7 @@ export const config = {
       { attr: POSITION, header: ['#', 'sr. no', 'sno', 's.n'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
-      { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1 },
+      { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
       {
         attr: LAST_NAME,
         header: [
@@ -480,6 +481,7 @@ export const config = {
   identifiers: [
     'AITA JUNIOR TOUR',
     { text: 'SPORTS india', includes: true },
+    { text: 'rank as on', includes: true },
     { text: 'sportindia', includes: true },
     { text: 'india ranking', includes: true },
     { text: 'jyta', splitIncludes: true },
