@@ -26,7 +26,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       keyColors: { fileName: 'brightgreen', sheetCount: 'brightgreen' },
       divider: 80,
       sheetCount,
-      fileName
+      fileName: fileName.slice(0, 40)
     });
     return { error: UNKNOWN_WORKBOOK_TYPE };
   }
@@ -37,7 +37,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     keyColors: { fileName: 'brightgreen', sheetCount: 'brightgreen' },
     divider: 80,
     sheetCount,
-    fileName
+    fileName: fileName.slice(0, 40)
   });
 
   const skippedResults = [];
@@ -66,7 +66,15 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       profile
     });
 
-    const { participants: structureParticipants, structures = [], entries, hasValues, analysis, error } = result;
+    const {
+      participants: structureParticipants,
+      structures = [],
+      entries,
+      hasValues,
+      analysis,
+      warning,
+      error
+    } = result;
 
     const invalidParticipant = structureParticipants?.find(({ participantName }) =>
       invalidNames.includes(participantName)
@@ -123,9 +131,11 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       } else {
         errorLog[error].push(sheetName);
       }
+    } else if (warning) {
+      if (logging) console.log({ warning });
+      pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'yellow' } });
     } else {
       const method = `processSheet ${sheetNumber}`;
-      if (!result.analysis) console.log({ result });
       pushGlobalLog(
         {
           method,

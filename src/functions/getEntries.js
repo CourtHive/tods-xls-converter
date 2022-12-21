@@ -100,13 +100,19 @@ export function getEntries({
   if (isSeparatedPersonsDoubles) {
     // NOTE: necessary to get row values past final positionRow
     const missingEntryDetailRow = Math.max(...positionRows) + 1;
-    detailParticipants[missingEntryDetailRow] = {};
+    // detailParticipants[missingEntryDetailRow] = {};
+    const missingDetail = {};
     entryDetailColumnProfiles.forEach(({ attribute, column }) => {
       const cellRef = `${column}${missingEntryDetailRow}`;
       const value = getCellValue(sheet[cellRef]);
-      detailParticipants[missingEntryDetailRow][attribute] = value;
+      // detailParticipants[missingEntryDetailRow][attribute] = value;
+      missingDetail[attribute] = value;
     });
-    entryDetailRows.push(missingEntryDetailRow);
+    const missingEntryValues = Object.values(missingDetail).filter(Boolean);
+    if (missingEntryValues.length) {
+      detailParticipants[missingEntryDetailRow] = missingDetail;
+      entryDetailRows.push(missingEntryDetailRow);
+    }
     const message = `adding participant detail row: ${missingEntryDetailRow}`;
     pushGlobalLog({
       method: 'notice',
@@ -179,10 +185,17 @@ export function getEntries({
     if (!analysis.columns?.round) {
       return { error: 'NO ROUND COLUMNS IDENTIFIED' };
     }
-    const error = NO_PARTICIPANTS_FOUND;
-    pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
-    pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } }, 'error');
-    return { error };
+    const roundValues = analysis.columns.round
+      .flatMap((roundColumn) => analysis.columnProfiles.find((column) => column === roundColumn)?.values)
+      .filter(Boolean);
+
+    if (roundValues.length) {
+      const error = NO_PARTICIPANTS_FOUND;
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } }, 'error');
+
+      return { error };
+    }
   }
 
   return { ...SUCCESS, entries, boundaryIndex, participants, positionAssignments, seedAssignments };

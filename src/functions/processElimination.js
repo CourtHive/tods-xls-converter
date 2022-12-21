@@ -1,4 +1,6 @@
+import { getColumnParticipantConfidence } from './getColumnParticipantConfidence';
 import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
+import { getMaxPositionWithValues } from './getMaxPositionWithValues';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
 import { generateStructureId } from '../utilities/hashing';
@@ -10,7 +12,7 @@ import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
-import { MISSING_MATCHUP_DETAILS } from '../constants/errorConditions';
+import { NO_RESULTS_FOUND } from '../constants/errorConditions';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
@@ -21,16 +23,49 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
+  const { positionProfile, maxPositionWithValues, maxPosition, maxPositionRow, maxValueRow } = getMaxPositionWithValues(
+    {
+      columnProfiles,
+      positionColumn,
+      analysis
+    }
+  );
+
+  const noValues = maxValueRow === -Infinity;
+
+  const blankDraw = () => {
+    const message = 'Blank Draw';
+    pushGlobalLog({
+      method: 'notice',
+      color: 'cyan',
+      keyColors: { message: 'brightblue', attributes: 'cyan' },
+      message
+    });
+    return {};
+  };
+
+  if (noValues || maxPositionWithValues < 2) return blankDraw();
+
+  let positionLimit;
+  if (maxPositionWithValues < maxPosition) {
+    positionLimit = maxPositionWithValues;
+    const positionAvoidanceRange = utilities.generateRange(maxPositionRow + 1, Math.max(...positionProfile.rows) + 1);
+    avoidRows.push(...positionAvoidanceRange);
+  }
+
   const { positionRefs, positionProgression, preRoundParticipantRows, error } = getPositionRefs({
     columnProfiles,
     positionColumn,
     preRoundColumn,
+    positionLimit,
     avoidRows
   });
 
+  if (positionRefs?.length < maxPositionWithValues) return blankDraw();
   if (error) return { error };
 
   const preRoundParticipants = [],
+    ignoredMatchUps = [],
     participants = [],
     structures = [],
     matchUps = [],
@@ -95,7 +130,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
     .map(({ column }) => column);
 
-  let roundParticipants = getRoundParticipants({ positionAssignments, participants: firstRoundParticipants });
+  let roundParticipants = getRoundParticipants({ positionAssignments, participants: firstRoundParticipants }) || [];
 
   // if positionAssignments have been determined then push an additional round for processing
   if (positionAssignments.length) {
@@ -111,10 +146,36 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   let roundNumber = 1;
   let columnIndex = 0;
 
+  // -------------------------------------------------------------------------------------------------
+  // ACTION: profile all roundColumns to determine how many contain participants withConfidence
+  // NOTE: for this check the FIRST ROUND PARTICIPANTS are always used
+  const columnsWithParticipants = roundColumns
+    .map((targetColumn) => {
+      const { confidence: withConfidence, valuesCount } = getColumnParticipantConfidence({
+        confidenceThreshold,
+        roundParticipants,
+        targetColumn,
+        analysis
+      });
+
+      // confidence is the percentage of values in the column with confident matches
+      // in some cases inconsistent use of two column results leads to parsing errors
+      const confidence = withConfidence.length / valuesCount;
+
+      // console.log({ targetColumn, confidence });
+
+      return withConfidence.length && confidence > 0.3 && targetColumn;
+    })
+    .filter(Boolean);
+
+  const resultRounds = [];
+  // -------------------------------------------------------------------------------------------------
+
   while (columnIndex < roundColumns.length) {
     const pairedRowNumbers = positionProgression[roundNumber - 1];
     if (pairedRowNumbers) {
       const result = getRound({
+        columnsWithParticipants,
         subsequentColumnLimit,
         confidenceThreshold,
         positionProgression,
@@ -135,6 +196,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
         participants.push(...participantDetails.filter(({ isByePosition }) => isByePosition));
       }
 
+      resultRounds.push(roundColumns[columnIndex]);
       columnIndex += result.columnsConsumed || 0;
 
       if (result.columnsConsumed) consumedColumns.push(roundNumber);
@@ -147,6 +209,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
         // ... or if there is only one matchUp assume that it is an unfinished Final
         if (winningSides || columnIndex + 1 < roundColumns.length || roundMatchUps.length === 1) {
           matchUps.push(...roundMatchUps);
+        } else {
+          ignoredMatchUps.push(...roundMatchUps);
         }
       }
 
@@ -184,8 +248,11 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     { resultsCount: 0, nameCount: 0 }
   );
 
-  if (matchUps.length && !resultsCount) {
-    return { error: MISSING_MATCHUP_DETAILS };
+  const withDrawPositionsNotBye = matchUps.filter(
+    ({ drawPositions, matchUpStatus }) => drawPositions?.length === 2 && matchUpStatus !== 'BYE'
+  );
+  if (withDrawPositionsNotBye.length && !resultsCount) {
+    return { warning: NO_RESULTS_FOUND };
   }
 
   const matchUpIds = matchUps?.map(({ matchUpId }) => matchUpId);
@@ -212,13 +279,38 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   const matchUpsCount = matchUps.length;
 
+  if (utilities.isPowerOf2(maxPositionWithValues)) {
+    const roundCounts = [];
+    let roundCount = maxPositionWithValues / 2;
+    while (roundCount >= 1) {
+      roundCounts.push(roundCount);
+      roundCount = roundCount / 2;
+    }
+    const roundTotals = roundCounts.reduce(
+      (totals, count) => totals.concat((totals[totals.length - 1] || 0) + count),
+      []
+    );
+
+    if (!roundTotals.includes(matchUpsCount)) {
+      const message = `matchUpsTotal indicates incomplete round`;
+      pushGlobalLog({
+        method: 'warning',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow' },
+        message
+      });
+    }
+  }
+
   if (getLoggingActive('participants')) console.log(participants);
 
   return {
     hasValues: true,
+    ignoredMatchUps,
     seedAssignments,
     matchUpsCount,
     participants,
+    resultRounds, // currently unused
     structures,
     ...SUCCESS,
     matchUps,

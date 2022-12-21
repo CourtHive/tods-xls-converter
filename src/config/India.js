@@ -30,6 +30,7 @@ import {
   TOURNAMENT_ID,
   TOURNAMENT_NAME
 } from '../constants/attributeConstants';
+import { POSITION } from '../constants/columnConstants';
 
 const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusConstants;
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
@@ -38,20 +39,34 @@ const { MALE, FEMALE, ANY } = genderConstants;
 
 const roundNames = [
   'round 1',
+  'round of 64',
+  'round of 32',
+  'round of 16',
+  'round of 8',
+  '1st round',
   '2nd round',
   '3rd round',
   'pre-quarters',
+  'pre- quarters',
+  'quarter- finals',
+  'preqtrs',
+  'qtrs',
   'pre quarter finals',
   'quarters',
+  'quarter',
   'qualifiers',
   'round of 32',
   'quarterfinals',
   'quarter finals',
+  'final qualifying',
+  'final qualifing',
   'semifinal',
   'semifinals',
   'semi finals',
   'semi-finals',
+  'final round',
   'winners',
+  'winner',
   'finals',
   'final'
 ];
@@ -70,7 +85,7 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
-    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }],
+    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }, { regex: '^[0-9:]+[a|p]{1}m$' }],
     skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
@@ -117,14 +132,24 @@ export const config = {
       {
         type: HEADER,
         id: 'setup',
-        elements: [{ text: 'setup page', options: { startsWith: true } }],
+        elements: [
+          { text: 'setup page', options: { includes: true } },
+          { text: 'preparation', options: { startsWith: true } }
+        ],
         rows: 1,
         minimumElements: 1
       },
       {
         type: HEADER,
         id: 'report',
-        elements: [{ text: 'report cover', options: { startsWith: true } }, 'offence report', 'medical certification'],
+        elements: [
+          { text: 'report cover', options: { startsWith: true } },
+          { text: 'compatibility', options: { startsWith: true } },
+          { text: 'acceptance sheet', options: { startsWith: true } },
+          { text: 'acceptance list', options: { startsWith: true } },
+          'offence report',
+          'medical certification'
+        ],
         rows: 1,
         minimumElements: 1
       },
@@ -136,12 +161,18 @@ export const config = {
           'rank',
           'seed',
           'name',
+          'time',
           'family name',
+          'player name',
           'first name',
           'nationality',
           'aita no',
+          'sl no',
+          'aita reg no',
           'reg no.',
           'reg.no',
+          'sr.no',
+          'reg',
           'state',
           ...roundNames
         ],
@@ -168,33 +199,54 @@ export const config = {
       }
     ],
     headerColumns: [
+      { attr: POSITION, header: ['#', 'sr. no', 'sno', 's.n'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
-      { attr: SEED_VALUE, header: 'seed', limit: 1 },
-      { attr: LAST_NAME, header: 'family name', limit: 1, valueRegex: '[A-Za-z]+' },
+      { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
+      {
+        attr: LAST_NAME,
+        header: [
+          'name',
+          'surname',
+          'player name',
+          'family name',
+          'familiy name',
+          'famlily name',
+          'name of the players'
+        ],
+        limit: 1,
+        valueRegex: '[A-Za-z]*'
+      },
       {
         attr: FIRST_NAME,
-        header: ['first name', 'fisrt name'],
+        header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
         limit: 1,
         valueRegex: `[A-Za-z]+|0`
       },
       {
         attr: PERSON_ID,
         header: [
+          { text: 'aita', options: { startsWith: true } },
           { text: 'reg no', options: { startsWith: true } },
-          { text: 'reg.', options: { startsWith: true } },
-          'aita no',
+          { text: 'reg', options: { startsWith: true } },
+          { text: 'regn no', options: { includes: true } },
           'reg.no',
+          's.no',
+          'sr.no',
+          'sl no',
+          'itn',
           'state',
           'first name',
+          'city',
           'nationality'
         ],
         limit: 1,
         skipWords: ['reg', 'umpire', '0'],
-        valueRegex: '^\\d{6,}$'
+        valueRegex: '^\\d{4,}$'
       },
-      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '[A-Za-z]+' },
+      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '[A-Za-z]*' },
       { attr: STATE, header: ['state'], limit: 1 },
+      { attr: CITY, header: ['city'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
       { attr: ROUND, header: [...roundNames] }
     ],
@@ -404,6 +456,8 @@ export const config = {
       if (allProgressionKeys) {
         columnProfile.values = [];
         columnProfile.character = 'progression';
+        columnProfile.keyMap = {};
+        columnProfile.rows = [];
         return columnProfile.character;
       }
     },
@@ -427,6 +481,7 @@ export const config = {
   identifiers: [
     'AITA JUNIOR TOUR',
     { text: 'SPORTS india', includes: true },
+    { text: 'rank as on', includes: true },
     { text: 'sportindia', includes: true },
     { text: 'india ranking', includes: true },
     { text: 'jyta', splitIncludes: true },

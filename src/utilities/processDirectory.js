@@ -1,11 +1,11 @@
-import { matchUpStatusConstants, tournamentEngine } from 'tods-competition-factory';
+import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
 import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
-import { readdirSync, readFileSync, writeFileSync, existsSync } from 'fs-extra';
+import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'fs-extra';
 import { getLoggingActive, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
+import { writeTODS08CSV } from './writeTODS08CSV';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
-import { writeTODS08CSV } from './writeTODS08CSV';
 
 const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
 
@@ -15,6 +15,11 @@ export function processDirectory({
   writeDir = './',
   readDir = './',
 
+  useFileCreationDate = true,
+  tournamentContext = {},
+  matchUpContext = {},
+
+  captureProcessedData = true,
   processStructures = true,
   includeWorkbooks,
   processLimit = 0,
@@ -65,16 +70,23 @@ export function processDirectory({
   for (const fileName of fileNames) {
     if (getLoggingActive('sheetNames') || getLoggingActive('fileNames')) console.log({ fileName, index });
     const buf = readFileSync(`${readDir}/${fileName}`);
+    const stat = statSync(`${readDir}/${fileName}`);
+
     let result = loadWorkbook(buf, index);
     const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
     result = processSheets({ fileName, sheetNumbers, sheetLimit, sheetTypes, processStructures });
-    fileResults[index] = { fileName, ...result, ...additionalContent };
+    if (captureProcessedData) {
+      fileResults[index] = { fileName, ...result, ...additionalContent };
+    }
     index += 1;
 
     const { participants: participantsMap } = result;
     const tournamentParticipants = participantsMap ? Object.values(participantsMap) : [];
-    Object.assign(allParticipantsMap, participantsMap);
+
+    if (captureProcessedData) {
+      Object.assign(allParticipantsMap, participantsMap);
+    }
 
     const { tournamentId } = generateTournamentId({ attributes: [fileName] });
 
@@ -82,6 +94,7 @@ export function processDirectory({
 
     tournamentEngine.setState({
       participants: tournamentParticipants,
+      ...tournamentContext,
       tournamentId
     });
 
@@ -181,16 +194,41 @@ export function processDirectory({
     if (startDate) {
       const { startDate: existingStartDate } = tournamentEngine.getTournamentInfo();
       if (!existingStartDate) tournamentEngine.setTournamentDates({ startDate, endDate: startDate });
+    } else {
+      const message = `No Date Found`;
+      const contextDate = matchUpContext?.startDate || tournamentContext?.startDate;
+      const filedate = useFileCreationDate && !contextDate ? stat.birthtime : undefined;
+
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightred',
+        keyColors: { message: 'yellow', attributes: 'brightred', context: 'brightgreen', filedate: 'brightgreen' },
+        message,
+        contextDate,
+        filedate
+      });
+
+      const foundDate = contextDate || utilities.dateTime.extractDate(filedate?.toISOString());
+      if (foundDate) {
+        const result = tournamentEngine.setTournamentDates({ startDate: foundDate, endDate: foundDate });
+        if (result.error) console.log(result);
+      }
     }
 
     const matchUps = tournamentEngine.allTournamentMatchUps({
-      context: { tournamentName, level: 'REG', identifierType: profile.identifierType }
+      context: { tournamentName, level: 'REG', identifierType: profile?.identifierType, ...matchUpContext }
     }).matchUps;
-    allMatchUps.push(...matchUps);
+
+    if (captureProcessedData) {
+      allMatchUps.push(...matchUps);
+    }
 
     totalMatchUps += result.totalMatchUps || 0;
-    if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
-    if (result.resultValues?.length) resultValues.push(...result.resultValues);
+
+    if (captureProcessedData) {
+      if (result.skippedResults?.length) skippedResults.push(...result.skippedResults);
+      if (result.resultValues?.length) resultValues.push(...result.resultValues);
+    }
 
     if (result.errorLog) {
       Object.keys(result.errorLog).forEach((key) => {
@@ -204,7 +242,10 @@ export function processDirectory({
     }
 
     const tournamentRecord = tournamentEngine.getState().tournamentRecord;
-    tournamentRecords.push(tournamentRecord);
+
+    if (captureProcessedData) {
+      tournamentRecords.push(tournamentRecord);
+    }
 
     if (writeTournamentRecords && writeDir) {
       if (tournamentRecord.tournamentId) {

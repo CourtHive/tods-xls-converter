@@ -5,6 +5,7 @@ import { FIRST_NAME, LAST_NAME, PERSON_ID } from '../constants/attributeConstant
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { RESULT, ROUND } from '../constants/sheetElements';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
+import { getRow } from './sheetAccess';
 
 export function getColumnCharacter({
   columnProfiles,
@@ -14,7 +15,8 @@ export function getColumnCharacter({
   columnIndex,
   sheetType
 }) {
-  const {
+  let {
+    lastConsecutiveValue,
     consecutiveNumbers,
     lastNumericValue,
     containsNumeric,
@@ -35,11 +37,35 @@ export function getColumnCharacter({
     return { character };
   }
 
+  // check for erroneous values in position column when reasonable drawSize achieved
+  if (allNumeric && !consecutiveNumbers && utilities.isPowerOf2(lastConsecutiveValue)) {
+    const indexPlusOne = values.indexOf(lastConsecutiveValue) + 1;
+    const valueOverhang = values.length - indexPlusOne;
+    if (lastConsecutiveValue / valueOverhang > 4) {
+      columnProfile.values = columnProfile.values.slice(0, indexPlusOne);
+      columnProfile.rows = columnProfile.rows.slice(0, indexPlusOne);
+      columnProfile.lastNumericValue = lastConsecutiveValue;
+      columnProfile.consecutiveNumbers = true;
+
+      values = columnProfile.values.slice(0, indexPlusOne);
+      lastNumericValue = lastConsecutiveValue;
+      consecutiveNumbers = true;
+
+      const maxRow = Math.max(...columnProfile.rows);
+      const keysToRemove = Object.keys(columnProfile.keyMap).filter((key) => getRow(key) > maxRow);
+      keysToRemove.forEach((key) => {
+        delete columnProfile.keyMap[key];
+      });
+    }
+  }
+
   const numericCheck = consecutiveNumbers && lastNumericValue > 0;
+
+  const meetsMinimumDrawSize = (value) => value > 1 && utilities.isPowerOf2(value);
 
   // TODO: this would exclude any qualifying rounds which are not power of 2
   const knockOutCheck =
-    utilities.isPowerOf2(lastNumericValue) || (lastNumericValue < values.length && utilities.isPowerOf2(values.length));
+    meetsMinimumDrawSize(lastNumericValue) || (lastNumericValue < values.length && meetsMinimumDrawSize(values.length));
 
   // preRound and position columns cannot occur beyond 4th column
   if (

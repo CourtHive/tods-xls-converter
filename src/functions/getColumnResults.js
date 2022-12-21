@@ -1,10 +1,9 @@
 import { getNonBracketedValue, tidyValue, withoutQualifyingDesignator } from '../utilities/convenience';
 import { getPotentialResult, isScoreLike } from '../utilities/identification';
+import { getParticipantValues } from './getParticipantValues';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getLoggingActive } from '../global/state';
-import { fuzzy } from 'fast-fuzzy';
-
-const joiners = ['-', '/'];
+import { pRankReducer } from './pRankReducer';
 
 export function getColumnResults({
   confidenceThreshold = 0.7,
@@ -49,46 +48,8 @@ export function getColumnResults({
 
     const sideWeights = !isDoubleWalkover
       ? consideredParticipants?.map((participant, index) => {
-          const { participantName, person, individualParticipants } = participant;
-
-          let pValues = [participantName];
-          if (person) {
-            const { standardFamilyName, standardGivenName } = person;
-            pValues.push(standardFamilyName, standardGivenName);
-            // handle multiple last names where only one of the last names is progressed
-            const splitFamilyName = standardFamilyName.split(' ');
-            if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
-          }
-          const doublesFirstNames = [];
-          const doublesLastNames = [];
-          individualParticipants?.forEach(({ person }) => {
-            if (person) {
-              const { standardFamilyName, standardGivenName } = person;
-              doublesFirstNames.push(standardGivenName?.toLowerCase());
-              doublesLastNames.push(standardFamilyName?.toLowerCase());
-
-              pValues.push(standardFamilyName);
-              // handle multiple last names where only one of the last names is progressed
-              const splitFamilyName = standardFamilyName.split(' ');
-              if (splitFamilyName !== standardFamilyName) pValues.push(...splitFamilyName);
-            }
-          });
-
-          // for those rare occations where first names are advanced rather than last names
-          if (doublesFirstNames.length > 1) {
-            const combinations = joiners.flatMap((joiner) => doublesFirstNames.join(joiner));
-            pValues.push(...combinations);
-          }
-
-          const pRank = pValues.reduce(
-            (result, v) => {
-              const confidence = v ? fuzzy(v, value.toString()) : 0;
-              return confidence > confidenceThreshold && confidence > result.confidence
-                ? { confidence, match: v }
-                : result;
-            },
-            { confidence: 0 }
-          );
+          const pValues = getParticipantValues(participant, roundNumber, roundPosition);
+          const pRank = pRankReducer({ pValues, value, confidenceThreshold });
 
           return { sideNumber: index + 1, ...pRank };
         })

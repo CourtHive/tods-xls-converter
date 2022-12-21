@@ -40,7 +40,10 @@ export function getColumnAssessment({
           assessment.containsNumeric = true;
           assessment.allAlpha = false;
           if (assessment.consecutiveNumbers) {
-            assessment.consecutiveNumbers = parseFloat(value) > assessment.lastNumericValue;
+            const stillConsecutive =
+              parseFloat(value) > assessment.lastNumericValue && assessment.values.length + 1 >= parseFloat(value);
+            if (stillConsecutive) assessment.lastConsecutiveValue = value;
+            assessment.consecutiveNumbers = stillConsecutive;
           }
           assessment.lastNumericValue = value;
           if (assessment.allProviderId) {
@@ -84,10 +87,14 @@ export function getColumnAssessment({
 
   const containsNumeric = assessment.values.some(isNumeric);
   if (!containsNumeric) {
+    assessment.lastConsecutiveValue = undefined;
     assessment.lastNumericValue = undefined;
     assessment.consecutiveNumbers = false;
     assessment.allProviderId = undefined;
   }
+
+  // 1 is technically a powerOf2, but it is invalid for a drawSize
+  if (assessment?.lastConsecutiveValue < 2) assessment.lastConsecutiveValue = undefined;
 
   // apply any character processing specified by profile
   if (profile.columnCharacter) {

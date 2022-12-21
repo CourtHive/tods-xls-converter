@@ -25,9 +25,10 @@ export function digitsCount(value) {
 export function getPotentialResult(value) {
   const splitValue = splitValueOnFirstDigit(value);
   let potentialResult = excludeSingleDigits(splitValue?.[1]);
+
   let isPotential = isScoreLike(potentialResult) && digitsCount(potentialResult) > 1;
 
-  const lastPart = value.toString().toLowerCase().split(' ').reverse()[0];
+  const lastPart = value?.toString().toLowerCase().split(' ').reverse()[0];
 
   if (['walkover', 'wo', 'w/o'].includes(lastPart)) {
     potentialResult = 'WALKOVER';

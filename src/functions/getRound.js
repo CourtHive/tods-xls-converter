@@ -1,17 +1,20 @@
 import { matchUpStatusConstants, mocksEngine, utilities } from 'tods-competition-factory';
 import { getPotentialResult } from '../utilities/identification';
+import { getParticipantValues } from './getParticipantValues';
 import { audit, getLoggingActive } from '../global/state';
 import { generateMatchUpId } from '../utilities/hashing';
 import { getAdvanceTargets } from './getAdvanceTargets';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { tidyLower } from '../utilities/convenience';
 import { normalizeScore } from './cleanScore';
+import { pRankReducer } from './pRankReducer';
 import { tidyScore } from './scoreParser';
 import { getRow } from './sheetAccess';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
 export function getRound({
+  columnsWithParticipants,
   subsequentColumnLimit,
   confidenceThreshold,
   positionProgression,
@@ -38,6 +41,7 @@ export function getRound({
   const matchUps = [];
 
   const relevantSubsequentColumns = roundColumns.slice(columnIndex + 1).slice(0, subsequentColumnLimit);
+  const overlap = utilities.intersection(relevantSubsequentColumns, columnsWithParticipants);
 
   const prospectiveResults = finalRound || relevantSubsequentColumns.length;
 
@@ -80,23 +84,42 @@ export function getRound({
 
     if (potentialResults.length > 1) {
       // IF: there are participantNames combined with results
+      // AND: the subsequent column contains potentialParticipants
       // THEN: limit the column look ahead to only one subsequent column
-      columnValues = columnValues.map((c) => c.slice(0, 1));
+      const targetColumn = roundColumns[columnIndex + 2];
 
-      const message = `participantName (result) { roundNumber: ${roundNumber} }`;
-      pushGlobalLog({
-        method: 'notice',
-        color: 'brightyellow',
-        keyColors: { message: 'cyan', attributes: 'brightyellow' },
-        message
-      });
+      // ~~~~
+      // TODO: replace with getColumnParticipantConfidence({ targetColumn, confidenceThreshold, roundParticipants, analysis})
+      const nextColumnProfile = analysis.columnProfiles.find(({ column }) => column === targetColumn);
+      const nextColumnValues = nextColumnProfile?.values;
+      const roundParticipantValues = roundParticipants.flat().map(getParticipantValues);
+      const withConfidence = nextColumnValues
+        ?.flatMap((value) =>
+          roundParticipantValues.map((pValues) => pRankReducer({ pValues, value, confidenceThreshold }))
+        )
+        .filter(({ confidence }) => confidence);
+      // ~~~~
+
+      if (withConfidence?.length) {
+        columnValues = columnValues.map((c) => c.slice(0, 1));
+
+        const message = `participantName (result) { roundNumber: ${roundNumber} }`;
+        pushGlobalLog({
+          method: 'notice',
+          color: 'brightyellow',
+          keyColors: { message: 'cyan', attributes: 'brightyellow' },
+          message
+        });
+      }
+    } else if (overlap.length > 1) {
+      columnValues = columnValues.map((c) => c.slice(0, 1));
     }
     // -------------------------------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------------------------------
     // ACTION: process all roundPositions
-    pairedRowNumbers.forEach((_, pairIndex) => {
-      const consideredParticipants = roundParticipants?.[pairIndex];
+    pairedRowNumbers?.forEach((_, pairIndex) => {
+      const consideredParticipants = roundParticipants?.[pairIndex]?.filter(Boolean);
       if (!consideredParticipants) return;
 
       const isBye = consideredParticipants?.find(({ isByePosition }) => isByePosition);
@@ -113,7 +136,12 @@ export function getRound({
           const relevantProgression = positionProgression[positionProgression.length - relevantIndex - 1].flat();
           const pairCount = relevantProgression.length / 2;
           const relevantPair = relevantProgression.slice(pairCount - 1, pairCount + 1);
-          const pairRange = utilities.generateRange(relevantPair[0] + 3, relevantPair[1] + 1 - 3);
+
+          // NOTE: add buffer to avoid multiple result values
+          const pairRange = utilities.generateRange(
+            relevantPair[0] + 3 + (relevantIndex ? 0 : 2),
+            relevantPair[1] + 1 - 3 - (relevantIndex ? 0 : 2)
+          );
           const keyMap = analysis.columnProfiles.find(({ column }) => column === relevantColumn).keyMap;
 
           return Object.keys(keyMap)
@@ -131,6 +159,7 @@ export function getRound({
         potentialValues,
         roundPosition,
         roundNumber,
+        analysis,
         profile
       });
       if (advanceTargets.columnsConsumed > columnsConsumed) columnsConsumed = advanceTargets.columnsConsumed;
@@ -236,6 +265,8 @@ export function getRound({
     const missingDrawPosition = matchUps.filter((m) => !m.drawPositions || m.drawPositions.length < 2);
     if (missingDrawPosition.length) console.log(missingDrawPosition);
   }
+
+  // console.log(roundColumns[columnIndex], { columnsConsumed });
 
   return { matchUps, participantDetails, advancingParticipants, columnsConsumed, rangeAdjustment };
 }

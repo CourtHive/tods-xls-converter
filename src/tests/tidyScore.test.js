@@ -7,6 +7,7 @@ import { expect, it } from 'vitest';
 // '9/8 [7/0]' => '9-8 7-0'
 // '5/4 [7-4], 5/4 [12-11]' => '5-4 [7-4] 5-4 [12-11]'
 // '6/0, 7/6[7]' => '6-0 7-6[7]'
+// '6-2/6-3.' => '6-2'
 
 const scores = [
   { score: '93', expectation: { score: '9-3' } },
@@ -39,18 +40,20 @@ it.each(scores)('can tidy scores', ({ score, expectation }) => {
   }
 });
 
+// '(7, 5)(2, 1)con'
+// '(2, 6)(7, 6)[7, 2](6, 3'
+
 /*
-(6, 1)(6, 2)
-(6, 0)(7, 5)
-(7, 5)(6, 2)
-(7, 5)(2, 1)con
-(6, 3)(2, 6)(6, 1)
-(3, 6)(6, 3)(10, 8)
-(6, 3)(5, 7)(10, 4)
-(2, 6)(7, 6)[7, 2](6, 3
-(6, 3)(1, 6)(7, 6)[7, 4]
-(6, 4)(7, 6)[9, 7]
-(7, 6)[7, 4](6, 1)
-(3, 6)(7, 6)[7, 2](7, 6)[7, 5]
-(7, 6)[11, 9](6, 7)[4, 7)(10, 6)
+{ result: '(6, 4)(3, 6)(10, 6', isLikeScore: true, isScoreLike: true }
+{ result: ')', isLikeScore: true, isScoreLike: true }
+{ result: '17', isLikeScore: true, isScoreLike: true }
+{ result: '(6-1)(6-0)', isLikeScore: true, isScoreLike: true }
+{ result: '25', isLikeScore: true, isScoreLike: true }
+{ result: '(6-0)(6-0)', isLikeScore: true, isScoreLike: true }
+{ result: '17', isLikeScore: true, isScoreLike: true }
+{ result: 'w/o', isLikeScore: true, isScoreLike: false }
+{ result: '2-6, 7-6(7-4), 11-9', isLikeScore: true, isScoreLike: true }
+{ result: '12', isLikeScore: true, isScoreLike: true }
+{ result: '13', isLikeScore: true, isScoreLike: true }
+{ result: '(6-4)(6-3) 6', isLikeScore: true, isScoreLike: true }
 */

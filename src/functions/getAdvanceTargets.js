@@ -2,23 +2,12 @@ import { getParticipantValues } from './getParticipantValues';
 import { isScoreLike } from '../utilities/identification';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getColumnResults } from './getColumnResults';
+import { getLoggingActive } from '../global/state';
 
 export function getAdvanceTargets(params) {
   let columnsConsumed;
 
   const { consideredParticipants, potentialValues } = params;
-
-  // -------------------------------------------------------------------------------------------------
-  // ACTION: check to see whether one of the advanced sides is a BYE
-  const byeAdvancement = consideredParticipants?.some((participant) => participant.isByePosition);
-  if (byeAdvancement) {
-    const advancedSide = consideredParticipants?.reduce((sideNumber, participant, index) => {
-      if (!participant.isByePosition) return index + 1;
-      return sideNumber;
-    }, {});
-    return { advancedSide, confidence: 1 };
-  }
-  // -------------------------------------------------------------------------------------------------
 
   // if no potentialValues have been provided, return
   if (!potentialValues) return {};
@@ -34,10 +23,18 @@ export function getAdvanceTargets(params) {
     const potentialResults = columnResult.map(({ potentialResult }) => potentialResult);
 
     if (results.length > 1) {
-      console.log('MULTIPLE RESULTS');
-      results.map((result) =>
-        console.log({ result, isLikeScore: isLikeScore(result), isScoreLike: isScoreLike(result) })
-      );
+      const message = `Multiple Results, roundNumber: ${params.roundNumber}`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightyellow',
+        keyColors: { message: 'yellow', attributes: 'brightyellow' },
+        message
+      });
+      if (getLoggingActive('multiple results')) {
+        results.map((result, i) =>
+          console.log({ result, isLikeScore: isLikeScore(result), isScoreLike: isScoreLike(result), i })
+        );
+      }
     } else if (results.length) {
       if (!result) {
         if (columnResultIndex) {
@@ -69,6 +66,20 @@ export function getAdvanceTargets(params) {
   // -------------------------------------------------------------------------------------------------
 
   // -------------------------------------------------------------------------------------------------
+  // ACTION: check to see whether one of the advanced sides is a BYE
+  // POSSIBILITY: checking for BYE after checking for sides with results to provide error checking
+  const byeAdvancement = consideredParticipants?.some((participant) => participant.isByePosition);
+  if (byeAdvancement) {
+    const advancedSide = consideredParticipants?.reduce((sideNumber, participant, index) => {
+      if (!participant.isByePosition) return index + 1;
+      return sideNumber;
+    }, {});
+
+    return { advancedSide, confidence: 1 };
+  }
+  // -------------------------------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------------------------------
   // IF: a result was found but no side has been identified and there are two participants to consider
   // THEN: compare the potential values to the participants looking for a match
   // WHERE: the participant name starts with a potential value
@@ -97,7 +108,7 @@ export function getAdvanceTargets(params) {
     });
 
     if (sideStartsWith) {
-      const message = `side starts with to match ${sideStartsWith.participantName}`;
+      const message = `Side starts with to match: ${sideStartsWith.participantName}`;
       pushGlobalLog({
         method: 'notice',
         color: 'brightyellow',

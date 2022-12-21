@@ -395,9 +395,8 @@ export const config = {
   },
   sheetNameMatcher: (sheetNames) => {
     const potentials = sheetNames.some((sheetName) => {
-      const vTest = /^U1?[VD]??/.test(sheetName);
       const mTest = /^[ABC] MASC/.test(sheetName);
-      return vTest || mTest;
+      return mTest;
     });
     return potentials;
   },

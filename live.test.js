@@ -77,16 +77,20 @@ it('can process tests', () => {
   resetLogging();
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');
+  // setLoggingActive(true, 'fileNames');
   // setLoggingActive(true, 'sheetNames');
   // setLoggingActive(true, 'matchUps');
   // setLoggingActive(true, 'noWinningSide');
   // setLoggingActive(true, 'invalidResult');
+  // setLoggingActive(true, 'multiple results');
   // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'score-audit');
   // setLoggingActive(true, 'matchUps');
   // setLoggingActive(true, 'participants');
 
   const result = processDirectory({
+    captureProcessedData: true, // set to false to bulk process > 200 files
+    // tournamentContext: { startDate: '2022-06-06' },
     processStructures: true,
     includeWorkbooks: true,
     writeTournamentRecords,
