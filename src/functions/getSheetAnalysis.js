@@ -3,6 +3,7 @@ import { hasNumeric, isString } from '../utilities/identification';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getCol, getRow, keyRowSort } from './sheetAccess';
 import { getRoundCharacter } from './getRoundCharacter';
+import { pushGlobalLog } from '../utilities/globalLog';
 import { utilities } from 'tods-competition-factory';
 import { getIsQualifying } from './getIsQualifying';
 import { getSheetKeys } from './getSheetKeys';
@@ -16,6 +17,7 @@ import {
   tidyValue
 } from '../utilities/convenience';
 
+import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 import { POSITION } from '../constants/columnConstants';
 
@@ -167,6 +169,27 @@ export const getSheetAnalysis = ({
 
   const category = getCategory({ sheet, sheetName, profile })?.category || info.category;
   const { isQualifying } = getIsQualifying({ sheet, sheetName, profile });
+
+  if (!columns[LAST_NAME] && !columns[FIRST_NAME]) {
+    const potentialNameColumnProfiless = columnProfiles.filter(({ character, attribute }) => !character && !attribute);
+    const maxColumnFrequency = Math.max(...Object.values(columnFrequency));
+    const maxFrequencyColumn = Object.keys(columnFrequency).find((key) => columnFrequency[key] === maxColumnFrequency);
+    const nominatedNameColumn = potentialNameColumnProfiless.find(({ column }) => column === maxFrequencyColumn);
+    if (nominatedNameColumn) {
+      nominatedNameColumn.attribute = LAST_NAME;
+      attributeMap[maxFrequencyColumn] = LAST_NAME;
+      columns[LAST_NAME] = maxFrequencyColumn;
+
+      const message = `Name column identified`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightgreen',
+        keyColors: { message: 'brightgreen', attributes: 'magenta', column: 'brightgreen' },
+        message,
+        column: maxFrequencyColumn
+      });
+    }
+  }
 
   const result = {
     potentialResultValues,
