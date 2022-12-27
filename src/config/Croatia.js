@@ -95,14 +95,12 @@ export const config = {
         rowIds: ['doublesParticipants']
       }
     ],
-    gaps: { draw: { term: 'Round 1', gap: 0 } },
     headerColumns: [
       { attr: 'rank', header: 'Rang' },
       { attr: 'seed', header: 'Nositelj' },
       { attr: 'players', header: 'Prezime, Ime' },
       { attr: 'club', header: 'Klub' },
       { attr: 'rounds', header: '2.kolo' }
-    ],
-    playerRows: { playerNames: true, lastName: true, firstName: true }
+    ]
   }
 };

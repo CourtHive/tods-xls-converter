@@ -215,7 +215,8 @@ export const config = {
           'family name',
           'familiy name',
           'famlily name',
-          'name of the players'
+          'name of the players',
+          'round 1'
         ],
         limit: 1,
         valueRegex: '[A-Za-z]*'
@@ -306,8 +307,6 @@ export const config = {
         rowIds: ['doublesParticipants']
       }
     ],
-    gaps: { draw: { term: 'Round 1', gap: 0 } },
-    playerRows: { playerNames: true, lastName: true, firstName: true },
     tournamentInfo: [],
     drawInfo: [
       {
