@@ -25,8 +25,8 @@ export function getContentFrame({ sheet, profile, sheetDefinition, rowRange }) {
     sheet
   });
 
-  const fisrtHeaderRow = Math.min(...headerRows);
-  const avoidBeforeHeader = utilities.generateRange(0, fisrtHeaderRow);
+  const fisrtHeaderRow = headerRows && Math.min(...headerRows);
+  const avoidBeforeHeader = headerRows ? utilities.generateRange(0, fisrtHeaderRow) : [];
 
   const footerRows =
     findRow({
@@ -35,13 +35,14 @@ export function getContentFrame({ sheet, profile, sheetDefinition, rowRange }) {
       sheet
     }) || [];
 
-  const headerRow = Math.min(...headerRows);
+  const headerRow = headerRows && Math.min(...headerRows);
 
-  const headerAvoidRows = headerRows.flatMap((thisRow) => {
-    const startRange = thisRow;
-    const endRange = +thisRow + (headerRowDefinition.rows || 0);
-    return utilities.generateRange(startRange, endRange);
-  });
+  const headerAvoidRows =
+    headerRows?.flatMap((thisRow) => {
+      const startRange = thisRow;
+      const endRange = +thisRow + (headerRowDefinition.rows || 0);
+      return utilities.generateRange(startRange, endRange);
+    }) || [];
 
   const footerRow = footerRows[footerRows.length - 1] || rowRange.to + 1;
   const footerAvoidRows = footerRows.flatMap((footerRow) => {
