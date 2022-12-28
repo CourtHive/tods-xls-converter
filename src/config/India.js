@@ -276,7 +276,8 @@ export const config = {
       },
       {
         type: REPORT,
-        rowIds: ['report']
+        rowIds: ['report'],
+        sheetNames: ['report']
       },
       {
         type: SIGN_UP,
