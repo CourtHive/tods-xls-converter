@@ -206,7 +206,7 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'] },
+      { attr: POSITION, header: ['#', 'st', 'sr. no', 'sr no', 'sno', 's.n'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
@@ -216,6 +216,7 @@ export const config = {
           'name',
           'surname',
           'player name',
+          'players name',
           'family name',
           'familiy name',
           'famlily name',
