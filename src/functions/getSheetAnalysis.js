@@ -176,18 +176,20 @@ export const getSheetAnalysis = ({
     const maxFrequencyColumn = Object.keys(columnFrequency).find((key) => columnFrequency[key] === maxColumnFrequency);
     const nominatedNameColumn = potentialNameColumnProfiless.find(({ column }) => column === maxFrequencyColumn);
     if (nominatedNameColumn) {
-      nominatedNameColumn.attribute = LAST_NAME;
-      attributeMap[maxFrequencyColumn] = LAST_NAME;
-      columns[LAST_NAME] = maxFrequencyColumn;
+      if (nominatedNameColumn.values.length > 1) {
+        nominatedNameColumn.attribute = LAST_NAME;
+        attributeMap[maxFrequencyColumn] = LAST_NAME;
+        columns[LAST_NAME] = maxFrequencyColumn;
 
-      const message = `Name column identified`;
-      pushGlobalLog({
-        method: 'notice',
-        color: 'brightgreen',
-        keyColors: { message: 'brightgreen', attributes: 'magenta', column: 'brightgreen' },
-        message,
-        column: maxFrequencyColumn
-      });
+        const message = `Name column identified`;
+        pushGlobalLog({
+          method: 'notice',
+          color: 'brightgreen',
+          keyColors: { message: 'brightgreen', attributes: 'magenta', column: 'brightgreen' },
+          message,
+          column: maxFrequencyColumn
+        });
+      }
     }
   }
 

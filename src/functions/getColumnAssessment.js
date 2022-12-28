@@ -60,7 +60,7 @@ export function getColumnAssessment({
         )
           assessment.scoreLikeCount += 1;
 
-        if (value !== '') {
+        if (!['', 'undefined'].includes(value)) {
           assessment.values.push(value);
           assessment.keyMap[key] = value;
           assessment.rows.push(getRow(key));
