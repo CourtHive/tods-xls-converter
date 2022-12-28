@@ -52,10 +52,12 @@ const roundNames = [
   'quarter- finals',
   'quarterfinalists',
   'preqtrs',
+  'pqtr',
   'qtrs',
   'pre quarter finals',
   'quarters',
   'quarter',
+  'qtr',
   'qualifiers',
   'round of 32',
   'quarterfinals',
@@ -66,6 +68,7 @@ const roundNames = [
   'semifinals',
   'semi finals',
   'semi-finals',
+  'sf',
   'final round',
   'winners',
   'winner',
@@ -170,6 +173,7 @@ export const config = {
           'nationality',
           'aita no',
           'sl no',
+          'sr no',
           'member id',
           'aita reg no',
           'reg no.',
@@ -180,7 +184,7 @@ export const config = {
           ...roundNames
         ],
         rows: 1,
-        minimumElements: 4
+        minimumElements: 3
       },
       {
         type: FOOTER,
@@ -202,7 +206,7 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'sr. no', 'sno', 's.n'] },
+      { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
@@ -216,6 +220,7 @@ export const config = {
           'familiy name',
           'famlily name',
           'name of the players',
+          'name of players',
           'round 1'
         ],
         limit: 1,
