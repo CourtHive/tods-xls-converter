@@ -233,14 +233,12 @@ export const config = {
         rowIds: ['federationHeader', 'drawFooter']
       }
     ],
-    gaps: { draw: { term: 'Round 1', gap: 0 } },
     headerColumns: [
       {
         header: roundNames,
         attr: ROUND
       }
     ],
-    playerRows: { playerNames: true, lastName: true, firstName: true },
     tournamentInfo: [],
     drawInfo: [
       {

@@ -42,7 +42,7 @@ export function getValuesMap({ columnProfiles, profile, avoidRows }) {
   const valuesKeys = Object.keys(valuesMap);
   const commaSeparatedKeys = valuesKeys.filter((key) => key.includes(','));
   const noCommaKeys = valuesKeys.filter((key) => !key.includes(','));
-  const commaKeyhMatches = commaSeparatedKeys
+  const commaKeyMatches = commaSeparatedKeys
     .map((key) => {
       const lastName = key.split(',')[0];
       const match = noCommaKeys.find((nck) => nck === lastName);
@@ -50,7 +50,7 @@ export function getValuesMap({ columnProfiles, profile, avoidRows }) {
     })
     .filter(Boolean);
 
-  for (const keyMatch of commaKeyhMatches) {
+  for (const keyMatch of commaKeyMatches) {
     const [key, match] = keyMatch;
     participants[key] = key;
     valuesMap[match].push(...valuesMap[key]);

@@ -29,14 +29,14 @@ specifiers:
   lint-staged: 13.1.0
   node-xlsx: ^0.21.0
   normalize-text: ^2.4.1
-  np: 7.6.2
+  np: 7.6.3
   prettier: ^2.8.1
   rimraf: 3.0.2
   rollup: ^3.8.1
   rollup-plugin-esbuild: 5.0.0
   rollup-plugin-exclude-dependencies-from-bundle: ^1.1.23
   rollup-plugin-terser: 7.0.2
-  tods-competition-factory: ^0.420.0
+  tods-competition-factory: ^0.421.0
   typescript: ^4.9.4
   vite: ^4.0.3
   vitest: 0.26.2
@@ -47,7 +47,7 @@ dependencies:
   hash-sum: 2.0.0
   node-xlsx: 0.21.0
   normalize-text: 2.4.1
-  tods-competition-factory: 0.420.0
+  tods-competition-factory: 0.421.0
   xlsx: 0.18.5
 
 devDependencies:
@@ -75,7 +75,7 @@ devDependencies:
   fs-extra: 11.1.0
   husky: 8.0.2
   lint-staged: 13.1.0
-  np: 7.6.2
+  np: 7.6.3
   prettier: 2.8.1
   rimraf: 3.0.2
   rollup: 3.8.1
@@ -4905,8 +4905,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /np/7.6.2:
-    resolution: {integrity: sha512-gExmKGKixh7ITc4Q+Lv7nfCby0CVKvzri9zN8970oKD8976T4L5dw8QWUtMcXcIjhFF6h5lbvztao/NurDbmxQ==}
+  /np/7.6.3:
+    resolution: {integrity: sha512-GTFNvIhu/cZqzUhil/AlISCiipYeAUVx0JtyjtmumFJvWogSewUSAshFi5MSMc6BOj9C98s8NAFZiqlHb2wQPQ==}
     engines: {git: '>=2.11.0', node: '>=10', npm: '>=6.8.0', yarn: '>=1.7.0'}
     hasBin: true
     dependencies:
@@ -6112,8 +6112,8 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /tods-competition-factory/0.420.0:
-    resolution: {integrity: sha512-i5Wqqd77lp/0OUmJkodz+1epAjHAcMlUtclNFEAqgg2XPXXMzKOMSXJVUrAMguG0npFPUg+88VX7oHtWNoMfKg==}
+  /tods-competition-factory/0.421.0:
+    resolution: {integrity: sha512-vH27Uf+H9nKVf7v6S8daLtN1ZDze0wdTNqE8y0aVbS+DqUYv+CAcFRpYF5nTfoPWcV2On9W8fU85g9mlsxMr2A==}
     dev: false
 
   /trim-newlines/3.0.1:

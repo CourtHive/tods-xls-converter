@@ -173,7 +173,6 @@ export const config = {
         rowIds: ['doublesParticipants']
       }
     ],
-    gaps: { draw: { term: 'Round 1', gap: 0 } },
     headerColumns: [
       { attr: 'rank', header: 'Rangs' },
       { attr: 'rank', header: 'Rangsor' },
@@ -187,7 +186,6 @@ export const config = {
       { attr: 'rounds', header: 'Döntő' },
       { attr: 'rounds', header: '2. forduló' }
     ],
-    playerRows: { playerNames: true, lastName: true, firstName: true },
     tournamentInfo: [
       {
         attribute: [TOURNAMENT_NAME],

@@ -4,7 +4,7 @@ import { SUCCESS } from '../constants/resultConstants';
 
 const excludeValues = ['undefined'];
 
-export function identifySheet({ sheet, profile }) {
+export function identifySheet({ sheet, sheetName, profile }) {
   const hasValues = Object.keys(sheet).some((ref) => {
     const value = getCellValue(sheet[ref]);
     const consideredValue = !excludeValues.includes(value) && value;
@@ -17,6 +17,12 @@ export function identifySheet({ sheet, profile }) {
 
   // profile.sheetDefinitions should be ordered such that least certain matches occur last
   const sheetDefinitions = profile.sheetDefinitions;
+
+  const lowerSheetName = sheetName.toLowerCase();
+  const sheetNameMatch = sheetDefinitions.find((definition) =>
+    definition.sheetNames?.some((name) => lowerSheetName?.includes(name))
+  );
+
   const rowDefinitions = profile.rowDefinitions;
   const rowIds = rowDefinitions
     .reduce((rowIds, rowDefinition) => {
@@ -25,10 +31,11 @@ export function identifySheet({ sheet, profile }) {
     }, [])
     .filter(Boolean);
 
-  const identifiedDefinition = sheetDefinitions.find((currentDefinition) => {
-    const exactMatch = currentDefinition.rowIds.reduce((result, rowId) => rowIds.includes(rowId) && result, true);
-    return exactMatch;
-  });
+  const identifiedDefinition =
+    sheetDefinitions.find((currentDefinition) => {
+      const exactMatch = currentDefinition.rowIds.reduce((result, rowId) => rowIds.includes(rowId) && result, true);
+      return exactMatch;
+    }) || sheetNameMatch;
 
   return { sheetDefinition: identifiedDefinition, hasValues, ...SUCCESS };
 }

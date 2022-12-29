@@ -52,10 +52,12 @@ const roundNames = [
   'quarter- finals',
   'quarterfinalists',
   'preqtrs',
+  'pqtr',
   'qtrs',
   'pre quarter finals',
   'quarters',
   'quarter',
+  'qtr',
   'qualifiers',
   'round of 32',
   'quarterfinals',
@@ -66,6 +68,7 @@ const roundNames = [
   'semifinals',
   'semi finals',
   'semi-finals',
+  'sf',
   'final round',
   'winners',
   'winner',
@@ -170,6 +173,7 @@ export const config = {
           'nationality',
           'aita no',
           'sl no',
+          'sr no',
           'member id',
           'aita reg no',
           'reg no.',
@@ -180,7 +184,7 @@ export const config = {
           ...roundNames
         ],
         rows: 1,
-        minimumElements: 4
+        minimumElements: 3
       },
       {
         type: FOOTER,
@@ -202,7 +206,7 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'sr. no', 'sno', 's.n'] },
+      { attr: POSITION, header: ['#', 'st', 'sr. no', 'sr no', 'sno', 's.n'] },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
@@ -212,10 +216,13 @@ export const config = {
           'name',
           'surname',
           'player name',
+          'players name',
           'family name',
           'familiy name',
           'famlily name',
-          'name of the players'
+          'name of the players',
+          'name of players',
+          'round 1'
         ],
         limit: 1,
         valueRegex: '[A-Za-z]*'
@@ -275,7 +282,8 @@ export const config = {
       },
       {
         type: REPORT,
-        rowIds: ['report']
+        rowIds: ['report'],
+        sheetNames: ['report']
       },
       {
         type: SIGN_UP,
@@ -306,8 +314,6 @@ export const config = {
         rowIds: ['doublesParticipants']
       }
     ],
-    gaps: { draw: { term: 'Round 1', gap: 0 } },
-    playerRows: { playerNames: true, lastName: true, firstName: true },
     tournamentInfo: [],
     drawInfo: [
       {

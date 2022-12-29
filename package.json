@@ -76,7 +76,7 @@
     "fs-extra": "11.1.0",
     "husky": "8.0.2",
     "lint-staged": "13.1.0",
-    "np": "7.6.2",
+    "np": "7.6.3",
     "prettier": "^2.8.1",
     "rimraf": "3.0.2",
     "rollup": "^3.8.1",
@@ -92,7 +92,7 @@
     "hash-sum": "^2.0.0",
     "node-xlsx": "^0.21.0",
     "normalize-text": "^2.4.1",
-    "tods-competition-factory": "^0.420.0",
+    "tods-competition-factory": "^0.421.0",
     "xlsx": "0.18.5"
   },
   "lint-staged": {
