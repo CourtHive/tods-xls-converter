@@ -6,6 +6,7 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { POSITION } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import { KNOCKOUT } from '../constants/sheetTypes';
+import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
 
 export function processIndeterminate(props) {
   const { sheetDefinition, sheet, sheetNumber, profile, analysis, info } = props;
@@ -24,7 +25,11 @@ export function processIndeterminate(props) {
   const maxFrequencyValue = Math.max(...frequencyValues);
   const viableFrequencyColumn = maxFrequencyValue >= maxPositionWithValues / 2;
 
-  if (hasPosition && twoOrMoreColumns && viableFrequencyColumn) {
+  const nameColumns = analysis.columnProfiles
+    .filter((profile) => [LAST_NAME, FIRST_NAME].includes(profile.attribute))
+    .map(({ column }) => column);
+
+  if (hasPosition && twoOrMoreColumns && (viableFrequencyColumn || (positionColumn && nameColumns.length))) {
     analysis.sheetType = KNOCKOUT;
     const method = `processSheet ${sheetNumber}`;
     pushGlobalLog(
