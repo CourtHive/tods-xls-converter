@@ -40,6 +40,7 @@ export const getSheetAnalysis = ({
 
   const columns = getHeaderColumns({ sheet, profile, headerRow, columnValues });
 
+  /*
   const attributeMap = Object.assign(
     {},
     ...Object.keys(columns).flatMap((key) => {
@@ -50,6 +51,21 @@ export const getSheetAnalysis = ({
       }
     })
   );
+  */
+
+  const attributeMap = {};
+  const processKey = (column, key) => {
+    if (!attributeMap[column]) {
+      attributeMap[column] = key;
+    }
+  };
+  Object.keys(columns).forEach((key) => {
+    if (Array.isArray(columns[key])) {
+      columns[key].forEach((column) => processKey(column, key));
+    } else {
+      processKey(columns[key], key);
+    }
+  });
 
   let positionIndex;
 
