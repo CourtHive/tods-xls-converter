@@ -36,8 +36,8 @@ export const isSkipWord = (value, profile) =>
   (profile.skipWords || []).some((skipWord) => processSkipWord(skipWord, value));
 
 export const startsWithIterator = (value) => isString(value) && /^\d\s/.test(value.trim());
-export const hasBracketedValue = (value) => isString(value) && /^[A-Za-z]+.*\(\d+\)$/.test(value.trim());
-export const matchSeeding = (value) => value.match(/^(.+)\((\d+)\)$/);
+export const hasBracketedValue = (value) => isString(value) && /^[A-Za-z]+.*[([]{1}\d+[)\]]{1}$/.test(value.trim());
+export const matchSeeding = (value) => value.match(/^(.+)[([]{1}(\d+)[)\]]{1}$/);
 export const getSeeding = (value) => {
   if (typeof value !== 'string') return;
   const matchValues = matchSeeding(value);
