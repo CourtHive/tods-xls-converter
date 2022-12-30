@@ -96,6 +96,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
 export function extendColumnsMap({ columnsMap, attr, column, limit }) {
   if (Array.isArray(columnsMap[attr])) {
     columnsMap[attr].push(column);
+    columnsMap[attr].sort();
   } else {
     if (columnsMap[attr]) {
       if (!limit) columnsMap[attr] = [columnsMap[attr], column];

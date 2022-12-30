@@ -1,11 +1,11 @@
 import { isNumeric } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
+import { getRow } from './sheetAccess';
 
 import { FIRST_NAME, LAST_NAME, PERSON_ID } from '../constants/attributeConstants';
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { RESULT, ROUND } from '../constants/sheetElements';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
-import { getRow } from './sheetAccess';
 
 export function getColumnCharacter({
   columnProfiles,
