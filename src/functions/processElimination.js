@@ -11,10 +11,12 @@ import { getLoggingActive } from '../global/state';
 import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
-const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
+import { PERSON_ID, STATE, CITY } from '../constants/attributeConstants';
 import { NO_RESULTS_FOUND } from '../constants/errorConditions';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
+
+const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 
 export function processElimination({ profile, analysis, sheet, confidenceThreshold = 0.7 }) {
   const { columnProfiles, avoidRows } = analysis;
@@ -127,7 +129,10 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   participants.push(...firstRoundParticipants);
 
   let roundColumns = analysis.columnProfiles
-    .filter(({ column }) => columns.indexOf(column) > boundaryIndex)
+    .filter(
+      ({ column, character }) =>
+        columns.indexOf(column) > boundaryIndex && ![PERSON_ID, STATE, CITY].includes(character)
+    )
     .map(({ column }) => column);
 
   let roundParticipants = getRoundParticipants({ positionAssignments, participants: firstRoundParticipants }) || [];
