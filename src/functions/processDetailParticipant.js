@@ -1,9 +1,9 @@
 import { entryStatusConstants, participantConstants, participantRoles, utilities } from 'tods-competition-factory';
+import { getNonBracketedValue, isBye } from '../utilities/convenience';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
 import { generateParticipantId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { normalizeDiacritics } from 'normalize-text';
-import { isBye } from '../utilities/convenience';
 
 import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
@@ -106,7 +106,9 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
 
         let { personId, firstName, lastName, ranking } = detail;
         lastName = lastName ? normalizeDiacritics(lastName.toString()) : '';
+        lastName = getNonBracketedValue(lastName);
         firstName = firstName ? normalizeDiacritics(firstName.toString()) : '';
+        firstName = getNonBracketedValue(firstName);
 
         if (detail.seedValue) seedValue = detail.seedValue;
         if (detail.entryStatus) entryStatus = profile.entryStatusMap?.[detail.entryStatus] || DIRECT_ACCEPTANCE;
