@@ -21,7 +21,6 @@ export function processIndeterminate(props) {
 
   const hasPosition = Object.values(analysis.attributeMap).includes(POSITION);
   const frequencyValues = Object.values(analysis.columnFrequency);
-  const twoOrMoreColumns = frequencyValues.length >= 2;
   const maxFrequencyValue = Math.max(...frequencyValues);
   const viableFrequencyColumn = maxFrequencyValue >= maxPositionWithValues / 2;
 
@@ -29,7 +28,7 @@ export function processIndeterminate(props) {
     .filter((profile) => [LAST_NAME, FIRST_NAME].includes(profile.attribute))
     .map(({ column }) => column);
 
-  if (hasPosition && twoOrMoreColumns && (viableFrequencyColumn || (positionColumn && nameColumns.length))) {
+  if (hasPosition && (viableFrequencyColumn || (positionColumn && nameColumns.length))) {
     analysis.sheetType = KNOCKOUT;
     const method = `processSheet ${sheetNumber}`;
     pushGlobalLog(
