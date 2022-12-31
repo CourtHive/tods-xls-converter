@@ -178,6 +178,7 @@ export const config = {
           'seed',
           'name',
           'time',
+          'name of players',
           'family name',
           'player name',
           'first name',
@@ -231,8 +232,7 @@ export const config = {
           'family name',
           'familiy name',
           'famlily name',
-          'name of the players',
-          'name of players',
+          { text: 'players', options: { includes: true } },
           'round 1'
         ],
         limit: 1,
