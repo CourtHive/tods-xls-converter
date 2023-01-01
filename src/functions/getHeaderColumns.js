@@ -27,18 +27,8 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
     profile.headerColumns.forEach((obj) => {
       // getRef takes search details and looks for header cells with values which match
       // and optionally validates the data in the column
-      const getRef = (details) => {
+      const getRef = (searchDetails) => {
         const options = { tidy: true };
-        let searchDetails;
-
-        if (typeof details === 'object') {
-          // additionalOptions supports transition from details which include an attribute 'options' with directives or directive attributes
-          const { text, options: objOptions, ...additionalOptions } = details;
-          text && Object.assign(options, additionalOptions, objOptions);
-          searchDetails = details;
-        } else {
-          searchDetails = details;
-        }
 
         const cols = findValueRefs({ searchDetails, sheet, options, log: obj.log })
           .filter((f) => getRow(f) === parseInt(headerRow))
