@@ -1,6 +1,6 @@
 import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
-import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'fs-extra';
+import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { getLoggingActive, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
 import { writeTODS08CSV } from './writeTODS08CSV';
@@ -218,6 +218,11 @@ export function processDirectory({
     const matchUps = tournamentEngine.allTournamentMatchUps({
       context: { tournamentName, level: 'REG', identifierType: profile?.identifierType, ...matchUpContext }
     }).matchUps;
+
+    if (getLoggingActive('finalPositions')) {
+      const finals = matchUps.filter((matchUp) => matchUp.roundName === 'Final');
+      console.log(finals.map((m) => [m.eventName, m.drawPositions]));
+    }
 
     if (captureProcessedData) {
       allMatchUps.push(...matchUps);
