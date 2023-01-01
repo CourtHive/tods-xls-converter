@@ -32,10 +32,11 @@ export function identifySheet({ sheet, sheetName, profile }) {
     .filter(Boolean);
 
   const identifiedDefinition =
+    sheetNameMatch ||
     sheetDefinitions.find((currentDefinition) => {
       const exactMatch = currentDefinition.rowIds.reduce((result, rowId) => rowIds.includes(rowId) && result, true);
       return exactMatch;
-    }) || sheetNameMatch;
+    });
 
   return { sheetDefinition: identifiedDefinition, hasValues, ...SUCCESS };
 }

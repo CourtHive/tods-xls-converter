@@ -1,4 +1,5 @@
 import { getLoggingActive, getWorkbook } from '../global/state';
+import { participantConstants } from 'tods-competition-factory';
 import { processIndeterminate } from './processIndeterminate';
 import { processElimination } from './processElimination';
 import { processRoundRobin } from './processRoundRobin';
@@ -11,8 +12,10 @@ import { MISSING_SHEET_DEFINITION, MISSING_WORKBOOK, UNKNOWN_WORKBOOK_TYPE } fro
 import { KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
 import { SUCCESS } from '../constants/resultConstants';
 
-const invalidNames = [];
+const { PAIR } = participantConstants;
+
 const invalidResults = ['76(3) 67(5) 60'];
+const invalidNames = [];
 
 export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTypes, processStructures } = {}) {
   const { workbook, workbookType } = getWorkbook();
@@ -79,6 +82,15 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     const invalidParticipant = structureParticipants?.find(({ participantName }) =>
       invalidNames.includes(participantName)
     );
+
+    const participantTypes = structureParticipants.reduce((types, participant) => {
+      const participantType = participant.participantType;
+      if (!types.includes(participantType)) types.push(participantType);
+      return types;
+    }, []);
+
+    const isDoubles = participantTypes.includes(PAIR);
+
     if (invalidParticipant)
       console.log({ sheetName, fileName }, invalidParticipant?.individualParticipants || invalidParticipant);
 
@@ -139,8 +151,14 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       pushGlobalLog(
         {
           method,
-          keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
+          keyColors: {
+            sheetName: 'brightcyan',
+            type: 'brightmagenta',
+            matchUpsCount: 'brightgreen',
+            format: 'brightmagenta'
+          },
           type: analysis?.sheetType,
+          format: isDoubles ? 'D' : 'S',
           sheetName,
           matchUpsCount
         },

@@ -39,6 +39,7 @@ const { MALE, FEMALE, ANY } = genderConstants;
 
 const roundNames = [
   'round 1',
+  'round 2',
   'round of 64',
   'round of 32',
   'round of 16',
@@ -91,7 +92,17 @@ export const config = {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
     exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }, { regex: '^[0-9:]+[a|p]{1}m$' }],
-    skipWords: ['winner', 'winner;', 'winner:', 'umpire', 'none', 'finalist', { text: '\\\\\\', startsWith: true }],
+    skipWords: [
+      'winner',
+      'winner;',
+      'winner:',
+      'umpire',
+      'none',
+      'finalist',
+      'later rounds',
+      { text: 'quarterfinalist', startsWith: true },
+      { text: '\\\\\\', startsWith: true }
+    ],
     skipExpressions: ['[0-9,/, ]+pont', 'umpire'],
     considerAlpha: ['0'], // '0' is the participantName given to BYE positions
     considerNumeric: ['-'], // '-' is a placeholder when no ranking
@@ -152,8 +163,8 @@ export const config = {
           { text: 'compatibility', options: { startsWith: true } },
           { text: 'acceptance sheet', options: { startsWith: true } },
           { text: 'acceptance list', options: { startsWith: true } },
-          'offence report',
-          'medical certification'
+          { text: 'medical certification', options: { startsWith: true } },
+          'offence report'
         ],
         rows: 1,
         minimumElements: 1
@@ -167,6 +178,7 @@ export const config = {
           'seed',
           'name',
           'time',
+          'name of players',
           'family name',
           'player name',
           'first name',
@@ -206,7 +218,7 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'st', 'sr. no', 'sr no', 'sno', 's.n'] },
+      { attr: POSITION, header: ['#', 'st', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '[0-9]+' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: 'rank', limit: 1 },
       { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
@@ -220,8 +232,7 @@ export const config = {
           'family name',
           'familiy name',
           'famlily name',
-          'name of the players',
-          'name of players',
+          { text: 'players', options: { includes: true } },
           'round 1'
         ],
         limit: 1,
@@ -283,7 +294,7 @@ export const config = {
       {
         type: REPORT,
         rowIds: ['report'],
-        sheetNames: ['report']
+        sheetNames: ['report', 'prep', 'sign-in', 'medical']
       },
       {
         type: SIGN_UP,
