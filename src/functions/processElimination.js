@@ -296,13 +296,14 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     );
 
     if (!roundTotals.includes(matchUpsCount)) {
-      const message = `matchUpsTotal indicates incomplete round`;
+      const message = `matchUpsTotal indicates incomplete round: ${matchUpsCount}`;
       pushGlobalLog({
-        method: 'warning',
+        method: '!!!!!!',
         color: 'brightyellow',
         keyColors: { message: 'cyan', attributes: 'brightyellow' },
         message
       });
+      return { error: 'INVALID matchUpsTotal', context: { matchUpsCount } };
     }
   }
 
