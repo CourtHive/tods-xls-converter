@@ -9,6 +9,7 @@ import { utilities } from 'tods-competition-factory';
 export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   const columnsMap = Object.assign({}, profile.columnsMap);
 
+  // map of spreadsheet column (A, B, C...) to the name given to the column
   const headerValueMap = Object.assign(
     {},
     ...Object.keys(columnValues)
@@ -22,20 +23,24 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   const invalidValueColumns = [];
 
   if (profile.headerColumns) {
+    // profile.headerColumns provides details for identifying which player attribute is found in which column
     profile.headerColumns.forEach((obj) => {
+      // getRef takes search details and looks for header cells with values which match
+      // and optionally validates the data in the column
       const getRef = (details) => {
         const options = { tidy: true };
         let searchDetails;
 
         if (typeof details === 'object') {
+          // additionalOptions supports transition from details which include an attribute 'options' with directives or directive attributes
           const { text, options: objOptions, ...additionalOptions } = details;
-          Object.assign(options, additionalOptions, objOptions);
-          searchDetails = text;
+          text && Object.assign(options, additionalOptions, objOptions);
+          searchDetails = details;
         } else {
           searchDetails = details;
         }
 
-        const cols = findValueRefs({ searchDetails, sheet, options })
+        const cols = findValueRefs({ searchDetails, sheet, options, log: obj.log })
           .filter((f) => getRow(f) === parseInt(headerRow))
           .map(getCol);
 

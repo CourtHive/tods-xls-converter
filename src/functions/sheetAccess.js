@@ -89,9 +89,11 @@ export function findRegexRefs({ regex, sheet, profile }) {
 
 export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
   const normalizedLowerCase = (value) => {
-    const text = isObject(value) ? value.text : value;
-    const normalizedText = normalizeDiacritics((text || '').toLowerCase());
-    return isObject(value) ? { text: normalizedText, options: value.options } : normalizedText;
+    if (!isObject(value)) return normalizeDiacritics(value || '').toLowerCase();
+    // objOptions and additionalOptions allow declartions to be in options object or as attributes
+    const { text: originalText, options: objOptions, ...additionalOptions } = value;
+    const normalizedText = normalizeDiacritics((originalText || '').toLowerCase());
+    return { text: normalizedText, options: { ...objOptions, ...additionalOptions } };
   };
 
   const isArray = Array.isArray(searchDetails);
@@ -117,6 +119,7 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
     const transformedValue = transformValue(value);
 
     const startsWith = (text) => transformedValue.startsWith(text) || transformedValue === text;
+    const endsWith = (text) => transformedValue.endsWith(text) || transformedValue === text;
     const separatedIncludes = (text, requiredSeparator) => transformedValue.split(requiredSeparator).includes(text);
     const includes = (text) => transformedValue.includes(text);
     const equals = (text) => transformedValue === text;
@@ -124,6 +127,8 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
     const checkObjectDetail = ({ text, options }) => {
       if (options?.startsWith) {
         return startsWith(text);
+      } else if (options?.endsWith) {
+        return endsWith(text);
       } else if (options?.includes) {
         return includes(text);
       }
