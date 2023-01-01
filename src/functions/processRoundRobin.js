@@ -1,11 +1,12 @@
-import { getIndividualParticipant, getPairParticipant } from './getIndividualParticipant';
 import { generateMatchUpId, generateStructureId } from '../utilities/hashing';
+import { getIndividualParticipant } from './getIndividualParticipant';
+import { cellValueAttribute, getRow } from './sheetAccess';
+import { getPairParticipant } from './getPairParticipant';
 import { onlyAlpha } from '../utilities/convenience';
 import { getLoggingActive } from '../global/state';
 import { normalizeName } from 'normalize-text';
 import { normalizeScore } from './cleanScore';
 import { tidyScore } from './scoreParser';
-import { cellValueAttribute, getRow } from './sheetAccess';
 import {
   drawDefinitionConstants,
   matchUpStatusConstants,
