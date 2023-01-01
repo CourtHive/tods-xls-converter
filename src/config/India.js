@@ -247,11 +247,11 @@ export const config = {
       {
         attr: PERSON_ID,
         header: [
+          { regex: 'itn$' },
           { text: 'aita', startsWith: true },
           { text: 'reg no', startsWith: true },
           { text: 'reg', startsWith: true },
           { text: 'regn no', includes: true },
-          { text: 'itn', endsWith: true },
           'reg.no',
           'member id',
           's.no',
