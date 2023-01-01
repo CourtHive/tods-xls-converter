@@ -83,6 +83,11 @@ export function processDirectory({
 
     const { participants: participantsMap } = result;
     const tournamentParticipants = participantsMap ? Object.values(participantsMap) : [];
+    const individualParticipants = tournamentParticipants.flatMap(({ individualParticipants }) => {
+      return individualParticipants || [];
+    });
+    tournamentParticipants.push(...individualParticipants);
+    if (getLoggingActive('participants')) console.log(tournamentParticipants);
 
     if (captureProcessedData) {
       Object.assign(allParticipantsMap, participantsMap);
