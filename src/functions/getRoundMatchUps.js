@@ -28,7 +28,7 @@ export function getRoundMatchUps({
 }) {
   const isWholeNumber = (num) => num % 1 === 0;
   const getColumn = (column) =>
-    analysis.columnProfiles.reduce((columnProfile, currentProfile, index) => {
+    analysis.columnProfiles.filter(Boolean).reduce((columnProfile, currentProfile, index) => {
       return columnProfile || (currentProfile.column === column && { columnProfile: currentProfile, index });
     }, undefined);
 
@@ -167,7 +167,7 @@ export function getRoundMatchUps({
       if (result) {
         matchUp.result = result;
       } else {
-        const inColumnResult = tidyValue(columnProfile.keyMap[`${column}${resultRow}`]);
+        const inColumnResult = tidyValue(columnProfile?.keyMap[`${column}${resultRow}`]);
         const inColumnResults = analysis.columnResultValues[column] || [];
         if (inColumnResult && inColumnResults.includes(inColumnResult)) console.log({ inColumnResult });
       }

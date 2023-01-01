@@ -74,7 +74,7 @@ export function getEntries({
     const entriesOnPositionRows = positionRows.every((row) => columnProfile.rows.includes(row));
     const columnRowsOnPositionRows = columnProfile.rows.every((row) => positionRows.includes(row));
 
-    if (entriesOnPositionRows || columnRowsOnPositionRows)
+    if (entriesOnPositionRows || columnRowsOnPositionRows) {
       return getFirstRoundEntries({
         preRoundParticipants,
         boundaryIndex,
@@ -83,6 +83,7 @@ export function getEntries({
         analysis,
         profile
       });
+    }
   }
 
   const bogusRows = Object.keys(detailParticipants).filter((key) => {

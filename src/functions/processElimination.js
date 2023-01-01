@@ -76,7 +76,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   // *. If preRound, use `preRoundParticipantRows` and positionRefs[0] to see whether there are progressed participants and set first roundNumber column
   //    - preRound is roundNumber: 0, first round of structure is roundNumber: 1
 
-  if (preRoundParticipantRows?.length) {
+  if (preRoundParticipantRows?.length && preRoundColumn) {
     const columns = analysis.columnProfiles.map(({ column }) => column).sort();
     const preRoundIndex = columns.indexOf(preRoundColumn);
     const nextColumn = columns[preRoundIndex + 1];

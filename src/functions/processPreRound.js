@@ -63,7 +63,7 @@ export function processPreRound({ preRoundParticipantRows, preRoundColumn, nextC
   const structure = { structureId, matchUps, structureName, stage, stageSequence, positionAssignments };
 
   const advancedDrawPositions = advancingParticipants.map(({ drawPosition }) => drawPosition);
-  const nonAdvancingParticipants = roundParticipants
+  const nonAdvancingParticipants = (roundParticipants || [])
     .flat()
     .filter(({ drawPosition }) => !advancedDrawPositions.includes(drawPosition))
     .map(({ drawPosition, ...participant }) => drawPosition && participant);

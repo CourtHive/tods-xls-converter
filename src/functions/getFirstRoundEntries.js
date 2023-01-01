@@ -32,7 +32,7 @@ export function getFirstRoundEntries({
   const isPositionRow = (index) => !positionRows || positionRows.includes(columnProfile.rows[index]);
 
   let drawPosition = 1;
-  columnProfile.values.forEach((value, index) => {
+  columnProfile?.values.forEach((value, index) => {
     if (isNumeric(value) || !isPositionRow(index)) return;
 
     const isPreRoundParticipant = preRoundAdvancedRows.includes(columnProfile.rows[index]);
@@ -132,7 +132,7 @@ export function getFirstRoundEntries({
     drawPosition += 1;
   });
 
-  const drawSize = columnProfile.values.length;
+  const drawSize = columnProfile?.values.length || 0;
   seedAssignments = limitedSeedAssignments({ seedAssignments, participants, drawSize });
 
   if (positionAssignments.length) boundaryIndex += 1;
