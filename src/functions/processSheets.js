@@ -72,9 +72,10 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     const {
       participants: structureParticipants,
       structures = [],
-      entries,
       hasValues,
       analysis,
+      context,
+      entries,
       warning,
       error
     } = result;
@@ -137,7 +138,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
 
     if (error) {
       if (logging) console.log({ error });
-      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' }, ...context });
       if (!errorLog[error]) {
         errorLog[error] = [sheetName];
       } else {
