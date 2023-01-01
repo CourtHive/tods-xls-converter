@@ -61,11 +61,13 @@ export function getEntries({
       columnProfile &&
         entryDetailRows.forEach((row) => {
           const cellRef = `${attributeColumn}${row}`;
-          if (!detailParticipants[row]) detailParticipants[row] = {};
           const value = columnProfile.keyMap[cellRef];
-          if (value) detailParticipants[row][attribute] = value;
-          if (!positionRows.includes(row)) {
-            notPositionRows[row] = value;
+          if (value) {
+            if (!detailParticipants[row]) detailParticipants[row] = {};
+            detailParticipants[row][attribute] = value;
+            if (!positionRows.includes(row)) {
+              notPositionRows[row] = value;
+            }
           }
         });
     }
@@ -94,7 +96,7 @@ export function getEntries({
     const detailParticipant = detailParticipants[key];
     const participantKeys = Object.keys(detailParticipant);
     const relevantKeys = participantKeys.filter((key) => !['ranking', 'seedValue', 'entryStatus'].includes(key));
-    return !relevantKeys.length;
+    return !relevantKeys.length || participantKeys.length < 2;
   });
 
   bogusRows.forEach((row) => delete detailParticipants[row]);
