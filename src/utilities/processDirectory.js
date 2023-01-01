@@ -87,7 +87,8 @@ export function processDirectory({
       return individualParticipants || [];
     });
     tournamentParticipants.push(...individualParticipants);
-    if (getLoggingActive('participants')) console.log(tournamentParticipants);
+    if (getLoggingActive('participants'))
+      console.log(tournamentParticipants, { participantsCount: tournamentParticipants.length });
 
     if (captureProcessedData) {
       Object.assign(allParticipantsMap, participantsMap);
