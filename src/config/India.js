@@ -97,7 +97,8 @@ export const config = {
       { regex: `^a/f$` }, // needs to be removed from id column
       { regex: '^[0-9:]+[a|p]{1}m$' },
       { regex: 'happen$' }, // "Didn't Happen" used for "CANCELLED"
-      { regex: "didn't happen$" } // "Didn't Happen" used for "CANCELLED"
+      { regex: "didn't happen$" }, // "Didn't Happen" used for "CANCELLED"
+      { regex: '^\\d{1,2}/\\d{1,2}/\\d{2,4}$' }
     ],
     skipWords: [
       'winner',
