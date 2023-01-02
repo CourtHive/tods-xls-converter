@@ -22,12 +22,14 @@ export function getParticipantValues(participant, roundNumber, roundPosition) {
 
   const doublesLastNames = [];
   const doublesFirstNames = [];
+  const allNames = [];
 
-  individualParticipants?.forEach(({ person }) => {
+  individualParticipants?.forEach(({ participantName, person }) => {
     if (person) {
       const { standardFamilyName, standardGivenName } = person;
       doublesFirstNames.push(standardGivenName);
       doublesLastNames.push(standardFamilyName);
+      allNames.push(participantName.split(' '));
 
       pValues.push(standardFamilyName);
       // sometimes TDs progress given names rather than family names, or put family names in given name column
@@ -41,15 +43,21 @@ export function getParticipantValues(participant, roundNumber, roundPosition) {
 
   // for those rare occations where first names are advanced rather than last names
   if (doublesFirstNames.length > 1) {
-    const combinations = joiners.flatMap((joiner) => doublesFirstNames.join(joiner));
+    const combinations = [];
+    joiners.forEach((joiner) => {
+      combinations.push(doublesFirstNames.join(joiner));
+      allNames[0].forEach((name, i) => {
+        combinations.push([name, allNames[1][i]].join(joiner));
+      });
+    });
     pValues.push(...combinations);
   }
 
-  return (
-    pValues
-      .filter(Boolean)
-      .map((v) => v.toString().toLowerCase())
-      // ignore values which are single characters
-      .filter((value) => value.length > 1)
-  );
+  const filteredValues = pValues
+    .filter(Boolean)
+    .map((v) => v.toString().toLowerCase())
+    // ignore values which are single characters
+    .filter((value) => value.length > 1);
+
+  return filteredValues;
 }

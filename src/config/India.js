@@ -3,6 +3,7 @@ import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
+import { POSITION } from '../constants/columnConstants';
 import {
   KNOCKOUT,
   ROUND_ROBIN,
@@ -30,7 +31,6 @@ import {
   TOURNAMENT_ID,
   TOURNAMENT_NAME
 } from '../constants/attributeConstants';
-import { POSITION } from '../constants/columnConstants';
 
 const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusConstants;
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
@@ -91,9 +91,18 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
-    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }, { regex: '^[0-9:]+[a|p]{1}m$' }],
+    exciseWords: [
+      { regex: '.*\\d{2,}[ap]m' },
+      { regex: `^q\\d$` },
+      { regex: `^a/f$` }, // needs to be removed from id column
+      { regex: '^[0-9:]+[a|p]{1}m$' },
+      { regex: 'happen$' }, // "Didn't Happen" used for "CANCELLED"
+      { regex: "didn't happen$" }, // "Didn't Happen" used for "CANCELLED"
+      { regex: '^\\d{1,2}/\\d{1,2}/\\d{2,4}$' }
+    ],
     skipWords: [
       'winner',
+      'a/f',
       'winner;',
       'winner:',
       'umpire',
@@ -141,7 +150,7 @@ export const config = {
       {
         type: HEADER,
         id: 'notice',
-        elements: ['notice'],
+        elements: ['notice', { text: 'important', options: { startsWith: true } }],
         rows: 1,
         minimumElements: 1
       },
@@ -218,9 +227,10 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'st', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '[0-9]+' },
+      { attr: 'ignored', header: ['st'] },
+      { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '[1-9]+' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
-      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1 },
+      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `[0-9]+` },
       { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
       {
         attr: LAST_NAME,
@@ -252,6 +262,7 @@ export const config = {
           { text: 'reg no', startsWith: true },
           { text: 'reg', startsWith: true },
           { text: 'regn no', includes: true },
+          { text: 'rect no', includes: true },
           'reg.no',
           'member id',
           's.no',
@@ -263,7 +274,7 @@ export const config = {
           'nationality'
         ],
         limit: 1,
-        skipWords: ['reg', 'umpire', '0'],
+        skipWords: ['reg', 'umpire', '0', 'a/f'],
         valueRegex: '\\d{4,}$',
         log: true
       },

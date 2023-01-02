@@ -10,11 +10,15 @@ export function getRoundCharacter({ attributeMap, columnProfiles, columnProfile 
   if (columnProfiles && nameColumnAttributes.length) {
     const nameRound = nameColumnAttributes.some((attribute) => {
       const nameColumnProfile = columnProfiles.find((profile) => profile.attribute === attribute);
-      const isNameRound = values.every((value) => {
-        const isNameValue = nameColumnProfile?.values?.includes(value);
-        if (isNameValue) hasNameValue = true;
-        return isNameValue;
-      });
+      const consideredValues = values.filter(Boolean);
+
+      const isNameRound =
+        consideredValues.length &&
+        consideredValues.every((value) => {
+          const isNameValue = nameColumnProfile?.values?.includes(value);
+          if (isNameValue) hasNameValue = true;
+          return isNameValue;
+        });
       return isNameRound;
     });
     if (nameRound) {

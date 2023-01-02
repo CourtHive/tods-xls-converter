@@ -41,7 +41,13 @@ export function getRound({
   const matchUps = [];
 
   const relevantSubsequentColumns = roundColumns.slice(columnIndex + 1).slice(0, subsequentColumnLimit);
-  const overlap = utilities.intersection(relevantSubsequentColumns, columnsWithParticipants);
+  const subsequentCount = relevantSubsequentColumns.map((column) => columnsWithParticipants[column]);
+
+  // considerTwo recognizes when the total of the values in two subsequent columns
+  // is less than or equal to the expected number of values (roundParticipants * 2)
+  // which is the number of participants and the number of results for each advancing participant
+  const considerTwo = subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.length * 2;
+  const overlap = utilities.intersection(relevantSubsequentColumns, Object.keys(columnsWithParticipants));
 
   const prospectiveResults = finalRound || relevantSubsequentColumns.length;
 
@@ -111,7 +117,7 @@ export function getRound({
           message
         });
       }
-    } else if (overlap.length > 1) {
+    } else if (overlap.length > 1 && !considerTwo) {
       columnValues = columnValues.map((c) => c.slice(0, 1));
     }
     // -------------------------------------------------------------------------------------------------

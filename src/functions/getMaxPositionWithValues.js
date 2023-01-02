@@ -3,7 +3,7 @@ export function getMaxPositionWithValues({ columnProfiles, positionColumn, analy
 
   const positionProfile = columnProfiles.find(({ column }) => column === positionColumn);
   const valuesColumns = columnProfiles.filter(
-    ({ column }) => column !== positionColumn && !roundColumns.includes(column)
+    ({ column, character }) => column !== positionColumn && !roundColumns.includes(column) && character !== 'result'
   );
   const maxValueRow = Math.max(...valuesColumns.flatMap(({ rows }) => rows));
   const positionRows = positionProfile?.rows || [];

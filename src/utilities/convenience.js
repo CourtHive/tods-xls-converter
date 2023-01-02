@@ -116,3 +116,12 @@ export function getPositionColumn(columnProfiles) {
     positionColumnProfile
   };
 }
+
+export function getLongestName(str) {
+  return str
+    .split(' ')
+    .sort(function (a, b) {
+      return a.length - b.length;
+    })
+    .pop();
+}

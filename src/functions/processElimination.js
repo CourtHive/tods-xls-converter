@@ -42,7 +42,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       keyColors: { message: 'brightblue', attributes: 'cyan' },
       message
     });
-    return {};
+    return { analysis };
   };
 
   if (noValues || maxPositionWithValues < 2) return blankDraw();
@@ -63,7 +63,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   });
 
   if (positionRefs?.length < maxPositionWithValues) return blankDraw();
-  if (error) return { error };
+  if (error) return { error, analysis };
 
   const preRoundParticipants = [],
     ignoredMatchUps = [],
@@ -153,24 +153,27 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   // -------------------------------------------------------------------------------------------------
   // ACTION: profile all roundColumns to determine how many contain participants withConfidence
   // NOTE: for this check the FIRST ROUND PARTICIPANTS are always used
-  const columnsWithParticipants = roundColumns
-    .map((targetColumn) => {
-      const { confidence: withConfidence, valuesCount } = getColumnParticipantConfidence({
-        confidenceThreshold,
-        roundParticipants,
-        targetColumn,
-        analysis
-      });
+  const columnsWithParticipants = Object.assign(
+    {},
+    ...roundColumns
+      .map((targetColumn) => {
+        const { confidence: withConfidence, valuesCount } = getColumnParticipantConfidence({
+          confidenceThreshold,
+          roundParticipants,
+          targetColumn,
+          analysis
+        });
 
-      // confidence is the percentage of values in the column with confident matches
-      // in some cases inconsistent use of two column results leads to parsing errors
-      const confidence = withConfidence.length / valuesCount;
+        // confidence is the percentage of values in the column with confident matches
+        // in some cases inconsistent use of two column results leads to parsing errors
+        const confidence = withConfidence.length / valuesCount;
 
-      // console.log({ targetColumn, confidence });
-
-      return withConfidence.length && confidence > 0.3 && targetColumn;
-    })
-    .filter(Boolean);
+        if (withConfidence.length && confidence > 0.3) {
+          return { [targetColumn]: valuesCount };
+        }
+      })
+      .filter(Boolean)
+  );
 
   const resultRounds = [];
   // -------------------------------------------------------------------------------------------------
@@ -305,6 +308,19 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       });
       return { error: 'INVALID matchUpsTotal', context: { matchUpsCount } };
     }
+  }
+
+  const singlePositionMatchUps = matchUps.filter(({ drawPositions }) => drawPositions.length === 1);
+
+  if (singlePositionMatchUps.length) {
+    const message = `Single position matchUps`;
+    pushGlobalLog({
+      method: '!!!!!!',
+      color: 'brightyellow',
+      keyColors: { message: 'cyan', attributes: 'brightyellow', matchUpsCount: 'brightred' },
+      message,
+      matchUpsCount: singlePositionMatchUps.length
+    });
   }
 
   return {

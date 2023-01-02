@@ -1,7 +1,8 @@
 import { getNonBracketedValue, getSeeding, isBye } from '../utilities/convenience';
-import { getIndividualParticipant, getPairParticipant } from './getIndividualParticipant';
+import { getIndividualParticipant } from './getIndividualParticipant';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
 import { entryStatusConstants } from 'tods-competition-factory';
+import { getPairParticipant } from './getPairParticipant';
 import { isNumeric } from '../utilities/identification';
 import { getRow } from './sheetAccess';
 

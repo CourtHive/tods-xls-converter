@@ -1,5 +1,5 @@
 import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
-import { hasNumeric, isString } from '../utilities/identification';
+import { hasNumeric, isScoreLike, isString } from '../utilities/identification';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getCol, getRow, keyRowSort } from './sheetAccess';
 import { getRoundCharacter } from './getRoundCharacter';
@@ -39,19 +39,6 @@ export const getSheetAnalysis = ({
   });
 
   const columns = getHeaderColumns({ sheet, profile, headerRow, columnValues });
-
-  /*
-  const attributeMap = Object.assign(
-    {},
-    ...Object.keys(columns).flatMap((key) => {
-      if (Array.isArray(columns[key])) {
-        return columns[key].map((col) => ({ [col]: key }));
-      } else {
-        return { [columns[key]]: key };
-      }
-    })
-  );
-  */
 
   const attributeMap = {};
   const processKey = (column, key) => {
@@ -114,6 +101,31 @@ export const getSheetAnalysis = ({
     if (character && !columns[character]) {
       if (!columnProfile.character) columnProfile.character = character;
       extendColumnsMap({ columnsMap: columns, attribute: character, column: columnProfile.column });
+    }
+  });
+
+  columnProfiles.forEach((profile) => {
+    const keyIndex = columnKeys.indexOf(profile.column);
+    const priorColumn = columnKeys[keyIndex - 1];
+    const priorProfile = columnProfiles.find(({ column }) => column === priorColumn);
+    const consideredValues = priorProfile?.values.filter((value) => !isScoreLike(value));
+    const repeatValues =
+      consideredValues?.length &&
+      profile.values.every((value) => consideredValues.includes(value)) &&
+      profile.values.length < consideredValues.length / 2 &&
+      profile.rows.every((row) => priorProfile.rows.includes(row));
+    const subsequentColumn = columnKeys[keyIndex + 1];
+    const subsequentProfile = columnProfiles.find(({ column }) => column === subsequentColumn);
+    if (repeatValues && subsequentProfile?.values?.length) {
+      const message = `Repeated Round Values`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow', column: 'brightred' },
+        message,
+        column: profile.column
+      });
+      profile.values = [];
     }
   });
 

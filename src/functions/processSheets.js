@@ -146,7 +146,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       }
     } else if (warning) {
       if (logging) console.log({ warning });
-      pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'yellow' } });
+      pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'brightyellow' } });
     } else {
       const method = `processSheet ${sheetNumber}`;
       const leader = {
