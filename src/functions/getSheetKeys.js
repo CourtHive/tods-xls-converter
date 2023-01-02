@@ -2,6 +2,7 @@ import { containsExpression, isFloatValue, keyHasSingleAlpha } from '../utilitie
 import { getCellValue, getCol, getRow } from './sheetAccess';
 import { utilities } from 'tods-competition-factory';
 import { getContentFrame } from './getContentFrame';
+import { getCheckedValue } from './getCheckedValue';
 
 export function getSheetKeys({ sheet, sheetDefinition, profile, ignoreCellRefs = [] }) {
   const sheetRows = utilities.unique(Object.keys(sheet).map(getRow).filter(Boolean)).sort(utilities.numericSort);
@@ -34,11 +35,15 @@ export function getSheetKeys({ sheet, sheetDefinition, profile, ignoreCellRefs =
 
   const columnKeys = filteredKeys.reduce((keys, key) => {
     const column = getCol(key);
-    const value = getCellValue(sheet[key]);
-    if (!columnValues[column]) {
-      columnValues[column] = [value];
-    } else {
-      columnValues[column].push(value);
+
+    const { value } = getCheckedValue({ profile, sheet, key });
+
+    if (value) {
+      if (!columnValues[column]) {
+        columnValues[column] = [value];
+      } else {
+        columnValues[column].push(value);
+      }
     }
     return keys.includes(column) ? keys : keys.concat(column);
   }, []);

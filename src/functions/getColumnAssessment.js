@@ -1,7 +1,8 @@
 import { isSkipWord, onlyAlpha, onlyNumeric } from '../utilities/convenience';
 import { isNumeric, isScoreLike, isString } from '../utilities/identification';
+import { getCheckedValue } from './getCheckedValue';
 import { getColumnCharacter } from './getColumnCharacter';
-import { getCellValue, getRow } from './sheetAccess';
+import { getRow } from './sheetAccess';
 
 export function getColumnAssessment({
   prospectColumnKeys,
@@ -18,16 +19,7 @@ export function getColumnAssessment({
   // WARNING: DO NOT SORT KEYS
   const assessment = prospectColumnKeys.reduce(
     (assessment, key) => {
-      let rawValue = getCellValue(sheet[key]).split('.').join(''); // remove '.'
-      if (profile.exciseWords) {
-        profile.exciseWords.forEach(({ regex }) => {
-          const re = new RegExp(regex);
-          if (re.test(rawValue.toString().toLowerCase())) {
-            rawValue = rawValue.toString().toLowerCase().split(re).join('').trim();
-          }
-        });
-      }
-      const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
+      const { value, rawValue } = getCheckedValue({ profile, sheet, key });
 
       const skip =
         profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) || isSkipWord(rawValue, profile);
