@@ -91,7 +91,12 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
-    exciseWords: [{ regex: '.*\\d{2,}[ap]m' }, { regex: `^q\\d$` }, { regex: '^[0-9:]+[a|p]{1}m$' }],
+    exciseWords: [
+      { regex: '.*\\d{2,}[ap]m' },
+      { regex: `^q\\d$` },
+      { regex: '^[0-9:]+[a|p]{1}m$' },
+      { regex: 'happen$' } // "Didn't Happen" used for "CANCELLED"
+    ],
     skipWords: [
       'winner',
       'winner;',
