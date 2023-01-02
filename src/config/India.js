@@ -3,6 +3,7 @@ import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
+import { POSITION } from '../constants/columnConstants';
 import {
   KNOCKOUT,
   ROUND_ROBIN,
@@ -30,7 +31,6 @@ import {
   TOURNAMENT_ID,
   TOURNAMENT_NAME
 } from '../constants/attributeConstants';
-import { POSITION } from '../constants/columnConstants';
 
 const { DIRECT_ACCEPTANCE, QUALIFYING, LUCKY_LOSER, WILDCARD } = entryStatusConstants;
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
@@ -218,7 +218,8 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'st', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '[0-9]+' },
+      { attr: 'ignored', header: ['st'] },
+      { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '[1-9]+' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `[0-9]+` },
       { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
