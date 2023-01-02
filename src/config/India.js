@@ -454,7 +454,7 @@ export const config = {
     genderParser: (value) => {
       const male = /^boys/.test(value);
       const female = /^girls/.test(value);
-      return male ? MALE : female ? FEMALE : ANY;
+      return (male && MALE) || female ? FEMALE : ANY;
     },
     matchUpTypeParser: (value) => {
       return value?.toString().toLowerCase().includes('dobles') ? DOUBLES_MATCHUP : SINGLES_MATCHUP;
