@@ -146,7 +146,7 @@ export const config = {
       {
         type: HEADER,
         id: 'notice',
-        elements: ['notice'],
+        elements: ['notice', { text: 'important', options: { startsWith: true } }],
         rows: 1,
         minimumElements: 1
       },
