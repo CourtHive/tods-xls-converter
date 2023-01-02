@@ -6,10 +6,19 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { getCellValue, getRow } from './sheetAccess';
 import { isBye } from '../utilities/convenience';
 
-import { ENTRY_DETAILS, ENTRY_STATUS, LAST_NAME, RANKING, SEED_VALUE } from '../constants/attributeConstants';
 import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
 import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
 import { SUCCESS } from '../constants/resultConstants';
+import {
+  ENTRY_DETAILS,
+  ENTRY_STATUS,
+  FIRST_NAME,
+  LAST_NAME,
+  PERSON_ID,
+  RANKING,
+  SEED_VALUE
+} from '../constants/attributeConstants';
+
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
 
 export function getEntries({
@@ -31,6 +40,17 @@ export function getEntries({
   const attributeColumns = Object.keys(analysis.columns).filter(Boolean);
   const entryDetailAttributes = ENTRY_DETAILS.filter((attribute) => attributeColumns.includes(attribute));
   const entryDetailColumns = entryDetailAttributes.flatMap((attribute) => analysis.columns[attribute]).sort();
+
+  const idColumn = analysis.columnProfiles.find(
+    ({ character, attribute }) => attribute === PERSON_ID || character === PERSON_ID
+  )?.column;
+
+  // backfill personId column
+  if (idColumn && !entryDetailColumns.includes(idColumn)) {
+    analysis.columns[PERSON_ID] = idColumn;
+    entryDetailAttributes.push(PERSON_ID);
+    entryDetailColumns.push(idColumn);
+  }
 
   const boundaryColumnsToConsider = [preRoundColumn, positionColumn, ...entryDetailColumns].filter(Boolean);
   const boundaryIndex = Math.max(...boundaryColumnsToConsider.map((column) => columns.indexOf(column)), 0);
@@ -98,7 +118,8 @@ export function getEntries({
 
     const participantKeys = Object.keys(detailParticipant);
     const relevantKeys = participantKeys.filter((key) => ![RANKING, SEED_VALUE, ENTRY_STATUS].includes(key));
-    return !relevantKeys.length || (!relevantKeys.includes(LAST_NAME) && participantKeys.length < 2);
+    const nameColumn = relevantKeys.includes(LAST_NAME) || relevantKeys.includes(FIRST_NAME);
+    return !relevantKeys.length || (!nameColumn && participantKeys.length < 2);
   });
 
   bogusRows.forEach((row) => delete detailParticipants[row]);
@@ -111,7 +132,8 @@ export function getEntries({
   // NOTE: fudgeFactor includes +1 for participant missing participantId
   const fudgeFactor = 2;
   // LIMITATION: doesn't support more than half of doubles draw filled with BYEs
-  const isSeparatedPersonsDoubles = (detailsCount + fudgeFactor + byesCount) / 2 >= positionRows.length;
+  const doublesThreshold = (detailsCount + fudgeFactor + byesCount) / 2;
+  const isSeparatedPersonsDoubles = doublesThreshold >= positionRows.length;
 
   // TODO: separated doubles can also be detected if subsequent rounds contain names joined with '/'
 
