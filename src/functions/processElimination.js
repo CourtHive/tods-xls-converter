@@ -313,12 +313,13 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const singlePositionMatchUps = matchUps.filter(({ drawPositions }) => drawPositions.length === 1);
 
   if (singlePositionMatchUps.length) {
-    const message = `single position matchUps: ${singlePositionMatchUps.length}`;
+    const message = `Single position matchUps`;
     pushGlobalLog({
       method: '!!!!!!',
       color: 'brightyellow',
-      keyColors: { message: 'cyan', attributes: 'brightyellow' },
-      message
+      keyColors: { message: 'cyan', attributes: 'brightyellow', matchUpsCount: 'brightred' },
+      message,
+      matchUpsCount: singlePositionMatchUps.length
     });
   }
 
