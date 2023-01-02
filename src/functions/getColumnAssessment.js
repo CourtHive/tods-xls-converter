@@ -15,14 +15,18 @@ export function getColumnAssessment({
   sheet
 }) {
   const truthiness = !!prospectColumnKeys.length;
+  const hiddenRows = sheet['!rows']?.map((row, i) => row?.hidden && i + 1).filter(Boolean) || [];
 
   // WARNING: DO NOT SORT KEYS
   const assessment = prospectColumnKeys.reduce(
     (assessment, key) => {
       const { value, rawValue } = getCheckedValue({ profile, sheet, key });
+      const row = getRow(key);
 
       const skip =
-        profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) || isSkipWord(rawValue, profile);
+        profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) ||
+        isSkipWord(rawValue, profile) ||
+        hiddenRows.includes(row);
 
       if (!skip) {
         if (onlyAlpha(rawValue, profile)) {
@@ -55,7 +59,7 @@ export function getColumnAssessment({
         if (!['', 'undefined'].includes(value)) {
           assessment.values.push(value);
           assessment.keyMap[key] = value;
-          assessment.rows.push(getRow(key));
+          assessment.rows.push(row);
         }
       }
 

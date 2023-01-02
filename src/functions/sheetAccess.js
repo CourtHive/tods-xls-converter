@@ -88,6 +88,7 @@ export function findRegexRefs({ regex, sheet, profile }) {
 }
 
 export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
+  const hiddenRows = sheet['!rows']?.map((row, i) => row?.hidden && i + 1).filter(Boolean) || [];
   const normalizedLowerCase = (value) => {
     if (!isObject(value)) return normalizeDiacritics(value || '').toLowerCase();
     // objOptions and additionalOptions allow declartions to be in options object or as attributes
@@ -113,6 +114,9 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
   const refMap = {};
 
   const refs = Object.keys(sheet).filter((ref) => {
+    const row = getRow(ref);
+    if (hiddenRows.includes(row)) return;
+
     const value = getCellValue(sheet[ref]);
     const transformedValue = transformValue(value);
 

@@ -42,7 +42,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       keyColors: { message: 'brightblue', attributes: 'cyan' },
       message
     });
-    return {};
+    return { analysis };
   };
 
   if (noValues || maxPositionWithValues < 2) return blankDraw();
@@ -63,7 +63,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   });
 
   if (positionRefs?.length < maxPositionWithValues) return blankDraw();
-  if (error) return { error };
+  if (error) return { error, analysis };
 
   const preRoundParticipants = [],
     ignoredMatchUps = [],
