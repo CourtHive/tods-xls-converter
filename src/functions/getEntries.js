@@ -113,6 +113,8 @@ export function getEntries({
   // LIMITATION: doesn't support more than half of doubles draw filled with BYEs
   const isSeparatedPersonsDoubles = (detailsCount + fudgeFactor + byesCount) / 2 >= positionRows.length;
 
+  // TODO: separated doubles can also be detected if subsequent rounds contain names joined with '/'
+
   if (detailsCount > positionRows.length && !isSeparatedPersonsDoubles) {
     const exciseRows = Object.keys(notPositionRows);
     entryDetailRows = entryDetailRows.filter((row) => !exciseRows.includes(row.toString()));
