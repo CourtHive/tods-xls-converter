@@ -6,8 +6,8 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { getCellValue, getRow } from './sheetAccess';
 import { isBye } from '../utilities/convenience';
 
+import { ENTRY_DETAILS, ENTRY_STATUS, LAST_NAME, RANKING, SEED_VALUE } from '../constants/attributeConstants';
 import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
-import { ENTRY_DETAILS } from '../constants/attributeConstants';
 import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
 import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
@@ -97,8 +97,8 @@ export function getEntries({
     if (isBye(detailParticipant)) return false;
 
     const participantKeys = Object.keys(detailParticipant);
-    const relevantKeys = participantKeys.filter((key) => !['ranking', 'seedValue', 'entryStatus'].includes(key));
-    return !relevantKeys.length || participantKeys.length < 2;
+    const relevantKeys = participantKeys.filter((key) => ![RANKING, SEED_VALUE, ENTRY_STATUS].includes(key));
+    return !relevantKeys.length || (!relevantKeys.includes(LAST_NAME) && participantKeys.length < 2);
   });
 
   bogusRows.forEach((row) => delete detailParticipants[row]);
