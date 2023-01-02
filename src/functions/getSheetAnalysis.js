@@ -1,5 +1,5 @@
 import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
-import { hasNumeric, isString } from '../utilities/identification';
+import { hasNumeric, isScoreLike, isString } from '../utilities/identification';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getCol, getRow, keyRowSort } from './sheetAccess';
 import { getRoundCharacter } from './getRoundCharacter';
@@ -108,10 +108,12 @@ export const getSheetAnalysis = ({
     const keyIndex = columnKeys.indexOf(profile.column);
     const priorColumn = columnKeys[keyIndex - 1];
     const priorProfile = columnProfiles.find(({ column }) => column === priorColumn);
+    const consideredValues = priorProfile?.values.filter((value) => !isScoreLike(value));
     const repeatValues =
-      priorProfile &&
-      profile.values.every((value) => priorProfile.values.includes(value)) &&
-      profile.values.length < priorProfile.values.length / 2;
+      consideredValues?.length &&
+      profile.values.every((value) => consideredValues.includes(value)) &&
+      profile.values.length < consideredValues.length / 2 &&
+      profile.rows.every((row) => priorProfile.rows.includes(row));
     const subsequentColumn = columnKeys[keyIndex + 1];
     const subsequentProfile = columnProfiles.find(({ column }) => column === subsequentColumn);
     if (repeatValues && subsequentProfile?.values?.length) {
