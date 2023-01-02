@@ -94,6 +94,7 @@ export const config = {
     exciseWords: [
       { regex: '.*\\d{2,}[ap]m' },
       { regex: `^q\\d$` },
+      { regex: `^a/f$` }, // needs to be removed from id column
       { regex: '^[0-9:]+[a|p]{1}m$' },
       { regex: 'happen$' }, // "Didn't Happen" used for "CANCELLED"
       { regex: "didn't happen$" } // "Didn't Happen" used for "CANCELLED"
@@ -260,6 +261,7 @@ export const config = {
           { text: 'reg no', startsWith: true },
           { text: 'reg', startsWith: true },
           { text: 'regn no', includes: true },
+          { text: 'rect no', includes: true },
           'reg.no',
           'member id',
           's.no',
@@ -271,7 +273,7 @@ export const config = {
           'nationality'
         ],
         limit: 1,
-        skipWords: ['reg', 'umpire', '0'],
+        skipWords: ['reg', 'umpire', '0', 'a/f'],
         valueRegex: '\\d{4,}$',
         log: true
       },
