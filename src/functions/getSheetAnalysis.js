@@ -40,19 +40,6 @@ export const getSheetAnalysis = ({
 
   const columns = getHeaderColumns({ sheet, profile, headerRow, columnValues });
 
-  /*
-  const attributeMap = Object.assign(
-    {},
-    ...Object.keys(columns).flatMap((key) => {
-      if (Array.isArray(columns[key])) {
-        return columns[key].map((col) => ({ [col]: key }));
-      } else {
-        return { [columns[key]]: key };
-      }
-    })
-  );
-  */
-
   const attributeMap = {};
   const processKey = (column, key) => {
     if (!attributeMap[column]) {
@@ -114,6 +101,27 @@ export const getSheetAnalysis = ({
     if (character && !columns[character]) {
       if (!columnProfile.character) columnProfile.character = character;
       extendColumnsMap({ columnsMap: columns, attribute: character, column: columnProfile.column });
+    }
+  });
+
+  columnProfiles.forEach((profile) => {
+    const keyIndex = columnKeys.indexOf(profile.column);
+    const priorColumn = columnKeys[keyIndex - 1];
+    const priorProfile = columnProfiles.find(({ column }) => column === priorColumn);
+    const repeatValues =
+      priorProfile &&
+      profile.values.every((value) => priorProfile.values.includes(value)) &&
+      profile.values.length < priorProfile.values.length / 2;
+    if (repeatValues) {
+      const message = `Repeated Round Values`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow', column: 'brightred' },
+        message,
+        column: profile.column
+      });
+      profile.values = [];
     }
   });
 
