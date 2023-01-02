@@ -112,7 +112,9 @@ export const getSheetAnalysis = ({
       priorProfile &&
       profile.values.every((value) => priorProfile.values.includes(value)) &&
       profile.values.length < priorProfile.values.length / 2;
-    if (repeatValues) {
+    const subsequentColumn = columnKeys[keyIndex + 1];
+    const subsequentProfile = columnProfiles.find(({ column }) => column === subsequentColumn);
+    if (repeatValues && subsequentProfile?.values?.length) {
       const message = `Repeated Round Values`;
       pushGlobalLog({
         method: 'notice',
