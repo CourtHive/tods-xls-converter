@@ -2,12 +2,13 @@ import { entryStatusConstants, participantConstants, participantRoles, utilities
 import { getNonBracketedValue, isBye } from '../utilities/convenience';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
 import { generateParticipantId } from '../utilities/hashing';
+import { getPairParticipant } from './getPairParticipant';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { normalizeDiacritics } from 'normalize-text';
 
 import { SUCCESS } from '../constants/resultConstants';
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
-const { PAIR, INDIVIDUAL } = participantConstants;
+const { INDIVIDUAL } = participantConstants;
 const { COMPETITOR } = participantRoles;
 
 // const doublesPartnerFollows = isdoubles && check for person on rows subsequewnt to positionRows
@@ -148,17 +149,9 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
           })
           .filter(Boolean);
 
-        const individualParticipantIds = individualParticipants.map(({ participantId }) => participantId);
-        participantId = generateParticipantId({ attributes: individualParticipantIds })?.participantId;
-        const participantName = individualParticipants.map(({ person }) => person.standardFamilyName).join('/');
+        const participant = getPairParticipant({ individualParticipants });
+        participantId = participant.participantId;
 
-        const participant = {
-          participantRole: COMPETITOR,
-          participantType: PAIR,
-          individualParticipants,
-          participantName,
-          participantId
-        };
         if (participant.participantName !== 'BYE') participants.push(participant);
       } else {
         const participant = getIndividualParticipant(consideredRows[0])?.participant;

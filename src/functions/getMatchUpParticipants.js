@@ -7,8 +7,8 @@ export function getMatchUpParticipants({ profile, columnProfile, derivedPair, ro
   const providerDoubleWalkover = profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER;
 
   const pairParticipantNames = derivedPair.map((rowNumber, i) => {
-    const ref = `${columnProfile.column}${rowNumber}`;
-    const refValue = columnProfile.keyMap[ref];
+    const ref = `${columnProfile?.column}${rowNumber}`;
+    const refValue = columnProfile?.keyMap[ref];
     const isDoubleWalkover = refValue?.toString().toLowerCase().trim() === providerDoubleWalkover.toLowerCase();
 
     const participantName = isDoubleWalkover ? undefined : refValue;

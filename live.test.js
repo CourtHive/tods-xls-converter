@@ -86,6 +86,7 @@ it('can process tests', () => {
   // setLoggingActive(true, 'scores');
   // setLoggingActive(true, 'score-audit');
   // setLoggingActive(true, 'matchUps');
+  // setLoggingActive(true, 'finalPositions');
   // setLoggingActive(true, 'participants');
 
   const result = processDirectory({

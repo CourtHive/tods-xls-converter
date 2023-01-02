@@ -220,7 +220,7 @@ export const config = {
     headerColumns: [
       { attr: POSITION, header: ['#', 'st', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '[0-9]+' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
-      { attr: RANKING, header: 'rank', limit: 1 },
+      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1 },
       { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
       {
         attr: LAST_NAME,
@@ -232,7 +232,7 @@ export const config = {
           'family name',
           'familiy name',
           'famlily name',
-          { text: 'players', options: { includes: true } },
+          { text: 'players', includes: true },
           'round 1'
         ],
         limit: 1,
@@ -247,16 +247,16 @@ export const config = {
       {
         attr: PERSON_ID,
         header: [
-          { text: 'aita', options: { startsWith: true } },
-          { text: 'reg no', options: { startsWith: true } },
-          { text: 'reg', options: { startsWith: true } },
-          { text: 'regn no', options: { includes: true } },
+          { regex: 'itn$' },
+          { text: 'aita', startsWith: true },
+          { text: 'reg no', startsWith: true },
+          { text: 'reg', startsWith: true },
+          { text: 'regn no', includes: true },
           'reg.no',
           'member id',
           's.no',
           'sr.no',
           'sl no',
-          'itn',
           'state',
           'first name',
           'city',
@@ -264,7 +264,8 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['reg', 'umpire', '0'],
-        valueRegex: '^\\d{4,}$'
+        valueRegex: '\\d{4,}$',
+        log: true
       },
       { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '[A-Za-z]*' },
       { attr: STATE, header: ['state'], limit: 1 },
@@ -453,7 +454,7 @@ export const config = {
     genderParser: (value) => {
       const male = /^boys/.test(value);
       const female = /^girls/.test(value);
-      return male ? MALE : female ? FEMALE : ANY;
+      return (male && MALE) || female ? FEMALE : ANY;
     },
     matchUpTypeParser: (value) => {
       return value?.toString().toLowerCase().includes('dobles') ? DOUBLES_MATCHUP : SINGLES_MATCHUP;

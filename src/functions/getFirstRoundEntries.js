@@ -1,15 +1,13 @@
-import { entryStatusConstants, participantConstants } from 'tods-competition-factory';
 import { getNonBracketedValue, getSeeding, isBye } from '../utilities/convenience';
-import { getIndividualParticipant } from './getIndividualParticipant';
+import { getIndividualParticipant, getPairParticipant } from './getIndividualParticipant';
 import { limitedSeedAssignments } from './limitedSeedAssignments';
-import { generateParticipantId } from '../utilities/hashing';
+import { entryStatusConstants } from 'tods-competition-factory';
 import { isNumeric } from '../utilities/identification';
 import { getRow } from './sheetAccess';
 
 import { SUCCESS } from '../constants/resultConstants';
 
 const { DIRECT_ACCEPTANCE, QUALIFIER } = entryStatusConstants;
-const { PAIR } = participantConstants;
 
 export function getFirstRoundEntries({
   preRoundParticipants,
@@ -32,7 +30,7 @@ export function getFirstRoundEntries({
   const isPositionRow = (index) => !positionRows || positionRows.includes(columnProfile.rows[index]);
 
   let drawPosition = 1;
-  columnProfile.values.forEach((value, index) => {
+  columnProfile?.values.forEach((value, index) => {
     if (isNumeric(value) || !isPositionRow(index)) return;
 
     const isPreRoundParticipant = preRoundAdvancedRows.includes(columnProfile.rows[index]);
@@ -91,9 +89,16 @@ export function getFirstRoundEntries({
         if (isQualifier || isQualifyingPosition) qualifyingPosition = true;
         return participant;
       });
+
+      const participant = getPairParticipant({ individualParticipants });
+      const participantName = participant.participantName;
+      participantId = participant.participantId;
+      /*
       const individualParticipantIds = individualParticipants.map(({ participantId }) => participantId);
       participantId = generateParticipantId({ attributes: individualParticipantIds })?.participantId;
-      const participantName = individualParticipants.map(({ person }) => person.standardFamilyName).join('/');
+      const participantName = individualParticipants
+        .map(({ person }) => person.standardFamilyName || person.standardGivenName?.split(' ').reverse()[0])
+        .join('/');
 
       const participant = {
         participantRole: 'COMPETITOR',
@@ -102,6 +107,7 @@ export function getFirstRoundEntries({
         participantName,
         participantId
       };
+      */
       if (isValidParticipantName(participantName)) {
         participants.push(participant);
       }
@@ -132,7 +138,7 @@ export function getFirstRoundEntries({
     drawPosition += 1;
   });
 
-  const drawSize = columnProfile.values.length;
+  const drawSize = columnProfile?.values.length || 0;
   seedAssignments = limitedSeedAssignments({ seedAssignments, participants, drawSize });
 
   if (positionAssignments.length) boundaryIndex += 1;

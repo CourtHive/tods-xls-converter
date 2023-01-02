@@ -7,7 +7,6 @@ import { generateStructureId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
-import { getLoggingActive } from '../global/state';
 import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
@@ -76,7 +75,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   // *. If preRound, use `preRoundParticipantRows` and positionRefs[0] to see whether there are progressed participants and set first roundNumber column
   //    - preRound is roundNumber: 0, first round of structure is roundNumber: 1
 
-  if (preRoundParticipantRows?.length) {
+  if (preRoundParticipantRows?.length && preRoundColumn) {
     const columns = analysis.columnProfiles.map(({ column }) => column).sort();
     const preRoundIndex = columns.indexOf(preRoundColumn);
     const nextColumn = columns[preRoundIndex + 1];
@@ -297,17 +296,16 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     );
 
     if (!roundTotals.includes(matchUpsCount)) {
-      const message = `matchUpsTotal indicates incomplete round`;
+      const message = `matchUpsTotal indicates incomplete round: ${matchUpsCount}`;
       pushGlobalLog({
-        method: 'warning',
+        method: '!!!!!!',
         color: 'brightyellow',
         keyColors: { message: 'cyan', attributes: 'brightyellow' },
         message
       });
+      return { error: 'INVALID matchUpsTotal', context: { matchUpsCount } };
     }
   }
-
-  if (getLoggingActive('participants')) console.log(participants);
 
   return {
     hasValues: true,

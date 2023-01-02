@@ -4,7 +4,7 @@ import { getNonBracketedValue } from '../utilities/convenience';
 import { generateParticipantId } from '../utilities/hashing';
 import { isString } from '../utilities/identification';
 
-const { INDIVIDUAL, PAIR } = participantConstants;
+const { INDIVIDUAL } = participantConstants;
 const { COMPETITOR } = participantRoles;
 
 export function getIndividualParticipant({ name, analysis }) {
@@ -74,18 +74,4 @@ export function getIndividualParticipant({ name, analysis }) {
   };
 
   return { participant, isQualifyingPosition, isQualifier };
-}
-
-export function getPairParticipant({ individualParticipants }) {
-  const individualParticipantIds = individualParticipants.map(({ participantId }) => participantId);
-  const participantId = generateParticipantId({ attributes: individualParticipantIds })?.participantId;
-  const participantName = individualParticipants.map(({ person }) => person.standardFamilyName).join('/');
-
-  return {
-    participantRole: COMPETITOR,
-    individualParticipantIds,
-    participantType: PAIR,
-    participantName,
-    participantId
-  };
 }

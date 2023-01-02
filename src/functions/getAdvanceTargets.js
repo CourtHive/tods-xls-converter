@@ -108,7 +108,7 @@ export function getAdvanceTargets(params) {
     });
 
     if (sideStartsWith) {
-      const message = `Side starts with to match: ${sideStartsWith.participantName}`;
+      const message = `sideStartsWith: ${sideStartsWith.participantName} ${params.roundNumber} ${params.roundPosition}`;
       pushGlobalLog({
         method: 'notice',
         color: 'brightyellow',

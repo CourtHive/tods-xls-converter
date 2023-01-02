@@ -72,9 +72,10 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     const {
       participants: structureParticipants,
       structures = [],
-      entries,
       hasValues,
       analysis,
+      context,
+      entries,
       warning,
       error
     } = result;
@@ -83,13 +84,13 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       invalidNames.includes(participantName)
     );
 
-    const participantTypes = structureParticipants.reduce((types, participant) => {
+    const participantTypes = structureParticipants?.reduce((types, participant) => {
       const participantType = participant.participantType;
       if (!types.includes(participantType)) types.push(participantType);
       return types;
     }, []);
 
-    const isDoubles = participantTypes.includes(PAIR);
+    const isDoubles = participantTypes?.includes(PAIR);
 
     if (invalidParticipant)
       console.log({ sheetName, fileName }, invalidParticipant?.individualParticipants || invalidParticipant);
@@ -137,7 +138,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
 
     if (error) {
       if (logging) console.log({ error });
-      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' }, ...context });
       if (!errorLog[error]) {
         errorLog[error] = [sheetName];
       } else {
@@ -148,23 +149,31 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'yellow' } });
     } else {
       const method = `processSheet ${sheetNumber}`;
-      pushGlobalLog(
-        {
-          method,
-          keyColors: {
-            sheetName: 'brightcyan',
-            type: 'brightmagenta',
-            matchUpsCount: 'brightgreen',
-            format: 'brightmagenta'
-          },
-          type: analysis?.sheetType,
-          format: isDoubles ? 'D' : 'S',
-          sheetName,
-          matchUpsCount
-        },
-        undefined,
-        method
-      );
+      const leader = {
+        method,
+        keyColors: {
+          sheetName: 'brightcyan',
+          type: 'brightmagenta',
+          matchUpsCount: 'brightgreen',
+          format: 'brightmagenta'
+        }
+      };
+      const format = isDoubles ? 'D' : participantTypes ? 'S' : undefined;
+      const attrs = format
+        ? {
+            ...leader,
+            type: analysis?.sheetType,
+            format,
+            sheetName,
+            matchUpsCount
+          }
+        : {
+            ...leader,
+            type: analysis?.sheetType,
+            sheetName
+          };
+
+      pushGlobalLog(attrs, undefined, method);
     }
 
     if (analysis?.potentialResultValues) resultValues.push(...analysis.potentialResultValues);

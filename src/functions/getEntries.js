@@ -24,6 +24,7 @@ export function getEntries({
 }) {
   const detailParticipants = {};
   const rowParticipants = {};
+  const notPositionRows = {};
 
   const getColumnProfile = (column) => analysis.columnProfiles.find((columnProfile) => columnProfile.column === column);
 
@@ -60,9 +61,14 @@ export function getEntries({
       columnProfile &&
         entryDetailRows.forEach((row) => {
           const cellRef = `${attributeColumn}${row}`;
-          if (!detailParticipants[row]) detailParticipants[row] = {};
           const value = columnProfile.keyMap[cellRef];
-          if (value) detailParticipants[row][attribute] = value;
+          if (value) {
+            if (!detailParticipants[row]) detailParticipants[row] = {};
+            detailParticipants[row][attribute] = value;
+            if (!positionRows.includes(row)) {
+              notPositionRows[row] = value;
+            }
+          }
         });
     }
   } else {
@@ -74,7 +80,7 @@ export function getEntries({
     const entriesOnPositionRows = positionRows.every((row) => columnProfile.rows.includes(row));
     const columnRowsOnPositionRows = columnProfile.rows.every((row) => positionRows.includes(row));
 
-    if (entriesOnPositionRows || columnRowsOnPositionRows)
+    if (entriesOnPositionRows || columnRowsOnPositionRows) {
       return getFirstRoundEntries({
         preRoundParticipants,
         boundaryIndex,
@@ -83,19 +89,29 @@ export function getEntries({
         analysis,
         profile
       });
+    }
   }
 
   const bogusRows = Object.keys(detailParticipants).filter((key) => {
     const detailParticipant = detailParticipants[key];
     const participantKeys = Object.keys(detailParticipant);
     const relevantKeys = participantKeys.filter((key) => !['ranking', 'seedValue', 'entryStatus'].includes(key));
-    return !relevantKeys.length;
+    return !relevantKeys.length || participantKeys.length < 2;
   });
 
   bogusRows.forEach((row) => delete detailParticipants[row]);
   entryDetailRows = entryDetailRows.filter((row) => !bogusRows.includes(row.toString()));
 
-  const isSeparatedPersonsDoubles = Object.values(detailParticipants).length > positionRows.length;
+  const detailsCount = Object.values(detailParticipants).length;
+
+  // LIMITATION: doesn't support more than half of doubles draw filled with BYEs
+  const isSeparatedPersonsDoubles = (detailsCount + 1) / 2 >= positionRows.length;
+
+  if (detailsCount > positionRows.length && !isSeparatedPersonsDoubles) {
+    const exciseRows = Object.keys(notPositionRows);
+    entryDetailRows = entryDetailRows.filter((row) => !exciseRows.includes(row.toString()));
+    exciseRows.forEach((row) => delete detailParticipants[row]);
+  }
 
   if (isSeparatedPersonsDoubles) {
     // NOTE: necessary to get row values past final positionRow
