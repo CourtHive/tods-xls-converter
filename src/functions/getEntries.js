@@ -105,9 +105,13 @@ export function getEntries({
   entryDetailRows = entryDetailRows.filter((row) => !bogusRows.includes(row.toString()));
 
   const detailsCount = Object.values(detailParticipants).length;
+  const byesCount = Object.values(detailParticipants).filter(isBye).length;
 
+  // NOTE: fudgeFactor includes +1 for doubles participant row after last positionRow
+  // NOTE: fudgeFactor includes +1 for participant missing participantId
+  const fudgeFactor = 2;
   // LIMITATION: doesn't support more than half of doubles draw filled with BYEs
-  const isSeparatedPersonsDoubles = (detailsCount + 1) / 2 >= positionRows.length;
+  const isSeparatedPersonsDoubles = (detailsCount + fudgeFactor + byesCount) / 2 >= positionRows.length;
 
   if (detailsCount > positionRows.length && !isSeparatedPersonsDoubles) {
     const exciseRows = Object.keys(notPositionRows);
@@ -138,6 +142,8 @@ export function getEntries({
       keyColors: { message: 'cyan', attributes: 'brightyellow' },
       message
     });
+  } else if (detailsCount > positionRows) {
+    console.log('----------------------- Check for false S');
   }
 
   const detailResult =
