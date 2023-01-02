@@ -95,10 +95,12 @@ export const config = {
       { regex: '.*\\d{2,}[ap]m' },
       { regex: `^q\\d$` },
       { regex: '^[0-9:]+[a|p]{1}m$' },
-      { regex: 'happen$' } // "Didn't Happen" used for "CANCELLED"
+      { regex: 'happen$' }, // "Didn't Happen" used for "CANCELLED"
+      { regex: "didn't happen$" } // "Didn't Happen" used for "CANCELLED"
     ],
     skipWords: [
       'winner',
+      'a/f',
       'winner;',
       'winner:',
       'umpire',
