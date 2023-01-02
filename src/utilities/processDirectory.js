@@ -279,7 +279,10 @@ export function processDirectory({
 
   if (writeMatchUps && writeDir) {
     const filteredMatchUps = allMatchUps.filter(
-      (matchUp) => ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus) && matchUp.winningSide
+      (matchUp) =>
+        ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus) &&
+        matchUp.drawPositions.length === 2 &&
+        matchUp.winningSide
     );
     writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
   }
