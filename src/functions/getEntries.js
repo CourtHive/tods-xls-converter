@@ -94,6 +94,8 @@ export function getEntries({
 
   const bogusRows = Object.keys(detailParticipants).filter((key) => {
     const detailParticipant = detailParticipants[key];
+    if (isBye(detailParticipant)) return false;
+
     const participantKeys = Object.keys(detailParticipant);
     const relevantKeys = participantKeys.filter((key) => !['ranking', 'seedValue', 'entryStatus'].includes(key));
     return !relevantKeys.length || participantKeys.length < 2;
