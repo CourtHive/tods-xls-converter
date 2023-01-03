@@ -69,22 +69,22 @@ it('can process tests', () => {
   let writeResultIndex;
 
   const sheetTypes = [];
-  const sheetNumbers = [3];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 0;
-  const startIndex = 45;
+  const startIndex = 0;
 
   resetLogging();
   setLoggingActive(true);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
-    roundNumbers: [5],
-    roundPositions: [1],
+    roundNumbers: [1],
+    roundPositions: [5],
     participantValues: true,
     potentialValues: true,
-    sideWeights: true,
-    pRank: false
+    sideWeights: false,
+    pRank: true
   });
   setLoggingActive(false, 'columnProfiles');
   setLoggingActive(false, 'detail'); // globalLog notices
