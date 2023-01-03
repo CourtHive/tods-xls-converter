@@ -54,5 +54,6 @@ export default {
   getWorkbookProps,
   setWorkbookType,
   getWorkbook,
-  setWorkbook
+  setWorkbook,
+  getAudit
 };

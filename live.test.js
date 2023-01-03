@@ -1,5 +1,5 @@
-import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
 import { getAudit, getLoggingActive, resetLogging, setLoggingActive } from './src/global/state';
+import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
 import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
@@ -60,6 +60,7 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
+  // const readDir = './examples/sheets/testing/working';
   const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
@@ -94,7 +95,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'multiple results');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
-  setLoggingActive(true, 'scoreAudit');
+  setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
 

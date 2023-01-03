@@ -28,6 +28,7 @@ export const getSheetAnalysis = ({
   sheetNumber,
   sheetName,
   sheetType,
+  fileName,
   profile,
   sheet,
   info
@@ -249,6 +250,7 @@ export const getSheetAnalysis = ({
     footerRow,
     headerRow,
     category,
+    fileName,
     columns,
     info
   };
