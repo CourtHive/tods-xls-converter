@@ -13,13 +13,13 @@ export function getAdvanceTargets(params) {
   if (!potentialValues) return {};
 
   const advanceLogging = getLoggingActive('advanceTargets');
-  const positionOfInterest = advanceLogging.roundPositions?.includes(roundPosition);
-  const roundOfInterest = advanceLogging.roundNumbers?.includes(roundNumber);
+  const positionOfInterest = advanceLogging?.roundPositions?.includes(roundPosition);
+  const roundOfInterest = advanceLogging?.roundNumbers?.includes(roundNumber);
 
   const log =
     ((positionOfInterest && roundOfInterest) ||
-      (!advanceLogging.roundPositions?.length && roundOfInterest) ||
-      (!advanceLogging.roundNumbers?.length && positionOfInterest)) &&
+      (!advanceLogging?.roundPositions?.length && roundOfInterest) ||
+      (!advanceLogging?.roundNumbers?.length && positionOfInterest)) &&
     advanceLogging;
 
   if (log?.potentialValues) console.log(potentialValues);
@@ -42,9 +42,16 @@ export function getAdvanceTargets(params) {
         keyColors: { message: 'yellow', attributes: 'brightyellow' },
         message
       });
-      if (getLoggingActive('multiple results')) {
+      if (getLoggingActive('multipleResults')) {
         results.map((result, i) =>
-          console.log({ result, isLikeScore: isLikeScore(result), isScoreLike: isScoreLike(result), i })
+          console.log({
+            roundNumber,
+            roundPosition,
+            result,
+            isLikeScore: isLikeScore(result),
+            isScoreLike: isScoreLike(result),
+            i
+          })
         );
       }
     } else if (results.length) {
