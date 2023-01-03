@@ -122,13 +122,15 @@ export function getRound({
       if (withConfidence?.length) {
         columnValues = columnValues.map((c) => c.slice(0, 1));
 
-        const message = `participantName (result) { roundNumber: ${roundNumber} }`;
-        pushGlobalLog({
-          method: 'notice',
-          color: 'brightyellow',
-          keyColors: { message: 'cyan', attributes: 'brightyellow' },
-          message
-        });
+        if (getLoggingActive('potentialResults')) {
+          const message = `participantName (result) { roundNumber: ${roundNumber} }`;
+          pushGlobalLog({
+            method: 'notice',
+            color: 'brightyellow',
+            keyColors: { message: 'cyan', attributes: 'brightyellow' },
+            message
+          });
+        }
       }
     } else if (overlap.length > 1 && !considerTwo) {
       columnValues = columnValues.map((c) => c.slice(0, 1));
