@@ -4,9 +4,10 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { read } from 'xlsx';
 
 import { SUCCESS } from '../constants/resultConstants';
+import { workbookTypes } from '../config/workbookTypes';
 
-export function loadWorkbook(buf, index) {
-  let data;
+export function loadWorkbook(buf, index, defaultProvider) {
+  let data, workbookType;
 
   try {
     data = read(buf);
@@ -15,10 +16,15 @@ export function loadWorkbook(buf, index) {
     return { error };
   }
 
-  let result = identifyWorkbook(data);
-  if (result.error) return result;
+  if (!defaultProvider) {
+    let result = identifyWorkbook(data);
+    if (result.error) return result;
 
-  const workbookType = result.workbookType;
+    workbookType = result.workbookType;
+  } else {
+    workbookType = workbookTypes.find((type) => type.organization === defaultProvider);
+  }
+
   setWorkbookType(workbookType);
 
   pushGlobalLog({

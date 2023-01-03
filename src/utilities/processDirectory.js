@@ -19,6 +19,8 @@ export function processDirectory({
   tournamentContext = {},
   matchUpContext = {},
 
+  defaultProvider,
+
   captureProcessedData = true,
   processStructures = true,
   includeWorkbooks,
@@ -28,7 +30,7 @@ export function processDirectory({
   sheetTypes,
   sheetLimit
 }) {
-  const isXLS = (fileName) => fileName.split('.').reverse()[0].startsWith('xls');
+  const isXLS = (fileName) => fileName.toLowerCase().split('.').reverse()[0].startsWith('xls');
   let fileNames = readdirSync(readDir).filter(isXLS);
   const workbookCount = fileNames.length;
 
@@ -72,7 +74,7 @@ export function processDirectory({
     const buf = readFileSync(`${readDir}/${fileName}`);
     const stat = statSync(`${readDir}/${fileName}`);
 
-    let result = loadWorkbook(buf, index);
+    let result = loadWorkbook(buf, index, defaultProvider);
     const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
     result = processSheets({ fileName, sheetNumbers, sheetLimit, sheetTypes, processStructures });
