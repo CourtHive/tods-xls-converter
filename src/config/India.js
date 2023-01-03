@@ -136,7 +136,13 @@ export const config = {
       {
         type: HEADER,
         id: 'playersList',
-        elements: [`Player's List`],
+        elements: [
+          `player's list`,
+          { text: 'acceptance list', options: { startsWith: true } },
+          { text: 'no show list', options: { startsWith: true } },
+          { text: 'late withdrawal', options: { startsWith: true } },
+          { text: 'no show', options: { endsWith: true } }
+        ],
         rows: 1,
         minimumElements: 1
       },
@@ -286,6 +292,10 @@ export const config = {
     ],
     sheetDefinitions: [
       {
+        type: PARTICIPANTS,
+        rowIds: ['playersList']
+      },
+      {
         type: KNOCKOUT,
         infoClass: 'drawInfo',
         rowIds: ['knockoutParticipants', 'drawFooter'],
@@ -327,10 +337,6 @@ export const config = {
       {
         type: INFORMATION,
         rowIds: ['tournamentInfo', 'tournamentOrganization']
-      },
-      {
-        type: PARTICIPANTS,
-        rowIds: ['playersList']
       },
       {
         type: PARTICIPANTS,
