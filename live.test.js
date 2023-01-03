@@ -78,7 +78,7 @@ it('can process tests', () => {
   resetLogging();
   setLoggingActive(true);
   setLoggingActive(false, 'advanceTargets', {
-    roundPositions: [13],
+    roundPositions: [1],
     roundNumbers: [1],
     participantValues: false,
     potentialValues: false,
@@ -95,7 +95,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'multiple results');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
-  setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
+  setLoggingActive(false, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
 
