@@ -2,7 +2,7 @@ import { isNumeric } from '../utilities/identification';
 import { getCellValue } from './sheetAccess';
 
 export function getCheckedValue({ profile, sheet, key }) {
-  let rawValue = getCellValue(sheet[key]).split('.').join(''); // remove '.'
+  let rawValue = getCellValue(sheet[key]).split('.').join(' ').trim(); // remove '.'
   if (profile.exciseWords) {
     profile.exciseWords.forEach(({ regex }) => {
       const re = new RegExp(regex);
