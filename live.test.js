@@ -78,16 +78,15 @@ it('can process tests', () => {
   setLoggingActive(true);
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'fileNames');
-  // setLoggingActive(true, 'sheetNames');
-  // setLoggingActive(true, 'matchUps');
-  // setLoggingActive(true, 'noWinningSide');
-  // setLoggingActive(true, 'invalidResult');
-  // setLoggingActive(true, 'multiple results');
-  // setLoggingActive(true, 'scores');
-  // setLoggingActive(true, 'score-audit');
-  // setLoggingActive(true, 'matchUps');
   // setLoggingActive(true, 'finalPositions');
+  // setLoggingActive(true, 'invalidResult');
+  // setLoggingActive(true, 'matchUps');
+  // setLoggingActive(true, 'multiple results');
+  // setLoggingActive(true, 'noWinningSide');
   // setLoggingActive(true, 'participants');
+  // setLoggingActive(true, 'score-audit');
+  // setLoggingActive(true, 'scores');
+  // setLoggingActive(true, 'sheetNames');
 
   const result = processDirectory({
     captureProcessedData: true, // set to false to bulk process > 200 files
@@ -95,6 +94,7 @@ it('can process tests', () => {
     processStructures: true,
     includeWorkbooks: true,
     writeTournamentRecords,
+    defaultProvider: 'IND',
     writeMatchUps,
     processLimit,
     sheetNumbers,

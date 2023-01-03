@@ -1,9 +1,9 @@
 import { workbookTypes } from '../config/workbookTypes';
 import { isString } from '../utilities/identification';
+import { tidyLower } from '../utilities/convenience';
 
 import { MISSING_WORKBOOK } from '../constants/errorConditions';
 import { SUCCESS } from '../constants/resultConstants';
-import { tidyLower } from '../utilities/convenience';
 
 export function identifyWorkbook(workbook) {
   if (!workbook) return { error: MISSING_WORKBOOK };

@@ -7,7 +7,8 @@ import { getLoggingActive } from '../global/state';
 export function getAdvanceTargets(params) {
   let columnsConsumed;
 
-  const { consideredParticipants, potentialValues } = params;
+  const { consideredParticipants, potentialValues, roundNumber, roundPosition } = params;
+  roundNumber && roundPosition; // useful for debugging
 
   // if no potentialValues have been provided, return
   if (!potentialValues) return {};
