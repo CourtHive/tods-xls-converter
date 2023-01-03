@@ -4,10 +4,10 @@ import { getMaxPositionWithValues } from './getMaxPositionWithValues';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
 import { generateStructureId } from '../utilities/hashing';
+import { audit, getLoggingActive } from '../global/state';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
-import { getLoggingActive } from '../global/state';
 import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
@@ -322,6 +322,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       message,
       matchUpsCount: singlePositionMatchUps.length
     });
+
+    audit({ singlePositions: singlePositionMatchUps.length, fileName: analysis.fileName });
   }
 
   return {
