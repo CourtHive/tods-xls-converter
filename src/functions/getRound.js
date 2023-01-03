@@ -238,7 +238,7 @@ export function getRound({
         const score = { ...outcome?.score, ...stringScore };
         matchUp.score = score;
         if (getLoggingActive('scoreAudit')) {
-          audit({ result, scoreString, fileName: analysis.fileName });
+          audit({ scoreString, result, fileName: analysis.fileName });
         }
         if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });
       }
