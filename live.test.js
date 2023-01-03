@@ -76,6 +76,7 @@ it('can process tests', () => {
 
   resetLogging();
   setLoggingActive(true);
+  // setLoggingActive(true, 'columnProfiles');
   // setLoggingActive(true, 'detail'); // globalLog notices
   // setLoggingActive(true, 'dev');
   // setLoggingActive(true, 'fileNames');
