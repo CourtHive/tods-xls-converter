@@ -292,7 +292,8 @@ export const config = {
       },
       {
         type: INFORMATION,
-        rowIds: ['notice']
+        rowIds: ['notice'],
+        sheetNames: ['order of play']
       },
       {
         type: INFORMATION,
