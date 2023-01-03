@@ -7,6 +7,7 @@ import { generateStructureId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
+import { getLoggingActive } from '../global/state';
 import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
@@ -237,7 +238,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     });
   }
 
-  if (rangeAdjustments.length) {
+  if (rangeAdjustments.length && getLoggingActive('detail')) {
     const message = `result range modified { roundNumbers: ${rangeAdjustments.join(',')} }`;
     pushGlobalLog({
       method: 'notice',

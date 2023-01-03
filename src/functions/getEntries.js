@@ -4,6 +4,7 @@ import { getFirstRoundEntries } from './getFirstRoundEntries';
 import { generateParticipantId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getCellValue, getRow } from './sheetAccess';
+import { getLoggingActive } from '../global/state';
 import { isBye } from '../utilities/convenience';
 
 import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
@@ -159,13 +160,15 @@ export function getEntries({
       detailParticipants[missingEntryDetailRow] = missingDetail;
       entryDetailRows.push(missingEntryDetailRow);
     }
-    const message = `adding participant detail row: ${missingEntryDetailRow}`;
-    pushGlobalLog({
-      method: 'notice',
-      color: 'brightyellow',
-      keyColors: { message: 'cyan', attributes: 'brightyellow' },
-      message
-    });
+    if (getLoggingActive('detail')) {
+      const message = `adding participant detail row: ${missingEntryDetailRow}`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow' },
+        message
+      });
+    }
   } else if (detailsCount > positionRows) {
     console.log('----------------------- Check for false S');
   }
