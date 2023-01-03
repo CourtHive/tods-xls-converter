@@ -1,3 +1,5 @@
+import { utilities } from 'tods-competition-factory';
+
 const joiners = ['-', '/', ' / '];
 
 // extract all the various participant values that will be compared to advanced participant string
@@ -10,9 +12,14 @@ export function getParticipantValues(participant, roundNumber, roundPosition, lo
   let pValues = [participantName];
   if (person) {
     const { standardFamilyName, standardGivenName } = person;
-    pValues.push(standardFamilyName, standardGivenName);
+    pValues.push(standardFamilyName);
+    pValues.push(standardGivenName);
     // handle multiple last names where only one of the last names is progressed
     const splitFamilyName = standardFamilyName.split(' ');
+
+    if (!standardFamilyName && standardGivenName?.split(' ').length > 1) {
+      pValues.push(standardGivenName.split(' ')[0]);
+    }
 
     // handle multiple last names where only one of the last names is progressed
     if (splitFamilyName[0] !== standardFamilyName) pValues.push(...splitFamilyName);
@@ -71,7 +78,9 @@ export function getParticipantValues(participant, roundNumber, roundPosition, lo
     // ignore values which are single characters
     .filter((value) => value.length > 1);
 
-  if (log?.participantValues) console.log({ filteredValues });
+  const uniqueFilteredValues = utilities.unique(filteredValues);
 
-  return filteredValues;
+  if (log?.participantValues) console.log({ uniqueFilteredValues });
+
+  return uniqueFilteredValues;
 }
