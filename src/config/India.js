@@ -2,6 +2,7 @@ import { genderConstants, matchUpTypes, drawDefinitionConstants, entryStatusCons
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
+import { roundNames as stockRoundNames } from './roundNames';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import { POSITION } from '../constants/columnConstants';
 import {
@@ -37,49 +38,8 @@ const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
 const { MALE, FEMALE, ANY } = genderConstants;
 
-const roundNames = [
-  'round 1',
-  'round 2',
-  'round of 64',
-  'round of 32',
-  'round of 16',
-  'round of 8',
-  '4th round',
-  '1st round',
-  '2nd round',
-  '3rd round',
-  'pre-quarters',
-  'pre- quarters',
-  'quarter- finals',
-  'quarterfinalists',
-  'preqtrs',
-  'pqtr',
-  'qtrs',
-  'pre quarter finals',
-  'quarters',
-  'quarter',
-  'qtr',
-  'pre=qf',
-  'qf',
-  'qtr final',
-  'qualifiers',
-  'round of 32',
-  'quarterfinals',
-  'quarter finals',
-  'final qualifying',
-  'final qualifing',
-  'semi final',
-  'semifinal',
-  'semifinals',
-  'semi finals',
-  'semi-finals',
-  'sf',
-  'final round',
-  'winners',
-  'winner',
-  'finals',
-  'final'
-];
+const roundNames = [...stockRoundNames];
+
 const qualifyingIdentifiers = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8'];
 const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN', 'under-12', 'under-14', 'under-16', 'under-18'];
 const entryStatusMap = {
