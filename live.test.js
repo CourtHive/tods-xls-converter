@@ -60,8 +60,8 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  // const readDir = './examples/sheets/testing/working';
-  const readDir = './examples/sheets/testing';
+  const readDir = './examples/sheets/testing/SinglePositionMatchUps';
+  // const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
@@ -77,12 +77,13 @@ it('can process tests', () => {
 
   resetLogging();
   setLoggingActive(true);
+  setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
+    roundNumbers: [5],
     roundPositions: [1],
-    roundNumbers: [1],
-    participantValues: false,
-    potentialValues: false,
-    sideWeights: false,
+    participantValues: true,
+    potentialValues: true,
+    sideWeights: true,
     pRank: false
   });
   setLoggingActive(false, 'columnProfiles');
@@ -92,7 +93,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'finalPositions');
   setLoggingActive(false, 'invalidResult');
   setLoggingActive(false, 'matchUps');
-  setLoggingActive(false, 'multiple results');
+  setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
   setLoggingActive(false, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
@@ -119,9 +120,11 @@ it('can process tests', () => {
   printGlobalLog();
   purgeGlobalLog();
 
+  const auditLog = getAudit();
+
   if (getLoggingActive('scoreAudit')) {
-    const auditLog = getAudit();
-    const csvScores = utilities.JSON2CSV(auditLog);
+    const scoreAudit = auditLog.filter((item) => typeof item === 'object' && item.scoreString);
+    const csvScores = utilities.JSON2CSV(scoreAudit);
     writeFileSync('./scratch/scoreParsing.csv', csvScores, 'UTF-8');
   }
 
@@ -133,6 +136,7 @@ it('can process tests', () => {
     writeFileSync('./scratch/participants.json', JSON.stringify(participants), 'UTF-8');
     writeFileSync('./scratch/participants.csv', csvParticipants, 'UTF-8');
   }
+
   if (!isNaN(writeResultIndex))
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 
