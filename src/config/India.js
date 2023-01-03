@@ -288,7 +288,7 @@ export const config = {
           'nationality'
         ],
         limit: 1,
-        skipWords: ['reg', 'umpire', '0', 'a/f'],
+        skipWords: ['reg', 'umpire', '0', 'a/f', 'new id'],
         valueRegex: '\\d{4,}$',
         log: true
       },
