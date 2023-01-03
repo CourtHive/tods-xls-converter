@@ -64,7 +64,7 @@ it('can process tests', () => {
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = true;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   const sheetTypes = [];
@@ -94,15 +94,15 @@ it('can process tests', () => {
   setLoggingActive(false, 'multiple results');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
-  setLoggingActive(false, 'score-audit');
+  setLoggingActive(true, 'scoreAudit');
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
 
   const result = processDirectory({
-    captureProcessedData: true, // set to false to bulk process > 200 files
+    captureProcessedData: false, // set to false to bulk process > 200 files
     // tournamentContext: { startDate: '2022-06-06' },
     processStructures: true,
-    includeWorkbooks: true,
+    includeWorkbooks: false,
     writeTournamentRecords,
     defaultProvider: 'IND',
     writeMatchUps,
@@ -118,7 +118,7 @@ it('can process tests', () => {
   printGlobalLog();
   purgeGlobalLog();
 
-  if (getLoggingActive('score-audit')) {
+  if (getLoggingActive('scoreAudit')) {
     const auditLog = getAudit();
     const csvScores = utilities.JSON2CSV(auditLog);
     writeFileSync('./scratch/scoreParsing.csv', csvScores, 'UTF-8');
