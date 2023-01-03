@@ -3,6 +3,7 @@ import { SUCCESS } from '../constants/resultConstants';
 let loggingActive = {},
   auditLog = [],
   workbookType,
+  params = {},
   workbook;
 
 export function audit(value) {
@@ -20,11 +21,12 @@ export function resetLogging() {
 }
 
 export function getLoggingActive(type = 'global') {
-  return loggingActive[type];
+  return loggingActive[type] && params;
 }
 
-export function setLoggingActive(value, type = 'global') {
+export function setLoggingActive(value, type = 'global', paramValues) {
   loggingActive[type] = !!value;
+  if (typeof paramValues === 'object') params = paramValues;
   return { ...SUCCESS };
 }
 

@@ -13,7 +13,8 @@ export function getColumnResults({
   potentialValues,
   roundPosition, // useful for debugging
   roundNumber, // useful for debugging
-  profile
+  profile,
+  log
 }) {
   let isDoubleWalkover;
 
@@ -48,12 +49,14 @@ export function getColumnResults({
 
     const sideWeights = !isDoubleWalkover
       ? consideredParticipants?.map((participant, index) => {
-          const pValues = getParticipantValues(participant, roundNumber, roundPosition);
-          const pRank = pRankReducer({ pValues, value, confidenceThreshold });
+          const pValues = getParticipantValues(participant, roundNumber, roundPosition, log);
+          const pRank = pRankReducer({ pValues, value, confidenceThreshold, log });
 
           return { sideNumber: index + 1, ...pRank };
         })
       : undefined;
+
+    if (log?.sideWeights) console.log({ value, sideWeights });
 
     const side = sideWeights?.reduce((side, weight) => (weight.confidence > side.confidence ? weight : side), {
       confidence: 0

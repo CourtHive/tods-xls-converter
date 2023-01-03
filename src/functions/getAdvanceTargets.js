@@ -8,13 +8,24 @@ export function getAdvanceTargets(params) {
   let columnsConsumed;
 
   const { consideredParticipants, potentialValues, roundNumber, roundPosition } = params;
-  roundNumber && roundPosition; // useful for debugging
 
   // if no potentialValues have been provided, return
   if (!potentialValues) return {};
 
+  const advanceLogging = getLoggingActive('advanceTargets');
+  const positionOfInterest = advanceLogging.roundPositions?.includes(roundPosition);
+  const roundOfInterest = advanceLogging.roundNumbers?.includes(roundNumber);
+
+  const log =
+    ((positionOfInterest && roundOfInterest) ||
+      (!advanceLogging.roundPositions?.length && roundOfInterest) ||
+      (!advanceLogging.roundNumbers?.length && positionOfInterest)) &&
+    advanceLogging;
+
+  if (log?.potentialValues) console.log(potentialValues);
+
   // process all of the potentialValues (potentially multiple columns)
-  const { columnResults, isLikeScore } = getColumnResults(params);
+  const { columnResults, isLikeScore } = getColumnResults({ ...params, log });
 
   // -------------------------------------------------------------------------------------------------
   // ACTION: search for viable side and result detail in the columnResults

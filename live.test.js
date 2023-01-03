@@ -76,19 +76,27 @@ it('can process tests', () => {
 
   resetLogging();
   setLoggingActive(true);
-  // setLoggingActive(true, 'columnProfiles');
-  // setLoggingActive(true, 'detail'); // globalLog notices
-  // setLoggingActive(true, 'dev');
-  // setLoggingActive(true, 'fileNames');
-  // setLoggingActive(true, 'finalPositions');
-  // setLoggingActive(true, 'invalidResult');
-  // setLoggingActive(true, 'matchUps');
-  // setLoggingActive(true, 'multiple results');
-  // setLoggingActive(true, 'noWinningSide');
-  // setLoggingActive(true, 'participants');
-  // setLoggingActive(true, 'score-audit');
-  // setLoggingActive(true, 'scores');
-  // setLoggingActive(true, 'sheetNames');
+  setLoggingActive(false, 'advanceTargets', {
+    roundPositions: [13],
+    roundNumbers: [1],
+    participantValues: false,
+    potentialValues: false,
+    sideWeights: false,
+    pRank: false
+  });
+  setLoggingActive(false, 'columnProfiles');
+  setLoggingActive(false, 'detail'); // globalLog notices
+  setLoggingActive(false, 'dev');
+  setLoggingActive(false, 'fileNames');
+  setLoggingActive(false, 'finalPositions');
+  setLoggingActive(false, 'invalidResult');
+  setLoggingActive(false, 'matchUps');
+  setLoggingActive(false, 'multiple results');
+  setLoggingActive(false, 'noWinningSide');
+  setLoggingActive(false, 'participants');
+  setLoggingActive(false, 'score-audit');
+  setLoggingActive(false, 'scores');
+  setLoggingActive(false, 'sheetNames');
 
   const result = processDirectory({
     captureProcessedData: true, // set to false to bulk process > 200 files
