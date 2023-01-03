@@ -239,7 +239,7 @@ export function getRoundMatchUps({
   if (getLoggingActive('matchUps')) {
     console.log(matchUps);
   }
-  if (getLoggingActive('missing')) {
+  if (getLoggingActive('singlePositions')) {
     const missingDrawPosition = matchUps.filter((m) => !m.drawPositions || m.drawPositions.length < 2);
     if (missingDrawPosition.length) console.log(missingDrawPosition);
   }
