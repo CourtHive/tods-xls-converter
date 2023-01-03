@@ -67,6 +67,7 @@ export function processDirectory({
   const errorLog = {};
 
   let tournamentRecords = [];
+  let sheetsProcessed = 0;
   let totalMatchUps = 0;
 
   let index = 0;
@@ -79,6 +80,12 @@ export function processDirectory({
     const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
     result = processSheets({ fileName, sheetNumbers, sheetLimit, sheetTypes, processStructures });
+
+    const processedSheets = Object.values(result.sheetAnalysis).filter(
+      ({ hasValues, analysis }) => hasValues && !analysis?.skipped
+    ).length;
+    sheetsProcessed += processedSheets;
+
     if (captureProcessedData) {
       fileResults[index] = { fileName, ...result, ...additionalContent };
     }
@@ -303,12 +310,14 @@ export function processDirectory({
     ?.flatMap((key) => errorLog[key].map((file) => file.sheetNames.length))
     .reduce((a, b) => a + b, 0);
 
+  /*
   const sheetsProcessed = Object.values(fileResults)
     .map(
       ({ sheetAnalysis = {} }) =>
         Object.values(sheetAnalysis).filter(({ hasValues, analysis }) => hasValues && !analysis?.skipped).length
     )
     .reduce((a, b) => a + b, 0);
+    */
 
   if (logging) console.log({ sheetsProcessed, totalMatchUps, errorTypes, totalErrors });
 
