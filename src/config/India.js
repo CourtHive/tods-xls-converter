@@ -133,7 +133,11 @@ export const config = {
       {
         type: HEADER,
         id: 'signup',
-        elements: ['practice courts', { text: 'sign-in', options: { startsWith: true } }],
+        elements: [
+          'practice courts',
+          { text: 'online sign-in', options: { includes: true } },
+          { text: 'sign-in', options: { startsWith: true } }
+        ],
         rows: 1,
         minimumElements: 1
       },
