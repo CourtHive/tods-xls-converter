@@ -7,13 +7,25 @@ import { getLoggingActive } from '../global/state';
 export function getAdvanceTargets(params) {
   let columnsConsumed;
 
-  const { consideredParticipants, potentialValues } = params;
+  const { consideredParticipants, potentialValues, roundNumber, roundPosition } = params;
 
   // if no potentialValues have been provided, return
   if (!potentialValues) return {};
 
+  const advanceLogging = getLoggingActive('advanceTargets');
+  const positionOfInterest = advanceLogging?.roundPositions?.includes(roundPosition);
+  const roundOfInterest = advanceLogging?.roundNumbers?.includes(roundNumber);
+
+  const log =
+    ((positionOfInterest && roundOfInterest) ||
+      (!advanceLogging?.roundPositions?.length && roundOfInterest) ||
+      (!advanceLogging?.roundNumbers?.length && positionOfInterest)) &&
+    advanceLogging;
+
+  if (log?.potentialValues) console.log(potentialValues);
+
   // process all of the potentialValues (potentially multiple columns)
-  const { columnResults, isLikeScore } = getColumnResults(params);
+  const { columnResults, isLikeScore } = getColumnResults({ ...params, log });
 
   // -------------------------------------------------------------------------------------------------
   // ACTION: search for viable side and result detail in the columnResults
@@ -30,9 +42,16 @@ export function getAdvanceTargets(params) {
         keyColors: { message: 'yellow', attributes: 'brightyellow' },
         message
       });
-      if (getLoggingActive('multiple results')) {
+      if (getLoggingActive('multipleResults')) {
         results.map((result, i) =>
-          console.log({ result, isLikeScore: isLikeScore(result), isScoreLike: isScoreLike(result), i })
+          console.log({
+            roundNumber,
+            roundPosition,
+            result,
+            isLikeScore: isLikeScore(result),
+            isScoreLike: isScoreLike(result),
+            i
+          })
         );
       }
     } else if (results.length) {

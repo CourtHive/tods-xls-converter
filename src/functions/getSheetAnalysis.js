@@ -6,6 +6,7 @@ import { getRoundCharacter } from './getRoundCharacter';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { utilities } from 'tods-competition-factory';
 import { getIsQualifying } from './getIsQualifying';
+import { getLoggingActive } from '../global/state';
 import { getSheetKeys } from './getSheetKeys';
 import { getValuesMap } from './getValuesMap';
 import { getCategory } from './getCategory';
@@ -27,6 +28,7 @@ export const getSheetAnalysis = ({
   sheetNumber,
   sheetName,
   sheetType,
+  fileName,
   profile,
   sheet,
   info
@@ -128,6 +130,8 @@ export const getSheetAnalysis = ({
       profile.values = [];
     }
   });
+
+  if (getLoggingActive('columnProfiles')) console.log({ columnProfiles });
 
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
@@ -246,6 +250,7 @@ export const getSheetAnalysis = ({
     footerRow,
     headerRow,
     category,
+    fileName,
     columns,
     info
   };

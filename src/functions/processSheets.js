@@ -79,6 +79,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       warning,
       error
     } = result;
+    const drawSize = structures?.[structures.length - 1]?.positionAssignments.length;
 
     const invalidParticipant = structureParticipants?.find(({ participantName }) =>
       invalidNames.includes(participantName)
@@ -149,12 +150,14 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'brightyellow' } });
     } else {
       const method = `processSheet ${sheetNumber}`;
+      // const drawSize = positionAssignments.length;
       const leader = {
         method,
         keyColors: {
           sheetName: 'brightcyan',
           type: 'brightmagenta',
           matchUpsCount: 'brightgreen',
+          drawSize: 'brightgreen',
           format: 'brightmagenta'
         }
       };
@@ -165,7 +168,8 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
             type: analysis?.sheetType,
             format,
             sheetName,
-            matchUpsCount
+            matchUpsCount,
+            drawSize
           }
         : {
             ...leader,

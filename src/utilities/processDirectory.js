@@ -1,7 +1,7 @@
 import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
 import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'fs-extra';
 import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
-import { getLoggingActive, getWorkbook } from '../global/state';
+import { getAudit, getLoggingActive, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
 import { writeTODS08CSV } from './writeTODS08CSV';
 import { loadWorkbook } from '../global/loader';
@@ -19,6 +19,8 @@ export function processDirectory({
   tournamentContext = {},
   matchUpContext = {},
 
+  defaultProvider,
+
   captureProcessedData = true,
   processStructures = true,
   includeWorkbooks,
@@ -28,10 +30,11 @@ export function processDirectory({
   sheetTypes,
   sheetLimit
 }) {
-  const isXLS = (fileName) => fileName.split('.').reverse()[0].startsWith('xls');
-  let fileNames = readdirSync(readDir).filter(isXLS);
+  const isXLS = (fileName) => fileName.toLowerCase().split('.').reverse()[0].startsWith('xls');
+  let fileNames = readdirSync(readDir).filter(isXLS).sort();
   const workbookCount = fileNames.length;
 
+  const filesWithSinglePositions = [];
   const logging = getLoggingActive('dev');
 
   const processing =
@@ -64,6 +67,7 @@ export function processDirectory({
   const errorLog = {};
 
   let tournamentRecords = [];
+  let sheetsProcessed = 0;
   let totalMatchUps = 0;
 
   let index = 0;
@@ -72,10 +76,16 @@ export function processDirectory({
     const buf = readFileSync(`${readDir}/${fileName}`);
     const stat = statSync(`${readDir}/${fileName}`);
 
-    let result = loadWorkbook(buf, index);
+    let result = loadWorkbook(buf, index, defaultProvider);
     const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
     result = processSheets({ fileName, sheetNumbers, sheetLimit, sheetTypes, processStructures });
+
+    const processedSheets = Object.values(result.sheetAnalysis).filter(
+      ({ hasValues, analysis }) => hasValues && !analysis?.skipped
+    ).length;
+    sheetsProcessed += processedSheets;
+
     if (captureProcessedData) {
       fileResults[index] = { fileName, ...result, ...additionalContent };
     }
@@ -275,6 +285,13 @@ export function processDirectory({
         writeFileSync(`${writeDir}/${tournamentName}.tods.json`, JSON.stringify(tournamentRecord), 'UTF-8');
       }
     }
+
+    const auditLog = getAudit();
+    const singlePositions = auditLog.filter((item) => typeof item === 'object' && item.singlePositions);
+    if (singlePositions.length) {
+      filesWithSinglePositions.push({ fileName, singlePositions });
+      // TODO: move file to subDirectory
+    }
   }
 
   if (writeMatchUps && writeDir) {
@@ -293,12 +310,14 @@ export function processDirectory({
     ?.flatMap((key) => errorLog[key].map((file) => file.sheetNames.length))
     .reduce((a, b) => a + b, 0);
 
+  /*
   const sheetsProcessed = Object.values(fileResults)
     .map(
       ({ sheetAnalysis = {} }) =>
         Object.values(sheetAnalysis).filter(({ hasValues, analysis }) => hasValues && !analysis?.skipped).length
     )
     .reduce((a, b) => a + b, 0);
+    */
 
   if (logging) console.log({ sheetsProcessed, totalMatchUps, errorTypes, totalErrors });
 
@@ -306,13 +325,24 @@ export function processDirectory({
     method: 'processingComplete',
     keyColors: { attributes: 'brightgreen' },
     color: 'brightcyan',
-    separator: ':',
+    separator: '.',
     newLine: true,
     divider: 80,
 
     sheetsProcessed,
     totalMatchUps,
     totalErrors
+  });
+
+  pushGlobalLog({
+    method: 'REPORT',
+    keyColors: { attributes: 'brightcyan' },
+    color: 'brightyellow',
+    separator: ':',
+    newLine: true,
+    divider: 80,
+
+    filesWithSinglePositions: filesWithSinglePositions.length
   });
 
   return {

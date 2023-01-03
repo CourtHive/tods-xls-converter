@@ -41,12 +41,16 @@ export function getRound({
   const matchUps = [];
 
   const relevantSubsequentColumns = roundColumns.slice(columnIndex + 1).slice(0, subsequentColumnLimit);
-  const subsequentCount = relevantSubsequentColumns.map((column) => columnsWithParticipants[column]);
+  let subsequentCount = relevantSubsequentColumns.map((column) => columnsWithParticipants[column]);
 
-  // considerTwo recognizes when the total of the values in two subsequent columns
-  // is less than or equal to the expected number of values (roundParticipants * 2)
-  // which is the number of participants and the number of results for each advancing participant
-  const considerTwo = subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.length * 2;
+  // calculation whether to consider two columns changes when there is a folded final
+  const foldedFinalAddition =
+    (relevantSubsequentColumns.length === 2 &&
+      relevantSubsequentColumns[1] === roundColumns[roundColumns.length - 1] &&
+      columnsWithParticipants[relevantSubsequentColumns[1]] > roundParticipants.flat().length &&
+      columnsWithParticipants[relevantSubsequentColumns[1]] - roundParticipants.flat().length) ||
+    0;
+
   const overlap = utilities.intersection(relevantSubsequentColumns, Object.keys(columnsWithParticipants));
 
   const prospectiveResults = finalRound || relevantSubsequentColumns.length;
@@ -75,7 +79,6 @@ export function getRound({
           .filter((key) => rowRange.includes(getRow(key)))
           .map((key) => keyMap[key]);
       });
-
       const pr = pv[0]
         ?.map((value) => {
           const { leader, potentialResult } = getPotentialResult(value);
@@ -87,6 +90,25 @@ export function getRound({
 
       return pv;
     });
+
+    if (relevantSubsequentColumns.length === 2) {
+      // remove all values which are duplicated across columns
+      columnValues = columnValues.map((row) => [row[0], row[1].filter((v) => !row[0].includes(v))]);
+      subsequentCount = columnValues.reduce(
+        (count, row) => {
+          count[0] += row[0].length;
+          count[1] += row[1].length;
+          return count;
+        },
+        [0, 0]
+      );
+    }
+
+    // considerTwo recognizes when the total of the values in two subsequent columns
+    // is less than or equal to the expected number of values (roundParticipants * 2)
+    // which is the number of participants and the number of results for each advancing participant
+    const considerTwo =
+      subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.flat().length + foldedFinalAddition;
 
     if (potentialResults.length > 1) {
       // IF: there are participantNames combined with results
@@ -109,13 +131,15 @@ export function getRound({
       if (withConfidence?.length) {
         columnValues = columnValues.map((c) => c.slice(0, 1));
 
-        const message = `participantName (result) { roundNumber: ${roundNumber} }`;
-        pushGlobalLog({
-          method: 'notice',
-          color: 'brightyellow',
-          keyColors: { message: 'cyan', attributes: 'brightyellow' },
-          message
-        });
+        if (getLoggingActive('potentialResults')) {
+          const message = `participantName (result) { roundNumber: ${roundNumber} }`;
+          pushGlobalLog({
+            method: 'notice',
+            color: 'brightyellow',
+            keyColors: { message: 'cyan', attributes: 'brightyellow' },
+            message
+          });
+        }
       }
     } else if (overlap.length > 1 && !considerTwo) {
       columnValues = columnValues.map((c) => c.slice(0, 1));
@@ -222,7 +246,9 @@ export function getRound({
         const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
         const score = { ...outcome?.score, ...stringScore };
         matchUp.score = score;
-        if (getLoggingActive('score-audit')) audit({ result, scoreString });
+        if (getLoggingActive('scoreAudit')) {
+          audit({ scoreString, result, fileName: analysis.fileName });
+        }
         if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });
       }
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -264,10 +290,9 @@ export function getRound({
     // -------------------------------------------------------------------------------------------------
   }
 
-  if (getLoggingActive('matchUps')) {
-    console.log(matchUps);
-  }
-  if (getLoggingActive('missing')) {
+  if (getLoggingActive('matchUps')) console.log(matchUps);
+
+  if (getLoggingActive('singlePositions')) {
     const missingDrawPosition = matchUps.filter((m) => !m.drawPositions || m.drawPositions.length < 2);
     if (missingDrawPosition.length) console.log(missingDrawPosition);
   }

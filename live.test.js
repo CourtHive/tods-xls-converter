@@ -1,5 +1,5 @@
-import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
 import { getAudit, getLoggingActive, resetLogging, setLoggingActive } from './src/global/state';
+import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
 import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
@@ -60,41 +60,53 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const readDir = './examples/sheets/testing';
+  const readDir = './examples/sheets/testing/SinglePositionMatchUps';
+  // const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = true;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   const sheetTypes = [];
-  const sheetNumbers = [];
+  const sheetNumbers = [3];
   const sheetLimit = 0;
 
   const processLimit = 0;
-  const startIndex = 0;
+  const startIndex = 45;
 
   resetLogging();
   setLoggingActive(true);
-  // setLoggingActive(true, 'dev');
-  // setLoggingActive(true, 'fileNames');
-  // setLoggingActive(true, 'sheetNames');
-  // setLoggingActive(true, 'matchUps');
-  // setLoggingActive(true, 'noWinningSide');
-  // setLoggingActive(true, 'invalidResult');
-  // setLoggingActive(true, 'multiple results');
-  // setLoggingActive(true, 'scores');
-  // setLoggingActive(true, 'score-audit');
-  // setLoggingActive(true, 'matchUps');
-  // setLoggingActive(true, 'finalPositions');
-  // setLoggingActive(true, 'participants');
+  setLoggingActive(false, 'singlePositions');
+  setLoggingActive(false, 'advanceTargets', {
+    roundNumbers: [5],
+    roundPositions: [1],
+    participantValues: true,
+    potentialValues: true,
+    sideWeights: true,
+    pRank: false
+  });
+  setLoggingActive(false, 'columnProfiles');
+  setLoggingActive(false, 'detail'); // globalLog notices
+  setLoggingActive(false, 'dev');
+  setLoggingActive(false, 'fileNames');
+  setLoggingActive(false, 'finalPositions');
+  setLoggingActive(false, 'invalidResult');
+  setLoggingActive(false, 'matchUps');
+  setLoggingActive(false, 'multipleResults');
+  setLoggingActive(false, 'noWinningSide');
+  setLoggingActive(false, 'participants');
+  setLoggingActive(false, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
+  setLoggingActive(false, 'scores');
+  setLoggingActive(false, 'sheetNames');
 
   const result = processDirectory({
-    captureProcessedData: true, // set to false to bulk process > 200 files
+    captureProcessedData: false, // set to false to bulk process > 200 files
     // tournamentContext: { startDate: '2022-06-06' },
     processStructures: true,
-    includeWorkbooks: true,
+    includeWorkbooks: false,
     writeTournamentRecords,
+    defaultProvider: 'IND',
     writeMatchUps,
     processLimit,
     sheetNumbers,
@@ -108,9 +120,11 @@ it('can process tests', () => {
   printGlobalLog();
   purgeGlobalLog();
 
-  if (getLoggingActive('score-audit')) {
-    const auditLog = getAudit();
-    const csvScores = utilities.JSON2CSV(auditLog);
+  const auditLog = getAudit();
+
+  if (getLoggingActive('scoreAudit')) {
+    const scoreAudit = auditLog.filter((item) => typeof item === 'object' && item.scoreString);
+    const csvScores = utilities.JSON2CSV(scoreAudit);
     writeFileSync('./scratch/scoreParsing.csv', csvScores, 'UTF-8');
   }
 
@@ -122,6 +136,7 @@ it('can process tests', () => {
     writeFileSync('./scratch/participants.json', JSON.stringify(participants), 'UTF-8');
     writeFileSync('./scratch/participants.csv', csvParticipants, 'UTF-8');
   }
+
   if (!isNaN(writeResultIndex))
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 

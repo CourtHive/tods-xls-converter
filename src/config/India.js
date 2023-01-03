@@ -2,6 +2,7 @@ import { genderConstants, matchUpTypes, drawDefinitionConstants, entryStatusCons
 import { postProcessors } from '../functions/postProcessors';
 import { isNumeric } from '../utilities/identification';
 
+import { roundNames as stockRoundNames } from './roundNames';
 import { HEADER, FOOTER, ROUND } from '../constants/sheetElements';
 import { POSITION } from '../constants/columnConstants';
 import {
@@ -37,45 +38,8 @@ const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 const { SINGLES_MATCHUP, DOUBLES_MATCHUP } = matchUpTypes;
 const { MALE, FEMALE, ANY } = genderConstants;
 
-const roundNames = [
-  'round 1',
-  'round 2',
-  'round of 64',
-  'round of 32',
-  'round of 16',
-  'round of 8',
-  '4th round',
-  '1st round',
-  '2nd round',
-  '3rd round',
-  'pre-quarters',
-  'pre- quarters',
-  'quarter- finals',
-  'quarterfinalists',
-  'preqtrs',
-  'pqtr',
-  'qtrs',
-  'pre quarter finals',
-  'quarters',
-  'quarter',
-  'qtr',
-  'qualifiers',
-  'round of 32',
-  'quarterfinals',
-  'quarter finals',
-  'final qualifying',
-  'final qualifing',
-  'semifinal',
-  'semifinals',
-  'semi finals',
-  'semi-finals',
-  'sf',
-  'final round',
-  'winners',
-  'winner',
-  'finals',
-  'final'
-];
+const roundNames = [...stockRoundNames];
+
 const qualifyingIdentifiers = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8'];
 const categories = ['U10', 'U12', 'U14', 'U16', 'U18', 'OPEN', 'under-12', 'under-14', 'under-16', 'under-18'];
 const entryStatusMap = {
@@ -95,12 +59,14 @@ export const config = {
       { regex: '.*\\d{2,}[ap]m' },
       { regex: `^q\\d$` },
       { regex: `^a/f$` }, // needs to be removed from id column
+      { regex: `^[as|b|a|bs]+$` }, // needs to be removed from round column
       { regex: '^[0-9:]+[a|p]{1}m$' },
       { regex: 'happen$' }, // "Didn't Happen" used for "CANCELLED"
       { regex: "didn't happen$" }, // "Didn't Happen" used for "CANCELLED"
-      { regex: '^\\d{1,2}/\\d{1,2}/\\d{2,4}$' }
+      { regex: '^\\d{1,2}/\\d{1,2}/\\d{2,4}$' } // dates
     ],
     skipWords: [
+      // all behave as startsWith
       'winner',
       'a/f',
       'winner;',
@@ -129,21 +95,24 @@ export const config = {
       {
         type: HEADER,
         id: 'signup',
-        elements: ['practice courts', { text: 'sign-in', options: { startsWith: true } }],
+        elements: [
+          'practice courts',
+          { text: 'online sign-in', options: { includes: true } },
+          { text: 'sign-in', options: { startsWith: true } }
+        ],
         rows: 1,
         minimumElements: 1
       },
       {
         type: HEADER,
         id: 'playersList',
-        elements: [`Player's List`],
-        rows: 1,
-        minimumElements: 1
-      },
-      {
-        type: HEADER,
-        id: 'overview',
-        elements: ['no show', 'late withdrawals'],
+        elements: [
+          `player's list`,
+          { text: 'acceptance list', options: { startsWith: true } },
+          { text: 'no show', options: { includes: true } },
+          { text: 'late withdrawal', options: { startsWith: true } },
+          { text: 'no show', options: { endsWith: true } }
+        ],
         rows: 1,
         minimumElements: 1
       },
@@ -188,7 +157,9 @@ export const config = {
           'name',
           'time',
           'name of players',
+          'Name of Player',
           'family name',
+          'family',
           'player name',
           'first name',
           'nationality',
@@ -239,7 +210,9 @@ export const config = {
           'surname',
           'player name',
           'players name',
+          'last name',
           'family name',
+          'family',
           'familiy name',
           'famlily name',
           { text: 'players', includes: true },
@@ -265,16 +238,17 @@ export const config = {
           { text: 'rect no', includes: true },
           'reg.no',
           'member id',
-          's.no',
-          'sr.no',
+          's no',
+          'sr no',
           'sl no',
+          'itn no',
           'state',
           'first name',
           'city',
           'nationality'
         ],
         limit: 1,
-        skipWords: ['reg', 'umpire', '0', 'a/f'],
+        skipWords: ['reg', 'umpire', '0', 'a/f', 'new id'],
         valueRegex: '\\d{4,}$',
         log: true
       },
@@ -285,6 +259,10 @@ export const config = {
       { attr: ROUND, header: [...roundNames] }
     ],
     sheetDefinitions: [
+      {
+        type: PARTICIPANTS,
+        rowIds: ['playersList']
+      },
       {
         type: KNOCKOUT,
         infoClass: 'drawInfo',
@@ -314,11 +292,8 @@ export const config = {
       },
       {
         type: INFORMATION,
-        rowIds: ['overview']
-      },
-      {
-        type: INFORMATION,
-        rowIds: ['notice']
+        rowIds: ['notice'],
+        sheetNames: ['order of play']
       },
       {
         type: INFORMATION,
@@ -327,10 +302,6 @@ export const config = {
       {
         type: INFORMATION,
         rowIds: ['tournamentInfo', 'tournamentOrganization']
-      },
-      {
-        type: PARTICIPANTS,
-        rowIds: ['playersList']
       },
       {
         type: PARTICIPANTS,
@@ -480,7 +451,10 @@ export const config = {
       const state = splitValue.length > 1 ? splitValue[1].trim() : '';
       return state?.toLowerCase() === 'india' ? '' : state;
     },
-    isProviderId: (value) => isNumeric(value) && (value === 0 || value.toString().length === 6),
+    isProviderId: (value) => {
+      const providerId = isNumeric(value) && (value === 0 || value.toString().length >= 6);
+      return providerId;
+    },
     columnCharacter: ({ columnProfile }) => {
       const { values } = columnProfile;
       const allProgressionKeys = values.every(

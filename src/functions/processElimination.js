@@ -4,6 +4,7 @@ import { getMaxPositionWithValues } from './getMaxPositionWithValues';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
 import { generateStructureId } from '../utilities/hashing';
+import { audit, getLoggingActive } from '../global/state';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { getPositionRefs } from './getPositionRefs';
 import { processPreRound } from './processPreRound';
@@ -237,7 +238,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     });
   }
 
-  if (rangeAdjustments.length) {
+  if (rangeAdjustments.length && getLoggingActive('detail')) {
     const message = `result range modified { roundNumbers: ${rangeAdjustments.join(',')} }`;
     pushGlobalLog({
       method: 'notice',
@@ -321,6 +322,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       message,
       matchUpsCount: singlePositionMatchUps.length
     });
+
+    audit({ singlePositions: singlePositionMatchUps.length, fileName: analysis.fileName });
   }
 
   return {

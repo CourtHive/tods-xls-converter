@@ -29,8 +29,9 @@ export function getColumnCharacter({
   } = columnProfile;
 
   if (columnProfile.character) return { character: columnProfile.character };
+  const existingAttributes = Object.values(attributeMap);
 
-  if (allProviderId) {
+  if (allProviderId && existingAttributes.includes(PERSON_ID)) {
     const character = PERSON_ID;
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;
