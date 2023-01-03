@@ -41,12 +41,8 @@ export function getRound({
   const matchUps = [];
 
   const relevantSubsequentColumns = roundColumns.slice(columnIndex + 1).slice(0, subsequentColumnLimit);
-  const subsequentCount = relevantSubsequentColumns.map((column) => columnsWithParticipants[column]);
+  let subsequentCount = relevantSubsequentColumns.map((column) => columnsWithParticipants[column]);
 
-  // considerTwo recognizes when the total of the values in two subsequent columns
-  // is less than or equal to the expected number of values (roundParticipants * 2)
-  // which is the number of participants and the number of results for each advancing participant
-  const considerTwo = subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.length * 2;
   const overlap = utilities.intersection(relevantSubsequentColumns, Object.keys(columnsWithParticipants));
 
   const prospectiveResults = finalRound || relevantSubsequentColumns.length;
@@ -75,7 +71,6 @@ export function getRound({
           .filter((key) => rowRange.includes(getRow(key)))
           .map((key) => keyMap[key]);
       });
-
       const pr = pv[0]
         ?.map((value) => {
           const { leader, potentialResult } = getPotentialResult(value);
@@ -87,6 +82,24 @@ export function getRound({
 
       return pv;
     });
+
+    if (relevantSubsequentColumns.length === 2) {
+      // remove all values which are duplicated across columns
+      columnValues = columnValues.map((row) => [row[0], row[1].filter((v) => !row[0].includes(v))]);
+      subsequentCount = columnValues.reduce(
+        (count, row) => {
+          count[0] += row[0].length;
+          count[1] += row[1].length;
+          return count;
+        },
+        [0, 0]
+      );
+    }
+
+    // considerTwo recognizes when the total of the values in two subsequent columns
+    // is less than or equal to the expected number of values (roundParticipants * 2)
+    // which is the number of participants and the number of results for each advancing participant
+    const considerTwo = subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.flat().length;
 
     if (potentialResults.length > 1) {
       // IF: there are participantNames combined with results
