@@ -59,12 +59,14 @@ const roundNames = [
   'quarters',
   'quarter',
   'qtr',
+  'qtr final',
   'qualifiers',
   'round of 32',
   'quarterfinals',
   'quarter finals',
   'final qualifying',
   'final qualifing',
+  'semi final',
   'semifinal',
   'semifinals',
   'semi finals',
@@ -95,12 +97,14 @@ export const config = {
       { regex: '.*\\d{2,}[ap]m' },
       { regex: `^q\\d$` },
       { regex: `^a/f$` }, // needs to be removed from id column
+      { regex: `^[as|b|a|bs]+$` }, // needs to be removed from round column
       { regex: '^[0-9:]+[a|p]{1}m$' },
       { regex: 'happen$' }, // "Didn't Happen" used for "CANCELLED"
       { regex: "didn't happen$" }, // "Didn't Happen" used for "CANCELLED"
-      { regex: '^\\d{1,2}/\\d{1,2}/\\d{2,4}$' }
+      { regex: '^\\d{1,2}/\\d{1,2}/\\d{2,4}$' } // dates
     ],
     skipWords: [
+      // all behave as startsWith
       'winner',
       'a/f',
       'winner;',
@@ -139,17 +143,10 @@ export const config = {
         elements: [
           `player's list`,
           { text: 'acceptance list', options: { startsWith: true } },
-          { text: 'no show list', options: { startsWith: true } },
+          { text: 'no show', options: { includes: true } },
           { text: 'late withdrawal', options: { startsWith: true } },
           { text: 'no show', options: { endsWith: true } }
         ],
-        rows: 1,
-        minimumElements: 1
-      },
-      {
-        type: HEADER,
-        id: 'overview',
-        elements: ['no show', 'late withdrawals'],
         rows: 1,
         minimumElements: 1
       },
@@ -245,6 +242,7 @@ export const config = {
           'surname',
           'player name',
           'players name',
+          'last name',
           'family name',
           'familiy name',
           'famlily name',
@@ -321,10 +319,6 @@ export const config = {
       {
         type: SIGN_UP,
         rowIds: ['signup']
-      },
-      {
-        type: INFORMATION,
-        rowIds: ['overview']
       },
       {
         type: INFORMATION,
@@ -486,7 +480,10 @@ export const config = {
       const state = splitValue.length > 1 ? splitValue[1].trim() : '';
       return state?.toLowerCase() === 'india' ? '' : state;
     },
-    isProviderId: (value) => isNumeric(value) && (value === 0 || value.toString().length === 6),
+    isProviderId: (value) => {
+      const providerId = isNumeric(value) && (value === 0 || value.toString().length >= 6);
+      return providerId;
+    },
     columnCharacter: ({ columnProfile }) => {
       const { values } = columnProfile;
       const allProgressionKeys = values.every(
