@@ -43,6 +43,14 @@ export function getRound({
   const relevantSubsequentColumns = roundColumns.slice(columnIndex + 1).slice(0, subsequentColumnLimit);
   let subsequentCount = relevantSubsequentColumns.map((column) => columnsWithParticipants[column]);
 
+  // calculation whether to consider two columns changes when there is a folded final
+  const foldedFinalAddition =
+    (relevantSubsequentColumns.length === 2 &&
+      relevantSubsequentColumns[1] === roundColumns[roundColumns.length - 1] &&
+      columnsWithParticipants[relevantSubsequentColumns[1]] > roundParticipants.flat().length &&
+      columnsWithParticipants[relevantSubsequentColumns[1]] - roundParticipants.flat().length) ||
+    0;
+
   const overlap = utilities.intersection(relevantSubsequentColumns, Object.keys(columnsWithParticipants));
 
   const prospectiveResults = finalRound || relevantSubsequentColumns.length;
@@ -99,7 +107,8 @@ export function getRound({
     // considerTwo recognizes when the total of the values in two subsequent columns
     // is less than or equal to the expected number of values (roundParticipants * 2)
     // which is the number of participants and the number of results for each advancing participant
-    const considerTwo = subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.flat().length;
+    const considerTwo =
+      subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.flat().length + foldedFinalAddition;
 
     if (potentialResults.length > 1) {
       // IF: there are participantNames combined with results
@@ -281,10 +290,9 @@ export function getRound({
     // -------------------------------------------------------------------------------------------------
   }
 
-  if (getLoggingActive('matchUps')) {
-    console.log(matchUps);
-  }
-  if (getLoggingActive('missing')) {
+  if (getLoggingActive('matchUps')) console.log(matchUps);
+
+  if (getLoggingActive('singlePositions')) {
     const missingDrawPosition = matchUps.filter((m) => !m.drawPositions || m.drawPositions.length < 2);
     if (missingDrawPosition.length) console.log(missingDrawPosition);
   }
