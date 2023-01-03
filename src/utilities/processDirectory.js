@@ -1,7 +1,7 @@
 import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
 import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'fs-extra';
 import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
-import { getLoggingActive, getWorkbook } from '../global/state';
+import { getAudit, getLoggingActive, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
 import { writeTODS08CSV } from './writeTODS08CSV';
 import { loadWorkbook } from '../global/loader';
@@ -34,6 +34,7 @@ export function processDirectory({
   let fileNames = readdirSync(readDir).filter(isXLS).sort();
   const workbookCount = fileNames.length;
 
+  const filesWithSinglePositions = [];
   const logging = getLoggingActive('dev');
 
   const processing =
@@ -277,6 +278,13 @@ export function processDirectory({
         writeFileSync(`${writeDir}/${tournamentName}.tods.json`, JSON.stringify(tournamentRecord), 'UTF-8');
       }
     }
+
+    const auditLog = getAudit();
+    const singlePositions = auditLog.filter((item) => typeof item === 'object' && item.singlePositions);
+    if (singlePositions.length) {
+      filesWithSinglePositions.push({ fileName, singlePositions });
+      // TODO: move file to subDirectory
+    }
   }
 
   if (writeMatchUps && writeDir) {
@@ -308,13 +316,24 @@ export function processDirectory({
     method: 'processingComplete',
     keyColors: { attributes: 'brightgreen' },
     color: 'brightcyan',
-    separator: ':',
+    separator: '.',
     newLine: true,
     divider: 80,
 
     sheetsProcessed,
     totalMatchUps,
     totalErrors
+  });
+
+  pushGlobalLog({
+    method: 'REPORT',
+    keyColors: { attributes: 'brightcyan' },
+    color: 'brightyellow',
+    separator: ':',
+    newLine: true,
+    divider: 80,
+
+    filesWithSinglePositions: filesWithSinglePositions.length
   });
 
   return {
