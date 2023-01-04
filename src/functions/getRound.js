@@ -1,5 +1,5 @@
 import { matchUpStatusConstants, mocksEngine, utilities } from 'tods-competition-factory';
-import { getPotentialResult } from '../utilities/identification';
+import { getPotentialResult, isScoreLike } from '../utilities/identification';
 import { getParticipantValues } from './getParticipantValues';
 import { audit, getLoggingActive } from '../global/state';
 import { generateMatchUpId } from '../utilities/hashing';
@@ -92,15 +92,20 @@ export function getRound({
     });
 
     if (relevantSubsequentColumns.length === 2) {
+      const lengthGreaterThanOne = (value) => value.toString().length > 1;
       // remove all values which are duplicated across columns
       columnValues = columnValues.map((row) => [row[0], row[1].filter((v) => !row[0].includes(v))]);
       subsequentCount = columnValues.reduce(
         (count, row) => {
-          count[0] += row[0].length;
-          count[1] += row[1].length;
+          count[0] += row[0].filter(lengthGreaterThanOne).length;
+          count[1] += row[1].filter(lengthGreaterThanOne).length;
+
+          // handle situations where some scoreLike results are invisible
+          const multipleScoreLike = row.flat().filter(isScoreLike).length;
+          count[2] -= multipleScoreLike - 1;
           return count;
         },
-        [0, 0]
+        [0, 0, 0]
       );
     }
 
@@ -109,6 +114,12 @@ export function getRound({
     // which is the number of participants and the number of results for each advancing participant
     const considerTwo =
       subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.flat().length + foldedFinalAddition;
+
+    const log = getLoggingActive('columnValues');
+    if (log && (!log.roundNumber || log.roundNumber === roundNumber)) {
+      console.log(columnValues);
+      console.log({ subsequentCount, roundNumber, considerTwo });
+    }
 
     if (potentialResults.length > 1) {
       // IF: there are participantNames combined with results
@@ -218,9 +229,9 @@ export function getRound({
 
       if (isBye) {
         matchUp.matchUpStatus = BYE;
-      } else if (result === providerDoubleWalkover) {
+      } else if (result === providerDoubleWalkover?.toLowerCase()) {
         matchUp.matchUpStatus = DOUBLE_WALKOVER;
-      } else if ([providerWalkover, WALKOVER, 'w/o'].includes(result)) {
+      } else if ([providerWalkover, WALKOVER, 'w/o'].map((w) => (w || '').toLowerCase()).includes(result)) {
         matchUp.matchUpStatus = WALKOVER;
         matchUp.winningSide = advancedSide;
       } else if (advancedSide) {
@@ -290,14 +301,24 @@ export function getRound({
     // -------------------------------------------------------------------------------------------------
   }
 
-  if (getLoggingActive('matchUps')) console.log(matchUps);
+  const log = getLoggingActive('matchUps');
+  if (log?.roundNumber || log?.logPosition) {
+    const filteredMatchUps = matchUps.filter(
+      (matchUp) =>
+        (!log.roundNumber || log.roundNumber === matchUp.roundNumber) &&
+        (!log.roundPosition || log.roundPosition === matchUp.roundPosition)
+    );
+    if (filteredMatchUps.length) console.log(filteredMatchUps);
+  } else if (log) {
+    if (matchUps.length) console.log(matchUps);
+  }
 
   if (getLoggingActive('singlePositions')) {
     const missingDrawPosition = matchUps.filter((m) => !m.drawPositions || m.drawPositions.length < 2);
     if (missingDrawPosition.length) console.log(missingDrawPosition);
   }
 
-  // console.log(roundColumns[columnIndex], { columnsConsumed });
+  if (getLoggingActive('columnValues')) console.log(roundColumns[columnIndex], { columnsConsumed });
 
   return { matchUps, participantDetails, advancingParticipants, columnsConsumed, rangeAdjustment };
 }
