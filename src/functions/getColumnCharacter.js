@@ -1,10 +1,12 @@
+import { getRoundCharacter } from './getRoundCharacter';
 import { isNumeric } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
 import { getRow } from './sheetAccess';
 
-import { FIRST_NAME, LAST_NAME, PERSON_ID } from '../constants/attributeConstants';
+// import { FIRST_NAME, LAST_NAME, PERSON_ID } from '../constants/attributeConstants';
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
-import { RESULT, ROUND } from '../constants/sheetElements';
+// import { RESULT, ROUND } from '../constants/sheetElements';
+import { PERSON_ID } from '../constants/attributeConstants';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
 export function getColumnCharacter({
@@ -20,7 +22,7 @@ export function getColumnCharacter({
     consecutiveNumbers,
     lastNumericValue,
     containsNumeric,
-    scoreLikeCount,
+    // scoreLikeCount,
     containsAlpha,
     allProviderId,
     allNumeric,
@@ -70,6 +72,7 @@ export function getColumnCharacter({
 
   // preRound and position columns cannot occur beyond 4th column
   if (
+    !columnProfile.attribute &&
     (sheetType === ROUND_ROBIN ? allNumeric : knockOutCheck) &&
     positionIndex === undefined &&
     columnIndex < 4 &&
@@ -92,6 +95,11 @@ export function getColumnCharacter({
     if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
   }
 
+  const { character: roundCharacter } = getRoundCharacter({ attributeMap, columnProfiles, columnProfile });
+
+  if (!columnProfile.character) columnProfile.character = roundCharacter;
+
+  /*
   let hasNameValue;
   const attributes = Object.values(attributeMap);
   const nameColumnAttributes = attributes.filter((attribute) => [FIRST_NAME, LAST_NAME].includes(attribute));
@@ -118,10 +126,20 @@ export function getColumnCharacter({
 
   const { character, attribute } = columnProfile;
 
+  const singleDigitValues = values.some((value) => value.toString().length === 1);
+
   // need to add additional safeguards here so that result column is not before any of the idAttribute columns
-  if (scoreLikeCount && !hasNameValue && !character && (!attribute || attribute === ROUND) && !consecutiveNumbers) {
+  if (
+    scoreLikeCount &&
+    !hasNameValue &&
+    !character &&
+    (!attribute || attribute === ROUND) &&
+    !consecutiveNumbers &&
+    !singleDigitValues
+  ) {
     columnProfile.character = RESULT;
   }
+  */
 
   return { character: columnProfile.character };
 }
