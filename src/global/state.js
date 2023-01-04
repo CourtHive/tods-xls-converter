@@ -10,10 +10,14 @@ export function audit(value) {
   auditLog.push(value);
 }
 
-export function getAudit() {
+export function getAudit(purge) {
   const auditCopy = auditLog.slice();
-  auditLog = [];
+  if (purge) purgeAudit();
   return auditCopy;
+}
+
+export function purgeAudit() {
+  auditLog = [];
 }
 
 export function resetLogging() {
@@ -55,5 +59,6 @@ export default {
   setWorkbookType,
   getWorkbook,
   setWorkbook,
+  purgeAudit,
   getAudit
 };
