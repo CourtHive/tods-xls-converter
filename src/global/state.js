@@ -21,12 +21,12 @@ export function resetLogging() {
 }
 
 export function getLoggingActive(type = 'global') {
-  return loggingActive[type] && params;
+  return loggingActive[type] && (params[type] || true);
 }
 
 export function setLoggingActive(value, type = 'global', paramValues) {
   loggingActive[type] = !!value;
-  if (!!value && typeof paramValues === 'object') params = paramValues;
+  if (!!value && typeof paramValues === 'object') params[type] = paramValues;
   return { ...SUCCESS };
 }
 
