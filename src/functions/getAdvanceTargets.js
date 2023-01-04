@@ -23,6 +23,7 @@ export function getAdvanceTargets(params) {
     advanceLogging;
 
   if (log?.potentialValues) console.log(potentialValues);
+  const byeAdvancement = consideredParticipants?.some((participant) => participant.isByePosition);
 
   // process all of the potentialValues (potentially multiple columns)
   const { columnResults, isLikeScore } = getColumnResults({ ...params, log });
@@ -56,7 +57,7 @@ export function getAdvanceTargets(params) {
       }
     } else if (results.length) {
       if (!result) {
-        if (columnResultIndex) {
+        if (columnResultIndex && !byeAdvancement) {
           columnsConsumed = columnResultIndex;
         }
         result = results[0];
@@ -91,7 +92,6 @@ export function getAdvanceTargets(params) {
   // -------------------------------------------------------------------------------------------------
   // ACTION: check to see whether one of the advanced sides is a BYE
   // POSSIBILITY: checking for BYE after checking for sides with results to provide error checking
-  const byeAdvancement = consideredParticipants?.some((participant) => participant.isByePosition);
   if (byeAdvancement) {
     const advancedSide = consideredParticipants?.reduce((sideNumber, participant, index) => {
       if (!participant.isByePosition) return index + 1;
