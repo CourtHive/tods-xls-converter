@@ -1,18 +1,23 @@
 import { findRow, getCellValue } from './sheetAccess';
 
 import { SUCCESS } from '../constants/resultConstants';
+import { BLANK } from '../constants/sheetTypes';
 
 const excludeValues = ['undefined'];
 
 export function identifySheet({ sheet, sheetName, profile }) {
-  const hasValues = Object.keys(sheet).some((ref) => {
-    const value = getCellValue(sheet[ref]);
-    const consideredValue = !excludeValues.includes(value) && value;
-    return consideredValue;
-  });
+  const hasValues = Object.keys(sheet)
+    .map((ref) => {
+      const value = getCellValue(sheet[ref]);
+      const consideredValue = !excludeValues.includes(value) && value;
+      return consideredValue;
+    })
+    .filter(Boolean);
 
-  if (!hasValues) {
+  if (!hasValues?.length) {
     return { hasValues };
+  } else if (hasValues.length < 6) {
+    return { sheetDefinition: { type: BLANK, rowIds: [] }, hasValues };
   }
 
   // profile.sheetDefinitions should be ordered such that least certain matches occur last
