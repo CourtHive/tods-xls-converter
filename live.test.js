@@ -60,8 +60,8 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const readDir = './examples/sheets/testing/SinglePositionMatchUps';
-  // const readDir = './examples/sheets/testing';
+  // const readDir = './examples/sheets/testing/SinglePositionMatchUps';
+  const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
@@ -86,7 +86,7 @@ it('can process tests', () => {
     sideWeights: false,
     pRank: true
   });
-  setLoggingActive(false, 'columnProfiles');
+  setLoggingActive(false, 'columnProfiles', { index: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(false, 'dev');
   setLoggingActive(false, 'fileNames');

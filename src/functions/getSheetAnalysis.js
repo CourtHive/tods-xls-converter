@@ -1,5 +1,5 @@
 import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
-import { hasNumeric, isScoreLike, isString } from '../utilities/identification';
+import { hasNumeric, isNumeric, isScoreLike, isString } from '../utilities/identification';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getCol, getRow, keyRowSort } from './sheetAccess';
 import { getRoundCharacter } from './getRoundCharacter';
@@ -131,7 +131,12 @@ export const getSheetAnalysis = ({
     }
   });
 
-  if (getLoggingActive('columnProfiles')) console.log({ columnProfiles });
+  const log = getLoggingActive('columnProfiles');
+  if (isNumeric(log?.index)) {
+    console.log(columnProfiles[log.index]);
+  } else if (log) {
+    console.log({ columnProfiles });
+  }
 
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
