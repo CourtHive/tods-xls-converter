@@ -79,20 +79,22 @@ it('can process tests', () => {
   setLoggingActive(true);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
-    roundNumbers: [1],
-    roundPositions: [5],
+    roundNumbers: [2],
+    roundPositions: [1],
     participantValues: true,
     potentialValues: true,
     sideWeights: false,
-    pRank: true
+    pRank: false
   });
-  setLoggingActive(false, 'columnProfiles', { index: 1 });
+  setLoggingActive(false, 'columnFrequency');
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
+  setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(false, 'dev');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
   setLoggingActive(false, 'invalidResult');
-  setLoggingActive(false, 'matchUps');
+  setLoggingActive(false, 'matchUps', { roundNumber: undefined, roundPosition: undefined });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
