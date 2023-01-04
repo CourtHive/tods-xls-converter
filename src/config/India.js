@@ -184,6 +184,7 @@ export const config = {
         elements: [
           { text: 'lucky losers', options: { includes: true } },
           'acc. ranking',
+          'seeded teams',
           'seeded players',
           'lucky losers',
           'replacing',
@@ -201,7 +202,7 @@ export const config = {
       { attr: 'ignored', header: ['st'] },
       { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '[1-9]+' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
-      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `[0-9]+` },
+      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `[0-9]*` },
       { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
       {
         attr: LAST_NAME,
