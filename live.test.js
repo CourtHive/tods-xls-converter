@@ -24,13 +24,13 @@ it.skip('can process passing', () => {
 
   resetLogging();
   setLoggingActive(true);
-  // setLoggingActive(true, 'dev');
-  // setLoggingActive(true, 'fileNames');
-  // setLoggingActive(true, 'sheetNames');
-  // setLoggingActive(true, 'noWinningSide');
-  // setLoggingActive(true, 'invalidResult');
-  // setLoggingActive(true, 'scores');
-  // setLoggingActive(true, 'matchUps');
+  setLoggingActive(false, 'dev');
+  setLoggingActive(false, 'fileNames');
+  setLoggingActive(false, 'sheetNames');
+  setLoggingActive(false, 'noWinningSide');
+  setLoggingActive(false, 'invalidResult');
+  setLoggingActive(false, 'scores');
+  setLoggingActive(false, 'matchUps');
   const result = processDirectory({
     writeTournamentRecords,
     writeMatchUps,
@@ -79,11 +79,11 @@ it('can process tests', () => {
   setLoggingActive(true);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
-    roundNumbers: [2],
-    roundPositions: [1],
+    roundNumbers: [1],
+    roundPositions: [7],
     participantValues: true,
     potentialValues: true,
-    sideWeights: false,
+    sideWeights: true,
     pRank: false
   });
   setLoggingActive(false, 'columnFrequency');
@@ -94,7 +94,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
   setLoggingActive(false, 'invalidResult');
-  setLoggingActive(false, 'matchUps', { roundNumber: undefined, roundPosition: undefined });
+  setLoggingActive(false, 'matchUps', { roundNumber: 1, roundPosition: 7 });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
