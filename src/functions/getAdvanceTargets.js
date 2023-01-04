@@ -18,8 +18,8 @@ export function getAdvanceTargets(params) {
 
   const log =
     ((positionOfInterest && roundOfInterest) ||
-      (!advanceLogging?.roundPositions?.length && roundOfInterest) ||
-      (!advanceLogging?.roundNumbers?.length && positionOfInterest)) &&
+      (!advanceLogging?.roundPositions?.length && positionOfInterest) ||
+      (!advanceLogging?.roundNumbers?.length && roundOfInterest)) &&
     advanceLogging;
 
   if (log?.potentialValues) console.log(potentialValues);
@@ -66,10 +66,14 @@ export function getAdvanceTargets(params) {
     }
 
     const sideMatches = columnResult
+      .map((result) => {
+        result.side.columnIndex = columnResultIndex;
+        return result;
+      })
       .filter(({ side }) => side?.confidence)
       .map(({ side, value }) => ({ ...side, value }));
 
-    const bestSideMatch = sideMatches.reduce((best, side) => (side.confidence > best.confidence ? side : best), {
+    const bestSideMatch = sideMatches.reduce((best, side) => (side.confidence > best.confidence ? { ...side } : best), {
       confidence: 0
     });
 
@@ -94,7 +98,7 @@ export function getAdvanceTargets(params) {
       return sideNumber;
     }, {});
 
-    return { advancedSide, confidence: 1 };
+    return { columnsConsumed, advancedSide, confidence: 1 };
   }
   // -------------------------------------------------------------------------------------------------
 
