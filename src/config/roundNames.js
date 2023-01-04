@@ -33,12 +33,14 @@ export const roundNames = [
   'semi final',
   'semifinal',
   'semifinals',
+  'semifinalists',
   'semi finals',
   'semi-finals',
   'sf',
   'final round',
   'winners',
   'winner',
+  'finalists',
   'finals',
   'final'
 ];
