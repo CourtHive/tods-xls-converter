@@ -30,8 +30,18 @@ export function getRoundCharacter({ attributeMap, columnProfiles, columnProfile 
 
   const { character, attribute } = columnProfile;
 
+  // TODO: don't ignore singleDigitValues when position Progression
+  const singleDigitValues = values.some((value) => value.toString().length === 1);
+
   // need to add additional safeguards here so that result column is not before any of the idAttribute columns
-  if (scoreLikeCount && !hasNameValue && !character && (!attribute || attribute === ROUND) && !consecutiveNumbers) {
+  if (
+    scoreLikeCount &&
+    !hasNameValue &&
+    !character &&
+    (!attribute || attribute === ROUND) &&
+    !consecutiveNumbers &&
+    !singleDigitValues
+  ) {
     columnProfile.character = RESULT;
   }
 
