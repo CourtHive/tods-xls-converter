@@ -26,7 +26,7 @@ export function getLoggingActive(type = 'global') {
 
 export function setLoggingActive(value, type = 'global', paramValues) {
   loggingActive[type] = !!value;
-  if (typeof paramValues === 'object') params = paramValues;
+  if (!!value && typeof paramValues === 'object') params = paramValues;
   return { ...SUCCESS };
 }
 
