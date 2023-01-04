@@ -22,7 +22,7 @@ export function getAdvanceTargets(params) {
       (!advanceLogging?.roundNumbers?.length && roundOfInterest)) &&
     advanceLogging;
 
-  if (log?.potentialValues) console.log(potentialValues);
+  if (log?.potentialValues) console.log({ potentialValues });
   const byeAdvancement = consideredParticipants?.some((participant) => participant.isByePosition);
 
   // process all of the potentialValues (potentially multiple columns)

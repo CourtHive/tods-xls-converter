@@ -73,6 +73,7 @@ export function getRound({
       }
 
       const rowRange = utilities.generateRange(start, end);
+      // if (roundNumber === 1) console.log({ pair, rowRange });
       let pv = relevantSubsequentColumns.map((relevantColumn) => {
         const keyMap = analysis.columnProfiles.find(({ column }) => column === relevantColumn).keyMap;
         return Object.keys(keyMap)
@@ -263,9 +264,6 @@ export function getRound({
         if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });
       }
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-      // SANITY check!
-      // if (roundNumber === 2 && roundPosition === 5) console.log(matchUp, potentialValues, { advanceTargets, result });
 
       if (!result && !isBye) {
         // TODO: in some draws preRound results appear as part of advancedSide participantName

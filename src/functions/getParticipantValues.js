@@ -80,7 +80,7 @@ export function getParticipantValues(participant, roundNumber, roundPosition, lo
 
   const uniqueFilteredValues = utilities.unique(filteredValues);
 
-  if (log?.participantValues) console.log({ uniqueFilteredValues });
+  if (log?.participantValues) console.log({ participant: !!Object.keys(participant).length, uniqueFilteredValues });
 
   return uniqueFilteredValues;
 }
