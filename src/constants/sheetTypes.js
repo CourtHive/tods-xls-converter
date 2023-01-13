@@ -8,4 +8,5 @@ export const INFORMATION = 'INFORMATION';
 export const KNOCKOUT = 'KNOCKOUT';
 export const SIGN_UP = 'SIGN_UP';
 export const REPORT = 'REPORT';
+export const BLANK = 'BLANK';
 export const MENU = 'MENU';

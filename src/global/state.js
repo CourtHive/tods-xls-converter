@@ -10,10 +10,14 @@ export function audit(value) {
   auditLog.push(value);
 }
 
-export function getAudit() {
+export function getAudit(purge) {
   const auditCopy = auditLog.slice();
-  auditLog = [];
+  if (purge) purgeAudit();
   return auditCopy;
+}
+
+export function purgeAudit() {
+  auditLog = [];
 }
 
 export function resetLogging() {
@@ -21,12 +25,12 @@ export function resetLogging() {
 }
 
 export function getLoggingActive(type = 'global') {
-  return loggingActive[type] && params;
+  return loggingActive[type] && (params[type] || true);
 }
 
 export function setLoggingActive(value, type = 'global', paramValues) {
   loggingActive[type] = !!value;
-  if (typeof paramValues === 'object') params = paramValues;
+  if (!!value && typeof paramValues === 'object') params[type] = paramValues;
   return { ...SUCCESS };
 }
 
@@ -55,5 +59,6 @@ export default {
   setWorkbookType,
   getWorkbook,
   setWorkbook,
+  purgeAudit,
   getAudit
 };

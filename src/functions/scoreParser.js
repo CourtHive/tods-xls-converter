@@ -804,7 +804,7 @@ export const scoreParser = (function () {
 function containedSets(score) {
   if (typeof score !== 'string') return score;
   const potentialEndings = [')', ']'];
-  const potentialMiddles = [')(', ')[', ']('];
+  const potentialMiddles = [')(', ') (', ')[', `) [`, '](', '] ('];
   if (
     score.startsWith('(') &&
     potentialEndings.some((ending) => score.endsWith(ending)) &&
@@ -843,7 +843,24 @@ function containedSets(score) {
 
       score = newScore.trim();
     }
+  } else if (score.startsWith('(') && score.endsWith(')')) {
+    const result = score.slice(1, score.length - 1);
+    const values = result.split(',');
+
+    // handle (6-2, 6-4)
+    const multipleResults = values.length > 1 && values.some((v) => v.includes('-') || v.includes('/'));
+
+    if (multipleResults) {
+      return values;
+    } else {
+      // handle (6, 3)
+      score = result
+        .split(/[, -\/]/)
+        .filter(Boolean)
+        .join('-');
+    }
   }
+
   return score;
 }
 
@@ -900,6 +917,9 @@ function joinFloatingTiebreak(score) {
 
 function removeErroneous(score) {
   if (typeof score !== 'string') return score;
+
+  if (parseSuper(score)) return parseSuper(score);
+
   return score
     .toLowerCase()
     .split(' ')
@@ -935,10 +955,13 @@ function correctShiftErrors(score) {
 export function tidyScore(score) {
   if (typeof score === 'number') {
     score = score.toString();
+
     if (!(score.length % 2)) {
       score = chunkArray(score.split(''), 2)
         .map((part) => part.join(''))
         .join(' ');
+    } else {
+      score = parseSuper(score) || score;
     }
   }
   score = containedSets(score);
@@ -959,4 +982,15 @@ export function chunkArray(arr, chunksize) {
     all[ch] = [].concat(all[ch] || [], one);
     return all;
   }, []);
+}
+
+function parseSuper(score) {
+  return (
+    score.length === 3 &&
+    score.includes('10') &&
+    score
+      .split('10')
+      .map((s) => s || 10)
+      .join('-')
+  );
 }

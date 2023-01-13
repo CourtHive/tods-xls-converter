@@ -24,13 +24,13 @@ it.skip('can process passing', () => {
 
   resetLogging();
   setLoggingActive(true);
-  // setLoggingActive(true, 'dev');
-  // setLoggingActive(true, 'fileNames');
-  // setLoggingActive(true, 'sheetNames');
-  // setLoggingActive(true, 'noWinningSide');
-  // setLoggingActive(true, 'invalidResult');
-  // setLoggingActive(true, 'scores');
-  // setLoggingActive(true, 'matchUps');
+  setLoggingActive(false, 'dev');
+  setLoggingActive(false, 'fileNames');
+  setLoggingActive(false, 'sheetNames');
+  setLoggingActive(false, 'noWinningSide');
+  setLoggingActive(false, 'invalidResult');
+  setLoggingActive(false, 'scores');
+  setLoggingActive(false, 'matchUps');
   const result = processDirectory({
     writeTournamentRecords,
     writeMatchUps,
@@ -60,8 +60,7 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const readDir = './examples/sheets/testing/SinglePositionMatchUps';
-  // const readDir = './examples/sheets/testing';
+  const readDir = './examples/sheets/testing';
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
@@ -80,19 +79,21 @@ it('can process tests', () => {
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
     roundNumbers: [1],
-    roundPositions: [5],
+    roundPositions: [7],
     participantValues: true,
     potentialValues: true,
-    sideWeights: false,
-    pRank: true
+    sideWeights: true,
+    pRank: false
   });
-  setLoggingActive(false, 'columnProfiles');
+  setLoggingActive(false, 'columnFrequency');
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
+  setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(false, 'dev');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
   setLoggingActive(false, 'invalidResult');
-  setLoggingActive(false, 'matchUps');
+  setLoggingActive(false, 'matchUps', { roundNumber: 1, roundPosition: 7 });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');

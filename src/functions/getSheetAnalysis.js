@@ -1,5 +1,5 @@
+import { hasNumeric, isNumeric, isScoreLike, isString } from '../utilities/identification';
 import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
-import { hasNumeric, isScoreLike, isString } from '../utilities/identification';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getCol, getRow, keyRowSort } from './sheetAccess';
 import { getRoundCharacter } from './getRoundCharacter';
@@ -18,9 +18,9 @@ import {
   tidyValue
 } from '../utilities/convenience';
 
-import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
-import { ROUND_ROBIN } from '../constants/sheetTypes';
+import { LAST_NAME } from '../constants/attributeConstants';
 import { POSITION } from '../constants/columnConstants';
+import { ROUND_ROBIN } from '../constants/sheetTypes';
 
 export const getSheetAnalysis = ({
   ignoreCellRefs = [],
@@ -131,7 +131,14 @@ export const getSheetAnalysis = ({
     }
   });
 
-  if (getLoggingActive('columnProfiles')) console.log({ columnProfiles });
+  const log = getLoggingActive('columnProfiles');
+  if (isNumeric(log?.index)) {
+    console.log(columnProfiles[log.index]);
+  } else if (log?.column) {
+    console.log(columnProfiles.find(({ column }) => column === log.column));
+  } else if (log) {
+    console.log({ columnProfiles });
+  }
 
   // filter out any columnProfiles which have no values after postProcessing
   columnProfiles = columnProfiles.filter(({ values }) => values.length);
@@ -140,6 +147,8 @@ export const getSheetAnalysis = ({
   const columnFrequency = utilities.instanceCount(Object.values(valuesMap).flat());
   const multiColumnValues = Object.keys(valuesMap).filter((key) => valuesMap[key].length > 1);
   const multiColumnFrequency = utilities.instanceCount(multiColumnValues.map((key) => valuesMap[key]).flat());
+
+  if (getLoggingActive('columnFrequency')) console.log({ columnFrequency, multiColumnFrequency, multiColumnValues });
 
   const greatestFrequency = Object.keys(columnFrequency).reduce(
     (greatest, column) => (columnFrequency[column] > greatest ? columnFrequency[column] : greatest),
@@ -202,7 +211,7 @@ export const getSheetAnalysis = ({
   const category = getCategory({ sheet, sheetName, profile })?.category || info.category;
   const { isQualifying } = getIsQualifying({ sheet, sheetName, profile });
 
-  if (!columns[LAST_NAME] && !columns[FIRST_NAME]) {
+  if (!columns[LAST_NAME]) {
     const potentialNameColumnProfiless = columnProfiles.filter(({ character, attribute }) => !character && !attribute);
     const maxColumnFrequency = Math.max(...Object.values(columnFrequency));
     const maxFrequencyColumn = Object.keys(columnFrequency).find((key) => columnFrequency[key] === maxColumnFrequency);

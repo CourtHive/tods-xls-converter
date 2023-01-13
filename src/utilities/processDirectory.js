@@ -310,15 +310,6 @@ export function processDirectory({
     ?.flatMap((key) => errorLog[key].map((file) => file.sheetNames.length))
     .reduce((a, b) => a + b, 0);
 
-  /*
-  const sheetsProcessed = Object.values(fileResults)
-    .map(
-      ({ sheetAnalysis = {} }) =>
-        Object.values(sheetAnalysis).filter(({ hasValues, analysis }) => hasValues && !analysis?.skipped).length
-    )
-    .reduce((a, b) => a + b, 0);
-    */
-
   if (logging) console.log({ sheetsProcessed, totalMatchUps, errorTypes, totalErrors });
 
   pushGlobalLog({
