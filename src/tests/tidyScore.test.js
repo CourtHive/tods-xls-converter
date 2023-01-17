@@ -20,13 +20,14 @@ import { expect, it } from 'vitest';
 // "4-6, 7-6(5), 2-0 concede","4-6 7-6(5) 2-0 concede"
 
 let start = 0;
-let end = undefined;
+let end = 1;
 
 const scores = [
-  { score: '5/4 [7-4], 5/4 [12-11]' }, // => '5-4 [7-4] 5-4 [12-11]'
   { score: '6/0, 7/6[7]' }, // => '6-0 7-6[7]'
   { score: '7/6(11/9), 5/7, 6/2' }, // => "7-6(11-9) 5-7 6-2"
 
+  { score: '5/4 [7-4], 5/4 [12-11]', expectation: { score: '5-4(4) 5-4(11)' } },
+  { score: '5/4 (7-4), 5/4 (12-11)', expectation: { score: '5-4(4) 5-4(11)' } },
   { score: '8 30 am', expectation: { score: '' } }, // => should reject
   { score: '9-8 (7-0)', expectation: { score: '9-8(0)' } },
   { score: '9/8 [7/0]', expectation: { score: '9-8(0)' } },

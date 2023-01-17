@@ -807,6 +807,10 @@ function isTiebreakScore(part) {
   return /^\(\d+\)$/.test(part) || /^\(\d+$/.test(part);
 }
 
+function isBracketScore(part) {
+  return /^\(\d+-\d+\)$/.test(part) || /^\[\d+-\d+\]$/.test(part);
+}
+
 function containedSets(score) {
   if (typeof score !== 'string') return score;
   const potentialEndings = [')', ']'];
@@ -916,9 +920,20 @@ function separateScoreBlocks(score) {
     .join(' ');
 }
 
+function isDiffOne(score) {
+  const strip = (value) => value?.split('-').join('').split('/').join('');
+  const stripped = strip(score);
+  if (/^\d+$/.test(stripped) && stripped.length === 2) {
+    const scores = stripped.split('');
+    const diff = Math.abs(scores.reduce((a, b) => +a - +b));
+    return diff === 1;
+  }
+}
+
 function joinFloatingTiebreak(score) {
   if (typeof score !== 'string') return score;
   const strip = (value) => value?.split('-').join('').split('/').join('');
+  const bracketToParen = (value) => value.split('[').join('(').split(']').join(')');
   score = score.split(', ').join(' ');
   const parts = score.split(' ');
 
@@ -953,9 +968,25 @@ function joinFloatingTiebreak(score) {
     const scores = stripped.split('');
     const diff = Math.abs(scores.reduce((a, b) => +a - +b));
     if (diff === 1) {
-      parts[1] = parts[1].split('[').join('(').split(']').join(')');
-      score = parts.join('');
+      parts[1] = bracketToParen(parts[1]);
+      return parts.join('');
     }
+  }
+
+  const parenScores = parts.map((part) => (isBracketScore(part) && 'bracket') || (isDiffOne(part) && 'set'));
+  if (parenScores.includes('set') && parenScores.includes('bracket')) {
+    let lastPart;
+    let joinedParts = '';
+    parts.forEach((part, i) => {
+      if (parenScores[i] === 'bracket' && lastPart === 'set') {
+        part = bracketToParen(part);
+        joinedParts += part;
+      } else {
+        joinedParts += ` ${part}`;
+      }
+      lastPart = parenScores[i];
+    });
+    return joinedParts;
   }
 
   return score;
@@ -1078,8 +1109,8 @@ export function handleSetSlashSeparation(score) {
 export function handleGameSlashSeparation(score) {
   const re = new RegExp(/^\d+\/\d+/);
   const parts = score.split(' ');
-  if (parts.every((part) => re.test(part))) {
-    return parts.map((part) => part.replace('/', '-')).join(' ');
+  if (parts.some((part) => re.test(part))) {
+    return parts.map((part) => (re.test(part) ? part.replace('/', '-') : part)).join(' ');
   }
   return score;
 }
@@ -1123,13 +1154,13 @@ export function tidyScore(score, stepLog) {
   if (stepLog) console.log('4', { score });
   score = separateScoreBlocks(score);
   if (stepLog) console.log('5', { score });
-  score = removeErroneous(score);
-  if (stepLog) console.log('6', { score });
-  score = joinFloatingTiebreak(score);
-  if (stepLog) console.log('7', { score });
-  score = handleSetSlashSeparation(score);
-  if (stepLog) console.log('8', { score });
   score = handleGameSlashSeparation(score);
+  if (stepLog) console.log('6', { score });
+  score = removeErroneous(score);
+  if (stepLog) console.log('7', { score });
+  score = joinFloatingTiebreak(score);
+  if (stepLog) console.log('8', { score });
+  score = handleSetSlashSeparation(score);
   if (stepLog) console.log('9', { score });
   score = handleTiebreakSlashSeparation(score);
   if (stepLog) console.log('10', { score });
