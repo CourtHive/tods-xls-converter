@@ -25,20 +25,21 @@ import { expect, it } from 'vitest';
 // "w/o,","w-o"
 
 const scores = [
-  { score: '(6-3)(6-3)' }, //"6-3) (6-3"
-  { score: '(6-4)(4-6)(6-1)' }, // "6-4) (4-6) (6-1"
-  { score: '(6-1) (4-6) (6-3)' }, //"6-1) (4-6) (6-3"
-  { score: '(7-6)[7-3] (5-7) (6-2)' }, //"7-6) [7-3] (5-7) (6-2"
-  { score: '(7, 6)(5), (6, 4)' }, // "7 6(5) (6 4"
+  { score: '(6, 4)(3, 6)(10, 6' },
+  { score: '6/0, 7/6[7]' }, // => '6-0 7-6[7]'
+  { score: '9/8 [7/0]' }, // => '9-8 7-0'
+  { score: '5/4 [7-4], 5/4 [12-11]' }, // => '5-4 [7-4] 5-4 [12-11]'
   { score: '6-2/6-3.', ex: { score: '6-2 6-3' } }, // => '6-2-6-3'
   { score: '7/6(11/9), 5/7, 6/2' }, // => "7-6(11-9) 5-7 6-2"
-  { score: '6/0, 7/6[7]' }, // => '6-0 7-6[7]'
   { score: '6-4, 2-6, ( 10-7 )' }, // =>"6-4 2-6 ( 10-7 )"
   { score: '3-6, 6-1, (10-6 )' }, // -> "3-6 6-1 (10-6 )"
   { score: '1/6, 7/6(7, 4)' }, // => "1-6 7-6(7 4"
-  { score: '9/8 [7/0]' }, // => '9-8 7-0'
-  { score: '5/4 [7-4], 5/4 [12-11]' }, // => '5-4 [7-4] 5-4 [12-11]'
 
+  { score: '(7, 6)(5), (6, 4)', expectation: { score: '7-6(5) 6-4' } },
+  { score: '(6-3)(6-3)', expectation: { score: '6-3 6-3' } },
+  { score: '(6-4)(4-6)(6-1)', expectation: { score: '6-4 4-6 6-1' } },
+  { score: '(6-1) (4-6) (6-3)', expectation: { score: '6-1 4-6 6-3' } },
+  { score: '(7-6)[7-3] (5-7) (6-2)', expectation: { score: '7-6(3) 5-7 6-2' } },
   { score: '(4, 6)(6, 0)(6, 0)', expectation: { score: '4-6 6-0 6-0' } },
   { score: '7-5 6-7 (6) 6-3', expectation: { score: '7-5 6-7(6) 6-3' } },
   { score: '6-7 (5), 7-6 (6), 10-7', expectation: { score: '6-7(5) 7-6(6) 10-7' } },
@@ -73,7 +74,7 @@ const scores = [
   { score: `6--1, 6--1`, expectation: { score: '6-1 6-1' } }
 ];
 
-it.each(scores.slice(0, 5))('can tidy scores', ({ score, expectation }) => {
+it.each(scores.slice(0, 1))('can tidy scores', ({ score, expectation }) => {
   const tidy = tidyScore(score);
   const { normalized, matchUpStatus } = normalizeScore(tidy);
   if (expectation) {

@@ -803,34 +803,54 @@ export const scoreParser = (function () {
   return fx;
 })();
 
+function isTiebreakScore(part) {
+  return /^\(\d+\)$/.test(part) || /^\(\d+$/.test(part);
+}
+
 function containedSets(score) {
   if (typeof score !== 'string') return score;
   const potentialEndings = [')', ']'];
-  const potentialMiddles = [')(', ') (', ')[', `) [`, '](', '] ('];
+  const potentialMiddles = [')(', '), (', ') (', ')[', `) [`, '](', '] ('];
   if (
     score.startsWith('(') &&
     potentialEndings.some((ending) => score.endsWith(ending)) &&
     potentialMiddles.some((middle) => score.includes(middle))
   ) {
     let newScore = '';
-    const parts = score.split(/[)\]]/).filter(Boolean);
-    if (parts.every((part) => part.includes(','))) {
+    const parts = score
+      .split(/[)\]]/)
+      .filter(Boolean)
+      .map((part) => {
+        if (part.startsWith(',')) part = part.slice(1);
+        return part.trim();
+      });
+    const commadDelimited = parts.every((part) => part.includes(',') || isTiebreakScore(part));
+    const dashDelimited = parts.every((part) => part.includes('-') || isTiebreakScore(part));
+    const delimiter = (commadDelimited && ',') || (dashDelimited && '-');
+
+    if (delimiter) {
       let lastPart;
       parts.forEach((part) => {
         if (part.startsWith('(')) {
           // is a set score
           if (lastPart === 'set') newScore += ' ';
-          newScore += part
-            .slice(1)
-            .split(',')
-            .map((s) => s.trim())
-            .join('-');
 
-          lastPart = 'set';
+          if (part.includes(delimiter)) {
+            newScore += part
+              .slice(1)
+              .split(delimiter)
+              .map((s) => s.trim())
+              .join('-');
+            lastPart = 'set';
+          } else {
+            const value = part.slice(1);
+            newScore += `(${value}) `;
+            lastPart = 'tiebreak';
+          }
         } else if (part.startsWith('[')) {
           const values = part
             .slice(1)
-            .split(',')
+            .split(delimiter)
             .map((s) => parseInt(s.trim()));
           const highValue = Math.min(...values);
           // is a tiebreak score
@@ -900,7 +920,7 @@ function joinFloatingTiebreak(score) {
   if (typeof score !== 'string') return score;
   score = score.split(', ').join(' ');
   const parts = score.split(' ');
-  const floatingTiebreaks = parts.filter((part) => /^\(\d+\)$/.test(part));
+  const floatingTiebreaks = parts.filter(isTiebreakScore);
 
   let lastIndex = 0;
   let joinedScore = '';
@@ -908,7 +928,7 @@ function joinFloatingTiebreak(score) {
     const thisIndex = indices(floatingTiebreak, parts).filter((index) => !lastIndex || index > lastIndex)[0];
     const leading = parts.slice(lastIndex, thisIndex - 1);
     const prior = parts[thisIndex - 1];
-    const stripped = prior.split('-').join('');
+    const stripped = prior?.split('-').join('');
     if (/^\d+$/.test(stripped) && stripped.length === 2) {
       const scores = stripped.split('');
       const diff = Math.abs(scores.reduce((a, b) => +a - +b));
