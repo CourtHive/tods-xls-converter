@@ -224,12 +224,12 @@ export const cleanScore = (function () {
     let cleaned = clean(score);
     let matchUpStatus;
 
-    const terminatesTest = /(ret|wo)/;
+    const terminatesTest = /(retired|walkover)/;
     const terminates = terminatesTest.test(cleaned);
     if (terminates) {
       const parts = cleaned.split(terminatesTest);
       cleaned = parts[0];
-      matchUpStatus = parts[1] === 'ret' ? 'RETIRED' : 'WALKOVER';
+      matchUpStatus = parts[1] === 'retired' ? 'RETIRED' : 'WALKOVER';
     }
 
     const splitScore = cleaned?.split(' ').filter(Boolean);

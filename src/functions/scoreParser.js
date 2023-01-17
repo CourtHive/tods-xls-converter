@@ -1,4 +1,4 @@
-import { indices } from '../utilities/convenience';
+import { indices, instanceCount } from '../utilities/convenience';
 
 export const scoreParser = (function () {
   let fx = {};
@@ -873,9 +873,9 @@ function containedSets(score) {
     const multipleResults = values.length > 1 && values.some((v) => v.includes('-') || v.includes('/'));
 
     if (multipleResults) {
-      return values;
+      return values.map((value) => value.trim()).join(' ');
     } else {
-      // handle (6, 3)
+      // handle 6, 3 | 9 3 | 93 | 9,3 | 9/3 | 9, 3
       score = result
         .split(/[, -\/]/)
         .filter(Boolean)
@@ -918,8 +918,10 @@ function separateScoreBlocks(score) {
 
 function joinFloatingTiebreak(score) {
   if (typeof score !== 'string') return score;
+  const strip = (value) => value?.split('-').join('').split('/').join('');
   score = score.split(', ').join(' ');
   const parts = score.split(' ');
+
   const floatingTiebreaks = parts.filter(isTiebreakScore);
 
   let lastIndex = 0;
@@ -928,7 +930,7 @@ function joinFloatingTiebreak(score) {
     const thisIndex = indices(floatingTiebreak, parts).filter((index) => !lastIndex || index > lastIndex)[0];
     const leading = parts.slice(lastIndex, thisIndex - 1);
     const prior = parts[thisIndex - 1];
-    const stripped = prior?.split('-').join('');
+    const stripped = strip(prior);
     if (/^\d+$/.test(stripped) && stripped.length === 2) {
       const scores = stripped.split('');
       const diff = Math.abs(scores.reduce((a, b) => +a - +b));
@@ -939,10 +941,21 @@ function joinFloatingTiebreak(score) {
       }
     }
   }
+
   if (floatingTiebreaks.length && joinedScore.length) {
     const remainder = parts.slice(lastIndex).join(' ');
     joinedScore = [joinedScore, remainder].join(' ');
     return joinedScore;
+  }
+
+  if (parts.length === 2 && ['(', '['].some((punctuation) => parts[1].includes(punctuation))) {
+    const stripped = strip(parts[0]);
+    const scores = stripped.split('');
+    const diff = Math.abs(scores.reduce((a, b) => +a - +b));
+    if (diff === 1) {
+      parts[1] = parts[1].split('[').join('(').split(']').join(')');
+      score = parts.join('');
+    }
   }
 
   return score;
@@ -969,25 +982,121 @@ function removeErroneous(score) {
     .join(' ');
 }
 
-function correctShiftErrors(score) {
-  if (typeof score !== 'string') return score;
-  const err = /^(\d{2})\((\d+)9$/;
-  return score
-    .toLowerCase()
-    .split(' ')
-    .map((part) => {
-      if (err.test(part)) {
-        const bits = part.match(err);
-        return `${bits[1]}(${bits[2]})`;
-      }
-      return part;
-    })
-    .join(' ');
+export function handleMissingClose(score) {
+  const counts = instanceCount(score.split(''));
+  const missingParen = counts['('] === counts[')'] + 1;
+  const missingBracket = counts['['] === counts[']'] + 1;
+  if (missingParen && !missingBracket) {
+    if (score.endsWith(9)) {
+      score = score.slice(0, score.length - 1) + ')';
+    } else {
+      return score + ')';
+    }
+  }
+  if (missingBracket && !missingParen) return score + ']';
+  return score;
 }
 
-export function tidyScore(score) {
+export function handleBracketSpacing(score) {
+  if (score.includes('( ')) {
+    score = score
+      .split('( ')
+      .map((part) => part.trim())
+      .join('(');
+  }
+  if (score.includes(' )')) {
+    score = score
+      .split(' )')
+      .map((part) => part.trim())
+      .join(')');
+  }
+  return score;
+}
+
+export function handleWalkover(score) {
+  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score)) {
+    return 'walkover';
+  }
+  return score;
+}
+
+export function handleRetired(score) {
+  if (/^(.*)ret[A-Za-z ]+$/.test(score)) {
+    const parts = score.split('ret');
+    return parts[0].trim() + ' retired';
+  }
+  const retired = ['ret', 'retired', 'con', 'cons', 'conceed', 'conceeded'].find((ret) => score.endsWith(ret));
+  if (retired) {
+    return score.replace(retired, 'retired');
+  }
+  return score;
+}
+
+export function removeDanglingBits(score) {
+  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) return '';
+  if (/^(.*) \d$/.test(score)) {
+    return score.slice(0, score.length - 2);
+  }
+  if (['.'].some((punctuation) => score.endsWith(punctuation))) {
+    return score.slice(0, score.length - 1);
+  }
+  return score;
+}
+
+export function reduceTiebreak(score) {
+  const tb = new RegExp(/(\([\d+ ]+\))/g);
+  if (tb.test(score)) {
+    // handle tiebreak score which has no delimiter
+    for (const t of score.match(tb)) {
+      const replacement = t.replace(' ', '-');
+      score = score.replace(t, replacement);
+    }
+  }
+
+  const parts = score?.split(' ');
+  const re = new RegExp(/^(\d[-/]+\d)\((\d+)-(\d+)\)$/);
+  const reducedParts = parts.map((part) => {
+    if (re.test(part)) {
+      const [set, tb1, tb2] = Array.from(part.match(re)).slice(1);
+      const lowTiebreakScore = Math.min(tb1, tb2);
+      const setScore = `${set}(${lowTiebreakScore})`;
+      return setScore;
+    }
+    return part;
+  });
+  return reducedParts.join(' ');
+}
+
+export function handleSetSlashSeparation(score) {
+  const re = new RegExp(/-\d+\/\d+-/);
+  if (re.test(score)) {
+    return score.split('/').join(' ');
+  }
+  return score;
+}
+
+export function handleGameSlashSeparation(score) {
+  const re = new RegExp(/^\d+\/\d+/);
+  const parts = score.split(' ');
+  if (parts.every((part) => re.test(part))) {
+    return parts.map((part) => part.replace('/', '-')).join(' ');
+  }
+  return score;
+}
+
+export function handleTiebreakSlashSeparation(score) {
+  const re = new RegExp(/\(\d+\/\d+\)/g);
+  const tiebreaks = score.match(re);
+  for (const tiebreak of tiebreaks || []) {
+    const replacement = tiebreak.replace('/', '-');
+    score = score.replace(tiebreak, replacement);
+  }
+  return score;
+}
+
+export function tidyScore(score, stepLog) {
   if (typeof score === 'number') {
-    score = score.toString();
+    score = score.toString().toLowerCase();
 
     if (!(score.length % 2)) {
       score = chunkArray(score.split(''), 2)
@@ -997,12 +1106,38 @@ export function tidyScore(score) {
       score = parseSuper(score) || score;
     }
   }
+  score = score.toString().toLowerCase();
+
+  // -------------------------------
+  score = handleMissingClose(score); // Must occure before removeDanglingBits
+  score = removeDanglingBits(score);
+  // -------------------------------
+  if (stepLog) console.log('1', { score });
+
+  score = handleWalkover(score);
+  score = handleRetired(score);
+  if (stepLog) console.log('2', { score });
+  score = handleBracketSpacing(score);
+  if (stepLog) console.log('3', { score });
   score = containedSets(score);
+  if (stepLog) console.log('4', { score });
   score = separateScoreBlocks(score);
-  score = correctShiftErrors(score);
+  if (stepLog) console.log('5', { score });
   score = removeErroneous(score);
+  if (stepLog) console.log('6', { score });
   score = joinFloatingTiebreak(score);
-  return scoreParser.tidyScore(replaceOh(score));
+  if (stepLog) console.log('7', { score });
+  score = handleSetSlashSeparation(score);
+  if (stepLog) console.log('8', { score });
+  score = handleGameSlashSeparation(score);
+  if (stepLog) console.log('9', { score });
+  score = handleTiebreakSlashSeparation(score);
+  if (stepLog) console.log('10', { score });
+  score = reduceTiebreak(score);
+  if (stepLog) console.log('11', { score });
+  score = scoreParser.tidyScore(replaceOh(score));
+  if (stepLog) console.log('12', { score });
+  return score;
 }
 
 export function transformScore(score) {

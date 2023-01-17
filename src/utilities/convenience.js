@@ -12,6 +12,13 @@ export function indices(val, arr) {
     return a;
   }, []);
 }
+export function instanceCount(values) {
+  return values.reduce((a, c) => {
+    if (!a[c]) a[c] = 0;
+    a[c]++;
+    return a;
+  }, {});
+}
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
   const valueInstances = Math.max(0, ...Object.values(valueCounts));
