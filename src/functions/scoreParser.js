@@ -1,3 +1,5 @@
+import { indices } from '../utilities/convenience';
+
 export const scoreParser = (function () {
   let fx = {};
 
@@ -896,22 +898,33 @@ function separateScoreBlocks(score) {
 
 function joinFloatingTiebreak(score) {
   if (typeof score !== 'string') return score;
+  score = score.split(', ').join(' ');
   const parts = score.split(' ');
-  const floatingTiebreak = parts.find((part) => /^\(\d+\)$/.test(part));
-  if (floatingTiebreak) {
-    const index = parts.indexOf(floatingTiebreak);
-    const prior = parts[index - 1].split('-').join('');
-    if (/^\d+$/.test(prior) && prior.length === 2) {
-      const scores = prior.split('');
+  const floatingTiebreaks = parts.filter((part) => /^\(\d+\)$/.test(part));
+
+  let lastIndex = 0;
+  let joinedScore = '';
+  for (const floatingTiebreak of floatingTiebreaks) {
+    const thisIndex = indices(floatingTiebreak, parts).filter((index) => !lastIndex || index > lastIndex)[0];
+    const leading = parts.slice(lastIndex, thisIndex - 1);
+    const prior = parts[thisIndex - 1];
+    const stripped = prior.split('-').join('');
+    if (/^\d+$/.test(stripped) && stripped.length === 2) {
+      const scores = stripped.split('');
       const diff = Math.abs(scores.reduce((a, b) => +a - +b));
       if (diff === 1) {
-        const bits = [parts.slice(0, index - 1), [prior, floatingTiebreak].join(''), parts.slice(index + 1)]
-          .flat()
-          .join(' ');
-        return bits;
+        const joined = [leading.join(' '), [prior, floatingTiebreak].join('')].join(' ');
+        joinedScore += joined;
+        lastIndex = thisIndex + 1;
       }
     }
   }
+  if (floatingTiebreaks.length && joinedScore.length) {
+    const remainder = parts.slice(lastIndex).join(' ');
+    joinedScore = [joinedScore, remainder].join(' ');
+    return joinedScore;
+  }
+
   return score;
 }
 
