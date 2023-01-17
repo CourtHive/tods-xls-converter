@@ -1,3 +1,6 @@
+import { indices, instanceCount } from '../utilities/convenience';
+import { isNumeric } from '../utilities/identification';
+
 export const scoreParser = (function () {
   let fx = {};
 
@@ -801,34 +804,58 @@ export const scoreParser = (function () {
   return fx;
 })();
 
+function isTiebreakScore(part) {
+  return /^\(\d+\)$/.test(part) || /^\(\d+$/.test(part);
+}
+
+function isBracketScore(part) {
+  return /^\(\d+-\d+\)$/.test(part) || /^\[\d+-\d+\]$/.test(part);
+}
+
 function containedSets(score) {
   if (typeof score !== 'string') return score;
   const potentialEndings = [')', ']'];
-  const potentialMiddles = [')(', ') (', ')[', `) [`, '](', '] ('];
+  const potentialMiddles = [')(', '), (', ') (', ')[', `) [`, '](', '] ('];
   if (
     score.startsWith('(') &&
     potentialEndings.some((ending) => score.endsWith(ending)) &&
     potentialMiddles.some((middle) => score.includes(middle))
   ) {
     let newScore = '';
-    const parts = score.split(/[)\]]/).filter(Boolean);
-    if (parts.every((part) => part.includes(','))) {
+    const parts = score
+      .split(/[)\]]/)
+      .filter(Boolean)
+      .map((part) => {
+        if (part.startsWith(',')) part = part.slice(1);
+        return part.trim();
+      });
+    const commadDelimited = parts.every((part) => part.includes(',') || isTiebreakScore(part));
+    const dashDelimited = parts.every((part) => part.includes('-') || isTiebreakScore(part));
+    const delimiter = (commadDelimited && ',') || (dashDelimited && '-');
+
+    if (delimiter) {
       let lastPart;
       parts.forEach((part) => {
         if (part.startsWith('(')) {
           // is a set score
           if (lastPart === 'set') newScore += ' ';
-          newScore += part
-            .slice(1)
-            .split(',')
-            .map((s) => s.trim())
-            .join('-');
 
-          lastPart = 'set';
+          if (part.includes(delimiter)) {
+            newScore += part
+              .slice(1)
+              .split(delimiter)
+              .map((s) => s.trim())
+              .join('-');
+            lastPart = 'set';
+          } else {
+            const value = part.slice(1);
+            newScore += `(${value}) `;
+            lastPart = 'tiebreak';
+          }
         } else if (part.startsWith('[')) {
           const values = part
             .slice(1)
-            .split(',')
+            .split(delimiter)
             .map((s) => parseInt(s.trim()));
           const highValue = Math.min(...values);
           // is a tiebreak score
@@ -851,9 +878,9 @@ function containedSets(score) {
     const multipleResults = values.length > 1 && values.some((v) => v.includes('-') || v.includes('/'));
 
     if (multipleResults) {
-      return values;
+      return values.map((value) => value.trim()).join(' ');
     } else {
-      // handle (6, 3)
+      // handle 6, 3 | 9 3 | 93 | 9,3 | 9/3 | 9, 3
       score = result
         .split(/[, -\/]/)
         .filter(Boolean)
@@ -894,24 +921,75 @@ function separateScoreBlocks(score) {
     .join(' ');
 }
 
+function isDiffOne(score) {
+  const strip = (value) => value?.split('-').join('').split('/').join('');
+  const stripped = strip(score);
+  if (/^\d+$/.test(stripped) && stripped.length === 2) {
+    const scores = stripped.split('');
+    const diff = Math.abs(scores.reduce((a, b) => +a - +b));
+    return diff === 1;
+  }
+}
+
 function joinFloatingTiebreak(score) {
   if (typeof score !== 'string') return score;
+  const strip = (value) => value?.split('-').join('').split('/').join('');
+  const bracketToParen = (value) => value.split('[').join('(').split(']').join(')');
+  score = score.split(', ').join(' ');
   const parts = score.split(' ');
-  const floatingTiebreak = parts.find((part) => /^\(\d+\)$/.test(part));
-  if (floatingTiebreak) {
-    const index = parts.indexOf(floatingTiebreak);
-    const prior = parts[index - 1].split('-').join('');
-    if (/^\d+$/.test(prior) && prior.length === 2) {
-      const scores = prior.split('');
+
+  const floatingTiebreaks = parts.filter(isTiebreakScore);
+
+  let lastIndex = 0;
+  let joinedScore = '';
+  for (const floatingTiebreak of floatingTiebreaks) {
+    const thisIndex = indices(floatingTiebreak, parts).filter((index) => !lastIndex || index > lastIndex)[0];
+    const leading = parts.slice(lastIndex, thisIndex - 1);
+    const prior = parts[thisIndex - 1];
+    const stripped = strip(prior);
+    if (/^\d+$/.test(stripped) && stripped.length === 2) {
+      const scores = stripped.split('');
       const diff = Math.abs(scores.reduce((a, b) => +a - +b));
       if (diff === 1) {
-        const bits = [parts.slice(0, index - 1), [prior, floatingTiebreak].join(''), parts.slice(index + 1)]
-          .flat()
-          .join(' ');
-        return bits;
+        const joined = [leading.join(' '), [prior, floatingTiebreak].join('')].join(' ');
+        joinedScore += joined;
+        lastIndex = thisIndex + 1;
       }
     }
   }
+
+  if (floatingTiebreaks.length && joinedScore.length) {
+    const remainder = parts.slice(lastIndex).join(' ');
+    joinedScore = [joinedScore, remainder].join(' ');
+    return joinedScore;
+  }
+
+  if (parts.length === 2 && ['(', '['].some((punctuation) => parts[1].includes(punctuation))) {
+    const stripped = strip(parts[0]);
+    const scores = stripped.split('');
+    const diff = Math.abs(scores.reduce((a, b) => +a - +b));
+    if (diff === 1) {
+      parts[1] = bracketToParen(parts[1]);
+      return parts.join('');
+    }
+  }
+
+  const parenScores = parts.map((part) => (isBracketScore(part) && 'bracket') || (isDiffOne(part) && 'set'));
+  if (parenScores.includes('set') && parenScores.includes('bracket')) {
+    let lastPart;
+    let joinedParts = '';
+    parts.forEach((part, i) => {
+      if (parenScores[i] === 'bracket' && lastPart === 'set') {
+        part = bracketToParen(part);
+        joinedParts += part;
+      } else {
+        joinedParts += ` ${part}`;
+      }
+      lastPart = parenScores[i];
+    });
+    return joinedParts;
+  }
+
   return score;
 }
 
@@ -936,25 +1014,193 @@ function removeErroneous(score) {
     .join(' ');
 }
 
-function correctShiftErrors(score) {
-  if (typeof score !== 'string') return score;
-  const err = /^(\d{2})\((\d+)9$/;
-  return score
-    .toLowerCase()
-    .split(' ')
+export function handleMissingClose(score) {
+  const counts = instanceCount(score.split(''));
+  const missingParen = counts['('] === counts[')'] + 1;
+  const missingBracket = counts['['] === counts[']'] + 1;
+  if (missingParen && !missingBracket) {
+    if (score.endsWith(9)) {
+      score = score.slice(0, score.length - 1) + ')';
+    } else {
+      return score + ')';
+    }
+  }
+  if (missingBracket && !missingParen) return score + ']';
+  return score;
+}
+
+export function handleBracketSpacing(score) {
+  if (score.includes('( ')) {
+    score = score
+      .split('( ')
+      .map((part) => part.trim())
+      .join('(');
+  }
+  if (score.includes(' )')) {
+    score = score
+      .split(' )')
+      .map((part) => part.trim())
+      .join(')');
+  }
+  return score;
+}
+
+export function handleWalkover(score) {
+  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score)) {
+    return 'walkover';
+  }
+  return score;
+}
+
+export function handleRetired(score) {
+  if (/^(.*)ret[A-Za-z ]+$/.test(score)) {
+    const parts = score.split('ret');
+    return parts[0].trim() + ' retired';
+  }
+  const retired = ['ret', 'retired', 'con', 'cons', 'conceed', 'concede', 'conceeded'].find((ret) =>
+    score.endsWith(ret)
+  );
+  if (retired) {
+    return score.replace(retired, 'retired');
+  }
+  return score;
+}
+
+export function removeDanglingBits(score) {
+  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) return '';
+  if (/^(.*) \d$/.test(score)) {
+    return score.slice(0, score.length - 2);
+  }
+  if (['.'].some((punctuation) => score.endsWith(punctuation))) {
+    return score.slice(0, score.length - 1);
+  }
+  return score;
+}
+
+export function properTiebreak(score) {
+  const parts = score?.split(' ');
+  return parts
     .map((part) => {
-      if (err.test(part)) {
-        const bits = part.match(err);
-        return `${bits[1]}(${bits[2]})`;
+      if (part.endsWith(']')) {
+        const setScores = part.split('[');
+        if (isDiffOne(setScores[0])) {
+          return setScores[0] + `(${setScores[1].slice(0, setScores[1].length - 1)})`;
+        }
       }
       return part;
     })
     .join(' ');
 }
 
-export function tidyScore(score) {
+export function reduceTiebreak(score) {
+  const tb = new RegExp(/(\([\d+ ]+\))/g);
+  if (tb.test(score)) {
+    // handle tiebreak score which has no delimiter
+    for (const t of score.match(tb)) {
+      const replacement = t.replace(' ', '-');
+      score = score.replace(t, replacement);
+    }
+  }
+
+  const parts = score?.split(' ');
+  const re = new RegExp(/^(\d[-/]+\d)\((\d+)-(\d+)\)$/);
+  const reducedParts = parts.map((part) => {
+    if (re.test(part)) {
+      const [set, tb1, tb2] = Array.from(part.match(re)).slice(1);
+      const lowTiebreakScore = Math.min(tb1, tb2);
+      const setScore = `${set}(${lowTiebreakScore})`;
+      return setScore;
+    }
+    return part;
+  });
+
+  return reducedParts.join(' ');
+}
+
+export function handleSetSlashSeparation(score) {
+  const re = new RegExp(/-\d+\/\d+-/);
+  if (re.test(score)) {
+    return score.split('/').join(' ');
+  }
+  return score;
+}
+
+export function handleGameSlashSeparation(score) {
+  const re = new RegExp(/^\d+\/\d+/);
+  const parts = score.split(' ');
+  if (parts.some((part) => re.test(part))) {
+    return parts.map((part) => (re.test(part) ? part.replace('/', '-') : part)).join(' ');
+  }
+  return score;
+}
+
+export function handleTiebreakSlashSeparation(score) {
+  const re = new RegExp(/\(\d+\/\d+\)/g);
+  const tiebreaks = score.match(re);
+  for (const tiebreak of tiebreaks || []) {
+    const replacement = tiebreak.replace('/', '-');
+    score = score.replace(tiebreak, replacement);
+  }
+  return score;
+}
+
+export function handleSpaceSeparator(score) {
+  if (score.includes(',')) {
+    const sets = score.split(',').map((set) => set.trim());
+    const isSpaced = (set) => /\d \d/.test(set);
+    const spacedSets = sets.every(isSpaced);
+    if (spacedSets) return sets.map((set) => set.replace(' ', '-')).join(' ');
+  }
+
+  if (score.includes(' ')) {
+    const noSpaces = score.replace(/[ ,]/g, '');
+    const isNumber = noSpaces.split('').every((char) => isNumeric(char));
+    if (isNumber && noSpaces.length === 4) {
+      return noSpaces;
+    }
+  }
+
+  return score;
+}
+
+export function sensibleSets(score) {
+  const sets = score.split(' ');
+  const isTiebreakSet = (set) => set.indexOf('(') === 3;
+  return sets
+    .map((set) => {
+      if (isTiebreakSet(set)) {
+        const tiebreak = set.slice(3);
+        const setScores = set.slice(0, 3);
+        if (!isDiffOne(setScores)) {
+          const maxSetScore = Math.max(...setScores.split('-'));
+          const maxIndex = setScores.indexOf(maxSetScore);
+          const sensibleSetScores = [maxSetScore, maxSetScore - 1];
+          const sensibleSetScore = maxIndex ? sensibleSetScores.reverse().join('-') : sensibleSetScores.join('-');
+          const sensibleSet = sensibleSetScore + tiebreak;
+          return sensibleSet;
+        }
+      }
+      return set;
+    })
+    .join(' ');
+}
+
+export function superSquare(score) {
+  const sets = score.split(' ');
+  const finalSet = sets[sets.length - 1];
+  if (finalSet.includes('(') || !finalSet.includes('-')) return score;
+  const scores = finalSet.split('-');
+  const maxSetScore = Math.max(...scores);
+  if (maxSetScore >= 10) {
+    const squared = [...sets.slice(0, sets.length - 1), `[${finalSet}]`].join(' ');
+    return squared;
+  }
+  return score;
+}
+
+export function tidyScore(score, stepLog) {
   if (typeof score === 'number') {
-    score = score.toString();
+    score = score.toString().toLowerCase();
 
     if (!(score.length % 2)) {
       score = chunkArray(score.split(''), 2)
@@ -964,12 +1210,47 @@ export function tidyScore(score) {
       score = parseSuper(score) || score;
     }
   }
+  score = score.toString().toLowerCase();
+
+  // -------------------------------
+  score = handleMissingClose(score); // Must occure before removeDanglingBits
+  // -------------------------------
+
+  score = handleSpaceSeparator(score);
+  if (stepLog) console.log('0', { score });
+  score = removeDanglingBits(score);
+  if (stepLog) console.log('1', { score });
+  score = handleWalkover(score);
+  score = handleRetired(score);
+  if (stepLog) console.log('2', { score });
+  score = handleBracketSpacing(score);
+  if (stepLog) console.log('3', { score });
   score = containedSets(score);
+  if (stepLog) console.log('4', { score });
   score = separateScoreBlocks(score);
-  score = correctShiftErrors(score);
+  if (stepLog) console.log('5', { score });
+  score = handleGameSlashSeparation(score);
+  if (stepLog) console.log('6', { score });
   score = removeErroneous(score);
+  if (stepLog) console.log('7', { score });
   score = joinFloatingTiebreak(score);
-  return scoreParser.tidyScore(replaceOh(score));
+  if (stepLog) console.log('8', { score });
+  score = handleSetSlashSeparation(score);
+  if (stepLog) console.log('9', { score });
+  score = handleTiebreakSlashSeparation(score);
+  if (stepLog) console.log('10', { score });
+  score = properTiebreak(score);
+  if (stepLog) console.log('11', { score });
+  score = reduceTiebreak(score);
+  if (stepLog) console.log('12', { score });
+  score = sensibleSets(score);
+  if (stepLog) console.log('13', { score });
+  score = superSquare(score);
+  if (stepLog) console.log('14', { score });
+  score = scoreParser.tidyScore(replaceOh(score));
+  if (stepLog) console.log('15', { score });
+
+  return score;
 }
 
 export function transformScore(score) {
@@ -985,12 +1266,33 @@ export function chunkArray(arr, chunksize) {
 }
 
 function parseSuper(score) {
-  return (
-    score.length === 3 &&
-    score.includes('10') &&
-    score
-      .split('10')
-      .map((s) => s || 10)
-      .join('-')
-  );
+  const oneIndex = score.indexOf('1');
+  const numbers = score.split('');
+  const allNumeric = numbers.every((n) => !isNaN(n));
+
+  const getSuper = (values, index) => {
+    const parts = [values.slice(index, index + 2), index ? values.slice(0, 1) : values.slice(2)].map((n) =>
+      parseInt(n.join(''))
+    );
+    // preserve order
+    const scores = index ? parts.reverse() : parts;
+
+    const diff = Math.abs(scores.reduce((a, b) => +a - +b));
+    if (diff >= 2) return scores.join('-');
+  };
+
+  if (allNumeric && score.length === 3 && oneIndex >= 0 && oneIndex < 2) {
+    const superTiebreak = getSuper(numbers, oneIndex);
+    if (superTiebreak) return superTiebreak;
+  }
+
+  if (allNumeric && score.length === 7 && oneIndex > 3) {
+    const tiebreak = numbers.slice(4);
+    const superTiebreak = getSuper(tiebreak, oneIndex - 4);
+    if (superTiebreak) {
+      return `${numbers[0]}-${numbers[1]} ${numbers[2]}-${numbers[3]} ${superTiebreak}`;
+    }
+  }
+
+  return;
 }

@@ -31,15 +31,15 @@ specifiers:
   normalize-text: ^2.4.1
   np: 7.6.3
   prettier: ^2.8.1
-  rimraf: 4.0.7
+  rimraf: 4.1.0
   rollup: ^3.8.1
   rollup-plugin-esbuild: 5.0.0
   rollup-plugin-exclude-dependencies-from-bundle: ^1.1.23
   rollup-plugin-terser: 7.0.2
-  tods-competition-factory: ^0.425.0
+  tods-competition-factory: ^0.426.0
   typescript: ^4.9.4
   vite: ^4.0.3
-  vitest: 0.27.1
+  vitest: 0.27.2
   xlsx: 0.18.5
 
 dependencies:
@@ -47,7 +47,7 @@ dependencies:
   hash-sum: 2.0.0
   node-xlsx: 0.21.0
   normalize-text: 2.4.1
-  tods-competition-factory: 0.425.0
+  tods-competition-factory: 0.426.0
   xlsx: 0.18.5
 
 devDependencies:
@@ -77,14 +77,14 @@ devDependencies:
   lint-staged: 13.1.0
   np: 7.6.3
   prettier: 2.8.1
-  rimraf: 4.0.7
+  rimraf: 4.1.0
   rollup: 3.8.1
   rollup-plugin-esbuild: 5.0.0_u22snonz57osndchv6caxptnwu
   rollup-plugin-exclude-dependencies-from-bundle: 1.1.23_rollup@3.8.1
   rollup-plugin-terser: 7.0.2_rollup@3.8.1
   typescript: 4.9.4
   vite: 4.0.3
-  vitest: 0.27.1
+  vitest: 0.27.2
 
 packages:
 
@@ -5827,8 +5827,8 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rimraf/4.0.7:
-    resolution: {integrity: sha512-CUEDDrZvc0swDgVdXGiv3FcYYQMpJxjvSGt85Amj6yU+MCVWurrLCeLiJDdJPHCzNJnwuebBEdcO//eP11Xa7w==}
+  /rimraf/4.1.0:
+    resolution: {integrity: sha512-ZJdkUR5/dRrRJHdcSKJLrpRn6tVjl9ALxd4yrTCxFsMpjQNzwHF6GLqMsuEzEYIXxHlFPDSk21Vr8VPuFBEz0g==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
@@ -6359,8 +6359,8 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /tods-competition-factory/0.425.0:
-    resolution: {integrity: sha512-hOv8dxC5x77IrfL+EnnZaj0eCGELDS/lrNipuyJiboJuoS+i33laSapilgJRNaAVCW9kKuxxDhZgOvQhYRIniw==}
+  /tods-competition-factory/0.426.0:
+    resolution: {integrity: sha512-apFV4lCs2TPq2mSTQr81fYyZMiZrffIy42ZExK1fxwYQcfQE/nonZXPWdrXEZHBAdb1oO5qhOA0jzdElPpU6WQ==}
     dev: false
 
   /trim-newlines/3.0.1:
@@ -6610,8 +6610,8 @@ packages:
       builtins: 1.0.3
     dev: true
 
-  /vite-node/0.27.1_@types+node@18.11.17:
-    resolution: {integrity: sha512-d6+ue/3NzsfndWaPbYh/bFkHbmAWfDXI4B874zRx+WREnG6CUHUbBC8lKaRYZjeR6gCPN5m1aVNNRXBYICA9XA==}
+  /vite-node/0.27.2_@types+node@18.11.17:
+    resolution: {integrity: sha512-IDwuVhslF10qCnWOGJui7/2KksAOBHi+UbVo6Pqt4f5lgn+kS2sVvYDsETRG5PSuslisGB5CFGvb9I6FQgymBQ==}
     engines: {node: '>=v14.16.0'}
     hasBin: true
     dependencies:
@@ -6700,8 +6700,8 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /vitest/0.27.1:
-    resolution: {integrity: sha512-1sIpQ1DVFTEn7c1ici1XHcVfdU4nKiBmPtPAtGKJJJLuJjojTv/OHGgcf69P57alM4ty8V4NMv+7Yoi5Cxqx9g==}
+  /vitest/0.27.2:
+    resolution: {integrity: sha512-y7tdsL2uaQy+KF18AlmNHZe29ukyFytlxrpSTwwmgLE2XHR/aPucJP9FLjWoqjgqFlXzRAjHlFJLU+HDyI/OsA==}
     engines: {node: '>=v14.16.0'}
     hasBin: true
     peerDependencies:
@@ -6738,7 +6738,7 @@ packages:
       tinypool: 0.3.0
       tinyspy: 1.0.2
       vite: 4.0.3_@types+node@18.11.17
-      vite-node: 0.27.1_@types+node@18.11.17
+      vite-node: 0.27.2_@types+node@18.11.17
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less

@@ -65,10 +65,12 @@ export const cleanScore = (function () {
     return scores;
   };
 
-  let supertiebreakSet = (set_score) => {
+  let supertiebreakSet = (set_score, keepBrackets) => {
     set_score = removeBrackets(set_score);
     let set = parseScore(set_score);
-    return set && set.type === 'supertiebreak' ? set.score : false;
+    let superTieBreakScore = set && set.type === 'supertiebreak' ? set.score : false;
+    if (superTieBreakScore && keepBrackets) superTieBreakScore = `[${superTieBreakScore}]`;
+    return superTieBreakScore;
   };
 
   let parseTiebreak = (set_score, totals = [9, 13, 17]) => {
@@ -184,7 +186,7 @@ export const cleanScore = (function () {
         .filter((f) => f)
     );
 
-  let okScore = (set_scores) => {
+  let okScore = (set_scores, keepBrackets) => {
     // all sets are "normal"
     let test_scores = set_scores?.slice();
     let normal = normalSets(test_scores);
@@ -203,7 +205,7 @@ export const cleanScore = (function () {
       return normal;
     }
 
-    let supertiebreak = supertiebreakSet(last_set);
+    let supertiebreak = supertiebreakSet(last_set, keepBrackets);
     if (supertiebreak) {
       normal.push(supertiebreak);
       return normal;
@@ -220,27 +222,27 @@ export const cleanScore = (function () {
     return false;
   };
 
-  let normalize = (score) => {
+  let normalize = (score, keepBrackets) => {
     let cleaned = clean(score);
     let matchUpStatus;
 
-    const terminatesTest = /(ret|wo)/;
+    const terminatesTest = /(retired|walkover)/;
     const terminates = terminatesTest.test(cleaned);
     if (terminates) {
       const parts = cleaned.split(terminatesTest);
       cleaned = parts[0];
-      matchUpStatus = parts[1] === 'ret' ? 'RETIRED' : 'WALKOVER';
+      matchUpStatus = parts[1] === 'retired' ? 'RETIRED' : 'WALKOVER';
     }
 
     const splitScore = cleaned?.split(' ').filter(Boolean);
 
-    const ok = okScore(splitScore) || splitScore;
+    const ok = okScore(splitScore, keepBrackets) || splitScore;
     return { normalized: ok?.join(' '), matchUpStatus };
   };
 
   return { walkout: wo, normalize, endedEarly };
 })();
 
-export function normalizeScore(score) {
-  return cleanScore.normalize(score);
+export function normalizeScore(score, keepBrackets) {
+  return cleanScore.normalize(score, keepBrackets);
 }

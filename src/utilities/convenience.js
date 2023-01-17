@@ -6,6 +6,19 @@ import { removeBits } from './transformers';
 import { POSITION } from '../constants/columnConstants';
 const { BYE } = matchUpStatusConstants;
 
+export function indices(val, arr) {
+  return arr.reduce((a, e, i) => {
+    if (e === val) a.push(i);
+    return a;
+  }, []);
+}
+export function instanceCount(values) {
+  return values.reduce((a, c) => {
+    if (!a[c]) a[c] = 0;
+    a[c]++;
+    return a;
+  }, {});
+}
 export function maxInstance(values) {
   const valueCounts = utilities.instanceCount(values);
   const valueInstances = Math.max(0, ...Object.values(valueCounts));
