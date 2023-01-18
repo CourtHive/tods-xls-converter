@@ -1083,7 +1083,50 @@ function removeErroneous(score) {
     .join(' ');
 }
 
+function correctContainerMismatch(score) {
+  const brackets = '[];';
+  const parens = '()';
+  const types = brackets + parens;
+  const openers = [brackets[0], parens[0]];
+  const typeCount = Object.assign({}, ...types.split('').map((char) => ({ [char]: 0 })));
+
+  let lastType = '';
+  const corrected = score
+    .split('')
+    .map((char) => {
+      const type = types.includes(char) && char;
+      const isOpener = openers.includes(type);
+      if (isOpener && type) {
+        typeCount[type] += 1;
+        lastType = type;
+        return char;
+      }
+      if (!isOpener && type && lastType && type !== lastType) {
+        typeCount[lastType] -= 1;
+        const domain = (brackets.includes(lastType) && brackets) || (parens.includes(lastType) && parens);
+        const complement = domain.split('').find((c) => c !== lastType);
+        if (!domain.includes(type)) {
+          if (!typeCount[type]) lastType = '';
+          return complement;
+        } else {
+          if (!typeCount[lastType]) lastType = '';
+        }
+      }
+
+      return char;
+    })
+    .join('');
+
+  if (score !== corrected) {
+    return corrected;
+  }
+
+  return score;
+}
+
 export function punctuationAdjustments(score) {
+  score = correctContainerMismatch(score);
+
   const counts = instanceCount(score.split(''));
   let missingCloseParen = counts['('] === counts[')'] + 1;
   let missingOpenParen = (counts['('] || 0) + 1 === counts[')'];
@@ -1244,11 +1287,9 @@ export function properTiebreak(score) {
     // handle tiebreak score which has no delimiter
     for (const t of score.match(tb)) {
       const replacement = t.replace(' ', '-');
-      score = score.replace(t, replacement);
-      /*
+      // score = score.replace(t, replacement);
       let tiebreakScore = replacement.match(/\((.*)\)/)?.[1];
-      console.log({ t, replacement, tiebreakScore });
-      if (tiebreakScore?.[0] > 2) {
+      if (isNumeric(tiebreakScore) && tiebreakScore?.[0] > 2) {
         if ([2, 4].includes(tiebreakScore.length)) {
           tiebreakScore = tiebreakScore.split('').join('-');
         } else if (tiebreakScore.length === 3) {
@@ -1257,7 +1298,6 @@ export function properTiebreak(score) {
         }
       }
       score = score.replace(t, `(${tiebreakScore})`);
-      */
     }
   }
 

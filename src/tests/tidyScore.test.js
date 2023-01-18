@@ -3,13 +3,14 @@ import { tidyScore } from '../functions/scoreParser';
 import { expect, it } from 'vitest';
 
 let start = 0;
-let end = 0;
+let end = undefined;
+let expectations = true;
 
 const scores = [
+  { score: '(4, 6)(7, 6)(75)(3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
+  { score: '(4, 6)(7, 6)[75)(3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
+  { score: '(4, 6)(7, 6)[75](3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
   /*
-  { score: '(4, 6)(7, 6)[75](3, 0) con' },
-  { score: '(4, 6)(7, 6)(75)(3, 0) con' },
-  { score: '(4, 6)(7, 6)[75)(3, 0) con' },
   { score: '1, 0 con' }, // => 1-0 RETIRED
   { score: '(63)(6, 4)' }, // bracketed 2 digit number that is not after isDiffOne(set) must split('').join('-')
 
@@ -93,8 +94,8 @@ const scores = [
   { score: '9/8 [7/0]', expectation: { score: '9-8(0)' } },
   { score: '6-2/6-3.', expectation: { score: '6-2 6-3' } },
   { score: '1/6, 7/6(7, 4)', expectation: { score: '1-6 7-6(4)' } },
-  { score: '1/6, 6/7(3 7), 7/6(7, 4)', expectation: { score: '1-6 6-7(3) 7-6(4)' } },
   { score: '2-6, 7-6(7-4), 11-9', expectation: { score: '2-6 7-6(4) [11-9]' } },
+  { score: '1/6, 6/7(3 7), 7/6(7, 4)', expectation: { score: '1-6 6-7(3) 7-6(4)' } },
 
   // consider implementing RegExp for matching conxxxxx
   { score: '4-6, 7-6(5), 2-0 concede', expectation: { score: '4-6 7-6(5) 2-0', matchUpStatus: 'RETIRED' } },
@@ -162,11 +163,11 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
 
   let metExpectation;
   if (expectation?.matchUpStatus) {
-    expect(matchUpStatus).toEqual(expectation.matchUpStatus);
+    if (expectations) expect(matchUpStatus).toEqual(expectation.matchUpStatus);
     metExpectation = true;
   }
   if (expectation?.score !== undefined) {
-    expect(normalized).toEqual(expectation.score);
+    if (expectations) expect(normalized).toEqual(expectation.score);
     metExpectation = true;
   }
 
