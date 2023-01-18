@@ -3,19 +3,10 @@ import { tidyScore } from '../functions/scoreParser';
 import { expect, it } from 'vitest';
 
 let start = 0;
-let end = 1;
+let end = undefined;
 
 const scores = [
   /*
-  { score: '(9-8(7-3))' }, //
-  { score: '(9-8(12-10))' }, //
-  { score: '(8-7)2' }, //
-
-  // implement recognition of separated tiebreak (in floatingTiebreak)
-  { score: '(6/2) (7/6) (3/7) (10/7)' }, // recognize both tiebreak and supertiebreak
-  { score: '(6-2) (7-6) (3-7) (10-7)' }, // recognize both tiebreak and supertiebreak
-  { score: '(9-8) (7-1)' },
-
   { score: '1, 0 con' }, // => 1-0 RETIRED
   { score: '[10]' }, // bracketed number with no '-' is seeding
   { score: '[1] 7/2' }, // leading bracketed number is seeding
@@ -37,10 +28,20 @@ const scores = [
   { score: '(4, 6)(7, 6)(75)(3, 0) con' },
   { score: '(4, 6)(7, 6)[75](3, 0) con' },
   { score: '(4, 6)(7, 6)[75)(3, 0) con' },
-  { score: '(2-6, 6-2, 1-0(10-6))', ex: { score: '2-6 6-2 [10-6]' } }, // step #12 should convert 1-0(10-6) to 10-6
-  { score: '(6-3, 5-7, 1-0 12-10)' },
   */
 
+  // convert 1-0(#) to super tiebreak
+  { score: '(6-3, 5-7, 1-0 12-10)', expectation: { score: '6-3 5-7 [12-10]' } },
+  { score: '(2-6, 6-2, 1-0(10-6))', expectation: { score: '2-6 6-2 [10-6]' } },
+
+  // recognition of separated tiebreak (in floatingTiebreak)
+  { score: '(6-2) (7-6) (3-7) (10-7)', expectation: { score: '6-2 7-6(3) [10-7]' } }, // recognize both tiebreak and supertiebreak
+  { score: '(6/2) (7/6) (3/7) (10/7)', expectation: { score: '6-2 7-6(3) [10-7]' } }, // recognize both tiebreak and supertiebreak
+  { score: '(9-8) (7-1)', expectation: { score: '9-8(1)' } },
+
+  { score: '(8-7)2', expectation: { score: '8-7(2)' } },
+  { score: '(9-8(12-10))', expectation: { score: '9-8(10)' } }, // remove enclosing parens
+  { score: '(9-8(7-3))', expectation: { score: '9-8(3)' } }, // remove enclosing parens
   { score: '97(3)', expectation: { score: '9-8(3)' } }, // set score should be auto-corrected to 9-8(3)
   { score: '98(1)', expectation: { score: '9-8(1)' } },
   { score: '9/8[7/2]', expectation: { score: '9-8(2)' } },

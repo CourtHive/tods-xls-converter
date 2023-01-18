@@ -937,7 +937,7 @@ function joinFloatingTiebreak(score) {
   const strip = (value) => value?.split('-').join('').split('/').join('');
   const bracketToParen = (value) => value.split('[').join('(').split(']').join(')');
   score = score.split(', ').join(' ');
-  const parts = score.split(' ');
+  let parts = score.split(' ');
 
   const floatingTiebreaks = parts.filter(isTiebreakScore);
 
@@ -991,6 +991,40 @@ function joinFloatingTiebreak(score) {
     return joinedParts;
   }
 
+  // recognize tiebreak scores which look like sets s#-s# tb#-tb#
+  parts = score.split(' ');
+  let lastSet;
+  const profile = parts.map((part) => {
+    const re = new RegExp(/^(\d+)-(\d+)$/); // only consider sets which have no existing tiebreak score
+    if (re.test(part)) {
+      const [n1, n2] = part.match(re).slice(1);
+      const diff = Math.abs([n1, n2].reduce((a, b) => +a - +b));
+      const max = Math.max(n1, n2);
+      if (diff === 1) {
+        lastSet = 'tiebreakSet';
+        return lastSet;
+      } else if (diff >= 2 && max >= 7 && lastSet === 'tiebreakSet') {
+        lastSet = 'tiebreak';
+        return lastSet;
+      }
+    }
+  });
+
+  const tiebreakIndices = indices('tiebreak', profile);
+  if (tiebreakIndices.length) {
+    let joinedParts = '';
+    parts.forEach((part, i) => {
+      if (tiebreakIndices.includes(i)) {
+        joinedParts += `(${part}) `;
+      } else if (tiebreakIndices.includes(i + 1)) {
+        joinedParts += `${part}`;
+      } else {
+        joinedParts += `${part} `;
+      }
+    });
+    score = joinedParts.trim();
+  }
+
   return score;
 }
 
@@ -1025,7 +1059,7 @@ export function punctuationAdjustments(score) {
 
   if (!hasAlpha && !hasDigits) return '';
 
-  if (score.startsWith('((') && score.endsWith('))')) {
+  if (score.startsWith('(') && score.endsWith('))')) {
     score = score.slice(1, score.length - 1);
   }
 
@@ -1174,31 +1208,64 @@ export function properTiebreak(score) {
   parts = score?.split(' ');
   // handles tiebreaks (#-#) or (#/#)
   let re = new RegExp(/^(\d[-/]+\d)\((\d+)[-\/]+(\d+)\)$/);
-  const reducedParts = parts.map((part) => {
-    if (re.test(part)) {
-      const [set, tb1, tb2] = Array.from(part.match(re)).slice(1);
-      const lowTiebreakScore = Math.min(tb1, tb2);
-      const setScore = `${set}(${lowTiebreakScore})`;
-      return setScore;
-    }
-    return part;
-  });
-
-  score = reducedParts.join(' ');
+  score = parts
+    .map((part) => {
+      if (re.test(part)) {
+        const [set, tb1, tb2] = Array.from(part.match(re)).slice(1);
+        const lowTiebreakScore = Math.min(tb1, tb2);
+        const setScore = `${set}(${lowTiebreakScore})`;
+        return setScore;
+      }
+      return part;
+    })
+    .join(' ');
 
   // convert ##(#) => #-#(#)
   parts = score?.split(' ');
   re = new RegExp(/^(\d{2})\((\d+)\)$/);
-  const formattedParts = parts.map((part) => {
-    if (re.test(part)) {
-      const [set, lowTiebreakScore] = Array.from(part.match(re)).slice(1);
-      const setScores = set.split('');
-      const setScore = `${setScores[0]}-${setScores[1]}(${lowTiebreakScore})`;
-      return setScore;
-    }
-    return part;
-  });
-  score = formattedParts.join(' ');
+  score = parts
+    .map((part) => {
+      if (re.test(part)) {
+        const [set, lowTiebreakScore] = Array.from(part.match(re)).slice(1);
+        const setScores = set.split('');
+        const setScore = `${setScores[0]}-${setScores[1]}(${lowTiebreakScore})`;
+        return setScore;
+      }
+      return part;
+    })
+    .join(' ');
+
+  // convert (#-#)# to #-#(#)
+  parts = score?.split(' ');
+  re = new RegExp(/^\((\d[-/]+\d)\)(\d+)$/);
+  score = parts
+    .map((part) => {
+      if (re.test(part)) {
+        const [set, lowTiebreakScore] = Array.from(part.match(re)).slice(1);
+        if (isDiffOne(set)) {
+          return `${set}(${lowTiebreakScore})`;
+        } else {
+          // discard the number outside the bracket as erroneous
+          return set;
+        }
+      }
+      return part;
+    })
+    .join(' ');
+
+  // convert 1-0(#) to super tiebreak
+  parts = score?.split(' ');
+  re = new RegExp(/^1-0\((\d+)\)$/);
+  score = parts
+    .map((part) => {
+      if (re.test(part)) {
+        const [lowTiebreakScore] = part.match(re).slice(1);
+        const hightiebreakScore = lowTiebreakScore < 9 ? 10 : parseInt(lowTiebreakScore) + 2;
+        return `[${hightiebreakScore}-${lowTiebreakScore}]`;
+      }
+      return part;
+    })
+    .join(' ');
 
   return score;
 }
