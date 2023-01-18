@@ -6,6 +6,16 @@ let start = 0;
 let end = 1;
 
 const scores = [
+  /*
+  { score: '(9-8(7-3))' }, //
+  { score: '(9-8(12-10))' }, //
+  { score: '(8-7)2' }, //
+
+  // implement recognition of separated tiebreak (in floatingTiebreak)
+  { score: '(6/2) (7/6) (3/7) (10/7)' }, // recognize both tiebreak and supertiebreak
+  { score: '(6-2) (7-6) (3-7) (10-7)' }, // recognize both tiebreak and supertiebreak
+  { score: '(9-8) (7-1)' },
+
   { score: '1, 0 con' }, // => 1-0 RETIRED
   { score: '[10]' }, // bracketed number with no '-' is seeding
   { score: '[1] 7/2' }, // leading bracketed number is seeding
@@ -15,19 +25,11 @@ const scores = [
   // nothing to be done?
   { score: '(9/9)(7)' }, // set should be 9/8
 
-  { score: '(8-7)2' }, //
-  { score: '(9-8(12-10))' }, //
-  { score: '(9-8(7-3))' }, //
-  { score: '(9-8) (7-1)' }, //
-  { score: '(9-8)(3)' }, //
-
   { score: '(7, 6)(8 6)(6, 4)' }, //
   { score: '(7, 6)(8/6), (6, 3)' }, //
   { score: '(7-6(8-6)) (4-6) (7-6(7-4))' }, //
   { score: '(7 6)(7, 3)(6, 0)' }, // second bracketed value is tiebreak
   { score: '(7/6)(7-4), (6/1)' }, //
-  { score: '(6-2) (7-6) (3-7) (10-7)' }, // recognize both tiebreak and supertiebreak
-  { score: '(6/2) (7/6) (3/7) (10/7)' }, // recognize both tiebreak and supertiebreak
   { score: '(6, 4)(2, 6)(10/8)' }, // supertiebreak
   { score: '(6, 2)(7, 6)(8/6)' }, // set tiebreak
 
@@ -37,6 +39,11 @@ const scores = [
   { score: '(4, 6)(7, 6)[75)(3, 0) con' },
   { score: '(2-6, 6-2, 1-0(10-6))', ex: { score: '2-6 6-2 [10-6]' } }, // step #12 should convert 1-0(10-6) to 10-6
   { score: '(6-3, 5-7, 1-0 12-10)' },
+  */
+
+  { score: '97(3)', expectation: { score: '9-8(3)' } }, // set score should be auto-corrected to 9-8(3)
+  { score: '98(1)', expectation: { score: '9-8(1)' } },
+  { score: '9/8[7/2]', expectation: { score: '9-8(2)' } },
 
   { score: '(6-7)(5), (6-4), (10-6)', expectation: { score: '6-7(5) 6-4 [10-6]' } },
   { score: '(6/7)(5), (6/4), (10/6)', expectation: { score: '6-7(5) 6-4 [10-6]' } }, //
@@ -46,6 +53,8 @@ const scores = [
   { score: '(1/6) (6/3) (10/4)', expectation: { score: '1-6 6-3 [10-4]' } },
   { score: '(4/0) (4/0)', expectation: { score: '4-0 4-0' } },
 
+  { score: '(9-8)(3)', expectation: { score: '9-8(3)' } }, //
+  { score: '96-2, 6-4)', expectation: { score: '6-2 6-4' } }, // starts with a '9' instead of '('
   { score: '(6, 4)(7, 6)([10, 8]', expectation: { score: '6-4 7-6(8)' } }, // see dev notes on superSquare
   { score: '((6, 2)(7, 6)(2))', expectation: { score: '6-2 7-6(2)' } },
   { score: ')6, 4)(6, 2)', expectation: { score: '6-4 6-2' } }, //

@@ -1015,10 +1015,10 @@ function removeErroneous(score) {
     .join(' ');
 }
 
-export function bracketAdjustments(score) {
+export function punctuationAdjustments(score) {
   const counts = instanceCount(score.split(''));
   let missingCloseParen = counts['('] === counts[')'] + 1;
-  let missingOpenParen = counts['('] + 1 === counts[')'];
+  let missingOpenParen = (counts['('] || 0) + 1 === counts[')'];
   let missingCloseBracket = counts['['] === counts[']'] + 1;
   const hasAlpha = /[A-Za-z]+/.test(score);
   const hasDigits = /[0-9]+/.test(score);
@@ -1044,7 +1044,9 @@ export function bracketAdjustments(score) {
     score = score.slice(1);
   }
 
-  if (missingOpenParen) {
+  if (missingOpenParen && score.startsWith('9')) {
+    score = '(' + score.slice(1);
+  } else if (missingOpenParen) {
     if (score[0] !== '(') score = '(' + score;
   }
 
@@ -1140,15 +1142,15 @@ export function removeDanglingBits(score) {
   if (/^(.*) \d$/.test(score)) {
     return score.slice(0, score.length - 2);
   }
-  if (['.'].some((punctuation) => score.endsWith(punctuation))) {
+  if (['.', ','].some((punctuation) => score.endsWith(punctuation))) {
     return score.slice(0, score.length - 1);
   }
   return score;
 }
 
 export function properTiebreak(score) {
-  const parts = score?.split(' ');
-  return parts
+  let parts = score?.split(' ');
+  score = parts
     .map((part) => {
       if (part.endsWith(']')) {
         const setScores = part.split('[');
@@ -1159,9 +1161,7 @@ export function properTiebreak(score) {
       return part;
     })
     .join(' ');
-}
 
-export function reduceTiebreak(score) {
   const tb = new RegExp(/(\([\d+ ]+\))/g);
   if (tb.test(score)) {
     // handle tiebreak score which has no delimiter
@@ -1171,8 +1171,9 @@ export function reduceTiebreak(score) {
     }
   }
 
-  const parts = score?.split(' ');
-  const re = new RegExp(/^(\d[-/]+\d)\((\d+)-(\d+)\)$/);
+  parts = score?.split(' ');
+  // handles tiebreaks (#-#) or (#/#)
+  let re = new RegExp(/^(\d[-/]+\d)\((\d+)[-\/]+(\d+)\)$/);
   const reducedParts = parts.map((part) => {
     if (re.test(part)) {
       const [set, tb1, tb2] = Array.from(part.match(re)).slice(1);
@@ -1183,7 +1184,23 @@ export function reduceTiebreak(score) {
     return part;
   });
 
-  return reducedParts.join(' ');
+  score = reducedParts.join(' ');
+
+  // convert ##(#) => #-#(#)
+  parts = score?.split(' ');
+  re = new RegExp(/^(\d{2})\((\d+)\)$/);
+  const formattedParts = parts.map((part) => {
+    if (re.test(part)) {
+      const [set, lowTiebreakScore] = Array.from(part.match(re)).slice(1);
+      const setScores = set.split('');
+      const setScore = `${setScores[0]}-${setScores[1]}(${lowTiebreakScore})`;
+      return setScore;
+    }
+    return part;
+  });
+  score = formattedParts.join(' ');
+
+  return score;
 }
 
 export function handleSetSlashSeparation(score) {
@@ -1282,42 +1299,41 @@ export function tidyScore(score, stepLog) {
   score = score.toString().toLowerCase();
 
   // -------------------------------
-  score = bracketAdjustments(score); // Must occure before removeDanglingBits
+  score = punctuationAdjustments(score); // Must occure before removeDanglingBits
+  if (stepLog) console.log({ score }, 'punctuationAdjustments');
   // -------------------------------
 
   score = handleSpaceSeparator(score);
-  if (stepLog) console.log('0', { score });
+  if (stepLog) console.log({ score }, 'handleSpaceSeparator');
   score = removeDanglingBits(score);
-  if (stepLog) console.log('1', { score });
+  if (stepLog) console.log({ score }, 'removeDanglingBits');
   score = handleWalkover(score);
   score = handleRetired(score);
-  if (stepLog) console.log('2', { score });
+  if (stepLog) console.log({ score }, 'handleMatchUpStatus');
   score = handleBracketSpacing(score);
-  if (stepLog) console.log('3', { score });
+  if (stepLog) console.log({ score }, 'handleBracketeSpacing');
   score = containedSets(score);
-  if (stepLog) console.log('4', { score });
+  if (stepLog) console.log({ score }, 'containedSets');
   score = separateScoreBlocks(score);
-  if (stepLog) console.log('5', { score });
+  if (stepLog) console.log({ score }, 'separateScoreBlocks');
   score = handleGameSlashSeparation(score);
-  if (stepLog) console.log('6', { score });
+  if (stepLog) console.log({ score }, 'handleGameSlashSeparation');
   score = removeErroneous(score);
-  if (stepLog) console.log('7', { score });
+  if (stepLog) console.log({ score }, 'removeErroneous');
   score = joinFloatingTiebreak(score);
-  if (stepLog) console.log('8', { score });
+  if (stepLog) console.log({ score }, 'joinFloatingTiebreak');
   score = handleSetSlashSeparation(score);
-  if (stepLog) console.log('9', { score });
+  if (stepLog) console.log({ score }, 'handleSetSlashSeparation');
   score = handleTiebreakSlashSeparation(score);
-  if (stepLog) console.log('10', { score });
+  if (stepLog) console.log({ score }, 'handleTiebreakSlashSeparation');
   score = properTiebreak(score);
-  if (stepLog) console.log('11', { score });
-  score = reduceTiebreak(score);
-  if (stepLog) console.log('12', { score });
+  if (stepLog) console.log({ score }, 'properTiebreak');
   score = sensibleSets(score);
-  if (stepLog) console.log('13', { score });
+  if (stepLog) console.log({ score }, 'sensibleSets');
   score = superSquare(score);
-  if (stepLog) console.log('14', { score });
+  if (stepLog) console.log({ score }, 'superSquare');
   score = scoreParser.tidyScore(replaceOh(score));
-  if (stepLog) console.log('15', { score });
+  if (stepLog) console.log({ score }, 'tidyScore');
 
   return score;
 }
