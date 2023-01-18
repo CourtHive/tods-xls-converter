@@ -8,7 +8,7 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { tidyLower } from '../utilities/convenience';
 import { normalizeScore } from './cleanScore';
 import { pRankReducer } from './pRankReducer';
-import { tidyScore } from './scoreParser';
+import { tidyScore } from './scoreParser/scoreParser';
 import { getRow } from './sheetAccess';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;

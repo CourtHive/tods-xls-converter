@@ -8,7 +8,7 @@ import { pushGlobalLog } from '../utilities/globalLog';
 import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
 import { normalizeScore } from './cleanScore';
-import { tidyScore } from './scoreParser';
+import { tidyScore } from './scoreParser/scoreParser';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 

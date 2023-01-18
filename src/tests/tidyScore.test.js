@@ -1,5 +1,5 @@
 import { normalizeScore } from '../functions/cleanScore';
-import { tidyScore } from '../functions/scoreParser';
+import { tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
 let start = 0;
