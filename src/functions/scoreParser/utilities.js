@@ -15,3 +15,14 @@ export function isDiffOne(score) {
     return diff === 1;
   }
 }
+
+export function getSuper(values, index) {
+  const parts = [values.slice(index, index + 2), index ? values.slice(0, 1) : values.slice(2)].map((n) =>
+    parseInt(n.join(''))
+  );
+  // preserve order
+  const scores = index ? parts.reverse() : parts;
+
+  const diff = Math.abs(scores.reduce((a, b) => +a - +b));
+  if (diff >= 2) return scores.join('-');
+}

@@ -1,7 +1,8 @@
-import { correctContainerMismatch } from './correctContainerMismatch';
+import { punctuationAdjustments } from './punctuationAdjustments';
 import { joinFloatingTiebreak } from './joinFloatingTiebreak';
-import { instanceCount } from '../../utilities/convenience';
 import { isNumeric } from '../../utilities/identification';
+import { getSuper, isDiffOne } from './utilities';
+import { properTiebreak } from './properTiebreak';
 import { containedSets } from './containedSets';
 import { scoreParser } from './tidyScore';
 
@@ -35,16 +36,6 @@ function separateScoreBlocks(score) {
     .join(' ');
 }
 
-function isDiffOne(score) {
-  const strip = (value) => value?.split('-').join('').split('/').join('');
-  const stripped = strip(score);
-  if (/^\d+$/.test(stripped) && stripped.length === 2) {
-    const scores = stripped.split('');
-    const diff = Math.abs(scores.reduce((a, b) => +a - +b));
-    return diff === 1;
-  }
-}
-
 function removeErroneous(score) {
   if (typeof score !== 'string') return score;
 
@@ -64,99 +55,6 @@ function removeErroneous(score) {
     })
     .filter(Boolean)
     .join(' ');
-}
-
-export function punctuationAdjustments(score) {
-  score = correctContainerMismatch(score);
-
-  const counts = instanceCount(score.split(''));
-  let missingCloseParen = counts['('] === counts[')'] + 1;
-  let missingOpenParen = (counts['('] || 0) + 1 === counts[')'];
-  let missingCloseBracket = counts['['] === counts[']'] + 1;
-  const hasAlpha = /[A-Za-z]+/.test(score);
-  const hasDigits = /[0-9]+/.test(score);
-
-  if (!hasAlpha && !hasDigits) return '';
-
-  // remove enclosing [] provided there is anything other than numbers contained
-  // don't want to remove for e.g. "[1]" which is dealt with as seeding value
-  if (/^\[.+\]$/.test(score) && '()/,- '.split('').some((punctuation) => counts[punctuation])) {
-    score = score.slice(1, score.length - 1);
-  }
-
-  // remove enclosing () provided contained punctuation
-  if (
-    /^\(.+\)$/.test(score) &&
-    counts['('] === 1 &&
-    counts[')'] === 1 &&
-    '[]/,'.split('').some((punctuation) => counts[punctuation] > 1)
-  ) {
-    score = score.slice(1, score.length - 1);
-  }
-
-  if (score.startsWith('(') && score.endsWith('))')) {
-    score = score.slice(1, score.length - 1);
-  }
-
-  if (counts['('] > (counts[')'] || 0) && score[score.length - 1] === '(') {
-    score = score.slice(0, score.length - 1) + ')';
-    missingCloseParen = counts['('] === counts[')'] + 1;
-    missingOpenParen = counts['('] + 1 === counts[')'];
-    missingCloseBracket = counts['['] === counts[']'] + 1;
-  }
-
-  if (counts['('] === 1 && !counts[')'] && score[0] === '(') {
-    score = score + ')';
-  }
-
-  if (counts['('] > counts[')'] && score.slice(0, 2) === '((') {
-    score = score.slice(1);
-  }
-
-  if (missingOpenParen && score.startsWith('9')) {
-    score = '(' + score.slice(1);
-  } else if (missingOpenParen) {
-    if (score[0] !== '(') score = '(' + score;
-  }
-
-  if (counts[')'] > counts['(']) {
-    if (score[0] === ')') score = '(' + score.slice(1);
-  }
-
-  if (missingCloseParen && !missingCloseBracket) {
-    if (score.endsWith(9)) {
-      score = score.slice(0, score.length - 1) + ')';
-    } else if (!score.endsWith(')') || score.startsWith('((')) {
-      score = score + ')';
-    } else {
-      let reconstructed = '';
-      let open = 0;
-      // step through characters and insert close before open when open
-      for (const char of score.split('')) {
-        if (char === '(') {
-          if (open) {
-            reconstructed += ')';
-          } else {
-            open += 1;
-          }
-        }
-        if (char === ')') open -= 1;
-        reconstructed += char;
-      }
-      score = reconstructed;
-    }
-  }
-
-  if (missingCloseBracket && !missingCloseParen) return score + ']';
-
-  // this is potentially problematic as enclosing with '[]' yields tiebreak...
-  // ... wheres enclosing with '()' yields a set which gets converted to a supertiebreak!
-  // Really it would be better to convert to set and determine later which type of tiebreak based on previous set
-  if (score.includes('([') && score.includes('])')) {
-    score = score.split('([').join('[').split('])').join(']');
-  }
-
-  return score;
 }
 
 export function handleBracketSpacing(score) {
@@ -206,105 +104,6 @@ export function removeDanglingBits(score) {
   if (['.', ','].some((punctuation) => score.endsWith(punctuation))) {
     return score.slice(0, score.length - 1);
   }
-  return score;
-}
-
-export function properTiebreak(score) {
-  let parts = score?.split(' ');
-  score = parts
-    .map((part) => {
-      if (part.endsWith(']')) {
-        const setScores = part.split('[');
-        if (isDiffOne(setScores[0])) {
-          return setScores[0] + `(${setScores[1].slice(0, setScores[1].length - 1)})`;
-        }
-      }
-      return part;
-    })
-    .join(' ');
-
-  const tb = new RegExp(/(\([\d ]+\))/g);
-  // const tb = new RegExp(/(\([\d+ ]+\))/g);
-  if (tb.test(score)) {
-    // handle tiebreak score which has no delimiter
-    for (const t of score.match(tb)) {
-      const replacement = t.replace(' ', '-');
-      // score = score.replace(t, replacement);
-      let tiebreakScore = replacement.match(/\((.*)\)/)?.[1];
-      if (isNumeric(tiebreakScore) && tiebreakScore?.[0] > 2) {
-        if ([2, 4].includes(tiebreakScore.length)) {
-          tiebreakScore = tiebreakScore.split('').join('-');
-        } else if (tiebreakScore.length === 3) {
-          const oneIndex = tiebreakScore.indexOf('1');
-          tiebreakScore = getSuper(tiebreakScore.split(''), oneIndex);
-        }
-      }
-      score = score.replace(t, `(${tiebreakScore})`);
-    }
-  }
-
-  parts = score?.split(' ');
-  // handles tiebreaks (#-#) or (#/#)
-  let re = new RegExp(/^(\d[-/]+\d)\((\d+)[-/]+(\d+)\)$/);
-  score = parts
-    .map((part) => {
-      if (re.test(part)) {
-        const [set, tb1, tb2] = Array.from(part.match(re)).slice(1);
-        const lowTiebreakScore = Math.min(tb1, tb2);
-        const setScore = `${set}(${lowTiebreakScore})`;
-        return setScore;
-      }
-      return part;
-    })
-    .join(' ');
-
-  // convert ##(#) => #-#(#)
-  parts = score?.split(' ');
-  re = new RegExp(/^(\d{2})\((\d+)\)$/);
-  score = parts
-    .map((part) => {
-      if (re.test(part)) {
-        const [set, lowTiebreakScore] = Array.from(part.match(re)).slice(1);
-        const setScores = set.split('');
-        const setScore = `${setScores[0]}-${setScores[1]}(${lowTiebreakScore})`;
-        return setScore;
-      }
-      return part;
-    })
-    .join(' ');
-
-  // convert (#-#)# to #-#(#)
-  parts = score?.split(' ');
-  re = new RegExp(/^\((\d[-/]+\d)\)(\d+)$/);
-  score = parts
-    .map((part) => {
-      if (re.test(part)) {
-        const [set, lowTiebreakScore] = Array.from(part.match(re)).slice(1);
-        if (isDiffOne(set)) {
-          return `${set}(${lowTiebreakScore})`;
-        } else {
-          // discard the number outside the bracket as erroneous
-          return set;
-        }
-      }
-      return part;
-    })
-    .join(' ');
-
-  // convert 1-0(#) to super tiebreak
-  parts = score?.split(' ');
-  re = new RegExp(/^1-0\((\d+)\)$/);
-  score = parts
-    .map((part) => {
-      if (re.test(part)) {
-        const [lowTiebreakScore] = part.match(re).slice(1);
-        const hightiebreakScore = lowTiebreakScore < 9 ? 10 : parseInt(lowTiebreakScore) + 2;
-        return `[${hightiebreakScore}-${lowTiebreakScore}]`;
-      }
-      return part;
-    })
-    .join(' ');
-
   return score;
 }
 
@@ -477,17 +276,6 @@ export function chunkArray(arr, chunksize) {
     all[ch] = [].concat(all[ch] || [], one);
     return all;
   }, []);
-}
-
-function getSuper(values, index) {
-  const parts = [values.slice(index, index + 2), index ? values.slice(0, 1) : values.slice(2)].map((n) =>
-    parseInt(n.join(''))
-  );
-  // preserve order
-  const scores = index ? parts.reverse() : parts;
-
-  const diff = Math.abs(scores.reduce((a, b) => +a - +b));
-  if (diff >= 2) return scores.join('-');
 }
 
 function parseSuper(score) {
