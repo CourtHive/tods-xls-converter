@@ -7,15 +7,13 @@ let end = undefined;
 
 const scores = [
   /*
+  { score: '(4, 6)(7, 6)(75)(3, 0) con' },
+  { score: '(4, 6)(7, 6)[75](3, 0) con' },
+  { score: '(4, 6)(7, 6)[75)(3, 0) con' },
   { score: '1, 0 con' }, // => 1-0 RETIRED
-  { score: '[10]' }, // bracketed number with no '-' is seeding
-  { score: '[1] 7/2' }, // leading bracketed number is seeding
   { score: '(63)(6, 4)' }, // bracketed 2 digit number that is not after isDiffOne(set) must split('').join('-')
-  { score: '[6-7, (7-7), 6-2, 10-7]' }, // remove non-sensical (7-7)
 
-  // nothing to be done?
-  { score: '(9/9)(7)' }, // set should be 9/8
-
+  { score: '(6, 3)(6 4)' },
   { score: '(7, 6)(8 6)(6, 4)' }, //
   { score: '(7, 6)(8/6), (6, 3)' }, //
   { score: '(7-6(8-6)) (4-6) (7-6(7-4))' }, //
@@ -23,12 +21,13 @@ const scores = [
   { score: '(7/6)(7-4), (6/1)' }, //
   { score: '(6, 4)(2, 6)(10/8)' }, // supertiebreak
   { score: '(6, 2)(7, 6)(8/6)' }, // set tiebreak
-
-  { score: '(6, 3)(6 4)' },
-  { score: '(4, 6)(7, 6)(75)(3, 0) con' },
-  { score: '(4, 6)(7, 6)[75](3, 0) con' },
-  { score: '(4, 6)(7, 6)[75)(3, 0) con' },
   */
+
+  // handle score beginning with []
+  { score: '[6-7, (7-7), 6-2, 10-7]', expectation: { score: '6-7(7) 6-2 [10-7]' } },
+  { score: '6-7, (7-7), 6-2, 10-7', expectation: { score: '6-7(7) 6-2 [10-7]' } },
+  { score: '[1] 7/2', expectation: { score: '7-2' } }, // leading bracketed number is seeding
+  { score: '[10]', expectation: { score: '' } }, // bracketed number with no '-' is seeding
 
   // convert 1-0(#) to super tiebreak
   { score: '(6-3, 5-7, 1-0 12-10)', expectation: { score: '6-3 5-7 [12-10]' } },
@@ -39,6 +38,7 @@ const scores = [
   { score: '(6/2) (7/6) (3/7) (10/7)', expectation: { score: '6-2 7-6(3) [10-7]' } }, // recognize both tiebreak and supertiebreak
   { score: '(9-8) (7-1)', expectation: { score: '9-8(1)' } },
 
+  { score: '(9/9)(7)', expectation: { score: '9-8(7)' } }, // set should be 9/8
   { score: '(8-7)2', expectation: { score: '8-7(2)' } },
   { score: '(9-8(12-10))', expectation: { score: '9-8(10)' } }, // remove enclosing parens
   { score: '(9-8(7-3))', expectation: { score: '9-8(3)' } }, // remove enclosing parens

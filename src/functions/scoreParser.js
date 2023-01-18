@@ -955,6 +955,15 @@ function joinFloatingTiebreak(score) {
         const joined = [leading.join(' '), [prior, floatingTiebreak].join('')].join(' ');
         joinedScore += joined;
         lastIndex = thisIndex + 1;
+      } else if (diff === 0) {
+        const sameScore = Math.max(...scores);
+        if ([4, 5, 6, 7, 8, 9].includes(sameScore)) {
+          const pairedScore = [6, 4].includes(sameScore) ? sameScore + 1 : sameScore - 1;
+          const setScore = [sameScore, pairedScore].sort().reverse().join('-');
+          const joined = [leading.join(' '), [setScore, floatingTiebreak].join('')].join(' ');
+          joinedScore += joined;
+          lastIndex = thisIndex + 1;
+        }
       }
     }
   }
@@ -1059,6 +1068,12 @@ export function punctuationAdjustments(score) {
 
   if (!hasAlpha && !hasDigits) return '';
 
+  // remove enclosing [] provided there is anything other than numbers contained
+  // don't want to remove for e.g. "[1]" which is dealt with as seeding value
+  if (/^\[.+\]$/.test(score) && '()/,- '.split('').some((punctuation) => counts[punctuation])) {
+    score = score.slice(1, score.length - 1);
+  }
+
   if (score.startsWith('(') && score.endsWith('))')) {
     score = score.slice(1, score.length - 1);
   }
@@ -1142,33 +1157,25 @@ export function handleBracketSpacing(score) {
 
 export function handleWalkover(score) {
   if (['walkover', 'wo', 'w/o', 'w-o'].includes(score)) {
-    return 'walkover';
+    return { matchUpStatus: 'walkover', score: '' };
   }
-  return score;
+  return { score };
 }
 
 export function handleRetired(score) {
-  if (/^(.*)ret[A-Za-z ]+$/.test(score)) {
-    const parts = score.split('ret');
-    return parts[0].trim() + ' retired';
+  const re = /^(.*)(ret|con)+[A-Za-z ]*$/;
+  if (re.test(score)) {
+    const [leading] = score.match(re).slice(1);
+    return { score: leading.trim(), matchUpStatus: 'retired' };
   }
-  const retired = [
-    'ret',
-    'rtd',
-    'retired',
-    'con',
-    'conc',
-    'cons',
-    'coneced',
-    'conceed',
-    'concede',
-    'conceded',
-    'conceeded'
-  ].find((ret) => score.endsWith(ret));
+
+  // accommodate other variations
+  const retired = ['rtd'].find((ret) => score.endsWith(ret));
+
   if (retired) {
-    return score.replace(retired, 'retired');
+    return { matchUpStatus: 'retired', score: score.replace(retired, '').trim() };
   }
-  return score;
+  return { score };
 }
 
 export function removeDanglingBits(score) {
@@ -1351,7 +1358,17 @@ export function superSquare(score) {
   return score;
 }
 
+export function excisions(score) {
+  const re = new RegExp(/^\[\d+\](.*)$/);
+  if (re.test(score)) {
+    score = score.match(re).slice(1)[0].trim();
+  }
+  return score;
+}
+
 export function tidyScore(score, stepLog) {
+  let matchUpStatus, result;
+
   if (typeof score === 'number') {
     score = score.toString().toLowerCase();
 
@@ -1370,13 +1387,22 @@ export function tidyScore(score, stepLog) {
   if (stepLog) console.log({ score }, 'punctuationAdjustments');
   // -------------------------------
 
+  score = excisions(score);
+  if (stepLog) console.log({ score }, 'excisions');
   score = handleSpaceSeparator(score);
   if (stepLog) console.log({ score }, 'handleSpaceSeparator');
   score = removeDanglingBits(score);
   if (stepLog) console.log({ score }, 'removeDanglingBits');
-  score = handleWalkover(score);
-  score = handleRetired(score);
+
+  result = handleWalkover(score);
+  score = result.score;
+  if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
+
+  result = handleRetired(score);
+  score = result.score;
+  if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
   if (stepLog) console.log({ score }, 'handleMatchUpStatus');
+
   score = handleBracketSpacing(score);
   if (stepLog) console.log({ score }, 'handleBracketeSpacing');
   score = containedSets(score);
@@ -1399,6 +1425,11 @@ export function tidyScore(score, stepLog) {
   if (stepLog) console.log({ score }, 'sensibleSets');
   score = superSquare(score);
   if (stepLog) console.log({ score }, 'superSquare');
+
+  if (matchUpStatus) {
+    score = score + ` ${matchUpStatus}`;
+  }
+
   score = scoreParser.tidyScore(replaceOh(score));
   if (stepLog) console.log({ score }, 'tidyScore');
 
