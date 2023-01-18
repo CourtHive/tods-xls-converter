@@ -2,11 +2,18 @@ import { normalizeScore } from '../functions/cleanScore';
 import { tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
-const expectations = true;
+const expectations = false;
 const start = 0;
 const end = 0;
 
 const scores = [
+  { score: '7-6(60', expectation: { score: '7-6(6)' } },
+  { score: '7-6(60, 6-0', expectation: { score: '7-6(6) 6-0' } },
+  { score: '7/5 6 /0', expectation: { score: '7-5 6-0' } },
+  { score: '7/6[11/13] 6/3', expectation: { score: '7-6(11) 6-3' } },
+  { score: '75 36 12 -10', expectation: { score: '7-5 3-6 [12-10]' } },
+  { score: '8-7, /7-0', expectation: { score: '8-7(0)' } },
+  { score: '9-5)', expectation: { score: '9-5' } },
   { score: '1, 0', expectation: { score: '1-0' } },
   { score: '1, 0 con', expectation: { score: '1-0', matchUpStatus: 'RETIRED' } },
 
