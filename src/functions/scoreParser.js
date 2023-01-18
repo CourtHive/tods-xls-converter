@@ -830,8 +830,9 @@ function containedSets(score) {
         return part.trim();
       });
     const commadDelimited = parts.every((part) => part.includes(',') || isTiebreakScore(part));
+    const slashDelimited = parts.every((part) => part.includes('/') || isTiebreakScore(part));
     const dashDelimited = parts.every((part) => part.includes('-') || isTiebreakScore(part));
-    const delimiter = (commadDelimited && ',') || (dashDelimited && '-');
+    const delimiter = (commadDelimited && ',') || (dashDelimited && '-') || (slashDelimited && '/');
 
     if (delimiter) {
       let lastPart;
@@ -1014,18 +1015,76 @@ function removeErroneous(score) {
     .join(' ');
 }
 
-export function handleMissingClose(score) {
+export function bracketAdjustments(score) {
   const counts = instanceCount(score.split(''));
-  const missingParen = counts['('] === counts[')'] + 1;
-  const missingBracket = counts['['] === counts[']'] + 1;
-  if (missingParen && !missingBracket) {
+  let missingCloseParen = counts['('] === counts[')'] + 1;
+  let missingOpenParen = counts['('] + 1 === counts[')'];
+  let missingCloseBracket = counts['['] === counts[']'] + 1;
+  const hasAlpha = /[A-Za-z]+/.test(score);
+  const hasDigits = /[0-9]+/.test(score);
+
+  if (!hasAlpha && !hasDigits) return '';
+
+  if (score.startsWith('((') && score.endsWith('))')) {
+    score = score.slice(1, score.length - 1);
+  }
+
+  if (counts['('] > (counts[')'] || 0) && score[score.length - 1] === '(') {
+    score = score.slice(0, score.length - 1) + ')';
+    missingCloseParen = counts['('] === counts[')'] + 1;
+    missingOpenParen = counts['('] + 1 === counts[')'];
+    missingCloseBracket = counts['['] === counts[']'] + 1;
+  }
+
+  if (counts['('] === 1 && !counts[')'] && score[0] === '(') {
+    score = score + ')';
+  }
+
+  if (counts['('] > counts[')'] && score.slice(0, 2) === '((') {
+    score = score.slice(1);
+  }
+
+  if (missingOpenParen) {
+    if (score[0] !== '(') score = '(' + score;
+  }
+
+  if (counts[')'] > counts['(']) {
+    if (score[0] === ')') score = '(' + score.slice(1);
+  }
+
+  if (missingCloseParen && !missingCloseBracket) {
     if (score.endsWith(9)) {
       score = score.slice(0, score.length - 1) + ')';
+    } else if (!score.endsWith(')') || score.startsWith('((')) {
+      score = score + ')';
     } else {
-      return score + ')';
+      let reconstructed = '';
+      let open = 0;
+      // step through characters and insert close before open when open
+      for (const char of score.split('')) {
+        if (char === '(') {
+          if (open) {
+            reconstructed += ')';
+          } else {
+            open += 1;
+          }
+        }
+        if (char === ')') open -= 1;
+        reconstructed += char;
+      }
+      score = reconstructed;
     }
   }
-  if (missingBracket && !missingParen) return score + ']';
+
+  if (missingCloseBracket && !missingCloseParen) return score + ']';
+
+  // this is potentially problematic as enclosing with '[]' yields tiebreak...
+  // ... wheres enclosing with '()' yields a set which gets converted to a supertiebreak!
+  // Really it would be better to convert to set and determine later which type of tiebreak based on previous set
+  if (score.includes('([') && score.includes('])')) {
+    score = score.split('([').join('[').split('])').join(']');
+  }
+
   return score;
 }
 
@@ -1057,9 +1116,19 @@ export function handleRetired(score) {
     const parts = score.split('ret');
     return parts[0].trim() + ' retired';
   }
-  const retired = ['ret', 'retired', 'con', 'cons', 'conceed', 'concede', 'conceeded'].find((ret) =>
-    score.endsWith(ret)
-  );
+  const retired = [
+    'ret',
+    'rtd',
+    'retired',
+    'con',
+    'conc',
+    'cons',
+    'coneced',
+    'conceed',
+    'concede',
+    'conceded',
+    'conceeded'
+  ].find((ret) => score.endsWith(ret));
   if (retired) {
     return score.replace(retired, 'retired');
   }
@@ -1188,11 +1257,11 @@ export function sensibleSets(score) {
 export function superSquare(score) {
   const sets = score.split(' ');
   const finalSet = sets[sets.length - 1];
-  if (finalSet.includes('(') || !finalSet.includes('-')) return score;
-  const scores = finalSet.split('-');
+  if (!finalSet.includes('-') || finalSet.indexOf('(') > 0) return score;
+  const scores = finalSet.split('(').join('').split(')').join('').split('-');
   const maxSetScore = Math.max(...scores);
   if (maxSetScore >= 10) {
-    const squared = [...sets.slice(0, sets.length - 1), `[${finalSet}]`].join(' ');
+    const squared = [...sets.slice(0, sets.length - 1), `[${scores.join('-')}]`].join(' ');
     return squared;
   }
   return score;
@@ -1213,7 +1282,7 @@ export function tidyScore(score, stepLog) {
   score = score.toString().toLowerCase();
 
   // -------------------------------
-  score = handleMissingClose(score); // Must occure before removeDanglingBits
+  score = bracketAdjustments(score); // Must occure before removeDanglingBits
   // -------------------------------
 
   score = handleSpaceSeparator(score);
