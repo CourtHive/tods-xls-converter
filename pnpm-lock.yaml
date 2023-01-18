@@ -31,7 +31,7 @@ specifiers:
   normalize-text: ^2.4.1
   np: 7.6.3
   prettier: ^2.8.1
-  rimraf: 4.1.0
+  rimraf: 4.1.1
   rollup: ^3.8.1
   rollup-plugin-esbuild: 5.0.0
   rollup-plugin-exclude-dependencies-from-bundle: ^1.1.23
@@ -77,7 +77,7 @@ devDependencies:
   lint-staged: 13.1.0
   np: 7.6.3
   prettier: 2.8.1
-  rimraf: 4.1.0
+  rimraf: 4.1.1
   rollup: 3.8.1
   rollup-plugin-esbuild: 5.0.0_u22snonz57osndchv6caxptnwu
   rollup-plugin-exclude-dependencies-from-bundle: 1.1.23_rollup@3.8.1
@@ -5827,8 +5827,8 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rimraf/4.1.0:
-    resolution: {integrity: sha512-ZJdkUR5/dRrRJHdcSKJLrpRn6tVjl9ALxd4yrTCxFsMpjQNzwHF6GLqMsuEzEYIXxHlFPDSk21Vr8VPuFBEz0g==}
+  /rimraf/4.1.1:
+    resolution: {integrity: sha512-Z4Y81w8atcvaJuJuBB88VpADRH66okZAuEm+Jtaufa+s7rZmIz+Hik2G53kGaNytE7lsfXyWktTmfVz0H9xuDg==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
