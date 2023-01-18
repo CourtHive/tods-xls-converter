@@ -8,6 +8,21 @@ export function joinFloatingTiebreak(score) {
   score = score.split(', ').join(' ');
   let parts = score.split(' ');
 
+  score = parts
+    .map((part) => {
+      const deDash = /^-(\d+)$/;
+      if (deDash.test(part)) {
+        const [value] = part.match(deDash).slice(1);
+        if (value.length === 2) {
+          return value.split('').join('-');
+        }
+      }
+      return part;
+    })
+    .join(' ');
+
+  parts = score.split(' ');
+
   const floatingTiebreaks = parts.filter(isTiebreakScore);
 
   let lastIndex = 0;

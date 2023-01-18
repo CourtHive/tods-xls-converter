@@ -4,6 +4,11 @@ import { isContained } from './utilities';
 
 export function punctuationAdjustments(score) {
   score = correctContainerMismatch(score);
+
+  '-/,'.split('').forEach((punctuation) => {
+    if (score.endsWith(punctuation)) score = score.slice(0, score.length - 1);
+  });
+
   let counts = instanceCount(score.split(''));
 
   // generalize this into array of replacements
@@ -111,10 +116,14 @@ export function punctuationAdjustments(score) {
     score = score.split('([').join('[').split('])').join(']');
   }
 
-  counts = instanceCount(score.split(''));
-
   if (/\(\d+0$/.test(score)) {
     score = score.slice(0, score.length - 1) + ')';
+  }
+
+  counts = instanceCount(score.split(''));
+
+  if (counts[')'] === 1 && !counts['('] && score.endsWith(')')) {
+    score = score.slice(0, score.length - 1);
   }
 
   return score;
