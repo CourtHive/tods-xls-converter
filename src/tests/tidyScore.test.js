@@ -2,13 +2,13 @@ import { normalizeScore } from '../functions/cleanScore';
 import { tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
-const expectations = false;
+const expectations = true;
 const start = 0;
 const end = 0;
 
 const scores = [
-  { score: '1, 0', expectation: { score: '1-0', matchUpStatus: 'RETIRED' } }, // => 1-0 RETIRED
-  { score: '1, 0 con', expectation: { score: '1-0', matchUpStatus: 'RETIRED' } }, // => 1-0 RETIRED
+  { score: '1, 0', expectation: { score: '1-0' } },
+  { score: '1, 0 con', expectation: { score: '1-0', matchUpStatus: 'RETIRED' } },
 
   // danglingBits ...
   { score: '(6-4)(6-3) 6', expectation: { score: '6-4 6-3' } },
