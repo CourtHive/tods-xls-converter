@@ -814,6 +814,31 @@ function isBracketScore(part) {
 
 function containedSets(score) {
   if (typeof score !== 'string') return score;
+
+  const withParens = new RegExp(/\([\d,\/ ]+\)/g);
+  const contained = score.match(withParens);
+  contained?.forEach((container) => {
+    const innards = container
+      .match(/^\((.*)\)$/)[1]
+      .split(', ')
+      .join('-')
+      .split('/')
+      .join('-');
+    score = score.replace(container, `(${innards})`).trim();
+  });
+
+  const withBrackets = new RegExp(/\[[\d,\/ ]+\]/g);
+  const bracketed = score.match(withBrackets);
+  bracketed?.forEach((container) => {
+    const innards = container
+      .match(/^\[(.*)\]$/)[1]
+      .split(', ')
+      .join('-')
+      .split('/')
+      .join('-');
+    score = score.replace(container, `(${innards}) `).trim();
+  });
+
   const potentialEndings = [')', ']'];
   const potentialMiddles = [')(', '), (', ') (', ')[', `) [`, '](', '] ('];
   if (
@@ -1074,6 +1099,16 @@ export function punctuationAdjustments(score) {
     score = score.slice(1, score.length - 1);
   }
 
+  // remove enclosing () provided contained punctuation
+  if (
+    /^\(.+\)$/.test(score) &&
+    counts['('] === 1 &&
+    counts[')'] === 1 &&
+    '[]/,'.split('').some((punctuation) => counts[punctuation] > 1)
+  ) {
+    score = score.slice(1, score.length - 1);
+  }
+
   if (score.startsWith('(') && score.endsWith('))')) {
     score = score.slice(1, score.length - 1);
   }
@@ -1203,12 +1238,26 @@ export function properTiebreak(score) {
     })
     .join(' ');
 
-  const tb = new RegExp(/(\([\d+ ]+\))/g);
+  const tb = new RegExp(/(\([\d ]+\))/g);
+  // const tb = new RegExp(/(\([\d+ ]+\))/g);
   if (tb.test(score)) {
     // handle tiebreak score which has no delimiter
     for (const t of score.match(tb)) {
       const replacement = t.replace(' ', '-');
       score = score.replace(t, replacement);
+      /*
+      let tiebreakScore = replacement.match(/\((.*)\)/)?.[1];
+      console.log({ t, replacement, tiebreakScore });
+      if (tiebreakScore?.[0] > 2) {
+        if ([2, 4].includes(tiebreakScore.length)) {
+          tiebreakScore = tiebreakScore.split('').join('-');
+        } else if (tiebreakScore.length === 3) {
+          const oneIndex = tiebreakScore.indexOf('1');
+          tiebreakScore = getSuper(tiebreakScore.split(''), oneIndex);
+        }
+      }
+      score = score.replace(t, `(${tiebreakScore})`);
+      */
     }
   }
 
@@ -1448,21 +1497,21 @@ export function chunkArray(arr, chunksize) {
   }, []);
 }
 
+function getSuper(values, index) {
+  const parts = [values.slice(index, index + 2), index ? values.slice(0, 1) : values.slice(2)].map((n) =>
+    parseInt(n.join(''))
+  );
+  // preserve order
+  const scores = index ? parts.reverse() : parts;
+
+  const diff = Math.abs(scores.reduce((a, b) => +a - +b));
+  if (diff >= 2) return scores.join('-');
+}
+
 function parseSuper(score) {
   const oneIndex = score.indexOf('1');
   const numbers = score.split('');
   const allNumeric = numbers.every((n) => !isNaN(n));
-
-  const getSuper = (values, index) => {
-    const parts = [values.slice(index, index + 2), index ? values.slice(0, 1) : values.slice(2)].map((n) =>
-      parseInt(n.join(''))
-    );
-    // preserve order
-    const scores = index ? parts.reverse() : parts;
-
-    const diff = Math.abs(scores.reduce((a, b) => +a - +b));
-    if (diff >= 2) return scores.join('-');
-  };
 
   if (allNumeric && score.length === 3 && oneIndex >= 0 && oneIndex < 2) {
     const superTiebreak = getSuper(numbers, oneIndex);

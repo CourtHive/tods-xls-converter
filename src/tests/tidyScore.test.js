@@ -3,12 +3,12 @@ import { tidyScore } from '../functions/scoreParser';
 import { expect, it } from 'vitest';
 
 let start = 0;
-let end = undefined;
+let end = 0;
 
 const scores = [
   /*
-  { score: '(4, 6)(7, 6)(75)(3, 0) con' },
   { score: '(4, 6)(7, 6)[75](3, 0) con' },
+  { score: '(4, 6)(7, 6)(75)(3, 0) con' },
   { score: '(4, 6)(7, 6)[75)(3, 0) con' },
   { score: '1, 0 con' }, // => 1-0 RETIRED
   { score: '(63)(6, 4)' }, // bracketed 2 digit number that is not after isDiffOne(set) must split('').join('-')
@@ -22,6 +22,8 @@ const scores = [
   { score: '(6, 4)(2, 6)(10/8)' }, // supertiebreak
   { score: '(6, 2)(7, 6)(8/6)' }, // set tiebreak
   */
+  { score: '(2/4, 4/1, 4/1)', expectation: { score: '2-4 4-1 4-1' } },
+  { score: '2/4, 4/1, 4/1', expectation: { score: '2-4 4-1 4-1' } },
 
   // handle score beginning with []
   { score: '[6-7, (7-7), 6-2, 10-7]', expectation: { score: '6-7(7) 6-2 [10-7]' } },
@@ -63,7 +65,6 @@ const scores = [
   { score: '2, 6)(7, 5)(6, 2)', expectation: { score: '2-6 7-5 6-2' } }, // missing opening bracket
   { score: '(4, 6)(6, 0(10, 7)', expectation: { score: '4-6 6-0 [10-7]' } }, // missing internal close paren
   { score: '(3, 6)(7, 6)(6, 4(', expectation: { score: '3-6 7-6 6-4' } },
-  { score: '(2/4, 4/1, 4/1)', expectation: { score: '2-4 4-1 4-1' } },
   { score: '(1/6, 6/3, 7/6[3])', expectation: { score: '1-6 6-3 7-6(3)' } },
   { score: '((3-6) (6-3) (6-1)', expectation: { score: '3-6 6-3 6-1' } },
   { score: '(9, 2', expectation: { score: '9-2' } },
@@ -155,7 +156,7 @@ const scores = [
   { score: `6--1, 6--1`, expectation: { score: '6-1 6-1' } }
 ];
 
-it.each(scores.slice(start, end))('can tidy scores', ({ score, expectation }) => {
+it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expectation }) => {
   const tidy = tidyScore(score, end - start === 1);
   const { normalized, matchUpStatus } = normalizeScore(tidy, true);
 
