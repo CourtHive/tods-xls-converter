@@ -97,12 +97,14 @@ export function handleRetired(score) {
 }
 
 export function removeDanglingBits(score) {
-  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) return '';
-  if (/^(.*) \d$/.test(score)) {
-    return score.slice(0, score.length - 2);
-  }
   if (['.', ','].some((punctuation) => score.endsWith(punctuation))) {
-    return score.slice(0, score.length - 1);
+    score = score.slice(0, score.length - 1);
+  }
+  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) return '';
+
+  const targetPunctuation = '()/-'.split('').some((punctuation) => score.includes(punctuation));
+  if (/ \d$/.test(score) && targetPunctuation) {
+    return score.slice(0, score.length - 2);
   }
   return score;
 }
@@ -115,12 +117,20 @@ export function handleSetSlashSeparation(score) {
   return score;
 }
 
-export function handleGameSlashSeparation(score) {
+export function handleGameSeparation(score) {
   const re = new RegExp(/^\d+\/\d+/);
   const parts = score.split(' ');
   if (parts.some((part) => re.test(part))) {
-    return parts.map((part) => (re.test(part) ? part.replace('/', '-') : part)).join(' ');
+    score = parts.map((part) => (re.test(part) ? part.replace('/', '-') : part)).join(' ');
   }
+
+  const singleSet = /^(\d+), *(\d+)$/;
+  if (singleSet.test(score)) {
+    const [s1, s2] = score.match(singleSet).slice(1);
+    const setScore = [s1, s2].join('-');
+    score = setScore;
+  }
+
   return score;
 }
 
@@ -233,14 +243,15 @@ export function tidyScore(score, stepLog) {
   if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
   if (stepLog) console.log({ score }, 'handleMatchUpStatus');
 
+  score = replaceOh(score);
   score = handleBracketSpacing(score);
   if (stepLog) console.log({ score }, 'handleBracketeSpacing');
   score = containedSets(score);
   if (stepLog) console.log({ score }, 'containedSets');
   score = separateScoreBlocks(score);
   if (stepLog) console.log({ score }, 'separateScoreBlocks');
-  score = handleGameSlashSeparation(score);
-  if (stepLog) console.log({ score }, 'handleGameSlashSeparation');
+  score = handleGameSeparation(score);
+  if (stepLog) console.log({ score }, 'handleGameSeparation');
   score = removeErroneous(score);
   if (stepLog) console.log({ score }, 'removeErroneous');
   score = joinFloatingTiebreak(score);
@@ -260,7 +271,7 @@ export function tidyScore(score, stepLog) {
     score = score + ` ${matchUpStatus}`;
   }
 
-  score = scoreParser.tidyScore(replaceOh(score));
+  score = scoreParser.tidyScore(score);
   if (stepLog) console.log({ score }, 'tidyScore');
 
   return score;

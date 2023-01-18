@@ -2,14 +2,20 @@ import { normalizeScore } from '../functions/cleanScore';
 import { tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
-const expectations = true;
+const expectations = false;
 const start = 0;
 const end = 0;
 
 const scores = [
-  /*
-  { score: '1, 0 con' }, // => 1-0 RETIRED
-   */
+  { score: '1, 0', expectation: { score: '1-0', matchUpStatus: 'RETIRED' } }, // => 1-0 RETIRED
+  { score: '1, 0 con', expectation: { score: '1-0', matchUpStatus: 'RETIRED' } }, // => 1-0 RETIRED
+
+  // danglingBits ...
+  { score: '(6-4)(6-3) 6', expectation: { score: '6-4 6-3' } },
+  { score: '(8-7) 6', expectation: { score: '8-7' } }, // arguable that 6 is the tiebreak score
+  { score: '(,', expectation: { score: '' } },
+  { score: ')', expectation: { score: '' } },
+
   { score: '(2/4, 4/1, 4/1)', expectation: { score: '2-4 4-1 4-1' } },
   { score: '2/4, 4/1, 4/1', expectation: { score: '2-4 4-1 4-1' } },
 
@@ -112,13 +118,6 @@ const scores = [
   { score: 'w-o', expectation: { matchUpStatus: 'WALKOVER' } },
   { score: 'wo', expectation: { matchUpStatus: 'WALKOVER' } },
   { score: 'walkover', expectation: { matchUpStatus: 'WALKOVER' } },
-
-  { score: '(,', expectation: { score: '' } },
-  { score: ')', expectation: { score: '' } },
-
-  // danglingBits ...
-  { score: '(8-7) 6', expectation: { score: '8-7' } }, // arguable that 6 is the tiebreak score
-  { score: '(6-4)(6-3) 6', expectation: { score: '6-4 6-3' } },
 
   { score: '(2, 6)(7, 6)[7, 2](6, 3', expectation: { score: '2-6 7-6(2) 6-3' } },
   { score: '57 76(7) 76(49', expectation: { score: '5-7 7-6(7) 7-6(4)' } },

@@ -1,9 +1,6 @@
 import { correctContainerMismatch } from './correctContainerMismatch';
 import { instanceCount } from '../../utilities/convenience';
-
-function isContained(part) {
-  return part.startsWith('(') && part.endsWith(')');
-}
+import { isContained } from './utilities';
 
 export function punctuationAdjustments(score) {
   score = correctContainerMismatch(score);
@@ -18,6 +15,8 @@ export function punctuationAdjustments(score) {
           return innards.length > 2 ? innards : part;
         })
         .join(' ');
+    } else {
+      score = parts.join(' ');
     }
   }
 

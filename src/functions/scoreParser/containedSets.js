@@ -1,12 +1,4 @@
-import { isTiebreakScore } from './utilities';
-
-function dashJoin(part) {
-  if (part.length === 2) {
-    return part.split('').join('-');
-  }
-  [', ', '/', ' '].forEach((separator) => (part = part.split(separator).join('-')));
-  return part;
-}
+import { dashJoin, isTiebreakScore } from './utilities';
 
 export function containedSets(score) {
   if (typeof score !== 'string') return score;

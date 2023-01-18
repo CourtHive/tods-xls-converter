@@ -26,3 +26,16 @@ export function getSuper(values, index) {
   const diff = Math.abs(scores.reduce((a, b) => +a - +b));
   if (diff >= 2) return scores.join('-');
 }
+
+export function dashJoin(part) {
+  if (part.length === 2) {
+    return part.split('').join('-');
+  }
+  [', ', '/', ' '].forEach((separator) => (part = part.split(separator).join('-')));
+  part = part.replace(/-{2,}/, '-'); // handle repeating '-'
+  return part;
+}
+
+export function isContained(part) {
+  return part.startsWith('(') && part.endsWith(')');
+}
