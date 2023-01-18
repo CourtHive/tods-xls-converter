@@ -103,5 +103,15 @@ export function joinFloatingTiebreak(score) {
     score = joinedParts.trim();
   }
 
+  const setCheck = /(\d+-\d+)\((\d+)-(\d+)\)$/;
+  if (setCheck.test(score)) {
+    const [setScore, t1, t2] = score.match(setCheck).slice(1);
+    const maxTiebreakScore = Math.max(t1, t2);
+    const potentialSuper = maxTiebreakScore >= 10;
+    if (!isDiffOne(setScore) && potentialSuper) {
+      score = score.replace(setCheck, `${setScore} [${t1}-${t2}]`);
+    }
+  }
+
   return score;
 }

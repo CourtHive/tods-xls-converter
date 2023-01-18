@@ -22,7 +22,7 @@ function replaceOh(score) {
 
 function separateScoreBlocks(score) {
   if (typeof score !== 'string') return score;
-  return score
+  score = score
     .toLowerCase()
     .split(' ')
     .map((part) => {
@@ -34,6 +34,8 @@ function separateScoreBlocks(score) {
       return part;
     })
     .join(' ');
+
+  return score;
 }
 
 function removeErroneous(score) {

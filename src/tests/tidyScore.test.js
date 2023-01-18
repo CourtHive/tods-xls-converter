@@ -7,6 +7,7 @@ const start = 0;
 const end = 0;
 
 const scores = [
+  { score: '7-6(6), 2-6(10-6)', expectation: { score: '7-6(6) 2-6 [10-6]' } },
   { score: '7-6(60', expectation: { score: '7-6(6)' } },
   { score: '7-6(60, 6-0', expectation: { score: '7-6(6) 6-0' } },
   { score: '7/5 6 /0', expectation: { score: '7-5 6-0' } },
