@@ -38,10 +38,10 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       // ACTION: check whether there is an offset
       const offsets = utilities.unique(positionRows.map((pRow, i) => Math.abs(pRow - entryDetailRows[i])));
       if (offsets.length !== 1) {
-        console.log('some kind of error', analysis.sheetName, { positionRows, entryDetailRows });
+        console.log('some kind of error', analysis.fileName, analysis.sheetName, { positionRows, entryDetailRows });
       }
     } else {
-      console.log('some kind of error', analysis.sheetName, { positionRows, entryDetailRows });
+      console.log('some kind of error', analysis.fileName, analysis.sheetName, { positionRows, entryDetailRows });
     }
   }
 

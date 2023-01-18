@@ -6,7 +6,7 @@ import { onlyAlpha } from '../utilities/convenience';
 import { getLoggingActive } from '../global/state';
 import { normalizeName } from 'normalize-text';
 import { normalizeScore } from './cleanScore';
-import { tidyScore } from './scoreParser';
+import { tidyScore } from './scoreParser/scoreParser';
 import {
   drawDefinitionConstants,
   matchUpStatusConstants,
