@@ -1,10 +1,26 @@
 import { correctContainerMismatch } from './correctContainerMismatch';
 import { instanceCount } from '../../utilities/convenience';
 
+function isContained(part) {
+  return part.startsWith('(') && part.endsWith(')');
+}
+
 export function punctuationAdjustments(score) {
   score = correctContainerMismatch(score);
-
   const counts = instanceCount(score.split(''));
+
+  if (counts['('] === counts[')'] && counts['('] > 1) {
+    const parts = score.split(')(').join(') (').split(' ');
+    if (parts.every(isContained)) {
+      score = parts
+        .map((part) => {
+          const innards = part.slice(1, part.length - 1);
+          return innards.length > 2 ? innards : part;
+        })
+        .join(' ');
+    }
+  }
+
   let missingCloseParen = counts['('] === counts[')'] + 1;
   let missingOpenParen = (counts['('] || 0) + 1 === counts[')'];
   let missingCloseBracket = counts['['] === counts[']'] + 1;

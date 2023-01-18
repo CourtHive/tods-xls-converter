@@ -2,27 +2,14 @@ import { normalizeScore } from '../functions/cleanScore';
 import { tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
-let start = 0;
-let end = undefined;
-let expectations = true;
+const expectations = true;
+const start = 0;
+const end = 0;
 
 const scores = [
-  { score: '(4, 6)(7, 6)(75)(3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
-  { score: '(4, 6)(7, 6)[75)(3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
-  { score: '(4, 6)(7, 6)[75](3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
   /*
   { score: '1, 0 con' }, // => 1-0 RETIRED
-  { score: '(63)(6, 4)' }, // bracketed 2 digit number that is not after isDiffOne(set) must split('').join('-')
-
-  { score: '(6, 3)(6 4)' },
-  { score: '(7, 6)(8 6)(6, 4)' }, //
-  { score: '(7, 6)(8/6), (6, 3)' }, //
-  { score: '(7-6(8-6)) (4-6) (7-6(7-4))' }, //
-  { score: '(7 6)(7, 3)(6, 0)' }, // second bracketed value is tiebreak
-  { score: '(7/6)(7-4), (6/1)' }, //
-  { score: '(6, 4)(2, 6)(10/8)' }, // supertiebreak
-  { score: '(6, 2)(7, 6)(8/6)' }, // set tiebreak
-  */
+   */
   { score: '(2/4, 4/1, 4/1)', expectation: { score: '2-4 4-1 4-1' } },
   { score: '2/4, 4/1, 4/1', expectation: { score: '2-4 4-1 4-1' } },
 
@@ -42,6 +29,15 @@ const scores = [
   { score: '(9-8) (7-1)', expectation: { score: '9-8(1)' } },
 
   { score: '(9/9)(7)', expectation: { score: '9-8(7)' } }, // set should be 9/8
+  { score: '(7-6(8-6)) (4-6) (7-6(7-4))', expectation: { score: '7-6(6) 4-6 7-6(4)' } }, //
+  { score: '(7 6)(7, 3)(6, 0)', expectation: { score: '7-6(3) 6-0' } },
+  { score: '(7, 6)(8/6), (6, 3)', expectation: { score: '7-6(6) 6-3' } },
+  { score: '(7, 6)(8 6)(6, 4)', expectation: { score: '7-6(6) 6-4' } }, //
+  { score: '(63)(6, 4)', expectation: { score: '6-3 6-4' } },
+  { score: '(6, 3)(6 4)', expectation: { score: '6-3 6-4' } },
+  { score: '(7/6)(7-4), (6/1)', expectation: { score: '7-6(4) 6-1' } },
+  { score: '(6, 4)(2, 6)(10/8)', expectation: { score: '6-4 2-6 [10-8]' } }, // supertiebreak
+  { score: '(6, 2)(7, 6)(8/6)', expectation: { score: '6-2 7-6(6)' } }, // set tiebreak
   { score: '(8-7)2', expectation: { score: '8-7(2)' } },
   { score: '(9-8(12-10))', expectation: { score: '9-8(10)' } }, // remove enclosing parens
   { score: '(9-8(7-3))', expectation: { score: '9-8(3)' } }, // remove enclosing parens
@@ -98,6 +94,9 @@ const scores = [
   { score: '1/6, 6/7(3 7), 7/6(7, 4)', expectation: { score: '1-6 6-7(3) 7-6(4)' } },
 
   // consider implementing RegExp for matching conxxxxx
+  { score: '(4, 6)(7, 6)(75)(3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
+  { score: '(4, 6)(7, 6)[75)(3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
+  { score: '(4, 6)(7, 6)[75](3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
   { score: '4-6, 7-6(5), 2-0 concede', expectation: { score: '4-6 7-6(5) 2-0', matchUpStatus: 'RETIRED' } },
   { score: '2-6 7-6(4) 3-0 conceded', expectation: { score: '2-6 7-6(4) 3-0', matchUpStatus: 'RETIRED' } },
   { score: '4--6, 6--1, 1--0 conceded', expectation: { score: '4-6 6-1 1-0', matchUpStatus: 'RETIRED' } },
@@ -167,7 +166,11 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
     metExpectation = true;
   }
   if (expectation?.score !== undefined) {
-    if (expectations) expect(normalized).toEqual(expectation.score);
+    if (expectations) {
+      expect(normalized).toEqual(expectation.score);
+    } else if (normalized !== expectation.score) {
+      console.log({ score, normalized, expectation });
+    }
     metExpectation = true;
   }
 

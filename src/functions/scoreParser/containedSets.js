@@ -1,29 +1,27 @@
 import { isTiebreakScore } from './utilities';
 
+function dashJoin(part) {
+  if (part.length === 2) {
+    return part.split('').join('-');
+  }
+  [', ', '/', ' '].forEach((separator) => (part = part.split(separator).join('-')));
+  return part;
+}
+
 export function containedSets(score) {
   if (typeof score !== 'string') return score;
 
   const withParens = new RegExp(/\([\d,/ ]+\)/g);
   const contained = score.match(withParens);
   contained?.forEach((container) => {
-    const innards = container
-      .match(/^\((.*)\)$/)[1]
-      .split(', ')
-      .join('-')
-      .split('/')
-      .join('-');
+    const innards = dashJoin(container.match(/^\((.*)\)$/)[1]);
     score = score.replace(container, `(${innards})`).trim();
   });
 
   const withBrackets = new RegExp(/\[[\d,/ ]+\]/g);
   const bracketed = score.match(withBrackets);
   bracketed?.forEach((container) => {
-    const innards = container
-      .match(/^\[(.*)\]$/)[1]
-      .split(', ')
-      .join('-')
-      .split('/')
-      .join('-');
+    const innards = dashJoin(container.match(/^\[(.*)\]$/)[1]);
     score = score.replace(container, `(${innards}) `).trim();
   });
 
