@@ -13,7 +13,6 @@ const end = 0;
 
 const scores = [
   /*
-  { score: '4--2, 40-40', expectation: { score: '4-2' } }, // discard indecipherable
   { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
   { score: '5-0 (40-0 coneced', expectation: { score: '5-4 4-0', matchUpStatus: 'RETIRED' } },
   { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
@@ -26,9 +25,10 @@ const scores = [
   { score: '6-2 5-76-3', expectation: { score: '6-3 5-7 6-3' } },
   { score: '6-16-1', expectation: { score: '6-1 6-1' } },
 
-  // remove the score?
-  { score: '6 4, 6 16 4, 6 2', expectation: { score: '***' } },
-  { score: '6 4, 6', expectation: { score: '6-4 6-4' } },
+  // discard indecipherable
+  { score: '4--2, 40-40', expectation: { score: '4-2' } },
+  { score: '6 4, 6 16 4, 6 2', expectation: { score: '6-4 6-2' } },
+  { score: '6 4, 6', expectation: { score: '6-4' } },
   
   //
   { score: '6-3, 6-6(6-1) cons', expectation: { score: '6-3 6-6(6-1)', matchUpStatus: 'RETIRED' } },
