@@ -9,14 +9,39 @@ const start = 0;
 const end = 0;
 
 // HIGHER ORDER PROCESSING
-// 64 67(7)  => recognize that there cannot be a winner unless 2nd set score is flipped
+// '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
 
 const scores = [
   /*
+  { score: '4--2, 40-40', expectation: { score: '4-2' } }, // discard indecipherable
+  { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
+  { score: '5-0 (40-0 coneced', expectation: { score: '5-4 4-0', matchUpStatus: 'RETIRED' } },
+  { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
   { score: '6-36-3', expectation: { score: '6-3 6-3' } },
-  { score: '6-4, 5-76, 6-3', expectation: { score: '6-4 5-7 6-3' } },
+  { score: '6 4 /6 3', expectation: { score: '6-4 6-3' } },
+  { score: '6 4, 6-4', expectation: { score: '6-4 6-4' } },
+  { score: '6 4/6 2', expectation: { score: '6-4 6-2' } },
+  { score: '6--, 2, 3--6, 10--5', expectation: { score: '6-2 3-6 [10-5]' } },
+  // pattern \d+-\d{2}-\d+ => \d-\d \d-\d
+  { score: '6-2 5-76-3', expectation: { score: '6-3 5-7 6-3' } },
+  { score: '6-16-1', expectation: { score: '6-1 6-1' } },
+
+  // remove the score?
+  { score: '6 4, 6 16 4, 6 2', expectation: { score: '***' } },
+  { score: '6 4, 6', expectation: { score: '6-4 6-4' } },
+  
+  //
+  { score: '6-3, 6-6(6-1) cons', expectation: { score: '6-3 6-6(6-1)', matchUpStatus: 'RETIRED' } },
   { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 4-6 6-2' } },
   { score: '7 6 (8 6)6 1', expectation: { score: '7-6(6) 6-1' } },
+
+  // extra digits
+  { score: '6--2, 6--11', expectation: { score: '6-2, 6-1' } },
+  { score: '6--3, 6--22', expectation: { score: '6-3 6-2' } },
+  { score: '6-12, 6-3', expectation: { score: '6-1 6-3' } },
+  { score: '6-4, 5-76, 6-3', expectation: { score: '6-4 5-7 6-3' } },
+  { score: '6-3, 6-23', expectation: { score: '6-3 6-2' } },
+  { score: '6-3, 7-54', expectation: { score: '6-3 7-5' } },
 
   // remove all empty spaces within (#) and (#-#)
   { score: '6/2, 4/6 (10 - 7 )', expectation: { score: '6-2 4-6 [10-7]' } },
@@ -31,8 +56,15 @@ const scores = [
   { score: '6076(3)', expectation: { score: '6-0 7-6(3)' } },
   { score: '6367 (3) 104', expectation: { score: '6-3 6-7(3) [10-4]' } },
   { score: '6367(3)104', expectation: { score: '6-3 6-7(3) [10-4]' } },
+  // tidyScore handles, but should be handled here
+  { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
+  { score: '6 26 3', expectation: { score: '6-2 6-3' } },
   */
 
+  { score: '5/4 [7-4], 5/4 [12-11]', expectation: { score: '5-4(4) 5-4(11)' } },
+  { score: '6 3, 7 5', expectation: { score: '6-3 7-5' } },
+  { score: '6-1, 2-6(10-1)', expectation: { score: '6-1 2-6 [10-1]' } },
+  { score: '6-2, 2-6(13-11)', expectation: { score: '6-2 2-6 [13-11]' } },
   { score: '6-4, -64', expectation: { score: '6-4 6-4' } },
   { score: '7--6, (7/4), 4--6, 16--14', expectation: { score: '7-6(4) 4-6 [16-14]' } },
   { score: '6-4, 4-6, 6-1)', expectation: { score: '6-4 4-6 6-1' } },
@@ -151,6 +183,7 @@ const scores = [
   { score: '63 O1 RET X LES', expectation: { score: '6-3 0-1', matchUpStatus: 'RETIRED' } },
   { score: '2-4 coneced', expectation: { score: '2-4', matchUpStatus: 'RETIRED' } },
   { score: '6/1 conceed', expectation: { score: '6-1', matchUpStatus: 'RETIRED' } },
+  { score: '4-2 retd', expectation: { score: '4-2', matchUpStatus: 'RETIRED' } },
 
   { score: 'w/o', expectation: { matchUpStatus: 'WALKOVER' } },
   { score: 'w-o', expectation: { matchUpStatus: 'WALKOVER' } },
