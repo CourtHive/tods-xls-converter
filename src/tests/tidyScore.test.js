@@ -1,7 +1,7 @@
-import { normalizeScore } from '../functions/cleanScore';
-import { tidyScore } from '../functions/scoreParser/scoreParser';
-import { expect, it } from 'vitest';
 import { isValidPattern } from '../functions/scoreParser/validPatterns';
+import { tidyScore } from '../functions/scoreParser/scoreParser';
+import { normalizeScore } from '../functions/cleanScore';
+import { expect, it } from 'vitest';
 
 const expectations = false;
 const validPatterns = true;
