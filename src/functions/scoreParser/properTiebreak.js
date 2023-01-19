@@ -97,5 +97,12 @@ export function properTiebreak(score) {
     })
     .join(' ');
 
+  // (#0, => (#) // ')' mistyped as '0'
+  const misTyped0 = /\((\d)+0 /;
+  if (misTyped0.test(score)) {
+    const value = score.match(misTyped0)[1];
+    score = score.replace(misTyped0, `(${value})`);
+  }
+
   return score;
 }

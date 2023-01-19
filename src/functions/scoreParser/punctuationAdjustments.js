@@ -4,7 +4,17 @@ import { isContained } from './utilities';
 
 export function punctuationAdjustments(score) {
   score = correctContainerMismatch(score);
-  const counts = instanceCount(score.split(''));
+
+  '-/,'.split('').forEach((punctuation) => {
+    if (score.endsWith(punctuation)) score = score.slice(0, score.length - 1);
+  });
+
+  let counts = instanceCount(score.split(''));
+
+  // generalize this into array of replacements
+  if (/\d \/\d/.test(score)) score = score.replace(/ \//g, '/');
+  if (score.includes(' /')) score = score.replace(/ \//g, ' ');
+  if (/\d -\d/.test(score)) score = score.replace(/ -/g, '-');
 
   if (counts['('] === counts[')'] && counts['('] > 1) {
     const parts = score.split(')(').join(') (').split(' ');
@@ -63,7 +73,7 @@ export function punctuationAdjustments(score) {
     score = score.slice(1);
   }
 
-  if (missingOpenParen && score.startsWith('9')) {
+  if (missingOpenParen && /^9\d/.test(score)) {
     score = '(' + score.slice(1);
   } else if (missingOpenParen) {
     if (score[0] !== '(') score = '(' + score;
@@ -74,7 +84,7 @@ export function punctuationAdjustments(score) {
   }
 
   if (missingCloseParen && !missingCloseBracket) {
-    if (score.endsWith(9)) {
+    if (score.endsWith(9) || score.endsWith(0)) {
       score = score.slice(0, score.length - 1) + ')';
     } else if (!score.endsWith(')') || score.startsWith('((')) {
       score = score + ')';
@@ -104,6 +114,16 @@ export function punctuationAdjustments(score) {
   // Really it would be better to convert to set and determine later which type of tiebreak based on previous set
   if (score.includes('([') && score.includes('])')) {
     score = score.split('([').join('[').split('])').join(']');
+  }
+
+  if (/\(\d+0$/.test(score)) {
+    score = score.slice(0, score.length - 1) + ')';
+  }
+
+  counts = instanceCount(score.split(''));
+
+  if (counts[')'] === 1 && !counts['('] && score.endsWith(')')) {
+    score = score.slice(0, score.length - 1);
   }
 
   return score;
