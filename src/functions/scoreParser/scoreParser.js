@@ -1,5 +1,5 @@
+import { scoreSlicer } from './legacyScoreTransforms';
 import { transforms } from './transforms';
-import { scoreParser } from './tidyScore';
 
 const processingOrder = [
   'handleNumeric',
@@ -41,12 +41,12 @@ export function tidyScore(score, stepLog, fullLog) {
     score = result.score;
   });
 
-  score = scoreParser.tidyScore(score);
+  score = scoreSlicer.sliceAndDice(score);
   if (stepLog) console.log({ score }, 'tidyScore');
 
   return { score, matchUpStatus };
 }
 
 export function transformScore(score) {
-  return scoreParser.transformScore(score).transformed_score;
+  return scoreSlicer.transformScore(score).transformed_score;
 }
