@@ -74,6 +74,7 @@ export function containedSets(score) {
 
       score = newScore.trim();
     }
+    /*
   } else if (score.startsWith('(') && score.endsWith(')')) {
     const result = score.slice(1, score.length - 1);
     const values = result.split(',');
@@ -82,7 +83,7 @@ export function containedSets(score) {
     const multipleResults = values.length > 1 && values.some((v) => v.includes('-') || v.includes('/'));
 
     if (multipleResults) {
-      return values.map((value) => value.trim()).join(' ');
+      score = values.map((value) => value.trim()).join(' ');
     } else {
       // handle 6, 3 | 9 3 | 93 | 9,3 | 9/3 | 9, 3
       score = result
@@ -90,6 +91,8 @@ export function containedSets(score) {
         .filter(Boolean)
         .join('-');
     }
+    console.log('xxx', { multipleResults, score, result });
+    */
   }
 
   return score;
