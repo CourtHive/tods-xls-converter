@@ -44,6 +44,27 @@ const transforms = {
   replaceOh: replaceOh
 };
 
+const processingOrder = [
+  'punctuationAdjustments',
+  'excisions',
+  'handleSpaceSeparator',
+  'removeDanglingBits'
+  /*
+  'handleWalkover',
+  'handleRetired',
+  'replaceOh',
+  'handleBracketSpacing',
+  'matchKnownPatterns',
+  'containedSets',
+  'separateScoreBlocks'
+  'joinFloatingTiebreak',
+  'handleSetSlashSeparation',
+  'handleTiebreakSlashSeparation',
+  'properTiebreak',
+  'sensibleSets'
+  */
+];
+
 export function tidyScore(score, stepLog) {
   let matchUpStatus, result;
 
@@ -60,12 +81,22 @@ export function tidyScore(score, stepLog) {
   }
   score = score.toString().toLowerCase();
 
+  /*
   // -------------------------------
   result = transforms.punctuationAdjustments({ score }); // Must occure before removeDanglingBits
   score = result.score;
   if (stepLog) console.log({ score }, 'punctuationAdjustments');
   // -------------------------------
+  */
 
+  processingOrder.forEach((method) => {
+    result = transforms[method]({ score, matchUpStatus });
+    if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
+    score = result.score;
+    if (stepLog) console.log({ score }, method);
+  });
+
+  /*
   result = transforms.excisions({ score });
   score = result.score;
   if (stepLog) console.log({ score }, 'excisions');
@@ -75,6 +106,7 @@ export function tidyScore(score, stepLog) {
   result = transforms.removeDanglingBits({ score });
   score = result.score;
   if (stepLog) console.log({ score }, 'removeDanglingBits');
+  */
 
   result = transforms.handleWalkover({ score });
   score = result.score;
