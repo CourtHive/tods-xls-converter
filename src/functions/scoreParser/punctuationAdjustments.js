@@ -2,7 +2,7 @@ import { correctContainerMismatch } from './correctContainerMismatch';
 import { instanceCount } from '../../utilities/convenience';
 import { isContained } from './utilities';
 
-export function punctuationAdjustments(score) {
+export function punctuationAdjustments({ score }) {
   score = correctContainerMismatch(score);
 
   const repeatingDash = new RegExp(/-{2,}/g);
@@ -47,7 +47,7 @@ export function punctuationAdjustments(score) {
   const hasAlpha = /[A-Za-z]+/.test(score);
   const hasDigits = /[0-9]+/.test(score);
 
-  if (!hasAlpha && !hasDigits) return '';
+  if (!hasAlpha && !hasDigits) return { score: '' };
 
   // remove enclosing [] provided there is anything other than numbers contained
   // don't want to remove for e.g. "[1]" which is dealt with as seeding value
@@ -118,7 +118,7 @@ export function punctuationAdjustments(score) {
     }
   }
 
-  if (missingCloseBracket && !missingCloseParen) return score + ']';
+  if (missingCloseBracket && !missingCloseParen) score = score + ']';
 
   // this is potentially problematic as enclosing with '[]' yields tiebreak...
   // ... wheres enclosing with '()' yields a set which gets converted to a supertiebreak!
@@ -141,5 +141,5 @@ export function punctuationAdjustments(score) {
     score = score.slice(1, score.length - 1);
   }
 
-  return score;
+  return { score };
 }

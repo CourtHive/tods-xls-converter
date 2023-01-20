@@ -1,7 +1,7 @@
 import { isNumeric } from '../../utilities/identification';
 import { getSuper, isDiffOne } from './utilities';
 
-export function properTiebreak(score, matchUpStatus) {
+export function properTiebreak({ score, matchUpStatus }) {
   let parts = score?.split(' ');
   score = parts
     .map((part) => {
@@ -106,5 +106,5 @@ export function properTiebreak(score, matchUpStatus) {
     score = score.replace(misTyped0, `(${value})`);
   }
 
-  return score;
+  return { score };
 }

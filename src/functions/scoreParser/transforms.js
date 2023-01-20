@@ -2,9 +2,9 @@ import { isNumeric } from '../../utilities/identification';
 import { chunkArray } from './scoreParser';
 import { getSuper } from './utilities';
 
-export function replaceOh(score) {
-  if (typeof score !== 'string') return score;
-  return score
+export function replaceOh({ score }) {
+  if (typeof score !== 'string') return { score };
+  score = score
     .toLowerCase()
     .split(' ')
     .map((part) => {
@@ -14,10 +14,12 @@ export function replaceOh(score) {
       return part;
     })
     .join(' ');
+
+  return { score };
 }
 
-export function separateScoreBlocks(score) {
-  if (typeof score !== 'string') return score;
+export function separateScoreBlocks({ score }) {
+  if (typeof score !== 'string') return { score };
   score = score
     .toLowerCase()
     .split(' ')
@@ -31,15 +33,15 @@ export function separateScoreBlocks(score) {
     })
     .join(' ');
 
-  return score;
+  return { score };
 }
 
-export function removeErroneous(score) {
-  if (typeof score !== 'string') return score;
+export function removeErroneous({ score }) {
+  if (typeof score !== 'string') return { score };
 
-  if (parseSuper(score)) return parseSuper(score);
+  if (parseSuper(score)) return { score: parseSuper(score) };
 
-  return score
+  score = score
     .toLowerCase()
     .split(' ')
     .map((part) => {
@@ -53,16 +55,18 @@ export function removeErroneous(score) {
     })
     .filter(Boolean)
     .join(' ');
+
+  return { score };
 }
 
-export function handleWalkover(score) {
+export function handleWalkover({ score }) {
   if (['walkover', 'wo', 'w/o', 'w-o'].includes(score)) {
     return { matchUpStatus: 'walkover', score: '' };
   }
   return { score };
 }
 
-export function handleRetired(score) {
+export function handleRetired({ score }) {
   const re = /^(.*)(ret|con)+[A-Za-z ]*$/;
   if (re.test(score)) {
     const [leading] = score.match(re).slice(1);
@@ -78,28 +82,28 @@ export function handleRetired(score) {
   return { score };
 }
 
-export function removeDanglingBits(score) {
+export function removeDanglingBits({ score }) {
   if (['.', ','].some((punctuation) => score.endsWith(punctuation))) {
     score = score.slice(0, score.length - 1);
   }
-  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) return '';
+  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) score = '';
 
   const targetPunctuation = '()/-'.split('').some((punctuation) => score.includes(punctuation));
   if (/ \d$/.test(score) && targetPunctuation) {
-    return score.slice(0, score.length - 2);
+    score = score.slice(0, score.length - 2);
   }
-  return score;
+  return { score };
 }
 
-export function handleSetSlashSeparation(score) {
+export function handleSetSlashSeparation({ score }) {
   const re = new RegExp(/-\d+\/\d+-/);
   if (re.test(score)) {
-    return score.split('/').join(' ');
+    score = score.split('/').join(' ');
   }
-  return score;
+  return { score };
 }
 
-export function handleGameSeparation(score) {
+export function handleGameSeparation({ score }) {
   const re = new RegExp(/^\d+\/\d+/);
   const parts = score.split(' ');
   if (parts.some((part) => re.test(part))) {
@@ -113,47 +117,47 @@ export function handleGameSeparation(score) {
     score = setScore;
   }
 
-  return score;
+  return { score };
 }
 
-export function handleTiebreakSlashSeparation(score) {
+export function handleTiebreakSlashSeparation({ score }) {
   const re = new RegExp(/\(\d+\/\d+\)/g);
   const tiebreaks = score.match(re);
   for (const tiebreak of tiebreaks || []) {
     const replacement = tiebreak.replace('/', '-');
     score = score.replace(tiebreak, replacement);
   }
-  return score;
+  return { score };
 }
 
-export function handleSpaceSeparator(score) {
+export function handleSpaceSeparator({ score }) {
   if (score.includes(',')) {
     const sets = score.split(',').map((set) => set.trim());
     const isSpaced = (set) => /\d \d/.test(set);
     const spacedSets = sets.every(isSpaced);
-    if (spacedSets) return sets.map((set) => set.replace(' ', '-')).join(' ');
+    if (spacedSets) score = sets.map((set) => set.replace(' ', '-')).join(' ');
   }
 
   if (score.includes(' ')) {
     const noSpaces = score.replace(/[ ,]/g, '');
     const isNumber = noSpaces.split('').every((char) => isNumeric(char));
     if (isNumber && noSpaces.length === 4) {
-      return noSpaces;
+      score = noSpaces;
     }
   }
 
-  return score;
+  return { score };
 }
 
-export function excisions(score) {
+export function excisions({ score }) {
   const re = new RegExp(/^\[\d+\](.*)$/);
   if (re.test(score)) {
     score = score.match(re).slice(1)[0].trim();
   }
-  return score;
+  return { score };
 }
 
-export function matchKnownPatterns(score) {
+export function matchKnownPatterns({ score }) {
   for (const punctuation of ['.', ',', ' ', '/']) {
     const re = new RegExp(`^(\\d+)\\${punctuation}(\\d+)$`);
     if (re.test(score)) {
@@ -164,7 +168,7 @@ export function matchKnownPatterns(score) {
       }
     }
   }
-  return score;
+  return { score };
 }
 
 export function parseSuper(score) {

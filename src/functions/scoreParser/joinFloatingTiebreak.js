@@ -1,8 +1,8 @@
 import { indices } from '../../utilities/convenience';
 import { isBracketScore, isDiffOne, isTiebreakScore } from './utilities';
 
-export function joinFloatingTiebreak(score) {
-  if (typeof score !== 'string') return score;
+export function joinFloatingTiebreak({ score }) {
+  if (typeof score !== 'string') return { score };
   const strip = (value) => value?.split('-').join('').split('/').join('');
   const bracketToParen = (value) => value.split('[').join('(').split(']').join(')');
   score = score.split(', ').join(' ');
@@ -55,7 +55,7 @@ export function joinFloatingTiebreak(score) {
   if (floatingTiebreaks.length && joinedScore.length) {
     const remainder = parts.slice(lastIndex).join(' ');
     joinedScore = [joinedScore, remainder].join(' ');
-    return joinedScore.trim();
+    return { score: joinedScore.trim() };
   }
 
   if (parts.length === 2 && ['(', '['].some((punctuation) => parts[1].includes(punctuation))) {
@@ -64,7 +64,7 @@ export function joinFloatingTiebreak(score) {
     const diff = Math.abs(scores.reduce((a, b) => +a - +b));
     if (diff === 1) {
       parts[1] = bracketToParen(parts[1]);
-      return parts.join('');
+      return { score: parts.join('') };
     }
   }
 
@@ -81,7 +81,7 @@ export function joinFloatingTiebreak(score) {
       }
       lastPart = parenScores[i];
     });
-    return joinedParts.trim();
+    return { score: joinedParts.trim() };
   }
 
   // recognize tiebreak scores which look like sets s#-s# tb#-tb#
@@ -128,5 +128,5 @@ export function joinFloatingTiebreak(score) {
     }
   }
 
-  return score;
+  return { score };
 }

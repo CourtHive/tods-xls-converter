@@ -1,7 +1,7 @@
 import { dashJoin, isTiebreakScore } from './utilities';
 
-export function containedSets(score) {
-  if (typeof score !== 'string') return score;
+export function containedSets({ score }) {
+  if (typeof score !== 'string') return { score };
 
   const withParens = new RegExp(/\([\d,/ ]+\)/g);
   const contained = score.match(withParens);
@@ -95,5 +95,5 @@ export function containedSets(score) {
     */
   }
 
-  return score;
+  return { score };
 }
