@@ -5,7 +5,7 @@ import { expect, it } from 'vitest';
 const validPatterns = true;
 const expectations = false;
 const start = 0;
-const end = 1;
+const end = 0;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
@@ -57,8 +57,8 @@ const scores = [
   */
 
   // join numbers separated by a dash and a space
-  { score: '63 46 10 -4', expectation: { score: '6-3 4-6 10-4' } },
-  { score: '63 46 10- 4', expectation: { score: '6-3 4-6 10-4' } },
+  { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
+  { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
   { score: '61 26 10-13', expectation: { score: '6-1 2-6 [10-3]' } },
   { score: '5/4 [7-4], 5/4 [12-11]', expectation: { score: '5-4(4) 5-4(11)' } },
