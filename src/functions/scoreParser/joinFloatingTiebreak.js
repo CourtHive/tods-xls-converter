@@ -55,7 +55,7 @@ export function joinFloatingTiebreak(score) {
   if (floatingTiebreaks.length && joinedScore.length) {
     const remainder = parts.slice(lastIndex).join(' ');
     joinedScore = [joinedScore, remainder].join(' ');
-    return joinedScore;
+    return joinedScore.trim();
   }
 
   if (parts.length === 2 && ['(', '['].some((punctuation) => parts[1].includes(punctuation))) {
@@ -81,7 +81,7 @@ export function joinFloatingTiebreak(score) {
       }
       lastPart = parenScores[i];
     });
-    return joinedParts;
+    return joinedParts.trim();
   }
 
   // recognize tiebreak scores which look like sets s#-s# tb#-tb#

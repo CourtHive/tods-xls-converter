@@ -1,7 +1,7 @@
 import { isNumeric } from '../../utilities/identification';
 import { getSuper, isDiffOne } from './utilities';
 
-export function properTiebreak(score) {
+export function properTiebreak(score, matchUpStatus) {
   let parts = score?.split(' ');
   score = parts
     .map((part) => {
@@ -38,9 +38,11 @@ export function properTiebreak(score) {
   parts = score?.split(' ');
   // handles tiebreaks (#-#) or (#/#)
   let re = new RegExp(/^(\d[-/]+\d)\((\d+)[-/]+(\d+)\)$/);
+  const lastIndex = parts.length - 1;
   score = parts
-    .map((part) => {
-      if (re.test(part)) {
+    .map((part, index) => {
+      const considerCompleted = [undefined, '', 'COMPLETED'].includes(matchUpStatus) || index !== lastIndex;
+      if (re.test(part) && considerCompleted) {
         const [set, tb1, tb2] = Array.from(part.match(re)).slice(1);
         const lowTiebreakScore = Math.min(tb1, tb2);
         const setScore = `${set}(${lowTiebreakScore})`;

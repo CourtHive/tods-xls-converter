@@ -1,10 +1,9 @@
 import { isValidPattern } from '../functions/scoreParser/validPatterns';
 import { tidyScore } from '../functions/scoreParser/scoreParser';
-import { normalizeScore } from '../functions/cleanScore';
 import { expect, it } from 'vitest';
 
-const expectations = false;
 const validPatterns = true;
+const expectations = false;
 const start = 0;
 const end = 0;
 
@@ -13,6 +12,9 @@ const end = 0;
 
 const scores = [
   /*
+  // \d+- \d+ => \d+-\d+
+  { score: '63 46 10- 4', expectation: { score: '6- 4-6 10-4' } },
+
   { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
   { score: '5-0 (40-0 coneced', expectation: { score: '5-4 4-0', matchUpStatus: 'RETIRED' } },
   { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
@@ -31,7 +33,6 @@ const scores = [
   { score: '6 4, 6', expectation: { score: '6-4' } },
   
   //
-  { score: '6-3, 6-6(6-1) cons', expectation: { score: '6-3 6-6(6-1)', matchUpStatus: 'RETIRED' } },
   { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 4-6 6-2' } },
   { score: '7 6 (8 6)6 1', expectation: { score: '7-6(6) 6-1' } },
 
@@ -49,9 +50,6 @@ const scores = [
   // (#/) => (#)
   { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
 
-  // \d+- \d+ => \d+-\d+
-  { score: '63 46 10- 4', expectation: { score: '6- 4-6 10-4' } },
-
   // block of 4 numbers with one number appearing in each couplet
   { score: '6076(3)', expectation: { score: '6-0 7-6(3)' } },
   { score: '6367 (3) 104', expectation: { score: '6-3 6-7(3) [10-4]' } },
@@ -61,6 +59,7 @@ const scores = [
   { score: '6 26 3', expectation: { score: '6-2 6-3' } },
   */
 
+  { score: '61 26 10-13', expectation: { score: '6-1 2-6 [10-3]' } },
   { score: '5/4 [7-4], 5/4 [12-11]', expectation: { score: '5-4(4) 5-4(11)' } },
   { score: '6 3, 7 5', expectation: { score: '6-3 7-5' } },
   { score: '6-1, 2-6(10-1)', expectation: { score: '6-1 2-6 [10-1]' } },
@@ -168,14 +167,16 @@ const scores = [
   { score: '1/6, 7/6(7, 4)', expectation: { score: '1-6 7-6(4)' } },
   { score: '2-6, 7-6(7-4), 11-9', expectation: { score: '2-6 7-6(4) [11-9]' } },
   { score: '1/6, 6/7(3 7), 7/6(7, 4)', expectation: { score: '1-6 6-7(3) 7-6(4)' } },
+  { score: '1/6, 6/7(3 7), 7/6(7, 4)', expectation: { score: '1-6 6-7(3) 7-6(4)' } },
 
-  // consider implementing RegExp for matching conxxxxx
+  // matchUpStatus
   { score: '(4, 6)(7, 6)(75)(3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
   { score: '(4, 6)(7, 6)[75)(3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
   { score: '(4, 6)(7, 6)[75](3, 0) con', expectation: { score: '4-6 7-6(5) 3-0', matchUpStatus: 'RETIRED' } },
   { score: '4-6, 7-6(5), 2-0 concede', expectation: { score: '4-6 7-6(5) 2-0', matchUpStatus: 'RETIRED' } },
   { score: '2-6 7-6(4) 3-0 conceded', expectation: { score: '2-6 7-6(4) 3-0', matchUpStatus: 'RETIRED' } },
   { score: '4--6, 6--1, 1--0 conceded', expectation: { score: '4-6 6-1 1-0', matchUpStatus: 'RETIRED' } },
+  { score: '6-3, 6-6(6-1) cons', expectation: { score: '6-3 6-6(6-1)', matchUpStatus: 'RETIRED' } },
   { score: '3-6, 6-2, 2-0conc', expectation: { score: '3-6 6-2 2-0', matchUpStatus: 'RETIRED' } },
   { score: '(6, 2)(4, 2)rtd', expectation: { score: '6-2 4-2', matchUpStatus: 'RETIRED' } },
   { score: '(7, 5)(2, 1)con', expectation: { score: '7-5 2-1', matchUpStatus: 'RETIRED' } },
@@ -190,11 +191,11 @@ const scores = [
   { score: 'wo', expectation: { matchUpStatus: 'WALKOVER' } },
   { score: 'walkover', expectation: { matchUpStatus: 'WALKOVER' } },
 
+  { score: '6-4, 2-6, ( 10-7 )', expectation: { score: '6-4 2-6 [10-7]' } },
   { score: '(2, 6)(7, 6)[7, 2](6, 3', expectation: { score: '2-6 7-6(2) 6-3' } },
   { score: '6/1)(6/3)', expectation: { score: '6-1 6-3' } },
   { score: '57 76(7) 76(49', expectation: { score: '5-7 7-6(7) 7-6(4)' } },
   { score: '3-6, 6-1, (10-6 )', expectation: { score: '3-6 6-1 [10-6]' } },
-  { score: '6-4, 2-6, ( 10-7 )', expectation: { score: '6-4 2-6 [10-7]' } },
   { score: '(6, 4)(3, 6)(10, 6', expectation: { score: '6-4 3-6 [10-6]' } },
   { score: '(7, 6)(5), (6, 4)', expectation: { score: '7-6(5) 6-4' } },
   { score: '(6-3)(6-3)', expectation: { score: '6-3 6-3' } },
@@ -213,7 +214,6 @@ const scores = [
   { score: '(9, 3)', expectation: { score: '9-3' } },
   { score: '9-8 (3)', expectation: { score: '9-8(3)' } },
   { score: '67 (3)', expectation: { score: '6-7(3)' } },
-  { score: '61 26 10-13', expectation: { score: '6-1 2-6 [10-3]' } },
   { score: '61 26 10-5', expectation: { score: '6-1 2-6 [10-5]' } },
   { score: '4662 10-8', expectation: { score: '4-6 6-2 [10-8]' } },
   { score: '41 1', expectation: { score: '4-1' } },
@@ -227,9 +227,14 @@ const scores = [
   { score: `6--1, 6--1`, expectation: { score: '6-1 6-1' } }
 ];
 
+let iteration = 0;
 it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expectation }) => {
-  const tidy = tidyScore(score, end - start === 1);
-  const { normalized, matchUpStatus } = normalizeScore(tidy, true);
+  iteration += 1;
+
+  const singleScore = end - start === 1;
+  if (singleScore) console.log({ score });
+
+  const { score: tidy, matchUpStatus } = tidyScore(score, singleScore);
 
   let metExpectation;
   if (expectation?.matchUpStatus) {
@@ -239,19 +244,19 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
 
   if (expectation?.score !== undefined) {
     if (expectations) {
-      expect(normalized).toEqual(expectation.score);
-    } else if (normalized !== expectation.score) {
-      console.log({ score, normalized, expectation });
+      expect(tidy).toEqual(expectation.score);
+    } else if (tidy !== expectation.score) {
+      console.log({ iteration, score, matchUpStatus, tidy, expectation });
     }
     metExpectation = true;
   }
 
   if (validPatterns) {
-    const isValid = isValidPattern(normalized);
-    if (!isValid) console.log({ isValid, normalized });
+    const isValid = isValidPattern(tidy);
+    if (!isValid) console.log({ isValid, tidy });
   }
 
-  if (!metExpectation) {
-    console.log({ score, tidy, normalized, matchUpStatus });
+  if (expectations && !metExpectation) {
+    console.log({ score, tidy, matchUpStatus });
   }
 });

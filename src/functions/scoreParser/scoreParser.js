@@ -1,191 +1,48 @@
 import { punctuationAdjustments } from './punctuationAdjustments';
+import { handleBracketSpacing } from './handleBracketSpacing';
 import { joinFloatingTiebreak } from './joinFloatingTiebreak';
-import { isNumeric } from '../../utilities/identification';
 import { properTiebreak } from './properTiebreak';
 import { containedSets } from './containedSets';
 import { sensibleSets } from './sensibleSets';
+import { superSquare } from './superSquare';
 import { scoreParser } from './tidyScore';
-import { getSuper } from './utilities';
+import {
+  excisions,
+  handleGameSeparation,
+  handleRetired,
+  handleSetSlashSeparation,
+  handleSpaceSeparator,
+  handleTiebreakSlashSeparation,
+  handleWalkover,
+  matchKnownPatterns,
+  parseSuper,
+  removeDanglingBits,
+  removeErroneous,
+  replaceOh,
+  separateScoreBlocks
+} from './transforms';
 
-function replaceOh(score) {
-  if (typeof score !== 'string') return score;
-  return score
-    .toLowerCase()
-    .split(' ')
-    .map((part) => {
-      if (/^o[1-9]$/.test(part) || /^[1-9]o$/.test(part)) {
-        part = part.split('o').join('0');
-      }
-      return part;
-    })
-    .join(' ');
-}
-
-function separateScoreBlocks(score) {
-  if (typeof score !== 'string') return score;
-  score = score
-    .toLowerCase()
-    .split(' ')
-    .map((part) => {
-      if (/^\d+$/.test(part) && part.length > 2 && !(part.length % 2)) {
-        part = chunkArray(part.split(''), 2)
-          .map((c) => c.join(''))
-          .join(' ');
-      }
-      return part;
-    })
-    .join(' ');
-
-  return score;
-}
-
-function removeErroneous(score) {
-  if (typeof score !== 'string') return score;
-
-  if (parseSuper(score)) return parseSuper(score);
-
-  return score
-    .toLowerCase()
-    .split(' ')
-    .map((part) => {
-      if (/^\d+$/.test(part) && part.length === 1) {
-        return;
-      }
-      if (/^\d+$/.test(part) && part.length === 3) {
-        return part.slice(0, 2);
-      }
-      return part;
-    })
-    .filter(Boolean)
-    .join(' ');
-}
-
-export function handleBracketSpacing(score) {
-  if (score.includes('( ')) {
-    score = score
-      .split('( ')
-      .map((part) => part.trim())
-      .join('(');
-  }
-  if (score.includes(' )')) {
-    score = score
-      .split(' )')
-      .map((part) => part.trim())
-      .join(')');
-  }
-  return score;
-}
-
-export function handleWalkover(score) {
-  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score)) {
-    return { matchUpStatus: 'walkover', score: '' };
-  }
-  return { score };
-}
-
-export function handleRetired(score) {
-  const re = /^(.*)(ret|con)+[A-Za-z ]*$/;
-  if (re.test(score)) {
-    const [leading] = score.match(re).slice(1);
-    return { score: leading.trim(), matchUpStatus: 'retired' };
-  }
-
-  // accommodate other variations
-  const retired = ['rtd'].find((ret) => score.endsWith(ret));
-
-  if (retired) {
-    return { matchUpStatus: 'retired', score: score.replace(retired, '').trim() };
-  }
-  return { score };
-}
-
-export function removeDanglingBits(score) {
-  if (['.', ','].some((punctuation) => score.endsWith(punctuation))) {
-    score = score.slice(0, score.length - 1);
-  }
-  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) return '';
-
-  const targetPunctuation = '()/-'.split('').some((punctuation) => score.includes(punctuation));
-  if (/ \d$/.test(score) && targetPunctuation) {
-    return score.slice(0, score.length - 2);
-  }
-  return score;
-}
-
-export function handleSetSlashSeparation(score) {
-  const re = new RegExp(/-\d+\/\d+-/);
-  if (re.test(score)) {
-    return score.split('/').join(' ');
-  }
-  return score;
-}
-
-export function handleGameSeparation(score) {
-  const re = new RegExp(/^\d+\/\d+/);
-  const parts = score.split(' ');
-  if (parts.some((part) => re.test(part))) {
-    score = parts.map((part) => (re.test(part) ? part.replace('/', '-') : part)).join(' ');
-  }
-
-  const singleSet = /^(\d+), *(\d+)$/;
-  if (singleSet.test(score)) {
-    const [s1, s2] = score.match(singleSet).slice(1);
-    const setScore = [s1, s2].join('-');
-    score = setScore;
-  }
-
-  return score;
-}
-
-export function handleTiebreakSlashSeparation(score) {
-  const re = new RegExp(/\(\d+\/\d+\)/g);
-  const tiebreaks = score.match(re);
-  for (const tiebreak of tiebreaks || []) {
-    const replacement = tiebreak.replace('/', '-');
-    score = score.replace(tiebreak, replacement);
-  }
-  return score;
-}
-
-export function handleSpaceSeparator(score) {
-  if (score.includes(',')) {
-    const sets = score.split(',').map((set) => set.trim());
-    const isSpaced = (set) => /\d \d/.test(set);
-    const spacedSets = sets.every(isSpaced);
-    if (spacedSets) return sets.map((set) => set.replace(' ', '-')).join(' ');
-  }
-
-  if (score.includes(' ')) {
-    const noSpaces = score.replace(/[ ,]/g, '');
-    const isNumber = noSpaces.split('').every((char) => isNumeric(char));
-    if (isNumber && noSpaces.length === 4) {
-      return noSpaces;
-    }
-  }
-
-  return score;
-}
-
-export function superSquare(score) {
-  const sets = score.split(' ');
-  const finalSet = sets[sets.length - 1];
-  if (!finalSet.includes('-') || finalSet.indexOf('(') > 0) return score;
-  const scores = finalSet.split('(').join('').split(')').join('').split('-');
-  const maxSetScore = Math.max(...scores);
-  if (maxSetScore >= 10) {
-    const squared = [...sets.slice(0, sets.length - 1), `[${scores.join('-')}]`].join(' ');
-    return squared;
-  }
-  return score;
-}
-
-export function excisions(score) {
-  const re = new RegExp(/^\[\d+\](.*)$/);
-  if (re.test(score)) {
-    score = score.match(re).slice(1)[0].trim();
-  }
-  return score;
-}
+const transforms = {
+  handleTiebreakSlashSeparation: handleTiebreakSlashSeparation,
+  handleSetSlashSeparation: handleSetSlashSeparation,
+  punctuationAdjustments: punctuationAdjustments,
+  handleGameSeparation: handleGameSeparation,
+  joinFloatingTiebreak: joinFloatingTiebreak,
+  handleBracketSpacing: handleBracketSpacing,
+  handleSpaceSeparator: handleSpaceSeparator,
+  separateScoreBlocks: separateScoreBlocks,
+  matchKnownPatterns: matchKnownPatterns,
+  removeDanglingBits: removeDanglingBits,
+  removeErroneous: removeErroneous,
+  handleWalkover: handleWalkover,
+  properTiebreak: properTiebreak,
+  handleRetired: handleRetired,
+  containedSets: containedSets,
+  sensibleSets: sensibleSets,
+  superSquare: superSquare,
+  excisions: excisions,
+  replaceOh: replaceOh
+};
 
 export function tidyScore(score, stepLog) {
   let matchUpStatus, result;
@@ -204,58 +61,56 @@ export function tidyScore(score, stepLog) {
   score = score.toString().toLowerCase();
 
   // -------------------------------
-  score = punctuationAdjustments(score); // Must occure before removeDanglingBits
+  score = transforms.punctuationAdjustments(score); // Must occure before removeDanglingBits
   if (stepLog) console.log({ score }, 'punctuationAdjustments');
   // -------------------------------
 
-  score = excisions(score);
+  score = transforms.excisions(score);
   if (stepLog) console.log({ score }, 'excisions');
-  score = handleSpaceSeparator(score);
+  score = transforms.handleSpaceSeparator(score);
   if (stepLog) console.log({ score }, 'handleSpaceSeparator');
-  score = removeDanglingBits(score);
+  score = transforms.removeDanglingBits(score);
   if (stepLog) console.log({ score }, 'removeDanglingBits');
 
-  result = handleWalkover(score);
+  result = transforms.handleWalkover(score);
   score = result.score;
   if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
 
-  result = handleRetired(score);
+  result = transforms.handleRetired(score);
   score = result.score;
   if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
   if (stepLog) console.log({ score }, 'handleMatchUpStatus');
 
-  score = replaceOh(score);
-  score = handleBracketSpacing(score);
+  score = transforms.replaceOh(score);
+  score = transforms.handleBracketSpacing(score);
   if (stepLog) console.log({ score }, 'handleBracketeSpacing');
-  score = containedSets(score);
+  score = transforms.matchKnownPatterns(score);
+  if (stepLog) console.log({ score }, 'matchKnownPatterns');
+  score = transforms.containedSets(score);
   if (stepLog) console.log({ score }, 'containedSets');
-  score = separateScoreBlocks(score);
+  score = transforms.separateScoreBlocks(score);
   if (stepLog) console.log({ score }, 'separateScoreBlocks');
-  score = handleGameSeparation(score);
+  score = transforms.handleGameSeparation(score);
   if (stepLog) console.log({ score }, 'handleGameSeparation');
-  score = removeErroneous(score);
+  score = transforms.removeErroneous(score);
   if (stepLog) console.log({ score }, 'removeErroneous');
-  score = joinFloatingTiebreak(score);
+  score = transforms.joinFloatingTiebreak(score);
   if (stepLog) console.log({ score }, 'joinFloatingTiebreak');
-  score = handleSetSlashSeparation(score);
+  score = transforms.handleSetSlashSeparation(score);
   if (stepLog) console.log({ score }, 'handleSetSlashSeparation');
-  score = handleTiebreakSlashSeparation(score);
+  score = transforms.handleTiebreakSlashSeparation(score);
   if (stepLog) console.log({ score }, 'handleTiebreakSlashSeparation');
-  score = properTiebreak(score);
+  score = transforms.properTiebreak(score, matchUpStatus);
   if (stepLog) console.log({ score }, 'properTiebreak');
-  score = sensibleSets(score);
+  score = transforms.sensibleSets(score, matchUpStatus);
   if (stepLog) console.log({ score }, 'sensibleSets');
-  score = superSquare(score);
+  score = transforms.superSquare(score);
   if (stepLog) console.log({ score }, 'superSquare');
-
-  if (matchUpStatus) {
-    score = score + ` ${matchUpStatus}`;
-  }
 
   score = scoreParser.tidyScore(score);
   if (stepLog) console.log({ score }, 'tidyScore');
 
-  return score;
+  return { score, matchUpStatus };
 }
 
 export function transformScore(score) {
@@ -268,25 +123,4 @@ export function chunkArray(arr, chunksize) {
     all[ch] = [].concat(all[ch] || [], one);
     return all;
   }, []);
-}
-
-function parseSuper(score) {
-  const oneIndex = score.indexOf('1');
-  const numbers = score.split('');
-  const allNumeric = numbers.every((n) => !isNaN(n));
-
-  if (allNumeric && score.length === 3 && oneIndex >= 0 && oneIndex < 2) {
-    const superTiebreak = getSuper(numbers, oneIndex);
-    if (superTiebreak) return superTiebreak;
-  }
-
-  if (allNumeric && score.length === 7 && oneIndex > 3) {
-    const tiebreak = numbers.slice(4);
-    const superTiebreak = getSuper(tiebreak, oneIndex - 4);
-    if (superTiebreak) {
-      return `${numbers[0]}-${numbers[1]} ${numbers[2]}-${numbers[3]} ${superTiebreak}`;
-    }
-  }
-
-  return;
 }

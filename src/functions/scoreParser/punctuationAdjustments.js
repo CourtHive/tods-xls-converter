@@ -5,6 +5,9 @@ import { isContained } from './utilities';
 export function punctuationAdjustments(score) {
   score = correctContainerMismatch(score);
 
+  const repeatingDash = new RegExp(/-{2,}/g);
+  score = score.replace(repeatingDash, '-');
+
   '-/,'.split('').forEach((punctuation) => {
     if (score.endsWith(punctuation)) score = score.slice(0, score.length - 1);
   });
@@ -124,6 +127,10 @@ export function punctuationAdjustments(score) {
 
   if (counts[')'] === 1 && !counts['('] && score.endsWith(')')) {
     score = score.slice(0, score.length - 1);
+  }
+
+  if (score.startsWith('(') && score.endsWith(')') && counts['('] === 1 && counts[')'] === 1) {
+    score = score.slice(1, score.length - 1);
   }
 
   return score;
