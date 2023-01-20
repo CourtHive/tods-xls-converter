@@ -48,14 +48,15 @@ const scores = [
   // (#/) => (#)
   { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
 
-  // block of 4 numbers with one number appearing in each couplet
-  { score: '6076(3)', expectation: { score: '6-0 7-6(3)' } },
-  { score: '6367 (3) 104', expectation: { score: '6-3 6-7(3) [10-4]' } },
-  { score: '6367(3)104', expectation: { score: '6-3 6-7(3) [10-4]' } },
   // tidyScore handles, but should be handled here
   { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
   { score: '6 26 3', expectation: { score: '6-2 6-3' } },
   */
+
+  // block of 4 numbers
+  { score: '6076(3)', expectation: { score: '6-0 7-6(3)' } },
+  { score: '6367(3)104', expectation: { score: '6-3 6-7(3) [10-4]' } },
+  { score: '6367 (3) 104', expectation: { score: '6-3 6-7(3) [10-4]' } },
 
   // join numbers separated by a dash and a space
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },

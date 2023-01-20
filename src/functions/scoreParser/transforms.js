@@ -52,11 +52,17 @@ export function separateScoreBlocks({ score }) {
     .toLowerCase()
     .split(' ')
     .map((part) => {
-      if (/^\d+$/.test(part) && part.length > 2 && !(part.length % 2)) {
-        part = utilities
-          .chunkArray(part.split(''), 2)
-          .map((c) => c.join(''))
-          .join(' ');
+      if (/^\d+$/.test(part) && part.length > 2) {
+        const oneIndex = part.indexOf('1');
+        if (!(part.length % 2)) {
+          part = utilities
+            .chunkArray(part.split(''), 2)
+            .map((c) => c.join(''))
+            .join(' ');
+        } else if (part.length === 3 && oneIndex >= 0) {
+          const tiebreakScore = getSuper(part.split(''), oneIndex);
+          return tiebreakScore;
+        }
       }
       return part;
     })
@@ -199,6 +205,26 @@ export function matchKnownPatterns({ score }) {
       }
     }
   }
+
+  const noSpacing = /^\d{3,}\(/;
+  const parenStart = /^\(\d+\)\d+/;
+  const considerations = [noSpacing, parenStart];
+
+  considerations.forEach(() => {
+    const parts = score.split(' ');
+    score = parts
+      .map((part) => {
+        if (noSpacing.test(part)) {
+          part = part.replace('(', ' (');
+        }
+        if (parenStart.test(part)) {
+          part = part.replace(')', ') ');
+        }
+        return part;
+      })
+      .join(' ');
+  });
+
   return { score };
 }
 
