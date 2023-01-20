@@ -48,21 +48,22 @@ const processingOrder = [
   'punctuationAdjustments',
   'excisions',
   'handleSpaceSeparator',
-  'removeDanglingBits'
-  /*
+  'removeDanglingBits',
   'handleWalkover',
   'handleRetired',
   'replaceOh',
   'handleBracketSpacing',
   'matchKnownPatterns',
   'containedSets',
-  'separateScoreBlocks'
+  'separateScoreBlocks',
+  'handleGameSeparation',
+  'removeErroneous',
   'joinFloatingTiebreak',
   'handleSetSlashSeparation',
   'handleTiebreakSlashSeparation',
   'properTiebreak',
-  'sensibleSets'
-  */
+  'sensibleSets',
+  'superSquare'
 ];
 
 export function tidyScore(score, stepLog) {
@@ -81,80 +82,12 @@ export function tidyScore(score, stepLog) {
   }
   score = score.toString().toLowerCase();
 
-  /*
-  // -------------------------------
-  result = transforms.punctuationAdjustments({ score }); // Must occure before removeDanglingBits
-  score = result.score;
-  if (stepLog) console.log({ score }, 'punctuationAdjustments');
-  // -------------------------------
-  */
-
   processingOrder.forEach((method) => {
     result = transforms[method]({ score, matchUpStatus });
     if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
     score = result.score;
     if (stepLog) console.log({ score }, method);
   });
-
-  /*
-  result = transforms.excisions({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'excisions');
-  result = transforms.handleSpaceSeparator({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'handleSpaceSeparator');
-  result = transforms.removeDanglingBits({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'removeDanglingBits');
-  */
-
-  result = transforms.handleWalkover({ score });
-  score = result.score;
-  if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
-
-  result = transforms.handleRetired({ score });
-  score = result.score;
-  if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
-  if (stepLog) console.log({ score }, 'handleMatchUpStatus');
-
-  result = transforms.replaceOh({ score });
-  score = result.score;
-  result = transforms.handleBracketSpacing({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'handleBracketeSpacing');
-  result = transforms.matchKnownPatterns({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'matchKnownPatterns');
-  result = transforms.containedSets({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'containedSets');
-  result = transforms.separateScoreBlocks({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'separateScoreBlocks');
-  result = transforms.handleGameSeparation({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'handleGameSeparation');
-  result = transforms.removeErroneous({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'removeErroneous');
-  result = transforms.joinFloatingTiebreak({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'joinFloatingTiebreak');
-  result = transforms.handleSetSlashSeparation({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'handleSetSlashSeparation');
-  result = transforms.handleTiebreakSlashSeparation({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'handleTiebreakSlashSeparation');
-  result = transforms.properTiebreak({ score, matchUpStatus });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'properTiebreak');
-  result = transforms.sensibleSets({ score, matchUpStatus });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'sensibleSets');
-  result = transforms.superSquare({ score });
-  score = result.score;
-  if (stepLog) console.log({ score }, 'superSquare');
 
   score = scoreParser.tidyScore(score);
   if (stepLog) console.log({ score }, 'tidyScore');
