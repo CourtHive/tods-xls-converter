@@ -8,6 +8,14 @@ export function punctuationAdjustments(score) {
   const repeatingDash = new RegExp(/-{2,}/g);
   score = score.replace(repeatingDash, '-');
 
+  ['- ', ' -'].forEach((dashScenario) => {
+    const dashSpace = new RegExp(`(\\d+)${dashScenario}(\\d+)`, 'g');
+    const spacedDash = score.match(dashSpace);
+    if (spacedDash) {
+      spacedDash.forEach((spaced) => (score = score.replace(spaced, spaced.split('- ').join('-'))));
+    }
+  });
+
   '-/,'.split('').forEach((punctuation) => {
     if (score.endsWith(punctuation)) score = score.slice(0, score.length - 1);
   });
