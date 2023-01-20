@@ -1,6 +1,34 @@
+import { punctuationAdjustments } from './punctuationAdjustments';
+import { handleBracketSpacing } from './handleBracketSpacing';
+import { joinFloatingTiebreak } from './joinFloatingTiebreak';
 import { isNumeric } from '../../utilities/identification';
-import { chunkArray } from './scoreParser';
+import { utilities } from 'tods-competition-factory';
+import { properTiebreak } from './properTiebreak';
+import { containedSets } from './containedSets';
+import { sensibleSets } from './sensibleSets';
+import { superSquare } from './superSquare';
 import { getSuper } from './utilities';
+
+export function stringScore({ score }) {
+  score = score.toString().toLowerCase();
+  return { score };
+}
+
+export function handleNumeric({ score }) {
+  if (typeof score === 'number') {
+    score = score.toString().toLowerCase();
+
+    if (!(score.length % 2)) {
+      score = utilities
+        .chunkArray(score.split(''), 2)
+        .map((part) => part.join(''))
+        .join(' ');
+    } else {
+      score = parseSuper(score) || score;
+    }
+  }
+  return { score };
+}
 
 export function replaceOh({ score }) {
   if (typeof score !== 'string') return { score };
@@ -25,7 +53,8 @@ export function separateScoreBlocks({ score }) {
     .split(' ')
     .map((part) => {
       if (/^\d+$/.test(part) && part.length > 2 && !(part.length % 2)) {
-        part = chunkArray(part.split(''), 2)
+        part = utilities
+          .chunkArray(part.split(''), 2)
           .map((c) => c.join(''))
           .join(' ');
       }
@@ -191,3 +220,27 @@ export function parseSuper(score) {
 
   return;
 }
+
+export const transforms = {
+  handleTiebreakSlashSeparation: handleTiebreakSlashSeparation,
+  handleSetSlashSeparation: handleSetSlashSeparation,
+  punctuationAdjustments: punctuationAdjustments,
+  handleGameSeparation: handleGameSeparation,
+  joinFloatingTiebreak: joinFloatingTiebreak,
+  handleBracketSpacing: handleBracketSpacing,
+  handleSpaceSeparator: handleSpaceSeparator,
+  separateScoreBlocks: separateScoreBlocks,
+  matchKnownPatterns: matchKnownPatterns,
+  removeDanglingBits: removeDanglingBits,
+  removeErroneous: removeErroneous,
+  handleWalkover: handleWalkover,
+  properTiebreak: properTiebreak,
+  handleNumeric: handleNumeric,
+  handleRetired: handleRetired,
+  containedSets: containedSets,
+  sensibleSets: sensibleSets,
+  stringScore: stringScore,
+  superSquare: superSquare,
+  excisions: excisions,
+  replaceOh: replaceOh
+};

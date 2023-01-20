@@ -1,50 +1,9 @@
-import { punctuationAdjustments } from './punctuationAdjustments';
-import { handleBracketSpacing } from './handleBracketSpacing';
-import { joinFloatingTiebreak } from './joinFloatingTiebreak';
-import { properTiebreak } from './properTiebreak';
-import { containedSets } from './containedSets';
-import { sensibleSets } from './sensibleSets';
-import { superSquare } from './superSquare';
+import { transforms } from './transforms';
 import { scoreParser } from './tidyScore';
-import {
-  excisions,
-  handleGameSeparation,
-  handleRetired,
-  handleSetSlashSeparation,
-  handleSpaceSeparator,
-  handleTiebreakSlashSeparation,
-  handleWalkover,
-  matchKnownPatterns,
-  parseSuper,
-  removeDanglingBits,
-  removeErroneous,
-  replaceOh,
-  separateScoreBlocks
-} from './transforms';
-
-const transforms = {
-  handleTiebreakSlashSeparation: handleTiebreakSlashSeparation,
-  handleSetSlashSeparation: handleSetSlashSeparation,
-  punctuationAdjustments: punctuationAdjustments,
-  handleGameSeparation: handleGameSeparation,
-  joinFloatingTiebreak: joinFloatingTiebreak,
-  handleBracketSpacing: handleBracketSpacing,
-  handleSpaceSeparator: handleSpaceSeparator,
-  separateScoreBlocks: separateScoreBlocks,
-  matchKnownPatterns: matchKnownPatterns,
-  removeDanglingBits: removeDanglingBits,
-  removeErroneous: removeErroneous,
-  handleWalkover: handleWalkover,
-  properTiebreak: properTiebreak,
-  handleRetired: handleRetired,
-  containedSets: containedSets,
-  sensibleSets: sensibleSets,
-  superSquare: superSquare,
-  excisions: excisions,
-  replaceOh: replaceOh
-};
 
 const processingOrder = [
+  'handleNumeric',
+  'stringScore',
   'punctuationAdjustments',
   'excisions',
   'handleSpaceSeparator',
@@ -66,27 +25,20 @@ const processingOrder = [
   'superSquare'
 ];
 
-export function tidyScore(score, stepLog) {
+export function tidyScore(score, stepLog, fullLog) {
   let matchUpStatus, result;
-
-  if (typeof score === 'number') {
-    score = score.toString().toLowerCase();
-
-    if (!(score.length % 2)) {
-      score = chunkArray(score.split(''), 2)
-        .map((part) => part.join(''))
-        .join(' ');
-    } else {
-      score = parseSuper(score) || score;
-    }
-  }
-  score = score.toString().toLowerCase();
 
   processingOrder.forEach((method) => {
     result = transforms[method]({ score, matchUpStatus });
+    if (stepLog && (fullLog || result.score !== score || result.matchUpStatus !== matchUpStatus)) {
+      if (matchUpStatus) {
+        console.log({ score: result.score, matchUpStatus }, method);
+      } else {
+        console.log({ score: result.score }, method);
+      }
+    }
     if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
     score = result.score;
-    if (stepLog) console.log({ score }, method);
   });
 
   score = scoreParser.tidyScore(score);
@@ -97,12 +49,4 @@ export function tidyScore(score, stepLog) {
 
 export function transformScore(score) {
   return scoreParser.transformScore(score).transformed_score;
-}
-
-export function chunkArray(arr, chunksize) {
-  return arr.reduce((all, one, i) => {
-    const ch = Math.floor(i / chunksize);
-    all[ch] = [].concat(all[ch] || [], one);
-    return all;
-  }, []);
 }
