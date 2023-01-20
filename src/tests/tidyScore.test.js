@@ -1,4 +1,3 @@
-import { isValidPattern } from '../functions/scoreParser/validPatterns';
 import { tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
@@ -237,7 +236,7 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
   const singleScore = end - start === 1;
   if (singleScore) console.log({ score });
 
-  const { score: tidy, matchUpStatus } = tidyScore(score, singleScore, fullLog, iteration);
+  const { score: tidy, matchUpStatus, isValid } = tidyScore(score, singleScore, fullLog, iteration);
 
   let metExpectation;
   if (expectation?.matchUpStatus) {
@@ -254,9 +253,8 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
     metExpectation = true;
   }
 
-  if (validPatterns) {
-    const isValid = isValidPattern(tidy);
-    if (!isValid) console.log({ isValid, tidy });
+  if (validPatterns && !isValid) {
+    console.log({ isValid, tidy });
   }
 
   if (expectations && !metExpectation) {

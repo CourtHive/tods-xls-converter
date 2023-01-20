@@ -1,5 +1,6 @@
 import { scoreSlicer } from './legacyScoreTransforms';
 import { transforms } from './transforms';
+import { isValidPattern } from './validPatterns';
 
 const processingOrder = [
   'handleNumeric',
@@ -43,6 +44,7 @@ export function tidyScore(score, stepLog, fullLog, identifier) {
     score = result.score;
   });
 
+  // check whether legacy sliceAndDice is necessary
   result = scoreSlicer.sliceAndDice(score);
   if (result !== score) {
     if (identifier !== undefined) console.log({ identifier });
@@ -57,7 +59,9 @@ export function tidyScore(score, stepLog, fullLog, identifier) {
     score = result;
   }
 
-  return { score, matchUpStatus };
+  const isValid = isValidPattern(score);
+
+  return { score, matchUpStatus, isValid };
 }
 
 export function transformScore(score) {
