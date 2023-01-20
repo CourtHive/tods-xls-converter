@@ -27,6 +27,12 @@ export function punctuationAdjustments({ score }) {
   if (score.includes(' /')) score = score.replace(/ \//g, ' ');
   if (/\d -\d/.test(score)) score = score.replace(/ -/g, '-');
 
+  const unclosed = /(\d+-\d+\(\d+)0,/;
+  if (unclosed.test(score)) {
+    const [setScore] = score.match(unclosed).slice(1);
+    score = score.replace(unclosed, setScore + ')');
+  }
+
   if (counts['('] === counts[')'] && counts['('] > 1) {
     const parts = score.split(')(').join(') (').split(' ');
     if (parts.every(isContained)) {

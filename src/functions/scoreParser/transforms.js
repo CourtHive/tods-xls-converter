@@ -111,7 +111,7 @@ export function handleRetired({ score }) {
   return { score };
 }
 
-export function removeDanglingBits({ score }) {
+export function removeDanglingBits({ score, attributes }) {
   if (['.', ','].some((punctuation) => score.endsWith(punctuation))) {
     score = score.slice(0, score.length - 1);
   }
@@ -119,9 +119,11 @@ export function removeDanglingBits({ score }) {
 
   const targetPunctuation = '()/-'.split('').some((punctuation) => score.includes(punctuation));
   if (/ \d$/.test(score) && targetPunctuation) {
+    const removed = score.slice(score.length - 2).trim();
+    attributes = { removed };
     score = score.slice(0, score.length - 2);
   }
-  return { score };
+  return { score, attributes };
 }
 
 export function handleSetSlashSeparation({ score }) {

@@ -103,7 +103,7 @@ export function properTiebreak({ score, matchUpStatus }) {
   const misTyped0 = /\((\d)+0 /;
   if (misTyped0.test(score)) {
     const value = score.match(misTyped0)[1];
-    score = score.replace(misTyped0, `(${value})`);
+    score = score.replace(misTyped0, `(${value}) `);
   }
 
   return { score };

@@ -25,11 +25,11 @@ const processingOrder = [
   'superSquare'
 ];
 
-export function tidyScore(score, stepLog, fullLog) {
-  let matchUpStatus, result;
+export function tidyScore(score, stepLog, fullLog, identifier) {
+  let matchUpStatus, result, attributes;
 
   processingOrder.forEach((method) => {
-    result = transforms[method]({ score, matchUpStatus });
+    result = transforms[method]({ score, matchUpStatus, attributes });
     if (stepLog && (fullLog || result.score !== score || result.matchUpStatus !== matchUpStatus)) {
       if (matchUpStatus) {
         console.log({ score: result.score, matchUpStatus }, method);
@@ -37,12 +37,25 @@ export function tidyScore(score, stepLog, fullLog) {
         console.log({ score: result.score }, method);
       }
     }
+
     if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
+    if (result.attributes) attributes = result.attributes;
     score = result.score;
   });
 
-  score = scoreSlicer.sliceAndDice(score);
-  if (stepLog) console.log({ score }, 'tidyScore');
+  result = scoreSlicer.sliceAndDice(score);
+  if (result !== score) {
+    if (identifier !== undefined) console.log({ identifier });
+    console.log({ result, score }, 'sliceAndDice');
+    if (result.length === score.length) {
+      result.split('').forEach((char, i) => {
+        console.log(char === score[i], char, score[i]);
+      });
+    } else {
+      console.log(result.length, score.length);
+    }
+    score = result;
+  }
 
   return { score, matchUpStatus };
 }

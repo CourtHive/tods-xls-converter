@@ -4,6 +4,7 @@ import { expect, it } from 'vitest';
 
 const validPatterns = true;
 const expectations = false;
+const fullLog = true;
 const start = 0;
 const end = 0;
 
@@ -82,7 +83,7 @@ const scores = [
 
   // danglingBits ...
   { score: '(6-4)(6-3) 6', expectation: { score: '6-4 6-3' } },
-  { score: '(8-7) 6', expectation: { score: '8-7' } }, // arguable that 6 is the tiebreak score
+  { score: '(8-7) 6', expectation: { score: '8-7(6)' } }, // arguable that 6 is the tiebreak score
   { score: '(,', expectation: { score: '' } },
   { score: ')', expectation: { score: '' } },
 
@@ -235,7 +236,7 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
   const singleScore = end - start === 1;
   if (singleScore) console.log({ score });
 
-  const { score: tidy, matchUpStatus } = tidyScore(score, singleScore);
+  const { score: tidy, matchUpStatus } = tidyScore(score, singleScore, fullLog, iteration);
 
   let metExpectation;
   if (expectation?.matchUpStatus) {
