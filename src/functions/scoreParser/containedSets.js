@@ -1,7 +1,9 @@
-import { dashJoin, isTiebreakScore } from './utilities';
+import { instanceCount } from '../../utilities/convenience';
+import { isNumeric } from '../../utilities/identification';
+import { dashJoin, isDiffOne, isTiebreakScore } from './utilities';
 
-export function containedSets(score) {
-  if (typeof score !== 'string') return score;
+export function containedSets({ score, attributes }) {
+  if (typeof score !== 'string') return { score };
 
   const withParens = new RegExp(/\([\d,/ ]+\)/g);
   const contained = score.match(withParens);
@@ -74,26 +76,18 @@ export function containedSets(score) {
 
       score = newScore.trim();
     }
-    /*
-  } else if (score.startsWith('(') && score.endsWith(')')) {
-    const result = score.slice(1, score.length - 1);
-    const values = result.split(',');
-
-    // handle (6-2, 6-4)
-    const multipleResults = values.length > 1 && values.some((v) => v.includes('-') || v.includes('/'));
-
-    if (multipleResults) {
-      score = values.map((value) => value.trim()).join(' ');
-    } else {
-      // handle 6, 3 | 9 3 | 93 | 9,3 | 9/3 | 9, 3
-      score = result
-        .split(/[, -/]/)
-        .filter(Boolean)
-        .join('-');
-    }
-    console.log('xxx', { multipleResults, score, result });
-    */
   }
 
-  return score;
+  let counts = instanceCount(score.split(''));
+  if (counts['('] === 1 && counts[')'] === 1 && score.startsWith('(') && score.endsWith(')')) {
+    score = score.slice(1, score.length - 1);
+
+    // is a tiebreakSet; check for valid removed tiebreak value
+    if (counts['-'] === 1 && isDiffOne(score) && isNumeric(attributes?.removed)) {
+      score = score + `(${attributes.removed})`;
+      attributes.removed = undefined;
+    }
+  }
+
+  return { score };
 }

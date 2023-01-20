@@ -1,12 +1,12 @@
 import { isNumeric } from '../../utilities/identification';
 
-export function superSquare(score) {
+export function superSquare({ score }) {
   const sets = score.split(' ');
   const finalSet = sets[sets.length - 1];
-  if (!finalSet.includes('-') || finalSet.indexOf('(') > 0) return score;
+  if (!finalSet.includes('-') || finalSet.indexOf('(') > 0) return { score };
 
   let scores = finalSet.split('(').join('').split(')').join('').split('-');
-  if (!scores.every((score) => isNumeric(score))) return score;
+  if (!scores.every((score) => isNumeric(score))) return { score };
   scores = scores.map((score) => parseInt(score));
 
   const maxSetScore = Math.max(...scores);
@@ -19,8 +19,7 @@ export function superSquare(score) {
       diff = Math.abs(modifiedScores[0] - modifiedScores[1]);
       if (diff > 2) scores = modifiedScores;
     }
-    const squared = [...sets.slice(0, sets.length - 1), `[${scores.join('-')}]`].join(' ');
-    return squared;
+    score = [...sets.slice(0, sets.length - 1), `[${scores.join('-')}]`].join(' ');
   }
-  return score;
+  return { score };
 }

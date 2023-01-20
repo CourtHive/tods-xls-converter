@@ -1,6 +1,6 @@
 import { standardSetComma, tiebreakSetComma } from './validPatterns';
 
-export function handleBracketSpacing(score) {
+export function handleBracketSpacing({ score }) {
   if (score.includes('( ')) {
     score = score
       .split('( ')
@@ -27,5 +27,5 @@ export function handleBracketSpacing(score) {
   // remove extraneous spaces
   score = score.split(' ').filter(Boolean).join(' ');
 
-  return score;
+  return { score };
 }

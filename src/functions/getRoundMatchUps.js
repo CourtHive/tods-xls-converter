@@ -5,10 +5,9 @@ import { getDerivedPair, getGroupings } from './columnUtilities';
 import { getPotentialResult } from '../utilities/identification';
 import { generateMatchUpId } from '../utilities/hashing';
 import { pushGlobalLog } from '../utilities/globalLog';
+import { tidyScore } from './scoreParser/scoreParser';
 import { getAdvancedSide } from './getAdvancedSide';
 import { getLoggingActive } from '../global/state';
-import { normalizeScore } from './cleanScore';
-import { tidyScore } from './scoreParser/scoreParser';
 
 const { BYE, COMPLETED, DOUBLE_WALKOVER, WALKOVER } = matchUpStatusConstants;
 
@@ -191,7 +190,7 @@ export function getRoundMatchUps({
       if (matchUp.winningSide && result && ![WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus)) {
         const sideString = matchUp.winningSide === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
         matchUp.score = { [sideString]: result };
-        const { normalized: scoreString, matchUpStatus } = normalizeScore(tidyScore(result));
+        const { score: scoreString, matchUpStatus } = tidyScore(result);
         if (matchUpStatus && !matchUp.matchUpStatus) matchUp.matchUpStatus = matchUpStatus;
         const { outcome } = mocksEngine.generateOutcomeFromScoreString({
           winningSide: matchUp.winningSide,

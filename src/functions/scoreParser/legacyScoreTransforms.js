@@ -1,4 +1,4 @@
-export const scoreParser = (function () {
+export const scoreSlicer = (function () {
   let fx = {};
 
   let counters = {
@@ -60,7 +60,7 @@ export const scoreParser = (function () {
   ];
   */
 
-  fx.tidyScore = (before_score = '') => {
+  fx.sliceAndDice = (before_score = '') => {
     const enclosed = /^\((.*)\)$/;
     if (enclosed.test(before_score)) {
       before_score = before_score.match(enclosed)[1];

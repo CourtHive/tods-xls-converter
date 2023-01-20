@@ -1,9 +1,9 @@
-import { isValidPattern } from '../functions/scoreParser/validPatterns';
 import { tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
 const validPatterns = true;
 const expectations = false;
+const fullLog = true;
 const start = 0;
 const end = 0;
 
@@ -12,9 +12,6 @@ const end = 0;
 
 const scores = [
   /*
-  // \d+- \d+ => \d+-\d+
-  { score: '63 46 10- 4', expectation: { score: '6- 4-6 10-4' } },
-
   { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
   { score: '5-0 (40-0 coneced', expectation: { score: '5-4 4-0', matchUpStatus: 'RETIRED' } },
   { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
@@ -50,14 +47,19 @@ const scores = [
   // (#/) => (#)
   { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
 
-  // block of 4 numbers with one number appearing in each couplet
-  { score: '6076(3)', expectation: { score: '6-0 7-6(3)' } },
-  { score: '6367 (3) 104', expectation: { score: '6-3 6-7(3) [10-4]' } },
-  { score: '6367(3)104', expectation: { score: '6-3 6-7(3) [10-4]' } },
   // tidyScore handles, but should be handled here
   { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
   { score: '6 26 3', expectation: { score: '6-2 6-3' } },
   */
+
+  // block of 4 numbers
+  { score: '6076(3)', expectation: { score: '6-0 7-6(3)' } },
+  { score: '6367(3)104', expectation: { score: '6-3 6-7(3) [10-4]' } },
+  { score: '6367 (3) 104', expectation: { score: '6-3 6-7(3) [10-4]' } },
+
+  // join numbers separated by a dash and a space
+  { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
+  { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
   { score: '61 26 10-13', expectation: { score: '6-1 2-6 [10-3]' } },
   { score: '5/4 [7-4], 5/4 [12-11]', expectation: { score: '5-4(4) 5-4(11)' } },
@@ -81,7 +83,7 @@ const scores = [
 
   // danglingBits ...
   { score: '(6-4)(6-3) 6', expectation: { score: '6-4 6-3' } },
-  { score: '(8-7) 6', expectation: { score: '8-7' } }, // arguable that 6 is the tiebreak score
+  { score: '(8-7) 6', expectation: { score: '8-7(6)' } }, // arguable that 6 is the tiebreak score
   { score: '(,', expectation: { score: '' } },
   { score: ')', expectation: { score: '' } },
 
@@ -234,7 +236,7 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
   const singleScore = end - start === 1;
   if (singleScore) console.log({ score });
 
-  const { score: tidy, matchUpStatus } = tidyScore(score, singleScore);
+  const { score: tidy, matchUpStatus, isValid } = tidyScore(score, singleScore, fullLog, iteration);
 
   let metExpectation;
   if (expectation?.matchUpStatus) {
@@ -251,9 +253,8 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
     metExpectation = true;
   }
 
-  if (validPatterns) {
-    const isValid = isValidPattern(tidy);
-    if (!isValid) console.log({ isValid, tidy });
+  if (validPatterns && !isValid) {
+    console.log({ isValid, tidy });
   }
 
   if (expectations && !metExpectation) {

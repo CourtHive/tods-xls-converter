@@ -2,7 +2,7 @@ import { isNumeric } from '../../utilities/identification';
 import { tiebreakSet } from './validPatterns';
 import { isDiffOne } from './utilities';
 
-export function sensibleSets(score, matchUpStatus) {
+export function sensibleSets({ score, matchUpStatus }) {
   const sets = score.split(' ');
 
   score = sets
@@ -27,5 +27,6 @@ export function sensibleSets(score, matchUpStatus) {
       return set;
     })
     .join(' ');
-  return score;
+
+  return { score };
 }

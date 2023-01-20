@@ -2,11 +2,19 @@ import { correctContainerMismatch } from './correctContainerMismatch';
 import { instanceCount } from '../../utilities/convenience';
 import { isContained } from './utilities';
 
-export function punctuationAdjustments(score) {
+export function punctuationAdjustments({ score }) {
   score = correctContainerMismatch(score);
 
   const repeatingDash = new RegExp(/-{2,}/g);
   score = score.replace(repeatingDash, '-');
+
+  ['- ', ' -'].forEach((dashScenario) => {
+    const dashSpace = new RegExp(`(\\d+)${dashScenario}(\\d+)`, 'g');
+    const spacedDash = score.match(dashSpace);
+    if (spacedDash) {
+      spacedDash.forEach((spaced) => (score = score.replace(spaced, spaced.split('- ').join('-'))));
+    }
+  });
 
   '-/,'.split('').forEach((punctuation) => {
     if (score.endsWith(punctuation)) score = score.slice(0, score.length - 1);
@@ -18,6 +26,12 @@ export function punctuationAdjustments(score) {
   if (/\d \/\d/.test(score)) score = score.replace(/ \//g, '/');
   if (score.includes(' /')) score = score.replace(/ \//g, ' ');
   if (/\d -\d/.test(score)) score = score.replace(/ -/g, '-');
+
+  const unclosed = /(\d+-\d+\(\d+)0,/;
+  if (unclosed.test(score)) {
+    const [setScore] = score.match(unclosed).slice(1);
+    score = score.replace(unclosed, setScore + ')');
+  }
 
   if (counts['('] === counts[')'] && counts['('] > 1) {
     const parts = score.split(')(').join(') (').split(' ');
@@ -39,7 +53,7 @@ export function punctuationAdjustments(score) {
   const hasAlpha = /[A-Za-z]+/.test(score);
   const hasDigits = /[0-9]+/.test(score);
 
-  if (!hasAlpha && !hasDigits) return '';
+  if (!hasAlpha && !hasDigits) return { score: '' };
 
   // remove enclosing [] provided there is anything other than numbers contained
   // don't want to remove for e.g. "[1]" which is dealt with as seeding value
@@ -110,7 +124,7 @@ export function punctuationAdjustments(score) {
     }
   }
 
-  if (missingCloseBracket && !missingCloseParen) return score + ']';
+  if (missingCloseBracket && !missingCloseParen) score = score + ']';
 
   // this is potentially problematic as enclosing with '[]' yields tiebreak...
   // ... wheres enclosing with '()' yields a set which gets converted to a supertiebreak!
@@ -133,5 +147,5 @@ export function punctuationAdjustments(score) {
     score = score.slice(1, score.length - 1);
   }
 
-  return score;
+  return { score };
 }

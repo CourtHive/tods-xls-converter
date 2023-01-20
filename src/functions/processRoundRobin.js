@@ -2,11 +2,10 @@ import { generateMatchUpId, generateStructureId } from '../utilities/hashing';
 import { getIndividualParticipant } from './getIndividualParticipant';
 import { cellValueAttribute, getRow } from './sheetAccess';
 import { getPairParticipant } from './getPairParticipant';
+import { tidyScore } from './scoreParser/scoreParser';
 import { onlyAlpha } from '../utilities/convenience';
 import { getLoggingActive } from '../global/state';
 import { normalizeName } from 'normalize-text';
-import { normalizeScore } from './cleanScore';
-import { tidyScore } from './scoreParser/scoreParser';
 import {
   drawDefinitionConstants,
   matchUpStatusConstants,
@@ -204,7 +203,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
       if (positionRow) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];
-        const { normalized: scoreString, matchUpStatus: normalizedMatchUpStatus } = normalizeScore(tidyScore(result));
+        const { score: scoreString, matchUpStatus: normalizedMatchUpStatus } = tidyScore(result);
         const resultIsMatchOutcome =
           result &&
           onlyAlpha(result, profile) &&
