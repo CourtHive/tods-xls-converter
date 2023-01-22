@@ -95,13 +95,14 @@ export function removeErroneous({ score }) {
 }
 
 export function handleWalkover({ score }) {
-  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score)) {
+  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score.toString().toLowerCase())) {
     return { matchUpStatus: 'walkover', score: '' };
   }
   return { score };
 }
 
 export function handleRetired({ score }) {
+  score = score.toString().toLowerCase();
   const re = /^(.*)(ret|con)+[A-Za-z ]*$/;
   if (re.test(score)) {
     const [leading] = score.match(re).slice(1);

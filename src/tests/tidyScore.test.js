@@ -11,15 +11,20 @@ const end = 0;
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
 
 const scores = [
+  // IDEA: new method to process sets and start to guess at matchUpFormat
+  // { score: '5-0 (40-0 coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },
+  // { score: '5-0 (40-0) coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },
+
   /*
-  { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
-  { score: '5-0 (40-0 coneced', expectation: { score: '5-4 4-0', matchUpStatus: 'RETIRED' } },
   { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
-  { score: '6-36-3', expectation: { score: '6-3 6-3' } },
-  { score: '6 4 /6 3', expectation: { score: '6-4 6-3' } },
-  { score: '6 4, 6-4', expectation: { score: '6-4 6-4' } },
   { score: '6 4/6 2', expectation: { score: '6-4 6-2' } },
-  { score: '6--, 2, 3--6, 10--5', expectation: { score: '6-2 3-6 [10-5]' } },
+  { score: '6 4 /6 3', expectation: { score: '6-4 6-3' } },
+  { score: '6-36-3', expectation: { score: '6-3 6-3' } },
+  { score: '6 4, 6-4', expectation: { score: '6-4 6-4' } },
+
+  // pattern /\d+,\s?\d/+\/\d+\s?\d+/
+  { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
+
   // pattern \d+-\d{2}-\d+ => \d-\d \d-\d
   { score: '6-2 5-76-3', expectation: { score: '6-3 5-7 6-3' } },
   { score: '6-16-1', expectation: { score: '6-1 6-1' } },
@@ -41,9 +46,6 @@ const scores = [
   { score: '6-3, 6-23', expectation: { score: '6-3 6-2' } },
   { score: '6-3, 7-54', expectation: { score: '6-3 7-5' } },
 
-  // remove all empty spaces within (#) and (#-#)
-  { score: '6/2, 4/6 (10 - 7 )', expectation: { score: '6-2 4-6 [10-7]' } },
-
   // (#/) => (#)
   { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
 
@@ -51,6 +53,17 @@ const scores = [
   { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
   { score: '6 26 3', expectation: { score: '6-2 6-3' } },
   */
+
+  // sensibleSets recognizes 40-0 is not sensible
+  { score: '5-0 40-0 coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },
+
+  // repating dash with comma
+  { score: '6--, 2, 3--6, 10--5', expectation: { score: '6-2 3-6 [10-5]' } },
+
+  // remove all empty spaces within (#) and (#-#)
+  { score: '6/3, 2/6 ( 10 -3)', expectation: { score: '6-3 2-6 [10-3]' } },
+  { score: '6/3, 2/6 ( 10 - 3 )', expectation: { score: '6-3 2-6 [10-3]' } },
+  { score: '6/2, 4/6 (10 - 7 )', expectation: { score: '6-2 4-6 [10-7]' } },
 
   // block of 4 numbers
   { score: '6076(3)', expectation: { score: '6-0 7-6(3)' } },

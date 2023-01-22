@@ -4,13 +4,15 @@ import { isValidPattern } from './validPatterns';
 
 const processingOrder = [
   'handleNumeric',
+  'handleWalkover',
+  'handleRetired',
   'stringScore',
   'punctuationAdjustments',
   'excisions',
   'handleSpaceSeparator',
   'removeDanglingBits',
-  'handleWalkover',
-  'handleRetired',
+  // 'handleWalkover',
+  // 'handleRetired',
   'replaceOh',
   'handleBracketSpacing',
   'matchKnownPatterns',
