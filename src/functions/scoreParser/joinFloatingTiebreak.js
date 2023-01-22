@@ -1,5 +1,6 @@
-import { indices } from '../../utilities/convenience';
+import { matchTiebreak, standardSet, tiebreakSet } from './validPatterns';
 import { isBracketScore, isDiffOne, isTiebreakScore } from './utilities';
+import { indices } from '../../utilities/convenience';
 
 export function joinFloatingTiebreak({ score }) {
   if (typeof score !== 'string') return { score };
@@ -87,7 +88,7 @@ export function joinFloatingTiebreak({ score }) {
   // recognize tiebreak scores which look like sets s#-s# tb#-tb#
   parts = score.split(' ');
   let lastSet;
-  const profile = parts.map((part) => {
+  let profile = parts.map((part) => {
     const re = new RegExp(/^(\d+)-(\d+)$/); // only consider sets which have no existing tiebreak score
     if (re.test(part)) {
       const [n1, n2] = part.match(re).slice(1);
@@ -127,6 +128,27 @@ export function joinFloatingTiebreak({ score }) {
       score = score.replace(setCheck, `${setScore} [${t1}-${t2}]`);
     }
   }
+
+  profile = [];
+  score = score
+    .split(' ')
+    .map((set) => {
+      const getContained = /^\((.*)\)$/;
+      const isContained = getContained.test(set);
+      const setType =
+        (new RegExp(standardSet).test(set) && 'standard') ||
+        (new RegExp(tiebreakSet).test(set) && 'tiebreak') ||
+        (new RegExp(matchTiebreak).test(set) && 'super') ||
+        'unknown';
+      profile.push(setType);
+
+      if (setType === 'standard' && isContained) {
+        const value = set.match(getContained)[1];
+        return value;
+      }
+      return set;
+    })
+    .join(' ');
 
   return { score };
 }

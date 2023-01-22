@@ -5,15 +5,15 @@ const validPatterns = true;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 0;
+const end = 1;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
+// NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
-  // IDEA: new method to process sets and start to guess at matchUpFormat
-  // { score: '5-0 (40-0 coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },
-  // { score: '5-0 (40-0) coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },
+  // (#/) => (#)
+  { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
 
   /*
   { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
@@ -46,9 +46,6 @@ const scores = [
   { score: '6-3, 6-23', expectation: { score: '6-3 6-2' } },
   { score: '6-3, 7-54', expectation: { score: '6-3 7-5' } },
 
-  // (#/) => (#)
-  { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
-
   // tidyScore handles, but should be handled here
   { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
   { score: '6 26 3', expectation: { score: '6-2 6-3' } },
@@ -56,6 +53,8 @@ const scores = [
 
   // sensibleSets recognizes 40-0 is not sensible
   { score: '5-0 40-0 coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },
+  { score: '5-0 (40-0) coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },
+  { score: '5-0 (40-0 coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },
 
   // repating dash with comma
   { score: '6--, 2, 3--6, 10--5', expectation: { score: '6-2 3-6 [10-5]' } },
