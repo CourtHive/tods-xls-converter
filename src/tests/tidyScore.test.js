@@ -5,16 +5,13 @@ const validPatterns = true;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 1;
+const end = 0;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
-  // (#/) => (#)
-  { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
-
   /*
   { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
   { score: '6 4/6 2', expectation: { score: '6-4 6-2' } },
@@ -50,6 +47,9 @@ const scores = [
   { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
   { score: '6 26 3', expectation: { score: '6-2 6-3' } },
   */
+
+  // (#/) => (#)
+  { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
 
   // sensibleSets recognizes 40-0 is not sensible
   { score: '5-0 40-0 coneced', expectation: { score: '5-0 4-0', matchUpStatus: 'RETIRED' } },

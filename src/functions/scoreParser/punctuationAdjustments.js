@@ -48,6 +48,8 @@ export function punctuationAdjustments({ score }) {
   if (/\d \/\d/.test(score)) score = score.replace(/ \//g, '/');
   // all other space slashes are replaced by space
   if (score.includes(' /')) score = score.replace(/ \//g, ' ');
+  if (score.includes('/)')) score = score.replace(/\/\)/g, ')');
+  if (score.includes('(/')) score = score.replace(/\(\//g, '(');
 
   const unclosed = /(\d+-\d+\(\d+)0,/;
   if (unclosed.test(score)) {
