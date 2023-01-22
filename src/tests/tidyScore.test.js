@@ -13,18 +13,8 @@ const end = 0;
 
 const scores = [
   /*
-  { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
-  { score: '6 4/6 2', expectation: { score: '6-4 6-2' } },
-  { score: '6 4 /6 3', expectation: { score: '6-4 6-3' } },
-  { score: '6-36-3', expectation: { score: '6-3 6-3' } },
-  { score: '6 4, 6-4', expectation: { score: '6-4 6-4' } },
-
   // pattern /\d+,\s?\d/+\/\d+\s?\d+/
   { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
-
-  // pattern \d+-\d{2}-\d+ => \d-\d \d-\d
-  { score: '6-2 5-76-3', expectation: { score: '6-3 5-7 6-3' } },
-  { score: '6-16-1', expectation: { score: '6-1 6-1' } },
 
   // discard indecipherable
   { score: '4--2, 40-40', expectation: { score: '4-2' } },
@@ -47,6 +37,16 @@ const scores = [
   { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
   { score: '6 26 3', expectation: { score: '6-2 6-3' } },
   */
+
+  // various set separators
+  { score: '6 4, 6-4', expectation: { score: '6-4 6-4' } },
+  { score: '6 4/6 2', expectation: { score: '6-4 6-2' } },
+  { score: '6 0/6 0', expectation: { score: '6-0 6-0' } },
+  { score: '6 4 /6 3', expectation: { score: '6-4 6-3' } },
+
+  // pattern \d+-\d{2}-\d+ => \d-\d \d-\d
+  { score: '6-2 5-76-3', expectation: { score: '6-2 5-7 6-3' } },
+  { score: '6-36-3', expectation: { score: '6-3 6-3' } },
 
   // (#/) => (#)
   { score: '6/3, 5/7, 7/6 (7/)', expectation: { score: '6-3 5-7 7-6(7)' } },
