@@ -1,6 +1,6 @@
 import { scoreSlicer } from './legacyScoreTransforms';
-import { transforms } from './transforms';
 import { isValidPattern } from './validPatterns';
+import { transforms } from './transforms';
 
 const processingOrder = [
   'handleNumeric',
@@ -63,8 +63,4 @@ export function tidyScore(score, stepLog, fullLog, identifier) {
   const isValid = isValidPattern(score);
 
   return { score, matchUpStatus, isValid };
-}
-
-export function transformScore(score) {
-  return scoreSlicer.transformScore(score).transformed_score;
 }

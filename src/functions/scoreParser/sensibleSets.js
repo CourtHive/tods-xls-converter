@@ -1,6 +1,7 @@
 import { matchTiebreak, standardSet, tiebreakSet } from './validPatterns';
 import { isNumeric } from '../../utilities/identification';
 import { isDiffOne } from './utilities';
+import { getWinningSide } from './getWinningSide';
 
 export function sensibleSets({ score, matchUpStatus }) {
   const profile = [];
@@ -70,6 +71,20 @@ export function sensibleSets({ score, matchUpStatus }) {
     })
     .filter(Boolean)
     .join(' ');
+
+  const { setsWon, setWinners } = getWinningSide(score);
+
+  if (Math.max(...setsWon) > 2) {
+    let counts = [0, 0];
+    score = score
+      .split(' ')
+      .map((set, i) => {
+        counts[setWinners[i]] += 1;
+        return Math.max(...counts) > 2 ? undefined : set;
+      })
+      .filter(Boolean)
+      .join(' ');
+  }
 
   return { score };
 }

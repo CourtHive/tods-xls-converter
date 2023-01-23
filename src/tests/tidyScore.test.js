@@ -12,10 +12,8 @@ const end = 0;
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
-  /*
   // too many sets
   { score: '6 4, 6 16 4, 6 2', expectation: { score: '6-4 6-1' } },
-  */
 
   // discard indecipherable
   { score: '6 4, 6', expectation: { score: '6-4' } },

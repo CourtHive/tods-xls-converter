@@ -64,12 +64,14 @@ export function matchKnownPatterns({ score }) {
   }
 
   // pattern \d+-\d{2}-\d+ => \d-\d \d-\d
+  let failSafe = 0;
   const noSetSeparation = /(\d+)-(\d{2})-(\d+)/;
-  if (noSetSeparation.test(score)) {
+  while (noSetSeparation.test(score) && failSafe < 3) {
     const [left, middle, right] = score.match(noSetSeparation).slice(1);
     const separated = middle.split('');
     const reformatted = `${left}-${separated[0]} ${separated[1]}-${right}`;
     score = score.replace(noSetSeparation, reformatted);
+    failSafe += 1;
   }
 
   let spaceSeparatedSets = score.match(/\d \d /);
