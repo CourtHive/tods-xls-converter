@@ -5,27 +5,51 @@ import { isContained } from './utilities';
 export function punctuationAdjustments({ score }) {
   score = correctContainerMismatch(score);
 
-  const repeatingDash = new RegExp(/-{2,}/g);
+  // convert (# - # ) => (#-#)
+  const bwsg = /\(([\d- ]+)\)/g;
+  const bws = /\(([\d- ]+)\)/;
+  const ws = score.match(bwsg);
+  for (const s of ws || []) {
+    const [v] = s.match(bws).slice(1);
+    const trimmedBracketValue = v.replace(/ /g, '');
+    score = score.replace(s, `(${trimmedBracketValue})`);
+  }
+
+  // repeating dash or dash with comma
+  const repeatingDash = new RegExp(/[-,]{2,}/g);
   score = score.replace(repeatingDash, '-');
 
+  // dash space or space dash
   ['- ', ' -'].forEach((dashScenario) => {
     const dashSpace = new RegExp(`(\\d+)${dashScenario}(\\d+)`, 'g');
     const spacedDash = score.match(dashSpace);
     if (spacedDash) {
-      spacedDash.forEach((spaced) => (score = score.replace(spaced, spaced.split('- ').join('-'))));
+      spacedDash.forEach((spaced) => (score = score.replace(spaced, spaced.split(dashScenario).join('-'))));
     }
   });
 
+  // remove trailing puncutation
   '-/,'.split('').forEach((punctuation) => {
     if (score.endsWith(punctuation)) score = score.slice(0, score.length - 1);
   });
 
-  let counts = instanceCount(score.split(''));
+  let missingOpenParen, missingCloseParen, missingCloseBracket, noClose, counts;
 
-  // generalize this into array of replacements
+  const getMissing = () => {
+    counts = instanceCount(score.split(''));
+    missingCloseParen = counts['('] === (counts[')'] || 0) + 1;
+    missingOpenParen = (counts['('] || 0) + 1 === counts[')'];
+    missingCloseBracket = counts['['] === counts[']'] + 1;
+    noClose = missingCloseParen && !missingCloseBracket;
+  };
+  getMissing();
+
+  // space slash surrounded by digits
   if (/\d \/\d/.test(score)) score = score.replace(/ \//g, '/');
+  // all other space slashes are replaced by space
   if (score.includes(' /')) score = score.replace(/ \//g, ' ');
-  if (/\d -\d/.test(score)) score = score.replace(/ -/g, '-');
+  if (score.includes('/)')) score = score.replace(/\/\)/g, ')');
+  if (score.includes('(/')) score = score.replace(/\(\//g, '(');
 
   const unclosed = /(\d+-\d+\(\d+)0,/;
   if (unclosed.test(score)) {
@@ -47,11 +71,10 @@ export function punctuationAdjustments({ score }) {
     }
   }
 
-  let missingCloseParen = counts['('] === counts[')'] + 1;
-  let missingOpenParen = (counts['('] || 0) + 1 === counts[')'];
-  let missingCloseBracket = counts['['] === counts[']'] + 1;
+  getMissing();
+
   const hasAlpha = /[A-Za-z]+/.test(score);
-  const hasDigits = /[0-9]+/.test(score);
+  const hasDigits = /\d+/.test(score);
 
   if (!hasAlpha && !hasDigits) return { score: '' };
 
@@ -77,16 +100,15 @@ export function punctuationAdjustments({ score }) {
 
   if (counts['('] > (counts[')'] || 0) && score[score.length - 1] === '(') {
     score = score.slice(0, score.length - 1) + ')';
-    missingCloseParen = counts['('] === counts[')'] + 1;
-    missingOpenParen = counts['('] + 1 === counts[')'];
-    missingCloseBracket = counts['['] === counts[']'] + 1;
+    getMissing();
   }
 
   if (counts['('] === 1 && !counts[')'] && score[0] === '(') {
     score = score + ')';
+    getMissing();
   }
 
-  if (counts['('] > counts[')'] && score.slice(0, 2) === '((') {
+  if (counts['('] > (counts[')'] || 0) && score.slice(0, 2) === '((') {
     score = score.slice(1);
   }
 
@@ -96,32 +118,36 @@ export function punctuationAdjustments({ score }) {
     if (score[0] !== '(') score = '(' + score;
   }
 
-  if (counts[')'] > counts['(']) {
+  if (counts[')'] > (counts['('] || 0)) {
     if (score[0] === ')') score = '(' + score.slice(1);
   }
 
-  if (missingCloseParen && !missingCloseBracket) {
-    if (score.endsWith(9) || score.endsWith(0)) {
-      score = score.slice(0, score.length - 1) + ')';
-    } else if (!score.endsWith(')') || score.startsWith('((')) {
-      score = score + ')';
-    } else {
-      let reconstructed = '';
-      let open = 0;
-      // step through characters and insert close before open when open
-      for (const char of score.split('')) {
-        if (char === '(') {
-          if (open) {
-            reconstructed += ')';
-          } else {
-            open += 1;
-          }
+  if (noClose && (score.endsWith(9) || /\d{1,}0$/.test(score))) {
+    score = score.slice(0, score.length - 1) + ')';
+    getMissing();
+  }
+
+  if (noClose && (!score.endsWith(')') || score.startsWith('(('))) {
+    score = score + ')';
+    getMissing();
+  }
+
+  if (noClose) {
+    let reconstructed = '';
+    let open = 0;
+    // step through characters and insert close before open when open
+    for (const char of score.split('')) {
+      if (char === '(') {
+        if (open) {
+          reconstructed += ')';
+        } else {
+          open += 1;
         }
-        if (char === ')') open -= 1;
-        reconstructed += char;
       }
-      score = reconstructed;
+      if (char === ')') open -= 1;
+      reconstructed += char;
     }
+    score = reconstructed;
   }
 
   if (missingCloseBracket && !missingCloseParen) score = score + ']';

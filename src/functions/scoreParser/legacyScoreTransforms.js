@@ -341,7 +341,7 @@ export const scoreSlicer = (function () {
       return parsedScore;
     }
 
-    let tidy_score = fx.tidyScore(score);
+    let tidy_score = fx.sliceAndDice(score);
     let { transformed_score, applied_transformations } = fx.transformScore(tidy_score);
     if (applied_transformations.length) parsedScore.transformations = applied_transformations;
 

@@ -85,7 +85,7 @@
     "rollup-plugin-terser": "7.0.2",
     "typescript": "^4.9.4",
     "vite": "^4.0.3",
-    "vitest": "0.27.2"
+    "vitest": "0.28.0"
   },
   "dependencies": {
     "fast-fuzzy": "^1.12.0",

@@ -2,6 +2,7 @@ import { punctuationAdjustments } from './punctuationAdjustments';
 import { handleBracketSpacing } from './handleBracketSpacing';
 import { joinFloatingTiebreak } from './joinFloatingTiebreak';
 import { isNumeric } from '../../utilities/identification';
+import { matchKnownPatterns } from './matchKnownPatterns';
 import { utilities } from 'tods-competition-factory';
 import { properTiebreak } from './properTiebreak';
 import { containedSets } from './containedSets';
@@ -95,13 +96,14 @@ export function removeErroneous({ score }) {
 }
 
 export function handleWalkover({ score }) {
-  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score)) {
+  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score.toString().toLowerCase())) {
     return { matchUpStatus: 'walkover', score: '' };
   }
   return { score };
 }
 
 export function handleRetired({ score }) {
+  score = score.toString().toLowerCase();
   const re = /^(.*)(ret|con)+[A-Za-z ]*$/;
   if (re.test(score)) {
     const [leading] = score.match(re).slice(1);
@@ -191,40 +193,6 @@ export function excisions({ score }) {
   if (re.test(score)) {
     score = score.match(re).slice(1)[0].trim();
   }
-  return { score };
-}
-
-export function matchKnownPatterns({ score }) {
-  for (const punctuation of ['.', ',', ' ', '/']) {
-    const re = new RegExp(`^(\\d+)\\${punctuation}(\\d+)$`);
-    if (re.test(score)) {
-      const numbers = score.match(re).slice(1);
-      const diff = Math.abs(numbers[0] - numbers[1]);
-      if (diff <= 10 && diff >= 2) {
-        score = score.split(punctuation).join('-');
-      }
-    }
-  }
-
-  const noSpacing = /^\d{3,}\(/;
-  const parenStart = /^\(\d+\)\d+/;
-  const considerations = [noSpacing, parenStart];
-
-  considerations.forEach(() => {
-    const parts = score.split(' ');
-    score = parts
-      .map((part) => {
-        if (noSpacing.test(part)) {
-          part = part.replace('(', ' (');
-        }
-        if (parenStart.test(part)) {
-          part = part.replace(')', ') ');
-        }
-        return part;
-      })
-      .join(' ');
-  });
-
   return { score };
 }
 
