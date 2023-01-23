@@ -136,9 +136,9 @@ export function joinFloatingTiebreak({ score }) {
       const getContained = /^\((.*)\)$/;
       const isContained = getContained.test(set);
       const setType =
-        (new RegExp(standardSet).test(set) && 'standard') ||
-        (new RegExp(tiebreakSet).test(set) && 'tiebreak') ||
         (new RegExp(matchTiebreak).test(set) && 'super') ||
+        (new RegExp(tiebreakSet).test(set) && 'tiebreak') ||
+        (new RegExp(standardSet).test(set) && 'standard') ||
         'unknown';
       profile.push(setType);
 

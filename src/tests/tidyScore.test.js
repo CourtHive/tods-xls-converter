@@ -16,27 +16,27 @@ const scores = [
   // pattern /\d+,\s?\d/+\/\d+\s?\d+/
   { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
 
+  // too many sets
+  { score: '6 4, 6 16 4, 6 2', expectation: { score: '6-4 6-1' } },
+
   // discard indecipherable
-  { score: '4--2, 40-40', expectation: { score: '4-2' } },
-  { score: '6 4, 6 16 4, 6 2', expectation: { score: '6-4 6-2' } },
   { score: '6 4, 6', expectation: { score: '6-4' } },
-  
-  //
-  { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 4-6 6-2' } },
+  */
+
+  // space separated sets
+  { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 6-2' } },
   { score: '7 6 (8 6)6 1', expectation: { score: '7-6(6) 6-1' } },
 
+  // throw out equivalent sets when there is not 'RETIRED status
+  { score: '4--2, 40-40', expectation: { score: '4-2' } },
+
   // extra digits
-  { score: '6--2, 6--11', expectation: { score: '6-2, 6-1' } },
-  { score: '6--3, 6--22', expectation: { score: '6-3 6-2' } },
   { score: '6-12, 6-3', expectation: { score: '6-1 6-3' } },
   { score: '6-4, 5-76, 6-3', expectation: { score: '6-4 5-7 6-3' } },
-  { score: '6-3, 6-23', expectation: { score: '6-3 6-2' } },
   { score: '6-3, 7-54', expectation: { score: '6-3 7-5' } },
-
-  // tidyScore handles, but should be handled here
-  { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
-  { score: '6 26 3', expectation: { score: '6-2 6-3' } },
-  */
+  { score: '6--3, 6--22', expectation: { score: '6-3 6-2' } },
+  { score: '6--2, 6--11', expectation: { score: '6-2 6-1' } },
+  { score: '6-3, 6-23', expectation: { score: '6-3 6-2' } },
 
   // various set separators
   { score: '6 4, 6-4', expectation: { score: '6-4 6-4' } },
@@ -68,6 +68,8 @@ const scores = [
   { score: '6076(3)', expectation: { score: '6-0 7-6(3)' } },
   { score: '6367(3)104', expectation: { score: '6-3 6-7(3) [10-4]' } },
   { score: '6367 (3) 104', expectation: { score: '6-3 6-7(3) [10-4]' } },
+  { score: '6 26 3', expectation: { score: '6-2 6-3' } },
+  { score: '6 3, 6, 2', expectation: { score: '6-3 6-2' } },
 
   // join numbers separated by a dash and a space
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },

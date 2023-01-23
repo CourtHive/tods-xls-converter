@@ -62,5 +62,20 @@ export function matchKnownPatterns({ score }) {
     score = score.replace(noSetSeparation, reformatted);
   }
 
+  let spaceSeparatedSets = score.match(/\d \d /);
+  spaceSeparatedSets?.forEach((ss) => {
+    const replacement = ss
+      .slice(0, ss.length - 1)
+      .split(' ')
+      .join('-');
+    score = score.replace(ss, replacement);
+  });
+
+  spaceSeparatedSets = score.match(/ \d \d$/);
+  spaceSeparatedSets?.forEach((ss) => {
+    const replacement = ' ' + ss.slice(1).split(' ').join('-');
+    score = score.replace(ss, replacement);
+  });
+
   return { score };
 }
