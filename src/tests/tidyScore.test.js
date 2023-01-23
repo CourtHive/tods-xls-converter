@@ -13,15 +13,15 @@ const end = 0;
 
 const scores = [
   /*
-  // pattern /\d+,\s?\d/+\/\d+\s?\d+/
-  { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
-
   // too many sets
   { score: '6 4, 6 16 4, 6 2', expectation: { score: '6-4 6-1' } },
+  */
 
   // discard indecipherable
   { score: '6 4, 6', expectation: { score: '6-4' } },
-  */
+
+  // pattern /\d+,\s?\d/+\/\d+\s?\d+/
+  { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
 
   // space separated sets
   { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 6-2' } },

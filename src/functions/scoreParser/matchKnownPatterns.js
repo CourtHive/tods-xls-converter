@@ -53,6 +53,16 @@ export function matchKnownPatterns({ score }) {
     }
   }
 
+  const singleSetCommaSeparation = /^\d \d,/;
+  if (singleSetCommaSeparation.test(score)) {
+    const set = score.match(singleSetCommaSeparation)[0];
+    const replacement = set
+      .slice(0, set.length - 1)
+      .split(' ')
+      .join('-');
+    score = score.replace(set, replacement);
+  }
+
   // pattern \d+-\d{2}-\d+ => \d-\d \d-\d
   const noSetSeparation = /(\d+)-(\d{2})-(\d+)/;
   if (noSetSeparation.test(score)) {
@@ -76,6 +86,18 @@ export function matchKnownPatterns({ score }) {
     const replacement = ' ' + ss.slice(1).split(' ').join('-');
     score = score.replace(ss, replacement);
   });
+
+  // pattern /\d+,\s?\d/+\/\d+\s?\d+/
+  const slashCommaSets = /^\d, *\d\/\d, *\d/;
+  if (slashCommaSets.test(score)) {
+    const excerpt = score.match(slashCommaSets)[0];
+    const replacement =
+      excerpt
+        .split('/')
+        .map((e) => `(${e})`)
+        .join(' ') + ' ';
+    score = score.replace(excerpt, replacement);
+  }
 
   return { score };
 }
