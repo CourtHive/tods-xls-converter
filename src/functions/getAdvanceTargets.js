@@ -80,7 +80,7 @@ export function getAdvanceTargets(params) {
 
     if (bestSideMatch) {
       if (!side || bestSideMatch.confidence > side.confidence) {
-        if (columnResultIndex) {
+        if (columnResultIndex && !byeAdvancement && !['w/o'].includes(result)) {
           columnsConsumed = columnResultIndex;
         }
         side = bestSideMatch;

@@ -200,10 +200,10 @@ export const config = {
     ],
     headerColumns: [
       { attr: 'ignored', header: ['st'] },
-      { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '[1-9]+' },
+      { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
-      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `[0-9]*` },
-      { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `\\d+` },
+      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,3}$` },
+      { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `^\\d{0,2}$` },
       {
         attr: LAST_NAME,
         header: [
@@ -220,16 +220,18 @@ export const config = {
           'round 1'
         ],
         limit: 1,
-        valueRegex: '[A-Za-z]*'
+        skipWords: ['0'],
+        valueRegex: '^([A-Za-z]+)$'
       },
       {
         attr: FIRST_NAME,
+        skipWords: ['0'],
         header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
         limit: 1,
-        valueRegex: `[A-Za-z]+|0`
+        valueRegex: `^([A-Za-z]+)$`
       },
       {
-        attr: PERSON_ID,
+        attr: PERSON_ID, // sometimes appears also in the Rank column
         header: [
           { regex: 'itn$' },
           { text: 'aita', startsWith: true },
@@ -246,14 +248,15 @@ export const config = {
           'state',
           'first name',
           'city',
-          'nationality'
+          'nationality',
+          'rank'
         ],
         limit: 1,
-        skipWords: ['reg', 'umpire', '0', 'a/f', 'new id'],
-        valueRegex: '\\d{4,}$',
+        skipWords: ['reg', 'umpire', '0', 'a/f', 'new id', 'app'],
+        valueRegex: '(\\d{4,})$',
         log: true
       },
-      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '[A-Za-z]*' },
+      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z]*$' },
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: CITY, header: ['city'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
@@ -313,7 +316,7 @@ export const config = {
     drawInfo: [
       {
         attribute: [TOURNAMENT_NAME],
-        cellRef: 'A1' // function to look at A1, A2 and select the longest value or the value which includes 'tournament'
+        cellRefs: ['A1', 'B1'] // function to look at A1, A2 and select the longest value or the value which includes 'tournament'
       },
       {
         attribute: [TOURNAMENT_ID],
@@ -418,6 +421,7 @@ export const config = {
       if (parts.length < 3 || !parts.every(isNumeric)) return;
       let [month, day, year] = parts.map((number) => (number.toString()[1] ? number : '0' + number));
       if (year.length === 2) year = '20' + year;
+      if (year.length > 4 || parseInt(year) < 2005) return;
       return [year, month, day].join('-');
     },
     dateTimeParser: (dateTimeString) => {
@@ -452,10 +456,6 @@ export const config = {
       const state = splitValue.length > 1 ? splitValue[1].trim() : '';
       return state?.toLowerCase() === 'india' ? '' : state;
     },
-    isProviderId: (value) => {
-      const providerId = isNumeric(value) && (value === 0 || value.toString().length >= 6);
-      return providerId;
-    },
     columnCharacter: ({ columnProfile }) => {
       const { values } = columnProfile;
       const allProgressionKeys = values.every(
@@ -466,6 +466,14 @@ export const config = {
         columnProfile.character = 'progression';
         columnProfile.keyMap = {};
         columnProfile.rows = [];
+        return columnProfile.character;
+      }
+      const possiblePersonId = values.some((value) => /(\d{4,})$/.test(value));
+      const potentialPersonId = values.every(
+        (value) => isNumeric(value) && (parseInt(value) === 0 || /(\d{4,})$/.test(value))
+      );
+      if (potentialPersonId && possiblePersonId) {
+        columnProfile.character = PERSON_ID;
         return columnProfile.character;
       }
     },

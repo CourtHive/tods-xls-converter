@@ -101,5 +101,10 @@ export function matchKnownPatterns({ score }) {
     score = score.replace(excerpt, replacement);
   }
 
+  const missedSet0 = /\(6-\)/g;
+  if (missedSet0.test(score)) {
+    score = score.replace(missedSet0, '(6-0)');
+  }
+
   return { score };
 }

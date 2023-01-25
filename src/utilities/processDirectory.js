@@ -187,11 +187,11 @@ export function processDirectory({
           const result = tournamentEngine.addEvent({
             event: {
               category: { ageCategoryCode: category },
-              endDate: startDate,
+              endDate: startDate || tournamentInfo.startDate,
               drawDefinitions,
               extensions,
               eventName,
-              startDate,
+              startDate: startDate || tournamentInfo.startDate,
               eventId,
               entries,
               gender
@@ -232,7 +232,7 @@ export function processDirectory({
     }
 
     const matchUps = tournamentEngine.allTournamentMatchUps({
-      context: { tournamentName, level: 'REG', identifierType: profile?.identifierType, ...matchUpContext }
+      context: { tournamentName, level: 'REG', identifierType: profile?.identifierType, ...matchUpContext, fileName }
     }).matchUps;
 
     if (getLoggingActive('finalPositions')) {

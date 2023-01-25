@@ -207,7 +207,7 @@ export function processSheet({
 
   const sheetType = sheetDefinition?.type;
   const skipped = sheetTypes.length && sheetType && !sheetTypes.includes(sheetType);
-  if (!hasValues || skipped) {
+  if (!hasValues?.length || skipped) {
     return { analysis: { skipped }, sheetType, hasValues, ...SUCCESS };
   }
 

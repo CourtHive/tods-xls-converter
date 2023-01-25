@@ -15,9 +15,13 @@ export function extractInfo({ profile, sheet, infoClass }) {
 
   if (infoClass && accessors) {
     accessors.forEach((accessor) => {
-      if (accessor.cellRef) {
-        const result = getCellValue(sheet[accessor.cellRef]);
-        extractObject[accessor.attribute] = result;
+      const accessorCellRefs =
+        (accessor.cellRef && [accessor.cellRef]) || (Array.isArray(accessor.cellRefs) && accessor.cellRefs);
+      if (accessorCellRefs?.length) {
+        const results = accessorCellRefs
+          .map((cellRef) => getCellValue(sheet[cellRef]))
+          .filter((result) => result?.length > 3);
+        extractObject[accessor.attribute] = results[0];
       } else if (accessor.regex) {
         const { values } = findRegexRefs({ sheet, ...accessor, profile });
         if (values.length) {

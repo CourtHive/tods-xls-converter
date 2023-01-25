@@ -98,8 +98,8 @@ export function getEntries({
 
     const firstRoundColumn = rounds?.[0] || columns[boundaryIndex + 1];
     const columnProfile = getColumnProfile(firstRoundColumn);
-    const entriesOnPositionRows = positionRows.every((row) => columnProfile.rows.includes(row));
-    const columnRowsOnPositionRows = columnProfile.rows.every((row) => positionRows.includes(row));
+    const entriesOnPositionRows = positionRows.every((row) => columnProfile?.rows.includes(row));
+    const columnRowsOnPositionRows = columnProfile?.rows.every((row) => positionRows.includes(row));
 
     if (entriesOnPositionRows || columnRowsOnPositionRows) {
       return getFirstRoundEntries({

@@ -68,14 +68,14 @@ it('can process tests', () => {
   let writeResultIndex;
 
   const sheetTypes = [];
-  const sheetNumbers = [];
+  const sheetNumbers = [6];
   const sheetLimit = 0;
 
   const processLimit = 0;
-  const startIndex = 0;
+  const startIndex = 8;
 
   resetLogging();
-  setLoggingActive(false);
+  setLoggingActive(true);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
     roundNumbers: [1],
