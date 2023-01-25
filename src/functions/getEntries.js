@@ -199,8 +199,15 @@ export function getEntries({
         delete participant.seedValue;
       }
       const participantIsBye = isBye(participant);
-      const { drawPosition, personId, firstName, lastName, ranking, participantName, seedValue } = participant;
+      let { drawPosition, personId, firstName, lastName, ranking, participantName, seedValue } = participant;
       const idAttributes = [firstName, lastName, ranking, participantName].filter(Boolean);
+      const personIdHeaderInfo = profile.headerColumns?.find((hc) => hc.attr === PERSON_ID);
+      const personIdValueRegex = personIdHeaderInfo?.valueRegex;
+      if (personId && personIdHeaderInfo.extract && personIdValueRegex) {
+        const re = new RegExp(personIdValueRegex);
+        const value = personId.toString().match(re)?.[1];
+        personId = value;
+      }
       const participantId =
         personId || (idAttributes.length && generateParticipantId({ attributes: idAttributes })?.participantId);
 

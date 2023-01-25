@@ -53,5 +53,5 @@ export function tidyScore(score, stepLog, fullLog) {
   const isValid = isValidPattern(score);
   if (!isValid) score = '';
 
-  return { score, matchUpStatus, modifications, isValid };
+  return { score, matchUpStatus: matchUpStatus?.toUpperCase(), modifications, isValid };
 }

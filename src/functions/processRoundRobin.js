@@ -253,7 +253,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
             scoreString
           }).outcome;
         const stringScore =
-          matchUpStatus !== WALKOVER && !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
+          matchUpStatus !== WALKOVER && !outcome?.score?.scoreStringSide1 ? { [sideString]: scoreString } : undefined;
         const score = { ...outcome?.score, ...existingScore, ...stringScore };
 
         const matchUp = {

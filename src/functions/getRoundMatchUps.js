@@ -191,14 +191,14 @@ export function getRoundMatchUps({
         const sideString = matchUp.winningSide === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
         matchUp.score = { [sideString]: result };
         const { score: scoreString, matchUpStatus, isValid } = tidyScore(result);
-        if (matchUpStatus && !matchUp.matchUpStatus) matchUp.matchUpStatus = matchUpStatus;
+        if (matchUpStatus) matchUp.matchUpStatus = matchUpStatus;
         const outcome =
           isValid &&
           mocksEngine.generateOutcomeFromScoreString({
             winningSide: matchUp.winningSide,
             scoreString
           }).outcome;
-        const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
+        const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: scoreString } : undefined;
         const score = { ...outcome?.score, ...stringScore };
         matchUp.score = score;
         if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });

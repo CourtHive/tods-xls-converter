@@ -12,6 +12,21 @@ const end = 0;
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
+  /*
+  { score: '(4/6 6/1 7/6(2)', expectation: { score: '4-6 6-1 7-6(2)' } },
+  { score: '6/0/6/1', expectation: { score: '6-0 6-1' } },
+  { score: '(6/4), 6/1)', expectation: { score: '6-4 6-1' } },
+  { score: '6/4, 6/', expectation: { score: '6-4 6-0' } },
+  { score: '6/2, 6', expectation: { score: '6-2' } },
+  { score: ' 6-, 6-4', expectation: { score: '6-0 6-4' } },
+  { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
+  { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
+  { score: '1-6, 6-4, (5)', expectation: { score: '1-6 6-4 [10-5]' } },
+  { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
+  { score: '(6, 0)(6, )', expectation: { score: '6-0 6-0' } },
+  { score: '(5, 0)( con', expectation: { score: '5-0', matchUpStatus: 'RETIRED' } },
+  */
+
   // missed 0 set score ending
   { score: '(6-)(6-2)', expectation: { score: '6-0 6-2' } },
 

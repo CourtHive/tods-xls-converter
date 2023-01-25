@@ -62,7 +62,7 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
       Filename: ['fileName']
     },
     valuesMap: {
-      MatchUpStatus: { COMPLETED: 'CO', RETIRED: 'RET', DEFAULTED: 'DEF', TO_BE_PLAYED: 'TBP' },
+      MatchUpStatus: { COMPLETED: 'CO', RETIRED: 'RET', DEFAULTED: 'DEF', TO_BE_PLAYED: 'TBP', WALKOVER: 'WO' },
       Gender: { MALE: 'M', FEMALE: 'F', MIXED: 'X', ANY: 'A' }
     },
     functionMap: {

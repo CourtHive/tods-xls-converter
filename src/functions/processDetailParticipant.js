@@ -6,7 +6,9 @@ import { getPairParticipant } from './getPairParticipant';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { normalizeDiacritics } from 'normalize-text';
 
+import { PERSON_ID } from '../constants/attributeConstants';
 import { SUCCESS } from '../constants/resultConstants';
+
 const { DIRECT_ACCEPTANCE } = entryStatusConstants;
 const { INDIVIDUAL } = participantConstants;
 const { COMPETITOR } = participantRoles;
@@ -120,6 +122,13 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         if (!participantName) return;
 
         const idAttributes = [firstName, lastName, participantName].filter(Boolean);
+        const personIdHeaderInfo = profile.headerColumns?.find((hc) => hc.attr === PERSON_ID);
+        const personIdValueRegex = personIdHeaderInfo?.valueRegex;
+        if (personId && personIdHeaderInfo?.extract && personIdValueRegex) {
+          const re = new RegExp(personIdValueRegex);
+          const value = personId.toString().match(re)?.[1];
+          personId = value;
+        }
         const participantId =
           personId || (idAttributes.length && generateParticipantId({ attributes: idAttributes })?.participantId);
 

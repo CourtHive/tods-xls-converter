@@ -68,11 +68,11 @@ it('can process tests', () => {
   let writeResultIndex;
 
   const sheetTypes = [];
-  const sheetNumbers = [6];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   const processLimit = 0;
-  const startIndex = 8;
+  const startIndex = 0;
 
   resetLogging();
   setLoggingActive(true);

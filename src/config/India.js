@@ -253,7 +253,8 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['reg', 'umpire', '0', 'a/f', 'new id', 'app'],
-        valueRegex: '(\\d{4,})$',
+        valueRegex: '(\\d{5,})[ A-Za-z]*$',
+        extract: true,
         log: true
       },
       { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z]*$' },
