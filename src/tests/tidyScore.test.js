@@ -13,6 +13,13 @@ const end = 0;
 
 const scores = [
   /*
+  { score: '6-3, 5-7-, 6-3', expectation: { score: '6-3 5-7 6-3' } },
+  { score: '5-3, 4-1s', expectation: { score: '5-3 4-1' } },
+  { score: '6/3, 6/7(5), (4)', expectation: { score: '6-3 6-7(5) [10-4]' } },
+  { score: '6-3, 3-0 coceed', expectation: { score: '6-3 3-0', matchUpStatus: 'RETIRED' } },
+  { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
+  { score: '76(2) 67(3)64', expectation: { score: '7-6(2) 6-7(3) 6-4' } },
+  { score: '26 76(7)61', expectation: { score: '2-6 7-6(7) 6-1' } },
   { score: '(4/6 6/1 7/6(2)', expectation: { score: '4-6 6-1 7-6(2)' } },
   { score: '6/0/6/1', expectation: { score: '6-0 6-1' } },
   { score: '(6/4), 6/1)', expectation: { score: '6-4 6-1' } },

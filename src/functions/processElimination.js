@@ -299,7 +299,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
       []
     );
 
-    if (!roundTotals.includes(matchUpsCount)) {
+    if (matchUpsCount && !roundTotals.includes(matchUpsCount)) {
       const message = `matchUpsTotal indicates incomplete round: ${matchUpsCount}`;
       pushGlobalLog({
         method: '!!!!!!',

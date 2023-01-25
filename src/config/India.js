@@ -253,7 +253,7 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['reg', 'umpire', '0', 'a/f', 'new id', 'app'],
-        valueRegex: '(\\d{4,})[ A-Za-z]*$',
+        valueRegex: '(\\d{5,})[ A-Za-z]*$',
         extract: true,
         log: true
       },
@@ -469,9 +469,9 @@ export const config = {
         columnProfile.rows = [];
         return columnProfile.character;
       }
-      const possiblePersonId = values.some((value) => /(\d{4,})$/.test(value));
+      const possiblePersonId = values.some((value) => /(\d{5,})$/.test(value));
       const potentialPersonId = values.every(
-        (value) => isNumeric(value) && (parseInt(value) === 0 || /(\d{4,})$/.test(value))
+        (value) => isNumeric(value) && (parseInt(value) === 0 || /(\d{5,})$/.test(value))
       );
       if (potentialPersonId && possiblePersonId) {
         columnProfile.character = PERSON_ID;
