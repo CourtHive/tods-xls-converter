@@ -12,6 +12,18 @@ const end = 0;
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
+  // missed 0 set score ending
+  { score: '(6-)(6-2)', expectation: { score: '6-0 6-2' } },
+
+  // discard invalid
+  { score: '44751', expectation: { score: '' } },
+
+  // remove extraneous enclosing parens
+  { score: '(6-3, 7-6 (1) )', expectation: { score: '6-3 7-6(1)' } },
+  { score: '(6-1, 6-7(7-2), 6-2)', expectation: { score: '6-1 6-7(2) 6-2' } },
+  { score: '7/6(2), 6/0)', expectation: { score: '7-6(2) 6-0' } },
+  { score: '6-4, 6-7(17-15), 6-4)', expectation: { score: '6-4 6-7(15) 6-4' } },
+
   // too many sets
   { score: '6 4, 6 16 4, 6 2', expectation: { score: '6-4 6-1' } },
 
@@ -248,7 +260,7 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
   const singleScore = end - start === 1;
   if (singleScore) console.log({ score });
 
-  const { score: tidy, matchUpStatus, isValid } = tidyScore(score, singleScore, fullLog, iteration);
+  const { score: tidy, matchUpStatus, modifications, isValid } = tidyScore(score, singleScore, fullLog, iteration);
 
   let metExpectation;
   if (expectation?.matchUpStatus) {
@@ -265,8 +277,8 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
     metExpectation = true;
   }
 
-  if (validPatterns && !isValid) {
-    console.log({ isValid, tidy });
+  if ((validPatterns && !isValid) || singleScore) {
+    console.log({ isValid, score, tidy, modifications });
   }
 
   if (expectations && !metExpectation) {
