@@ -190,13 +190,15 @@ export function getRoundMatchUps({
       if (matchUp.winningSide && result && ![WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus)) {
         const sideString = matchUp.winningSide === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
         matchUp.score = { [sideString]: result };
-        const { score: scoreString, matchUpStatus } = tidyScore(result);
-        if (matchUpStatus && !matchUp.matchUpStatus) matchUp.matchUpStatus = matchUpStatus;
-        const { outcome } = mocksEngine.generateOutcomeFromScoreString({
-          winningSide: matchUp.winningSide,
-          scoreString
-        });
-        const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
+        const { score: scoreString, matchUpStatus, isValid } = tidyScore(result);
+        if (matchUpStatus) matchUp.matchUpStatus = matchUpStatus;
+        const outcome =
+          isValid &&
+          mocksEngine.generateOutcomeFromScoreString({
+            winningSide: matchUp.winningSide,
+            scoreString
+          }).outcome;
+        const stringScore = !outcome?.score?.scoreStringSide1 ? { [sideString]: scoreString } : undefined;
         const score = { ...outcome?.score, ...stringScore };
         matchUp.score = score;
         if (getLoggingActive('scores')) console.log({ result, scoreString, outcome, score });

@@ -3,10 +3,7 @@ import { isNumeric } from '../utilities/identification';
 import { utilities } from 'tods-competition-factory';
 import { getRow } from './sheetAccess';
 
-// import { FIRST_NAME, LAST_NAME, PERSON_ID } from '../constants/attributeConstants';
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
-// import { RESULT, ROUND } from '../constants/sheetElements';
-import { PERSON_ID } from '../constants/attributeConstants';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
 export function getColumnCharacter({
@@ -22,23 +19,13 @@ export function getColumnCharacter({
     consecutiveNumbers,
     lastNumericValue,
     containsNumeric,
-    // scoreLikeCount,
     containsAlpha,
-    allProviderId,
     allNumeric,
     values,
     column
   } = columnProfile;
 
   if (columnProfile.character) return { character: columnProfile.character };
-  const existingAttributes = Object.values(attributeMap);
-
-  if (allProviderId && existingAttributes.includes(PERSON_ID)) {
-    const character = PERSON_ID;
-    columnProfile.character = character;
-    if (!attributeMap[column]) attributeMap[column] = character;
-    return { character };
-  }
 
   // check for erroneous values in position column when reasonable drawSize achieved
   if (allNumeric && !consecutiveNumbers && utilities.isPowerOf2(lastConsecutiveValue)) {

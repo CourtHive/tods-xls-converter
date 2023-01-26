@@ -35,12 +35,12 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
         'sides.1.participant.individualParticipants.0.participantName',
         'sides.1.participant.participantName'
       ],
-      Side2Player1Id: [
+      Side2Player1ID: [
         'sides.1.participant.individualParticipants.0.participantId',
         'sides.1.participant.participantId'
       ],
       Side2Player2: ['sides.1.participant.individualParticipants.1.participantName'],
-      Side2Player2Id: ['sides.1.participant.individualParticipants.1.participantId'],
+      Side2Player2ID: ['sides.1.participant.individualParticipants.1.participantId'],
 
       WinningSide: ['winningSide'],
       ScoreString: ['perspectiveScoreString'],
@@ -58,17 +58,40 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
       RoundNumber: ['roundNumber'],
       RoundPosition: ['roundPosition'],
       DrawStructure: ['drawType'],
-      IdentifierType: ['identifierType']
+      IdentifierType: ['identifierType'],
+      Filename: ['fileName']
     },
     valuesMap: {
-      MatchUpStatus: { COMPLETED: 'CO', RETIRED: 'RET', DEFAULTED: 'DEF', TO_BE_PLAYED: 'TBP' },
+      MatchUpStatus: { COMPLETED: 'CO', RETIRED: 'RET', DEFAULTED: 'DEF', TO_BE_PLAYED: 'TBP', WALKOVER: 'WO' },
       Gender: { MALE: 'M', FEMALE: 'F', MIXED: 'X', ANY: 'A' }
     },
     functionMap: {
       DrawStructure: (value) => (value === ROUND_ROBIN ? 'RR' : 'KO'),
       IndoorOutdoor: (value) => getFirstChar(value),
       MatchUpType: (value) => getFirstChar(value)
-    }
+    },
+    sortOrder: [
+      'TournamentEndDate',
+      'TournamentName',
+      'TournamentID',
+      'MatchUpStartDate',
+      'MatchUpEndDate',
+      'MatchUpID',
+      'MatchUpStatus',
+      'MatchUpType',
+      'RoundNumber',
+      'RoundPosition',
+      'ScoreString',
+      'WinningSide',
+      'Side1Player1ID',
+      'Side2Player1ID',
+      'Side1Player2ID',
+      'Side2Player2ID',
+      'Side1Player1',
+      'Side2Player1',
+      'Side1Player2',
+      'Side2Player2'
+    ]
   };
   const csvMatchUps = utilities.JSON2CSV(matchUps, config);
   writeFileSync(`${writeDir}/matchUps.csv`, csvMatchUps, 'UTF-8');

@@ -32,7 +32,6 @@ export function getColumnAssessment({
         if (onlyAlpha(rawValue, profile)) {
           assessment.containsAlpha = true;
           assessment.allNumeric = false;
-          assessment.allProviderId = false;
         } else if (onlyNumeric(rawValue, profile)) {
           assessment.containsNumeric = true;
           assessment.allAlpha = false;
@@ -46,10 +45,6 @@ export function getColumnAssessment({
         } else if (value) {
           assessment.allNumeric = false;
           assessment.allAlpha = false;
-        }
-
-        if (assessment.allProviderId) {
-          assessment.allProviderId = profile?.isProviderId?.(value);
         }
 
         if (
@@ -70,7 +65,6 @@ export function getColumnAssessment({
     {
       attribute: attributeMap[column],
       consecutiveNumbers: truthiness,
-      allProviderId: truthiness,
       containsNumeric: false,
       allNumeric: truthiness,
       allAlpha: truthiness,
@@ -88,7 +82,6 @@ export function getColumnAssessment({
     assessment.lastConsecutiveValue = undefined;
     assessment.lastNumericValue = undefined;
     assessment.consecutiveNumbers = false;
-    assessment.allProviderId = undefined;
   }
 
   // 1 is technically a powerOf2, but it is invalid for a drawSize

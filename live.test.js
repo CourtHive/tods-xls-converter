@@ -64,7 +64,7 @@ it('can process tests', () => {
   const writeDir = './examples/sheets/processed/IND';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = false;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   const sheetTypes = [];
@@ -97,12 +97,12 @@ it('can process tests', () => {
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
-  setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
+  setLoggingActive(false, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
 
   const result = processDirectory({
-    captureProcessedData: false, // set to false to bulk process > 200 files
+    captureProcessedData: true, // set to false to bulk process > 200 files
     // tournamentContext: { startDate: '2022-06-06' },
     processStructures: true,
     includeWorkbooks: false,

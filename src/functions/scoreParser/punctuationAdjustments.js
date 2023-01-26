@@ -150,6 +150,7 @@ export function punctuationAdjustments({ score }) {
     score = reconstructed;
   }
 
+  getMissing();
   if (missingCloseBracket && !missingCloseParen) score = score + ']';
 
   // this is potentially problematic as enclosing with '[]' yields tiebreak...
@@ -157,13 +158,14 @@ export function punctuationAdjustments({ score }) {
   // Really it would be better to convert to set and determine later which type of tiebreak based on previous set
   if (score.includes('([') && score.includes('])')) {
     score = score.split('([').join('[').split('])').join(']');
+    getMissing();
   }
 
   if (/\(\d+0$/.test(score)) {
     score = score.slice(0, score.length - 1) + ')';
   }
 
-  counts = instanceCount(score.split(''));
+  getMissing();
 
   if (counts[')'] === 1 && !counts['('] && score.endsWith(')')) {
     score = score.slice(0, score.length - 1);
@@ -171,6 +173,20 @@ export function punctuationAdjustments({ score }) {
 
   if (score.startsWith('(') && score.endsWith(')') && counts['('] === 1 && counts[')'] === 1) {
     score = score.slice(1, score.length - 1);
+    getMissing();
+  }
+
+  const openFirst = (value) => {
+    const open = value.indexOf('(');
+    const close = value.indexOf(')');
+    return open >= 0 && close >= 0 && open < close;
+  };
+  if (/^\([\d ]+.*[\d ]+\)$/.test(score) && counts['('] === counts[')']) {
+    const proposed = score.slice(1, score.length - 1);
+    if (openFirst(proposed)) {
+      score = proposed;
+      getMissing();
+    }
   }
 
   return { score };

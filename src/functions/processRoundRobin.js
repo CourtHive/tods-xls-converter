@@ -203,7 +203,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
       if (positionRow) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];
-        const { score: scoreString, matchUpStatus: normalizedMatchUpStatus } = tidyScore(result);
+        const { score: scoreString, matchUpStatus: normalizedMatchUpStatus, isValid } = tidyScore(result);
         const resultIsMatchOutcome =
           result &&
           onlyAlpha(result, profile) &&
@@ -214,11 +214,8 @@ export function getRoundRobinValues(analysis, profile, sheet) {
         const sideString = sidePerspective === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
         const positioning = drawPositions.slice().sort().join('|');
 
-        const {
-          outcome: {
-            score: { sets }
-          }
-        } = mocksEngine.generateOutcomeFromScoreString({ scoreString });
+        const rawOutcome = isValid && mocksEngine.generateOutcomeFromScoreString({ scoreString }).outcome;
+        const sets = rawOutcome?.score?.sets;
         const winInstances = sets ? utilities.instanceCount(sets.map(({ winningSide }) => winningSide)) : {};
         const winnerBySets =
           (winInstances[1] && winInstances[2] && (winInstances[1] > winInstances[2] ? 1 : 2)) ||
@@ -249,12 +246,14 @@ export function getRoundRobinValues(analysis, profile, sheet) {
             : undefined;
 
         const existingScore = positionedMatchUps[positioning]?.score;
-        const { outcome } = mocksEngine.generateOutcomeFromScoreString({
-          winningSide: winningSide || winningSideByPerspective,
-          scoreString
-        });
+        const outcome =
+          isValid &&
+          mocksEngine.generateOutcomeFromScoreString({
+            winningSide: winningSide || winningSideByPerspective,
+            scoreString
+          }).outcome;
         const stringScore =
-          matchUpStatus !== WALKOVER && !outcome?.score?.scoreStringSide1 ? { [sideString]: result } : undefined;
+          matchUpStatus !== WALKOVER && !outcome?.score?.scoreStringSide1 ? { [sideString]: scoreString } : undefined;
         const score = { ...outcome?.score, ...existingScore, ...stringScore };
 
         const matchUp = {

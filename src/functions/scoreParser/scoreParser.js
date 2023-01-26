@@ -28,10 +28,16 @@ const processingOrder = [
 
 export function tidyScore(score, stepLog, fullLog) {
   let matchUpStatus, result, attributes;
+  const modifications = [];
 
   processingOrder.forEach((method) => {
     result = transforms[method]({ score, matchUpStatus, attributes });
-    if (stepLog && (fullLog || result.score !== score || result.matchUpStatus !== matchUpStatus)) {
+    const modified = result.score !== score;
+    if (modified) {
+      modifications.push({ method, score: result.score });
+    }
+
+    if (stepLog && (fullLog || modified || result.matchUpStatus !== matchUpStatus)) {
       if (matchUpStatus) {
         console.log({ score: result.score, matchUpStatus }, method);
       } else {
@@ -45,6 +51,7 @@ export function tidyScore(score, stepLog, fullLog) {
   });
 
   const isValid = isValidPattern(score);
+  if (!isValid) score = '';
 
-  return { score, matchUpStatus, isValid };
+  return { score, matchUpStatus: matchUpStatus?.toUpperCase(), modifications, isValid };
 }
