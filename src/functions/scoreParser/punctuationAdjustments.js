@@ -15,6 +15,33 @@ export function punctuationAdjustments({ score }) {
     score = score.replace(s, `(${trimmedBracketValue})`);
   }
 
+  let doubleBracketed = /\(\(\d-\d\)\)/g;
+  if (doubleBracketed.test(score)) {
+    const dbls = score.match(doubleBracketed);
+    if (dbls.length) {
+      dbls.forEach((dbl) => {
+        const m = dbl.match(/\((\(\d-\d\))\)/).slice(1)[0];
+        score = score.replace(dbl, m);
+      });
+    }
+  }
+
+  doubleBracketed = /\(\((\d)\)\)/g;
+  if (doubleBracketed.test(score)) {
+    const dbls = score.match(doubleBracketed);
+    if (dbls.length) {
+      dbls.forEach((dbl) => {
+        const m = dbl.match(/\((\(\d\))\)/).slice(1)[0];
+        score = score.replace(dbl, m);
+      });
+    }
+  }
+
+  // must occur before repating dash or dash with comma
+  if (/(^|\s)6-,/.test(score)) {
+    score = score.replace(/(^|\s)6-,/g, '6-0,');
+  }
+
   // repeating dash or dash with comma
   const repeatingDash = new RegExp(/[-,]{2,}/g);
   score = score.replace(repeatingDash, '-');

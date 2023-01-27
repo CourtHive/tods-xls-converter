@@ -5,17 +5,15 @@ const validPatterns = true;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 1;
+const end = 0;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
-  { score: '6-3, 3-0 coceed', expectation: { score: '6-3 3-0', matchUpStatus: 'RETIRED' } },
   /*
-  { score: ' 6-, 6-4', expectation: { score: '6-0 6-4' } },
-  { score: '(4-6, 6-2, 7-6((7-2))', expectation: { score: '4-6 6-2 7-6(2)' } },
+  { score: '1-6, 6-4, (5)', expectation: { score: '1-6 6-4 [10-5]' } },
   { score: '(4/6 6/1 7/6(2)', expectation: { score: '4-6 6-1 7-6(2)' } },
   { score: '(5, 0)( con', expectation: { score: '5-0', matchUpStatus: 'RETIRED' } },
   { score: '(6, 0)(6, )', expectation: { score: '6-0 6-0' } },
@@ -23,7 +21,6 @@ const scores = [
   { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
   { score: '(6/4), 6/1)', expectation: { score: '6-4 6-1' } },
   { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
-  { score: '1-6, 6-4, (5)', expectation: { score: '1-6 6-4 [10-5]' } },
   { score: '26 76(7)61', expectation: { score: '2-6 7-6(7) 6-1' } },
   { score: '5-3, 4-1s', expectation: { score: '5-3 4-1' } },
   { score: '6-3, 5-7-, 6-3', expectation: { score: '6-3 5-7 6-3' } },
@@ -39,8 +36,12 @@ const scores = [
   { score: '76(2) 67(3)64', expectation: { score: '7-6(2) 6-7(3) 6-4' } },
   */
 
+  { score: '(4-6, 6-2, 7-6((2))', expectation: { score: '4-6 6-2 7-6(2)' } },
+  { score: '(4-6, 6-2, 7-6((7-2))', expectation: { score: '4-6 6-2 7-6(2)' } },
+
   // missed 0 set score ending
   { score: '(6-)(6-2)', expectation: { score: '6-0 6-2' } },
+  { score: ' 6-, 6-4', expectation: { score: '6-0 6-4' } },
 
   // discard invalid
   { score: '44751', expectation: { score: '' } },
@@ -231,6 +232,7 @@ const scores = [
   { score: '4--6, 6--1, 1--0 conceded', expectation: { score: '4-6 6-1 1-0', matchUpStatus: 'RETIRED' } },
   { score: '6-3, 6-6(6-1) cons', expectation: { score: '6-3 6-6(6-1)', matchUpStatus: 'RETIRED' } },
   { score: '3-6, 6-2, 2-0conc', expectation: { score: '3-6 6-2 2-0', matchUpStatus: 'RETIRED' } },
+  { score: '6-3, 3-0 coceed', expectation: { score: '6-3 3-0', matchUpStatus: 'RETIRED' } },
   { score: '(6, 2)(4, 2)rtd', expectation: { score: '6-2 4-2', matchUpStatus: 'RETIRED' } },
   { score: '(7, 5)(2, 1)con', expectation: { score: '7-5 2-1', matchUpStatus: 'RETIRED' } },
   { score: '62 32 RET X LES', expectation: { score: '6-2 3-2', matchUpStatus: 'RETIRED' } },
