@@ -26,12 +26,12 @@ const processingOrder = [
   'superSquare'
 ];
 
-export function tidyScore(score, stepLog, fullLog) {
+export function tidyScore({ score, stepLog, fullLog, profile }) {
   let matchUpStatus, result, attributes;
   const modifications = [];
 
   processingOrder.forEach((method) => {
-    result = transforms[method]({ score, matchUpStatus, attributes });
+    result = transforms[method]({ score, matchUpStatus, attributes, profile });
     const modified = result.score !== score;
     if (modified) {
       modifications.push({ method, score: result.score });

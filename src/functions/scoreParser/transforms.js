@@ -102,16 +102,19 @@ export function handleWalkover({ score }) {
   return { score };
 }
 
-export function handleRetired({ score }) {
+export function handleRetired({ score, profile }) {
   score = score.toString().toLowerCase();
-  const re = /^(.*)(ret|con)+[A-Za-z ]*$/;
+  const re = /^(.*\d+.*)(ret|con)+[A-Za-z ]*$/; // at least one digit
   if (re.test(score)) {
     const [leading] = score.match(re).slice(1);
     return { score: leading.trim(), matchUpStatus: 'retired' };
   }
 
+  const providerRetired = profile?.matchUpStatuses?.retired;
+  const additionalRetired = Array.isArray(providerRetired) ? providerRetired : [providerRetired].filter(Boolean);
+
   // accommodate other variations
-  const retired = ['rtd'].find((ret) => score.endsWith(ret));
+  const retired = ['rtd', ...additionalRetired].find((ret) => score.endsWith(ret));
 
   if (retired) {
     return { matchUpStatus: 'retired', score: score.replace(retired, '').trim() };

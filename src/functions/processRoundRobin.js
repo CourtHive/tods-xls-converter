@@ -203,7 +203,11 @@ export function getRoundRobinValues(analysis, profile, sheet) {
       if (positionRow) {
         const resultRow = positionRow + 1; // TODO: implement findInRowRange and determine rowRange from providerProfile
         const result = columnProfile.keyMap[`${column}${resultRow}`];
-        const { score: scoreString, matchUpStatus: normalizedMatchUpStatus, isValid } = tidyScore(result);
+        const {
+          matchUpStatus: normalizedMatchUpStatus,
+          score: scoreString,
+          isValid
+        } = tidyScore({ score: result, profile });
         const resultIsMatchOutcome =
           result &&
           onlyAlpha(result, profile) &&

@@ -48,7 +48,7 @@ export function getFirstRoundEntries({
     const isValidParticipantName = (participantName) => {
       if (!participantName) return false;
       if (!profile.matchUpStatuses) return true;
-      return !Object.values(profile.matchUpStatuses).includes(participantName?.toString().toLowerCase());
+      return !Object.values(profile.matchUpStatuses).flat().includes(participantName?.toString().toLowerCase());
     };
 
     // Costa Rica Qualifiers
