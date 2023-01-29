@@ -1,6 +1,6 @@
-import { instanceCount } from '../../utilities/convenience';
-import { isNumeric } from '../../utilities/identification';
+import { instanceCount, indices } from '../../utilities/convenience';
 import { dashJoin, isDiffOne, isTiebreakScore } from './utilities';
+import { isNumeric } from '../../utilities/identification';
 
 export function containedSets({ score, attributes }) {
   if (typeof score !== 'string') return { score };
@@ -8,7 +8,19 @@ export function containedSets({ score, attributes }) {
   const withParens = new RegExp(/\([\d,/ ]+\)/g);
   const contained = score.match(withParens);
   contained?.forEach((container) => {
-    const innards = dashJoin(container.match(/^\((.*)\)$/)[1]);
+    let innards = dashJoin(container.match(/^\((.*)\)$/)[1]);
+    const dashIndices = indices('-', innards.split(''));
+    const numbers = innards.split('-');
+    const eventNumberCount = !(numbers.length % 2);
+    const oddDashCount = !!(dashIndices.length % 2);
+    // handle situation where too many dashes join what should be sets
+    // multiple sets were found within a parenthetical
+    if (eventNumberCount && oddDashCount && dashIndices.length > numbers.length / 2) {
+      const spaceIndices = dashIndices.filter((_, i) => i % 2);
+      spaceIndices.forEach((index) => {
+        innards = innards.substring(0, index) + ' ' + innards.substring(index + 1);
+      });
+    }
     score = score.replace(container, `(${innards})`).trim();
   });
 
