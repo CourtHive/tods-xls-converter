@@ -12,8 +12,9 @@ export function matchKnownPatterns({ score }) {
     }
   }
 
-  const incompleteFinalSet = /(.*\s6)[/-]+$/;
-  if (incompleteFinalSet.test(score)) {
+  const incompleteFinalSet = /.*\s6[/-]+$/;
+  const missingFinalSetSideScore = /.*\s6$/;
+  if (incompleteFinalSet.test(score) || (missingFinalSetSideScore.test(score) && !score.startsWith('('))) {
     score += '0';
   }
 

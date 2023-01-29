@@ -19,8 +19,14 @@ const scores = [
   { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
   { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
   { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
-  { score: '6/2, 6', expectation: { score: '6-2' } },
   */
+
+  // TODO: integrity check set score for sanity
+  { score: '(8-7) 6', expectation: { score: '8-7(6)' } }, // arguable that 6 is the tiebreak score
+
+  // missing final set side score
+  { score: '6/2, 6', expectation: { score: '6-2 6-0' } },
+  { score: '6 4, 6', expectation: { score: '6-4 6-0' } },
 
   // smashedSets
   { score: '(6/06/2)', expectation: { score: '6-0 6-2' } },
@@ -64,9 +70,6 @@ const scores = [
 
   // too many sets
   { score: '6 4, 6 16 4, 6 2', expectation: { score: '6-4 6-1' } },
-
-  // discard indecipherable
-  { score: '6 4, 6', expectation: { score: '6-4' } },
 
   // pattern /\d+,\s?\d/+\/\d+\s?\d+/
   { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
@@ -145,7 +148,6 @@ const scores = [
 
   // danglingBits ...
   { score: '(6-4)(6-3) 6', expectation: { score: '6-4 6-3' } },
-  { score: '(8-7) 6', expectation: { score: '8-7(6)' } }, // arguable that 6 is the tiebreak score
   { score: '(,', expectation: { score: '' } },
   { score: ')', expectation: { score: '' } },
 
