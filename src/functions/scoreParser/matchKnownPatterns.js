@@ -18,6 +18,11 @@ export function matchKnownPatterns({ score }) {
     score += '0';
   }
 
+  const missingZero = /\(6,\)/g;
+  if (missingZero.test(score)) {
+    score = score.replace(missingZero, '(6, 0)');
+  }
+
   // insert spaces before and after parentheses
   const noSpacing = /^\d{3,}\(/;
   const parenStart = /\(\d+\)\d+/;
