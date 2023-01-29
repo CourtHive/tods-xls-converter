@@ -5,7 +5,7 @@ const validPatterns = true;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 0;
+const end = 1;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
@@ -13,29 +13,40 @@ const end = 0;
 
 const scores = [
   /*
-  { score: '1-6, 6-4, (5)', expectation: { score: '1-6 6-4 [10-5]' } },
-  { score: '(4/6 6/1 7/6(2)', expectation: { score: '4-6 6-1 7-6(2)' } },
   { score: '(5, 0)( con', expectation: { score: '5-0', matchUpStatus: 'RETIRED' } },
   { score: '(6, 0)(6, )', expectation: { score: '6-0 6-0' } },
   { score: '(6/06/2)', expectation: { score: '6-0 6-2' } },
   { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
   { score: '(6/4), 6/1)', expectation: { score: '6-4 6-1' } },
   { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
-  { score: '26 76(7)61', expectation: { score: '2-6 7-6(7) 6-1' } },
   { score: '5-3, 4-1s', expectation: { score: '5-3 4-1' } },
   { score: '6-3, 5-7-, 6-3', expectation: { score: '6-3 5-7 6-3' } },
   { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
-  { score: '6/0/6/1', expectation: { score: '6-0 6-1' } },
   { score: '6/2, 6', expectation: { score: '6-2' } },
-  { score: '6/3, 6/7(5), (4)', expectation: { score: '6-3 6-7(5) [10-4]' } },
-  { score: '1-6, 6-4, (5)', expectation: { score: '1-6 6-4 [10-5]' } },
   { score: '6/4, 6/', expectation: { score: '6-4 6-0' } },
-  { score: '6-3-6-1', expectation: { score: '6-3 6-1' } },
-  { score: '7-6(2 )6-0', expectation: { score: '7-6(2) 6-0' } },
   { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
-  { score: '76(2) 67(3)64', expectation: { score: '7-6(2) 6-7(3) 6-4' } },
   */
 
+  // smashedSets
+  { score: '(6/06/2)', expectation: { score: '6-0 6-2' } },
+  { score: '(6,06,2)', expectation: { score: '6-0 6-2' } },
+  { score: '6/0/6/1', expectation: { score: '6-0 6-1' } },
+  { score: '6-3-6-1', expectation: { score: '6-3 6-1' } },
+  { score: '6-3/6-1', expectation: { score: '6-3 6-1' } },
+
+  // smashed tiebreak
+  { score: '76(2) 67(3)64', expectation: { score: '7-6(2) 6-7(3) 6-4' } },
+  { score: '26 76(7)61', expectation: { score: '2-6 7-6(7) 6-1' } },
+  { score: '7-6(2 )6-0', expectation: { score: '7-6(2) 6-0' } },
+
+  // parenthetical with multiple sets
+  { score: '(4/6 6/1 7/6(2)', expectation: { score: '4-6 6-1 7-6(2)' } },
+
+  // match tiebreak low score in parens
+  { score: '1-6, 6-4, (5)', expectation: { score: '1-6 6-4 [10-5]' } },
+  { score: '6/3, 6/7(5), (4)', expectation: { score: '6-3 6-7(5) [10-4]' } },
+
+  // excessl parentheses
   { score: '(4-6, 6-2, 7-6((2))', expectation: { score: '4-6 6-2 7-6(2)' } },
   { score: '(4-6, 6-2, 7-6((7-2))', expectation: { score: '4-6 6-2 7-6(2)' } },
 

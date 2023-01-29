@@ -1,3 +1,5 @@
+import { dashMash } from './commonPatterns';
+
 export function matchKnownPatterns({ score }) {
   for (const punctuation of ['.', ',', ' ', '/']) {
     const re = new RegExp(`^(\\d+)\\${punctuation}(\\d+)$`);
@@ -29,14 +31,14 @@ export function matchKnownPatterns({ score }) {
       .join(' ');
   });
 
-  /*
-  const smashedSets = /(\d)[-/,]+(\d{2})[-/,]+(\d)/;
+  score = dashMash(score);
+
+  const smashedSets = /^(\d)[-/,]+(\d{2})[-/,]+(\d)$/;
   if (smashedSets.test(score)) {
     const [s1, ss, s4] = score.match(smashedSets).slice(1);
     const [s2, s3] = ss.split('');
     score = `${s1}-${s2} ${s3}-${s4}`;
   }
-  */
 
   const setSpacing = /^(\d+)[ -](\d+)$/;
   const slashSeparation = /^([\d -]+)\/([\d -]+)$/;
