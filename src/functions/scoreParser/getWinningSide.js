@@ -14,5 +14,7 @@ export function getWinningSide(score) {
     }
   });
   const winningSide = (setsWon[0] > setsWon[1] && 1) || (setsWon[1] > setsWon[0] && 2);
-  return { setsWon, setWinners, winningSide };
+  const setsTied = setsWon[0] > 0 && setsWon[0] === setsWon[1];
+
+  return { setsWon, setsTied, setWinners, winningSide };
 }
