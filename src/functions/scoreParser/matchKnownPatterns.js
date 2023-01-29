@@ -89,6 +89,7 @@ export function matchKnownPatterns({ score }) {
     score = score.replace(ss, replacement);
   });
 
+  // slash separated sets with comma separated games
   // pattern /\d+,\s?\d/+\/\d+\s?\d+/
   const slashCommaSets = /^\d, *\d\/\d, *\d/;
   if (slashCommaSets.test(score)) {
@@ -104,6 +105,20 @@ export function matchKnownPatterns({ score }) {
   const missedSet0 = /\(6-\)/g;
   if (missedSet0.test(score)) {
     score = score.replace(missedSet0, '(6-0)');
+  }
+
+  // IMPORTANT: must occur last...
+  const slashSetGlobal = /(?<!-)(\d+)\/(\d+)(?!-)/g;
+  if (slashSetGlobal.test(score)) {
+    const slashSets = score.match(slashSetGlobal);
+    const slashSet = /(?<!-)(\d+)\/(\d+)(?!-)/;
+    let newScore = score;
+    slashSets.forEach((set) => {
+      const [s1, s2] = set.match(slashSet).slice(1);
+      const dashSet = `${s1}-${s2}`;
+      newScore = newScore.replace(set, dashSet);
+    });
+    score = newScore;
   }
 
   return { score };
