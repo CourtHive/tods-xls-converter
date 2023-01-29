@@ -5,7 +5,7 @@ const validPatterns = true;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 0;
+const end = 1;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
@@ -14,7 +14,6 @@ const end = 0;
 const scores = [
   /*
   { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
-  { score: '(5, 0)( con', expectation: { score: '5-0', matchUpStatus: 'RETIRED' } },
   { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
   */
 
@@ -256,6 +255,7 @@ const scores = [
   { score: '(7, 5)(2, 1)con', expectation: { score: '7-5 2-1', matchUpStatus: 'RETIRED' } },
   { score: '62 32 RET X LES', expectation: { score: '6-2 3-2', matchUpStatus: 'RETIRED' } },
   { score: '63 O1 RET X LES', expectation: { score: '6-3 0-1', matchUpStatus: 'RETIRED' } },
+  { score: '(5, 0)( con', expectation: { score: '5-0', matchUpStatus: 'RETIRED' } },
   { score: '2-4 coneced', expectation: { score: '2-4', matchUpStatus: 'RETIRED' } },
   { score: '6/1 conceed', expectation: { score: '6-1', matchUpStatus: 'RETIRED' } },
   { score: '4-2 retd', expectation: { score: '4-2', matchUpStatus: 'RETIRED' } },

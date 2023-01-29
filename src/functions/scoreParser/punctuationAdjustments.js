@@ -280,6 +280,7 @@ export function punctuationAdjustments({ score }) {
     const close = value.indexOf(')');
     return open >= 0 && close >= 0 && open < close;
   };
+
   if (/^\([\d ]+.*[\d ]+\)$/.test(score) && counts['('] === counts[')']) {
     const proposed = score.slice(1, score.length - 1);
     if (openFirst(proposed)) {
@@ -287,6 +288,8 @@ export function punctuationAdjustments({ score }) {
       getMissing();
     }
   }
+
+  if (score.endsWith('()')) score = score.slice(0, score.length - 2);
 
   return { score };
 }
