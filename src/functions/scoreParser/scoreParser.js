@@ -26,6 +26,7 @@ const processingOrder = [
   'superSquare'
 ];
 
+// secondPass is used to process only numbers which have been extracted from strings
 const secondPass = ['separateScoreBlocks', 'sensibleSets', 'superSquare'];
 
 export function tidyScore({ score, stepLog, fullLog, profile }) {
