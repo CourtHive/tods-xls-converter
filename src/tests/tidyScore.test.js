@@ -13,16 +13,13 @@ const end = 0;
 
 const scores = [
   /*
-  { score: '(6/06/2)', expectation: { score: '6-0 6-2' } },
   { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
   { score: '(5, 0)( con', expectation: { score: '5-0', matchUpStatus: 'RETIRED' } },
   { score: '(6, 0)(6, )', expectation: { score: '6-0 6-0' } },
   { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
   { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
-  { score: '5-3, 4-1s', expectation: { score: '5-3 4-1' } },
   { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
   { score: '6/2, 6', expectation: { score: '6-2' } },
-  { score: '6/4, 6/', expectation: { score: '6-4 6-0' } },
   */
 
   // smashedSets
@@ -49,8 +46,8 @@ const scores = [
   { score: '(4-6, 6-2, 7-6((2))', expectation: { score: '4-6 6-2 7-6(2)' } },
   { score: '(4-6, 6-2, 7-6((7-2))', expectation: { score: '4-6 6-2 7-6(2)' } },
 
-  // missing parens
-  { score: '(6/4), 6/1)', expectation: { score: '6-4 6-1' } },
+  // missing finalSet side score
+  { score: '6/4, 6/', expectation: { score: '6-4 6-0' } },
 
   // missed 0 set score ending
   { score: '(6-)(6-2)', expectation: { score: '6-0 6-2' } },
@@ -155,6 +152,8 @@ const scores = [
   { score: '(2/4, 4/1, 4/1)', expectation: { score: '2-4 4-1 4-1' } },
   { score: '2/4, 4/1, 4/1', expectation: { score: '2-4 4-1 4-1' } },
 
+  { score: '5-3, 4-1s', expectation: { score: '5-3 4-1' } },
+
   // handle score beginning with []
   { score: '[6-7, (7-7), 6-2, 10-7]', expectation: { score: '6-7(7) 6-2 [10-7]' } },
   { score: '6-7, (7-7), 6-2, 10-7', expectation: { score: '6-7(7) 6-2 [10-7]' } },
@@ -201,6 +200,7 @@ const scores = [
   { score: '((6, 2)(7, 6)(2))', expectation: { score: '6-2 7-6(2)' } },
   { score: ')6, 4)(6, 2)', expectation: { score: '6-4 6-2' } }, //
   { score: '(8-7(2)', expectation: { score: '8-7(2)' } }, //
+  { score: '(6/4), 6/1)', expectation: { score: '6-4 6-1' } },
   { score: '2, 6)(7, 5)(6, 2)', expectation: { score: '2-6 7-5 6-2' } }, // missing opening bracket
   { score: '(4, 6)(6, 0(10, 7)', expectation: { score: '4-6 6-0 [10-7]' } }, // missing internal close paren
   { score: '(3, 6)(7, 6)(6, 4(', expectation: { score: '3-6 7-6 6-4' } },

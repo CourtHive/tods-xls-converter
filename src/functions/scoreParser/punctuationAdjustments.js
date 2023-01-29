@@ -55,10 +55,15 @@ export function punctuationAdjustments({ score }) {
     }
   });
 
-  // remove trailing puncutation
-  '-/,'.split('').forEach((punctuation) => {
-    if (score.endsWith(punctuation)) score = score.slice(0, score.length - 1);
-  });
+  // remove punctuation-only results
+  if (/^[(-/,]+$/.test(score)) {
+    score = '';
+  }
+
+  // remove extraneous trailing punctuation
+  if (/\)[-/,]+$/.test(score)) {
+    score = score.slice(0, score.length - 1);
+  }
 
   let missingOpenParen, missingCloseParen, missingCloseBracket, noClose, counts;
 

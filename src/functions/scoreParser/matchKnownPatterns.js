@@ -12,6 +12,11 @@ export function matchKnownPatterns({ score }) {
     }
   }
 
+  const incompleteFinalSet = /(.*\s6)[/-]+$/;
+  if (incompleteFinalSet.test(score)) {
+    score += '0';
+  }
+
   // insert spaces before and after parentheses
   const noSpacing = /^\d{3,}\(/;
   const parenStart = /\(\d+\)\d+/;

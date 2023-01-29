@@ -134,6 +134,13 @@ export function removeDanglingBits({ score, attributes }) {
     attributes = { removed };
     score = score.slice(0, score.length - 2);
   }
+
+  const alphaEnding = /(.*)[A-Za-z]+$/;
+  if (alphaEnding.test(score)) {
+    const scorePart = score.match(alphaEnding).slice(1)[0];
+    score = scorePart.trim();
+  }
+
   return { score, attributes };
 }
 
