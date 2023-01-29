@@ -15,11 +15,12 @@ const scores = [
   /*
   { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
   { score: '(5, 0)( con', expectation: { score: '5-0', matchUpStatus: 'RETIRED' } },
-  { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
-  { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
   { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
   */
 
+  { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
+  { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
+  { score: '(64 )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
   { score: '(6, 0)(6, )', expectation: { score: '6-0 6-0' } },
   { score: '(6, 0)(6,4)', expectation: { score: '6-0 6-4' } },
   { score: '(6,0)(6,4)', expectation: { score: '6-0 6-4' } },

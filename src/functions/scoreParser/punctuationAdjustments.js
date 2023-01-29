@@ -65,8 +65,58 @@ export function punctuationAdjustments({ score }) {
     score = score.slice(0, score.length - 1);
   }
 
-  let missingOpenParen, missingCloseParen, missingCloseBracket, noClose, counts;
+  // space slash surrounded by digits
+  if (/\d \/\d/.test(score)) score = score.replace(/ \//g, '/');
+  // all other space slashes are replaced by space
+  if (score.includes(' /')) score = score.replace(/ \//g, ' ');
 
+  const ghost = /\(\d+, \)/g;
+  if (ghost.test(score)) {
+    const ghosts = score.match(ghost);
+    ghosts.forEach((g) => {
+      const [digits] = g.match(/\((\d+), \)/).slice(1);
+      if (digits.length === 2) {
+        score = score.replace(g, `(${digits})`);
+      } else if (digits.length === 1 && digits === '6') {
+        score = score.replace(g, `(6-0)`);
+      }
+    });
+  }
+
+  const slashClose = /\((\d+)\/\)/g;
+  if (slashClose.test(score)) {
+    const sc = score.match(slashClose);
+    sc.forEach((s) => {
+      const [digits] = s.match(/\((\d+)\/\)/).slice(1);
+      if (digits.length === 2) {
+        score = score.replace(s, `(${digits})`);
+      } else if (digits.length === 1 && digits === '6') {
+        // TODO: some logic to determine whether tiebreak value is expected
+        score = score.replace(s, `(6-0)`);
+      } else {
+        // TODO: some logic to determine whether tiebreak value is expected
+        score = score.replace(s, `(${digits})`);
+      }
+    });
+  }
+
+  const slashOpen = /\(\/(\d+)\)/g;
+  if (slashOpen.test(score)) {
+    const sc = score.match(slashOpen);
+    sc.forEach((s) => {
+      const [digits] = s.match(/\(\/(\d+)\)/).slice(1);
+      if (digits.length === 2) {
+        score = score.replace(s, `(${digits})`);
+      } else if (digits.length === 1 && parseInt(digits) < 6) {
+        score = score.replace(s, `(6-${digits})`);
+      } else {
+        // TODO: some logic to determine whether tiebreak value is expected
+        score = score.replace(s, `(${digits})`);
+      }
+    });
+  }
+
+  let missingOpenParen, missingCloseParen, missingCloseBracket, noClose, counts;
   const getMissing = () => {
     counts = instanceCount(score.split(''));
     missingCloseParen = counts['('] === (counts[')'] || 0) + 1;
@@ -75,13 +125,6 @@ export function punctuationAdjustments({ score }) {
     noClose = missingCloseParen && !missingCloseBracket;
   };
   getMissing();
-
-  // space slash surrounded by digits
-  if (/\d \/\d/.test(score)) score = score.replace(/ \//g, '/');
-  // all other space slashes are replaced by space
-  if (score.includes(' /')) score = score.replace(/ \//g, ' ');
-  if (score.includes('/)')) score = score.replace(/\/\)/g, ')');
-  if (score.includes('(/')) score = score.replace(/\(\//g, '(');
 
   const unclosed = /(\d+-\d+\(\d+)0,/;
   if (unclosed.test(score)) {
@@ -164,7 +207,8 @@ export function punctuationAdjustments({ score }) {
         if (char === '(') open -= 1;
         reconstructed.push(char);
       }
-      score = reconstructed.reverse().join('');
+      reconstructed.reverse();
+      score = reconstructed.join('');
     }
 
     getMissing();
