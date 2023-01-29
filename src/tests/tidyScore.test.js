@@ -13,12 +13,11 @@ const end = 0;
 
 const scores = [
   /*
+  { score: '(6/06/2)', expectation: { score: '6-0 6-2' } },
   { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
   { score: '(5, 0)( con', expectation: { score: '5-0', matchUpStatus: 'RETIRED' } },
   { score: '(6, 0)(6, )', expectation: { score: '6-0 6-0' } },
-  { score: '(6/06/2)', expectation: { score: '6-0 6-2' } },
   { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
-  { score: '(6/4), 6/1)', expectation: { score: '6-4 6-1' } },
   { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
   { score: '5-3, 4-1s', expectation: { score: '5-3 4-1' } },
   { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
@@ -46,9 +45,12 @@ const scores = [
   { score: '1-6, 6-4, (5)', expectation: { score: '1-6 6-4 [10-5]' } },
   { score: '6/3, 6/7(5), (4)', expectation: { score: '6-3 6-7(5) [10-4]' } },
 
-  // excessl parentheses
+  // excess parens
   { score: '(4-6, 6-2, 7-6((2))', expectation: { score: '4-6 6-2 7-6(2)' } },
   { score: '(4-6, 6-2, 7-6((7-2))', expectation: { score: '4-6 6-2 7-6(2)' } },
+
+  // missing parens
+  { score: '(6/4), 6/1)', expectation: { score: '6-4 6-1' } },
 
   // missed 0 set score ending
   { score: '(6-)(6-2)', expectation: { score: '6-0 6-2' } },

@@ -196,6 +196,12 @@ export function excisions({ score }) {
   if (re.test(score)) {
     score = score.match(re).slice(1)[0].trim();
   }
+
+  const openComma = /\(,/g;
+  if (openComma.test(score)) {
+    score = score.replace(openComma, '(');
+  }
+
   return { score };
 }
 

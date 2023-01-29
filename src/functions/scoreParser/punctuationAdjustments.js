@@ -139,14 +139,37 @@ export function punctuationAdjustments({ score }) {
     score = score.slice(1);
   }
 
-  if (missingOpenParen && /^9\d/.test(score)) {
-    score = '(' + score.slice(1);
-  } else if (missingOpenParen) {
-    if (score[0] !== '(') score = '(' + score;
+  if (missingOpenParen) {
+    if (/^9\d/.test(score)) {
+      score = '(' + score.slice(1);
+    } else if (score[0] !== '(') {
+      score = '(' + score;
+    } else {
+      let reconstructed = [];
+      let open = 0;
+      // step through characters and insert close before open when open
+      for (const char of score.split('').reverse()) {
+        if (char === ')') {
+          if (open) {
+            reconstructed.push('(');
+          } else {
+            open += 1;
+          }
+        }
+        if (char === '(') open -= 1;
+        reconstructed.push(char);
+      }
+      score = reconstructed.reverse().join('');
+    }
+
+    getMissing();
   }
 
   if (counts[')'] > (counts['('] || 0)) {
-    if (score[0] === ')') score = '(' + score.slice(1);
+    if (score[0] === ')') {
+      score = '(' + score.slice(1);
+      getMissing();
+    }
   }
 
   if (noClose && (score.endsWith(9) || /\d+0$/.test(score))) {
