@@ -12,7 +12,7 @@ export function matchKnownPatterns({ score }) {
 
   // insert spaces before and after parentheses
   const noSpacing = /^\d{3,}\(/;
-  const parenStart = /^\(\d+\)\d+/;
+  const parenStart = /\(\d+\)\d+/;
   const considerations = [noSpacing, parenStart];
   considerations.forEach(() => {
     const parts = score.split(' ');
@@ -29,6 +29,15 @@ export function matchKnownPatterns({ score }) {
       .join(' ');
   });
 
+  /*
+  const smashedSets = /(\d)[-/,]+(\d{2})[-/,]+(\d)/;
+  if (smashedSets.test(score)) {
+    const [s1, ss, s4] = score.match(smashedSets).slice(1);
+    const [s2, s3] = ss.split('');
+    score = `${s1}-${s2} ${s3}-${s4}`;
+  }
+  */
+
   const setSpacing = /^(\d+)[ -](\d+)$/;
   const slashSeparation = /^([\d -]+)\/([\d -]+)$/;
   if (slashSeparation.test(score)) {
@@ -41,6 +50,7 @@ export function matchKnownPatterns({ score }) {
       score = `${set1} ${set2}`;
     }
   }
+
   const commaSeparation = /^([\d -]+),([\d -]+)$/;
   if (commaSeparation.test(score)) {
     const [left, right] = score.match(commaSeparation).slice(1);
