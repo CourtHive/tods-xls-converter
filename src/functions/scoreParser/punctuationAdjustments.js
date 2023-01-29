@@ -149,7 +149,7 @@ export function punctuationAdjustments({ score }) {
     if (score[0] === ')') score = '(' + score.slice(1);
   }
 
-  if (noClose && (score.endsWith(9) || /\d{1,}0$/.test(score))) {
+  if (noClose && (score.endsWith(9) || /\d+0$/.test(score))) {
     score = score.slice(0, score.length - 1) + ')';
     getMissing();
   }
