@@ -5,18 +5,20 @@ const validPatterns = true;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 1;
+const end = 0;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
-  /*
+  // test HAIL MARY
+  { score: '7563', expectation: { score: '7-5 6-3' } },
   { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
+  { score: '676264', expectation: { score: '6-7 6-2 6-4' } },
   { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
-  */
 
+  // varios bracket and punctuation errors
   { score: '(6/3) (/4)', expectation: { score: '6-3 6-4' } },
   { score: '(64, )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
   { score: '(64 )(4, 6)(10, 6)', expectation: { score: '6-4 4-6 [10-6]' } },
