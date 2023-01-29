@@ -1,6 +1,7 @@
+import { dashJoin, isDiffOne, isTiebreakScore } from './utilities';
 import { instanceCount } from '../../utilities/convenience';
 import { isNumeric } from '../../utilities/identification';
-import { dashJoin, isDiffOne, isTiebreakScore } from './utilities';
+import { dashMash } from './commonPatterns';
 
 export function containedSets({ score, attributes }) {
   if (typeof score !== 'string') return { score };
@@ -8,8 +9,10 @@ export function containedSets({ score, attributes }) {
   const withParens = new RegExp(/\([\d,/ ]+\)/g);
   const contained = score.match(withParens);
   contained?.forEach((container) => {
-    const innards = dashJoin(container.match(/^\((.*)\)$/)[1]);
-    score = score.replace(container, `(${innards})`).trim();
+    let innards = container.match(/^\((.*)\)$/)[1];
+    let joined = dashJoin(innards);
+    let mashed = dashMash(joined);
+    score = score.replace(container, `(${mashed})`).trim();
   });
 
   const withBrackets = new RegExp(/\[[\d,/ ]+\]/g);

@@ -31,7 +31,7 @@ export function dashJoin(part) {
   if (part.length === 2) {
     return part.split('').join('-');
   }
-  [', ', '/', ' '].forEach((separator) => (part = part.split(separator).join('-')));
+  [', ', ',', '/', ' '].forEach((separator) => (part = part.split(separator).join('-')));
   part = part.replace(/-{2,}/, '-'); // handle repeating '-'
   return part;
 }

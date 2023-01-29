@@ -1,7 +1,8 @@
 import { matchTiebreak, standardSet, tiebreakSet } from './validPatterns';
 import { isNumeric } from '../../utilities/identification';
-import { isDiffOne } from './utilities';
 import { getWinningSide } from './getWinningSide';
+import { dashMash } from './commonPatterns';
+import { isDiffOne } from './utilities';
 
 export function sensibleSets({ score, matchUpStatus }) {
   const profile = [];
@@ -9,6 +10,7 @@ export function sensibleSets({ score, matchUpStatus }) {
   let maxSetValue;
   const sets = score.split(' ');
   const setsCount = sets.length;
+
   score = sets
     .map((set, index) => {
       if (new RegExp(tiebreakSet).test(set)) {
@@ -27,6 +29,8 @@ export function sensibleSets({ score, matchUpStatus }) {
       } else if (set.length === 2 && isNumeric(set)) {
         return set.split('').join('-');
       }
+
+      set = dashMash(set);
 
       const setType =
         (new RegExp(`^${matchTiebreak}$`).test(set) && 'super') ||

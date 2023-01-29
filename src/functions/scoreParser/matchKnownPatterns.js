@@ -1,3 +1,5 @@
+import { dashMash } from './commonPatterns';
+
 export function matchKnownPatterns({ score }) {
   for (const punctuation of ['.', ',', ' ', '/']) {
     const re = new RegExp(`^(\\d+)\\${punctuation}(\\d+)$`);
@@ -10,9 +12,20 @@ export function matchKnownPatterns({ score }) {
     }
   }
 
+  const incompleteFinalSet = /.*\s6[/-]+$/;
+  const missingFinalSetSideScore = /.*\s6$/;
+  if (incompleteFinalSet.test(score) || (missingFinalSetSideScore.test(score) && !score.startsWith('('))) {
+    score += '0';
+  }
+
+  const missingZero = /\(6,\)/g;
+  if (missingZero.test(score)) {
+    score = score.replace(missingZero, '(6, 0)');
+  }
+
   // insert spaces before and after parentheses
   const noSpacing = /^\d{3,}\(/;
-  const parenStart = /^\(\d+\)\d+/;
+  const parenStart = /\(\d+\)\d+/;
   const considerations = [noSpacing, parenStart];
   considerations.forEach(() => {
     const parts = score.split(' ');
@@ -29,6 +42,15 @@ export function matchKnownPatterns({ score }) {
       .join(' ');
   });
 
+  score = dashMash(score);
+
+  const smashedSets = /^(\d)[-/,]+(\d{2})[-/,]+(\d)$/;
+  if (smashedSets.test(score)) {
+    const [s1, ss, s4] = score.match(smashedSets).slice(1);
+    const [s2, s3] = ss.split('');
+    score = `${s1}-${s2} ${s3}-${s4}`;
+  }
+
   const setSpacing = /^(\d+)[ -](\d+)$/;
   const slashSeparation = /^([\d -]+)\/([\d -]+)$/;
   if (slashSeparation.test(score)) {
@@ -41,6 +63,7 @@ export function matchKnownPatterns({ score }) {
       score = `${set1} ${set2}`;
     }
   }
+
   const commaSeparation = /^([\d -]+),([\d -]+)$/;
   if (commaSeparation.test(score)) {
     const [left, right] = score.match(commaSeparation).slice(1);
@@ -89,6 +112,7 @@ export function matchKnownPatterns({ score }) {
     score = score.replace(ss, replacement);
   });
 
+  // slash separated sets with comma separated games
   // pattern /\d+,\s?\d/+\/\d+\s?\d+/
   const slashCommaSets = /^\d, *\d\/\d, *\d/;
   if (slashCommaSets.test(score)) {
@@ -104,6 +128,20 @@ export function matchKnownPatterns({ score }) {
   const missedSet0 = /\(6-\)/g;
   if (missedSet0.test(score)) {
     score = score.replace(missedSet0, '(6-0)');
+  }
+
+  // IMPORTANT: must occur last...
+  const slashSetGlobal = /(?<!-)(\d+)\/(\d+)(?!-)/g;
+  if (slashSetGlobal.test(score)) {
+    const slashSets = score.match(slashSetGlobal);
+    const slashSet = /(?<!-)(\d+)\/(\d+)(?!-)/;
+    let newScore = score;
+    slashSets.forEach((set) => {
+      const [s1, s2] = set.match(slashSet).slice(1);
+      const dashSet = `${s1}-${s2}`;
+      newScore = newScore.replace(set, dashSet);
+    });
+    score = newScore;
   }
 
   return { score };

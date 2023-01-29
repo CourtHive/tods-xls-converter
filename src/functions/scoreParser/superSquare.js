@@ -1,6 +1,16 @@
 import { isNumeric } from '../../utilities/identification';
+import { getWinningSide } from './getWinningSide';
 
 export function superSquare({ score }) {
+  const { setsTied, winningSide } = getWinningSide(score);
+
+  const finalSetMatchTiebreak = /\s\((\d+)\)$/;
+  if (!winningSide && setsTied && finalSetMatchTiebreak.test(score)) {
+    const lowTiebreakScore = score.match(finalSetMatchTiebreak).slice(1)[0];
+    const highTiebreakScore = lowTiebreakScore <= 8 ? 10 : lowTiebreakScore + 2;
+    score = score.replace(finalSetMatchTiebreak, ` [${highTiebreakScore}-${lowTiebreakScore}]`);
+  }
+
   const sets = score.split(' ');
   const finalSet = sets[sets.length - 1];
   if (!finalSet.includes('-') || finalSet.indexOf('(') > 0) return { score };
@@ -21,5 +31,6 @@ export function superSquare({ score }) {
     }
     score = [...sets.slice(0, sets.length - 1), `[${scores.join('-')}]`].join(' ');
   }
+
   return { score };
 }

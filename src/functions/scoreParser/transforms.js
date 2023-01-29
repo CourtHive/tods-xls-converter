@@ -102,16 +102,19 @@ export function handleWalkover({ score }) {
   return { score };
 }
 
-export function handleRetired({ score }) {
+export function handleRetired({ score, profile }) {
   score = score.toString().toLowerCase();
-  const re = /^(.*)(ret|con)+[A-Za-z ]*$/;
+  const re = /^(.*\d+.*)(ret|con)+[A-Za-z ]*$/; // at least one digit
   if (re.test(score)) {
     const [leading] = score.match(re).slice(1);
     return { score: leading.trim(), matchUpStatus: 'retired' };
   }
 
+  const providerRetired = profile?.matchUpStatuses?.retired;
+  const additionalRetired = Array.isArray(providerRetired) ? providerRetired : [providerRetired].filter(Boolean);
+
   // accommodate other variations
-  const retired = ['rtd'].find((ret) => score.endsWith(ret));
+  const retired = ['rtd', ...additionalRetired].find((ret) => score.endsWith(ret));
 
   if (retired) {
     return { matchUpStatus: 'retired', score: score.replace(retired, '').trim() };
@@ -131,6 +134,13 @@ export function removeDanglingBits({ score, attributes }) {
     attributes = { removed };
     score = score.slice(0, score.length - 2);
   }
+
+  const alphaEnding = /(.*)[A-Za-z]+$/;
+  if (alphaEnding.test(score)) {
+    const scorePart = score.match(alphaEnding).slice(1)[0];
+    score = scorePart.trim();
+  }
+
   return { score, attributes };
 }
 
@@ -193,6 +203,12 @@ export function excisions({ score }) {
   if (re.test(score)) {
     score = score.match(re).slice(1)[0].trim();
   }
+
+  const openComma = /\(,/g;
+  if (openComma.test(score)) {
+    score = score.replace(openComma, '(');
+  }
+
   return { score };
 }
 

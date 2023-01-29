@@ -15,6 +15,33 @@ export function punctuationAdjustments({ score }) {
     score = score.replace(s, `(${trimmedBracketValue})`);
   }
 
+  let doubleBracketed = /\(\(\d-\d\)\)/g;
+  if (doubleBracketed.test(score)) {
+    const dbls = score.match(doubleBracketed);
+    if (dbls.length) {
+      dbls.forEach((dbl) => {
+        const m = dbl.match(/\((\(\d-\d\))\)/).slice(1)[0];
+        score = score.replace(dbl, m);
+      });
+    }
+  }
+
+  doubleBracketed = /\(\((\d)\)\)/g;
+  if (doubleBracketed.test(score)) {
+    const dbls = score.match(doubleBracketed);
+    if (dbls.length) {
+      dbls.forEach((dbl) => {
+        const m = dbl.match(/\((\(\d\))\)/).slice(1)[0];
+        score = score.replace(dbl, m);
+      });
+    }
+  }
+
+  // must occur before repating dash or dash with comma
+  if (/(^|\s)6-,/.test(score)) {
+    score = score.replace(/(^|\s)6-,/g, '6-0,');
+  }
+
   // repeating dash or dash with comma
   const repeatingDash = new RegExp(/[-,]{2,}/g);
   score = score.replace(repeatingDash, '-');
@@ -28,13 +55,68 @@ export function punctuationAdjustments({ score }) {
     }
   });
 
-  // remove trailing puncutation
-  '-/,'.split('').forEach((punctuation) => {
-    if (score.endsWith(punctuation)) score = score.slice(0, score.length - 1);
-  });
+  // remove punctuation-only results
+  if (/^[(-/,]+$/.test(score)) {
+    score = '';
+  }
+
+  // remove extraneous trailing punctuation
+  if (/\)[-/,]+$/.test(score)) {
+    score = score.slice(0, score.length - 1);
+  }
+
+  // space slash surrounded by digits
+  if (/\d \/\d/.test(score)) score = score.replace(/ \//g, '/');
+  // all other space slashes are replaced by space
+  if (score.includes(' /')) score = score.replace(/ \//g, ' ');
+
+  const ghost = /\(\d+, \)/g;
+  if (ghost.test(score)) {
+    const ghosts = score.match(ghost);
+    ghosts.forEach((g) => {
+      const [digits] = g.match(/\((\d+), \)/).slice(1);
+      if (digits.length === 2) {
+        score = score.replace(g, `(${digits})`);
+      } else if (digits.length === 1 && digits === '6') {
+        score = score.replace(g, `(6-0)`);
+      }
+    });
+  }
+
+  const slashClose = /\((\d+)\/\)/g;
+  if (slashClose.test(score)) {
+    const sc = score.match(slashClose);
+    sc.forEach((s) => {
+      const [digits] = s.match(/\((\d+)\/\)/).slice(1);
+      if (digits.length === 2) {
+        score = score.replace(s, `(${digits})`);
+      } else if (digits.length === 1 && digits === '6') {
+        // TODO: some logic to determine whether tiebreak value is expected
+        score = score.replace(s, `(6-0)`);
+      } else {
+        // TODO: some logic to determine whether tiebreak value is expected
+        score = score.replace(s, `(${digits})`);
+      }
+    });
+  }
+
+  const slashOpen = /\(\/(\d+)\)/g;
+  if (slashOpen.test(score)) {
+    const sc = score.match(slashOpen);
+    sc.forEach((s) => {
+      const [digits] = s.match(/\(\/(\d+)\)/).slice(1);
+      if (digits.length === 2) {
+        score = score.replace(s, `(${digits})`);
+      } else if (digits.length === 1 && parseInt(digits) < 6) {
+        score = score.replace(s, `(6-${digits})`);
+      } else {
+        // TODO: some logic to determine whether tiebreak value is expected
+        score = score.replace(s, `(${digits})`);
+      }
+    });
+  }
 
   let missingOpenParen, missingCloseParen, missingCloseBracket, noClose, counts;
-
   const getMissing = () => {
     counts = instanceCount(score.split(''));
     missingCloseParen = counts['('] === (counts[')'] || 0) + 1;
@@ -43,13 +125,6 @@ export function punctuationAdjustments({ score }) {
     noClose = missingCloseParen && !missingCloseBracket;
   };
   getMissing();
-
-  // space slash surrounded by digits
-  if (/\d \/\d/.test(score)) score = score.replace(/ \//g, '/');
-  // all other space slashes are replaced by space
-  if (score.includes(' /')) score = score.replace(/ \//g, ' ');
-  if (score.includes('/)')) score = score.replace(/\/\)/g, ')');
-  if (score.includes('(/')) score = score.replace(/\(\//g, '(');
 
   const unclosed = /(\d+-\d+\(\d+)0,/;
   if (unclosed.test(score)) {
@@ -112,17 +187,41 @@ export function punctuationAdjustments({ score }) {
     score = score.slice(1);
   }
 
-  if (missingOpenParen && /^9\d/.test(score)) {
-    score = '(' + score.slice(1);
-  } else if (missingOpenParen) {
-    if (score[0] !== '(') score = '(' + score;
+  if (missingOpenParen) {
+    if (/^9\d/.test(score)) {
+      score = '(' + score.slice(1);
+    } else if (score[0] !== '(') {
+      score = '(' + score;
+    } else {
+      let reconstructed = [];
+      let open = 0;
+      // step through characters and insert close before open when open
+      for (const char of score.split('').reverse()) {
+        if (char === ')') {
+          if (open) {
+            reconstructed.push('(');
+          } else {
+            open += 1;
+          }
+        }
+        if (char === '(') open -= 1;
+        reconstructed.push(char);
+      }
+      reconstructed.reverse();
+      score = reconstructed.join('');
+    }
+
+    getMissing();
   }
 
   if (counts[')'] > (counts['('] || 0)) {
-    if (score[0] === ')') score = '(' + score.slice(1);
+    if (score[0] === ')') {
+      score = '(' + score.slice(1);
+      getMissing();
+    }
   }
 
-  if (noClose && (score.endsWith(9) || /\d{1,}0$/.test(score))) {
+  if (noClose && (score.endsWith(9) || /\d+0$/.test(score))) {
     score = score.slice(0, score.length - 1) + ')';
     getMissing();
   }
@@ -181,6 +280,7 @@ export function punctuationAdjustments({ score }) {
     const close = value.indexOf(')');
     return open >= 0 && close >= 0 && open < close;
   };
+
   if (/^\([\d ]+.*[\d ]+\)$/.test(score) && counts['('] === counts[')']) {
     const proposed = score.slice(1, score.length - 1);
     if (openFirst(proposed)) {
@@ -188,6 +288,8 @@ export function punctuationAdjustments({ score }) {
       getMissing();
     }
   }
+
+  if (score.endsWith('()')) score = score.slice(0, score.length - 2);
 
   return { score };
 }
