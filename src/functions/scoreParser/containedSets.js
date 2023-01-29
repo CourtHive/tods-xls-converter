@@ -9,8 +9,10 @@ export function containedSets({ score, attributes }) {
   const withParens = new RegExp(/\([\d,/ ]+\)/g);
   const contained = score.match(withParens);
   contained?.forEach((container) => {
-    let innards = dashMash(dashJoin(container.match(/^\((.*)\)$/)[1]));
-    score = score.replace(container, `(${innards})`).trim();
+    let innards = container.match(/^\((.*)\)$/)[1];
+    let joined = dashJoin(innards);
+    let mashed = dashMash(joined);
+    score = score.replace(container, `(${mashed})`).trim();
   });
 
   const withBrackets = new RegExp(/\[[\d,/ ]+\]/g);
