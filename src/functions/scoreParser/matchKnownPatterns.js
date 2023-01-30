@@ -1,13 +1,17 @@
 import { dashMash } from './commonPatterns';
 
-export function matchKnownPatterns({ score }) {
+export function matchKnownPatterns({ score, applied }) {
   for (const punctuation of ['.', ',', ' ', '/']) {
     const re = new RegExp(`^(\\d+)\\${punctuation}(\\d+)$`);
     if (re.test(score)) {
-      const numbers = score.match(re).slice(1);
+      const numbers = score
+        .match(re)
+        .slice(1)
+        .map((n) => parseInt(n));
       const diff = Math.abs(numbers[0] - numbers[1]);
       if (diff <= 10 && diff >= 2) {
         score = score.split(punctuation).join('-');
+        applied.push('variedJoinerPattern');
       }
     }
   }
@@ -16,16 +20,19 @@ export function matchKnownPatterns({ score }) {
   if (smashSlash.test(score)) {
     const [before, s1, s2, s3, s4, after] = score.match(smashSlash).slice(1);
     score = score.replace(smashSlash, `${before}${s1}-${s2} ${s3}-${s4}${after}`);
+    applied.push('smashSlashPattern');
   }
 
   const incompleteFinalSet = /.*\s6[/-]+$/;
   if (incompleteFinalSet.test(score)) {
     score += '0';
+    applied.push('incompleteFinalSetPattern');
   }
 
   const missingZero = /\(6,\)/g;
   if (missingZero.test(score)) {
     score = score.replace(missingZero, '(6, 0)');
+    applied.push('missingZeroPattern1');
   }
 
   // insert spaces before and after parentheses
@@ -45,15 +52,21 @@ export function matchKnownPatterns({ score }) {
         return part;
       })
       .join(' ');
+    applied.push('spaceConsiderationPatterns');
   });
 
-  score = dashMash(score);
+  let deDashMash = dashMash(score);
+  if (deDashMash !== score) {
+    score = deDashMash;
+    applied.push('deDashMash');
+  }
 
   const smashedSets = /^(\d)[-/,]+(\d{2})[-/,]+(\d)$/;
   if (smashedSets.test(score)) {
     const [s1, ss, s4] = score.match(smashedSets).slice(1);
     const [s2, s3] = ss.split('');
     score = `${s1}-${s2} ${s3}-${s4}`;
+    applied.push('smashSetPattern');
   }
 
   const setSpacing = /^(\d+)[ -](\d+)$/;
@@ -66,6 +79,7 @@ export function matchKnownPatterns({ score }) {
       const set1 = s1.match(setSpacing).slice(1, 3).join('-');
       const set2 = s2.match(setSpacing).slice(1, 3).join('-');
       score = `${set1} ${set2}`;
+      applied.push('slashSeparationPattern');
     }
   }
 
@@ -78,6 +92,7 @@ export function matchKnownPatterns({ score }) {
       const set1 = s1.match(setSpacing).slice(1, 3).join('-');
       const set2 = s2.match(setSpacing).slice(1, 3).join('-');
       score = `${set1} ${set2}`;
+      applied.push('commaSeparationPattern');
     }
   }
 
@@ -89,6 +104,7 @@ export function matchKnownPatterns({ score }) {
       .split(' ')
       .join('-');
     score = score.replace(set, replacement);
+    applied.push('singleSetCommaSeparationPattern');
   }
 
   // pattern \d+-\d{2}-\d+ => \d-\d \d-\d
@@ -99,6 +115,7 @@ export function matchKnownPatterns({ score }) {
     const separated = middle.split('');
     const reformatted = `${left}-${separated[0]} ${separated[1]}-${right}`;
     score = score.replace(noSetSeparation, reformatted);
+    applied.push('noSetSeparationPattern');
     failSafe += 1;
   }
 
@@ -109,6 +126,7 @@ export function matchKnownPatterns({ score }) {
     floatingTiebreaks.forEach((floater) => {
       const tiebreakScore = floater.match(getFloatingTiebreak).slice(2)[0];
       score = score.replace(floater, `7-6(${tiebreakScore}) `);
+      applied.push('floatingTiebreakPattern1');
     });
   }
 
@@ -119,12 +137,14 @@ export function matchKnownPatterns({ score }) {
       .split(' ')
       .join('-');
     score = score.replace(ss, replacement);
+    applied.push('spaceSeparatedSetPattern1');
   });
 
   spaceSeparatedSets = score.match(/ \d \d$/);
   spaceSeparatedSets?.forEach((ss) => {
     const replacement = ' ' + ss.slice(1).split(' ').join('-');
     score = score.replace(ss, replacement);
+    applied.push('spaceSeparatedSetPattern2');
   });
 
   // slash separated sets with comma separated games
@@ -138,11 +158,13 @@ export function matchKnownPatterns({ score }) {
         .map((e) => `(${e})`)
         .join(' ') + ' ';
     score = score.replace(excerpt, replacement);
+    applied.push('slashCommaSetPattern');
   }
 
   const missedSet0 = /\(6-\)/g;
   if (missedSet0.test(score)) {
     score = score.replace(missedSet0, '(6-0)');
+    applied.push('missingZeroPattern2');
   }
 
   // IMPORTANT: must occur last...
@@ -157,6 +179,7 @@ export function matchKnownPatterns({ score }) {
       newScore = newScore.replace(set, dashSet);
     });
     score = newScore;
+    applied.push('slashSetPattern');
   }
 
   // space separated match tiebreak
@@ -166,6 +189,7 @@ export function matchKnownPatterns({ score }) {
     const digitCount = start.replace(/\D/g, '').length;
     if (digitCount >= 4) {
       score = start + ` ${s1}${s2}`;
+      applied.push('spaceSeparatedSuperPattern');
     }
   }
 
@@ -178,6 +202,7 @@ export function matchKnownPatterns({ score }) {
     const diff = Math.abs(s1 - s2);
     if (diff === 1) {
       score = score.replace(ssb, `${before}${setScore}(${tb})${after}`);
+      applied.push('spaceSeparatedSetPattern');
     }
   }
 
@@ -190,6 +215,7 @@ export function matchKnownPatterns({ score }) {
 
     if (diff === 1) {
       score = score.replace(floater, `${setScore}(${tb})${tail}`);
+      applied.push('floatingTiebreakPattern2');
     }
   }
 
@@ -198,7 +224,8 @@ export function matchKnownPatterns({ score }) {
     const getSpacedTibreakSet = /(^|\s)(\d \d)\(/;
     const [before, spacedScore] = spacedTB.match(getSpacedTibreakSet).slice(1);
     score = score.replace(spacedTB, `${before}${spacedScore.split(' ').join('-')}(`);
+    applied.push('spacedTiebreakPattern');
   }
 
-  return { score };
+  return { score, applied };
 }
