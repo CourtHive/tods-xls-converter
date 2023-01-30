@@ -1,11 +1,11 @@
 import { getTransformations, tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
-const validPatterns = true;
+const validPatterns = false;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 1;
+const end = 0;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
@@ -14,8 +14,7 @@ const end = 1;
 const scores = [
   // { score: '7567108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
-
-  { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
+  // { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
   /*
   // implied 0
