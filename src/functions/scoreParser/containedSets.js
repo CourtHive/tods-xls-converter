@@ -105,5 +105,10 @@ export function containedSets({ score, attributes, identifier }) {
     }
   }
 
+  const emptyParens = /\(\)/g;
+  if (emptyParens.test(score)) {
+    score = score.replace(emptyParens, '').trim();
+  }
+
   return { score };
 }

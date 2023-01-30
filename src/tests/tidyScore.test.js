@@ -12,8 +12,10 @@ const end = 0;
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
-  // { score: '(6-3) (1-6) (7-5)[1-7]', expectation: { score: '6-3 1-6 7-6(1)' } }, // 7-5 with tiebreak has been corrected
+  // { score: '7567108', expectation: { score: '7-5 6-7(8)' } },
+  // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
 
+  { score: '6157 108()', expectation: { score: '6-1 5-7 [10-8]' } },
   { score: '6157108', expectation: { score: '6-1 5-7 [10-8]' } },
   { score: '6157 108', expectation: { score: '6-1 5-7 [10-8]' } },
   { score: '6157 [10-8]', expectation: { score: '6-1 5-7 [10-8]' } },
@@ -27,7 +29,6 @@ const scores = [
 
   /*
   // should get caught by second pass
-  { score: '7567()108', expectation: { score: '' } },
   { score: '57 60 10 6', expectation: { score: '5-7 6-0 [10-6]' } },
   { score: '62 36 10 6', expectation: { score: '6-2 3-6 [10-6]' } },
   { score: '46 60 10 6', expectation: { score: '4-6 6-0 [10-6]' } },
@@ -297,6 +298,7 @@ const scores = [
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
   { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
+  { score: '(6-3) (1-6) (7-5)[1-7]', expectation: { score: '6-3 1-6 7-6(1)' } }, // 7-5 with tiebreak has been corrected
   { score: '61 26 10-13', expectation: { score: '6-1 2-6 [10-3]' } },
   { score: '5/4 [7-4], 5/4 [12-11]', expectation: { score: '5-4(4) 5-4(11)' } },
   { score: '6 3, 7 5', expectation: { score: '6-3 7-5' } },

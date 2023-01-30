@@ -29,7 +29,7 @@ const processingOrder = [
 ];
 
 // secondPass is used to process only numbers which have been extracted from strings
-const secondPass = ['separateScoreBlocks', 'sensibleSets', 'superSquare'];
+const secondPass = ['handleNumeric', 'separateScoreBlocks', 'sensibleSets', 'superSquare'];
 
 export function getInvalid() {
   return invalid;
