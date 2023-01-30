@@ -5,7 +5,7 @@ const validPatterns = true;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 0;
+const end = 1;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
@@ -14,6 +14,8 @@ const end = 0;
 const scores = [
   // { score: '7567108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
+
+  { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
   /*
   // implied 0
@@ -540,6 +542,8 @@ it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expe
     }
 
     if ((validPatterns && !isValid) || singleScore) {
+      const transformations = getTransformations();
+      console.log({ transformations });
       console.log({ isValid, score, tidy, modifications, attributes });
     }
 
