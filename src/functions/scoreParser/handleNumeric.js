@@ -14,10 +14,19 @@ export function handleNumeric({ score }) {
     if (score.length === 7) {
       score = score.slice(0, 4) + ' ' + score.slice(4);
     } else if (!(score.length % 2)) {
-      score = utilities
-        .chunkArray(score.split(''), 2)
-        .map((part) => part.join(''))
-        .join(' ');
+      const chunks = utilities.chunkArray(score.split(''), 2).map((part) => part.join(''));
+      const chunkCharacter = chunks.map((chunk) => {
+        const [s1, s2] = chunk.split('').map((s) => parseInt(s));
+        const diff = Math.abs(s1 - s2);
+        const winner = s1 > s2 ? 1 : 2;
+        return diff > 1 ? winner : 'tbset';
+      });
+
+      if (chunkCharacter[0] !== 'tbset' && chunkCharacter[1] !== 'tbset' && chunkCharacter[0] !== chunkCharacter[1]) {
+        score = [chunks.slice(0, 2).join(' '), chunks.slice(2).join('-')].join(' ');
+      } else {
+        score = chunks.join(' ');
+      }
     } else {
       score = parseSuper(score) || score;
     }

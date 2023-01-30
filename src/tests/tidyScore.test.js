@@ -30,14 +30,6 @@ const scores = [
   { score: '(4-6)(7-6)(8/6)(6-4)', expectation: { score: '' } },
   { score: '(4-6)(7-6)8/6(6-4)', expectation: { score: '' } },
 
-  { score: '36641210', expectation: { score: '' } },
-  { score: '46611513', expectation: { score: '' } },
-  { score: '46621210', expectation: { score: '' } },
-  { score: '61161210', expectation: { score: '' } },
-  { score: '63461412', expectation: { score: '' } },
-  { score: '63461412', expectation: { score: '' } },
-  { score: '63571311', expectation: { score: '' } },
-  { score: '64261210', expectation: { score: '' } },
   // should get caught by second pass
   { score: '75 36 12 10', expectation: { score: '' } },
 
@@ -170,6 +162,9 @@ const scores = [
   { score: '3661119', expectation: { score: '3-6 6-1 [11-9]' } },
   { score: '4661105', expectation: { score: '4-6 6-1 [10-5]' } },
   { score: '6136107', expectation: { score: '6-1 3-6 [10-7]' } },
+  { score: '36641210', expectation: { score: '3-6 6-4 [12-10]' } },
+  { score: '46611513', expectation: { score: '4-6 6-1 [15-13]' } },
+  { score: '46621210', expectation: { score: '4-6 6-2 [12-10]' } },
 
   // space separated match tiebreak
   { score: '46, 63, 10 6', expectation: { score: '4-6 6-3 [10-6]' } },
