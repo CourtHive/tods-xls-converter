@@ -18,16 +18,14 @@ export function stringScore({ score }) {
 
 export function replaceOh({ score }) {
   if (typeof score !== 'string') return { score };
-  score = score
-    .toLowerCase()
-    .split(' ')
-    .map((part) => {
-      if (/^o[1-9]$/.test(part) || /^[1-9]o$/.test(part)) {
-        part = part.split('o').join('0');
-      }
-      return part;
-    })
-    .join(' ');
+
+  if (score.toLowerCase().includes('o')) {
+    score = score
+      .toLowerCase()
+      .split(' ')
+      .map((part) => part.split('o').join('0'))
+      .join(' ');
+  }
 
   return { score };
 }

@@ -15,25 +15,7 @@ const scores = [
   // { score: '7567108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
 
-  // should get caught by second pass
-  { score: '57 60 106', expectation: { score: '5-7 6-0 [10-6]' } },
-  { score: '62 36 10 6', expectation: { score: '6-2 3-6 [10-6]' } },
-  { score: '46 60 10 6', expectation: { score: '4-6 6-0 [10-6]' } },
-
-  { score: '6157 108()', expectation: { score: '6-1 5-7 [10-8]' } },
-  { score: '6157108', expectation: { score: '6-1 5-7 [10-8]' } },
-  { score: '6157 108', expectation: { score: '6-1 5-7 [10-8]' } },
-  { score: '6157 [10-8]', expectation: { score: '6-1 5-7 [10-8]' } },
-
-  { score: '1440119', expectation: { score: '1-4 4-0 [11-9]' } },
-  { score: '2441108', expectation: { score: '2-4 4-1 [10-8]' } },
-  { score: '3661103', expectation: { score: '3-6 6-1 [10-3]' } },
-  { score: '3661119', expectation: { score: '3-6 6-1 [11-9]' } },
-  { score: '4661105', expectation: { score: '4-6 6-1 [10-5]' } },
-  { score: '6136107', expectation: { score: '6-1 3-6 [10-7]' } },
-
   /*
-
   { score: '36641210', expectation: { score: '' } },
   { score: '46611513', expectation: { score: '' } },
   { score: '46621210', expectation: { score: '' } },
@@ -152,11 +134,27 @@ const scores = [
   { score: '(6)(6-2)', expectation: { score: '' } },
   { score: '(6-4)(6-7((5)(7-5)', expectation: { score: '' } },
   { score: '(6-, 2-6, 10-5)', expectation: { score: '' } },
-  { score: '4 0, 4 o', expectation: { score: '' } },
 
   // RETIRED is not specified but could be implied
   { score: '(2, 6)(7, 5)[7, 6](6, 4)', expectation: { score: '2-6 7-5 7-6(6-4)', matchUpStatus: 'RETIRED' } },
   */
+
+  // match tiebreak variations
+  { score: '57 60 106', expectation: { score: '5-7 6-0 [10-6]' } },
+  { score: '62 36 10 6', expectation: { score: '6-2 3-6 [10-6]' } },
+  { score: '46 60 10 6', expectation: { score: '4-6 6-0 [10-6]' } },
+
+  { score: '6157 108()', expectation: { score: '6-1 5-7 [10-8]' } },
+  { score: '6157108', expectation: { score: '6-1 5-7 [10-8]' } },
+  { score: '6157 108', expectation: { score: '6-1 5-7 [10-8]' } },
+  { score: '6157 [10-8]', expectation: { score: '6-1 5-7 [10-8]' } },
+
+  { score: '1440119', expectation: { score: '1-4 4-0 [11-9]' } },
+  { score: '2441108', expectation: { score: '2-4 4-1 [10-8]' } },
+  { score: '3661103', expectation: { score: '3-6 6-1 [10-3]' } },
+  { score: '3661119', expectation: { score: '3-6 6-1 [11-9]' } },
+  { score: '4661105', expectation: { score: '4-6 6-1 [10-5]' } },
+  { score: '6136107', expectation: { score: '6-1 3-6 [10-7]' } },
 
   // space separated match tiebreak
   { score: '46, 63, 10 6', expectation: { score: '4-6 6-3 [10-6]' } },
@@ -430,6 +428,7 @@ const scores = [
   { score: '6/1 conceed', expectation: { score: '6-1', matchUpStatus: 'RETIRED' } },
   { score: '4-2 retd', expectation: { score: '4-2', matchUpStatus: 'RETIRED' } },
 
+  { score: '4 0, 4 o', expectation: { score: '4-0 4-0' } },
   { score: 'w/o', expectation: { matchUpStatus: 'WALKOVER' } },
   { score: 'w-o', expectation: { matchUpStatus: 'WALKOVER' } },
   { score: 'wo', expectation: { matchUpStatus: 'WALKOVER' } },
