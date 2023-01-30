@@ -1,7 +1,7 @@
 import { utilities } from 'tods-competition-factory';
 import { getRow } from './sheetAccess';
 
-import { NO_POSITION_ROWS_ROUND } from '../constants/errorConditions';
+import { NO_POSITION_ROWS_FOUND } from '../constants/errorConditions';
 
 export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn, avoidRows, positionLimit }) {
   const columnProfile = columnProfiles.find((columnProfile) =>
@@ -9,7 +9,7 @@ export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn
   );
 
   if (!columnProfile) {
-    return { error: NO_POSITION_ROWS_ROUND };
+    return { error: NO_POSITION_ROWS_FOUND };
   }
 
   const { column, keyMap } = columnProfile;

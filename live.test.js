@@ -25,7 +25,7 @@ it.skip('can process passing', () => {
 
   resetLogging();
   setLoggingActive(true);
-  setLoggingActive(false, 'dev');
+  setLoggingActive(false, 'errorlog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'sheetNames');
   setLoggingActive(false, 'noWinningSide');
@@ -61,10 +61,10 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  // const readDir = './examples/sheets/testing/working';
-  // const writeDir = './examples/sheets/processed/IND';
-  const readDir = './examples/sheets/India/years/2019';
-  const writeDir = './examples/sheets/processed/IND/2019';
+  // const readDir = './examples/sheets/testing/';
+  const year = '2020';
+  const readDir = `./examples/sheets/India/years/${year}`;
+  const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
   const writeMatchUps = true;
@@ -92,7 +92,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
-  setLoggingActive(false, 'dev');
+  setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
   setLoggingActive(false, 'invalidResult');
@@ -128,8 +128,8 @@ it('can process tests', () => {
 
   const invalidScores = getInvalid();
   if (invalidScores?.length) {
-    const csvScores = utilities.JSON2CSV(invalidScores);
-    writeFileSync('./scratch/invalidScores.csv', csvScores, 'UTF-8');
+    const csvInvalid = utilities.JSON2CSV(invalidScores.map((score) => ({ score })));
+    writeFileSync(`${writeDir}/invalidScores.csv`, csvInvalid, 'UTF-8');
     dumpInvalid();
   }
 
@@ -142,9 +142,9 @@ it('can process tests', () => {
       return unique;
     }, {});
     const csvUnique = utilities.JSON2CSV(Object.values(uniqueMap));
-    writeFileSync('./scratch/uniqueScores.csv', csvUnique, 'UTF-8');
+    writeFileSync(`${writeDir}/uniqueScores.csv`, csvUnique, 'UTF-8');
     const csvScores = utilities.JSON2CSV(scoreAudit);
-    writeFileSync('./scratch/scoreParsing.csv', csvScores, 'UTF-8');
+    writeFileSync(`${writeDir}/scoreParsing.csv`, csvScores, 'UTF-8');
   }
 
   if (writeParticipants) {
@@ -152,12 +152,12 @@ it('can process tests', () => {
     const csvParticipants = utilities.JSON2CSV(participants, {
       columnAccessors: ['person.personId', 'participantName', 'person.standardFamilyName', 'person.standardGivenName']
     });
-    writeFileSync('./scratch/participants.json', JSON.stringify(participants), 'UTF-8');
-    writeFileSync('./scratch/participants.csv', csvParticipants, 'UTF-8');
+    writeFileSync(`${writeDir}/participants.json`, JSON.stringify(participants), 'UTF-8');
+    writeFileSync(`${writeDir}//participants.csv`, csvParticipants, 'UTF-8');
   }
 
   if (!isNaN(writeResultIndex))
-    writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
+    writeFileSync(`${writeDir}/fileResult.json`, JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 
   // console.log(result.fileResults[0].sheetAnalysis[2].analysis.info);
 });

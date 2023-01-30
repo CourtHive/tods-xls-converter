@@ -1,5 +1,5 @@
+import { readdirSync, readFileSync, writeFileSync, existsSync, statSync, moveSync } from 'fs-extra';
 import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
-import { readdirSync, readFileSync, writeFileSync, existsSync, statSync } from 'fs-extra';
 import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { getAudit, getLoggingActive, getWorkbook } from '../global/state';
 import { processSheets } from '../functions/processSheets';
@@ -35,7 +35,7 @@ export function processDirectory({
   const workbookCount = fileNames.length;
 
   const filesWithSinglePositions = [];
-  const logging = getLoggingActive('dev');
+  const logging = getLoggingActive('errorLog');
 
   const processing =
     processLimit && startIndex + processLimit < workbookCount ? processLimit : workbookCount - startIndex;
@@ -73,8 +73,10 @@ export function processDirectory({
   let index = 0;
   for (const fileName of fileNames) {
     if (getLoggingActive('sheetNames') || getLoggingActive('fileNames')) console.log({ fileName, index });
-    const buf = readFileSync(`${readDir}/${fileName}`);
-    const stat = statSync(`${readDir}/${fileName}`);
+
+    const filePath = `${readDir}/${fileName}`;
+    const buf = readFileSync(filePath);
+    const stat = statSync(filePath);
 
     let result = loadWorkbook(buf, index, defaultProvider);
     const { workbookType } = result;
@@ -251,8 +253,11 @@ export function processDirectory({
       if (result.resultValues?.length) resultValues.push(...result.resultValues);
     }
 
+    let firstError;
     if (result.errorLog) {
-      Object.keys(result.errorLog).forEach((key) => {
+      const errorKeys = Object.keys(result.errorLog);
+      firstError = errorKeys[0];
+      errorKeys.forEach((key) => {
         const sheetNames = result.errorLog[key];
         if (!errorLog[key]) {
           errorLog[key] = [{ fileName, sheetNames }];
@@ -260,6 +265,12 @@ export function processDirectory({
           errorLog[key].push({ fileName, sheetNames });
         }
       });
+    }
+
+    if (firstError) {
+      const fileDest = `${readDir}/${firstError}/${fileName}`;
+      const result = moveSync(filePath, fileDest);
+      if (result) console.log({ fileDest, result });
     }
 
     const tournamentRecord = tournamentEngine.getState().tournamentRecord;
@@ -310,12 +321,17 @@ export function processDirectory({
   }
 
   const errorKeys = Object.keys(errorLog);
-  const errorTypes = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
-  const totalErrors = errorKeys
-    ?.flatMap((key) => errorLog[key].map((file) => file.sheetNames.length))
-    .reduce((a, b) => a + b, 0);
+  const totalErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
 
-  if (logging) console.log({ sheetsProcessed, totalMatchUps, errorTypes, totalErrors });
+  if (logging)
+    console.log({
+      filesProcessed: fileNames.length,
+      errorTypes: errorKeys.length,
+      sheetsProcessed,
+      totalMatchUps,
+      totalErrors,
+      errorKeys
+    });
 
   pushGlobalLog({
     method: 'processingComplete',
