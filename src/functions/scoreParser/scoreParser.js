@@ -9,6 +9,7 @@ const processingOrder = [
   'handleRetired',
   'replaceOh',
   'stringScore',
+  // 'setBuilder',
   'punctuationAdjustments',
   'excisions',
   'handleSpaceSeparator',

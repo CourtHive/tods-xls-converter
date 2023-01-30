@@ -1,3 +1,4 @@
+import { dashMash } from './commonPatterns';
 import { standardSetComma, tiebreakSetComma } from './validPatterns';
 
 export function handleBracketSpacing({ score }) {
@@ -25,7 +26,7 @@ export function handleBracketSpacing({ score }) {
   });
 
   // remove extraneous spaces
-  score = score.split(' ').filter(Boolean).join(' ');
+  score = score.split(' ').filter(Boolean).map(dashMash).join(' ');
 
   return { score };
 }

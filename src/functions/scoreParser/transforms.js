@@ -10,6 +10,7 @@ import { sensibleSets } from './sensibleSets';
 import { superSquare } from './superSquare';
 import { getSuper } from './utilities';
 import { handleNumeric } from './handleNumeric';
+import { setBuilder } from './setBuilder';
 
 export function stringScore({ score }) {
   score = score.toString().toLowerCase();
@@ -252,6 +253,7 @@ export const transforms = {
   sensibleSets: sensibleSets,
   stringScore: stringScore,
   superSquare: superSquare,
+  setBuilder: setBuilder,
   excisions: excisions,
   replaceOh: replaceOh
 };

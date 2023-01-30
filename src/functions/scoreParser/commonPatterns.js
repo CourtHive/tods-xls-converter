@@ -1,7 +1,9 @@
 import { indices } from '../../utilities/convenience';
 
 export function dashMash(segment) {
-  if (!/^[\d-]+$/.test(segment)) return segment;
+  if (!/^[\d-]+(\(\d\))*$/.test(segment)) {
+    return segment;
+  }
   const dashIndices = indices('-', segment.split(''));
   if (!dashIndices.length) return segment;
   const numbers = segment.split('-');

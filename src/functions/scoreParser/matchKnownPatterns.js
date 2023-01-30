@@ -12,6 +12,12 @@ export function matchKnownPatterns({ score }) {
     }
   }
 
+  const smashSlash = /(^|\s)(\d)\/(\d)(\d)\/(\d)(\(|$)/;
+  if (smashSlash.test(score)) {
+    const [before, s1, s2, s3, s4, after] = score.match(smashSlash).slice(1);
+    score = score.replace(smashSlash, `${before}${s1}-${s2} ${s3}-${s4}${after}`);
+  }
+
   const incompleteFinalSet = /.*\s6[/-]+$/;
   if (incompleteFinalSet.test(score)) {
     score += '0';
@@ -185,6 +191,13 @@ export function matchKnownPatterns({ score }) {
     if (diff === 1) {
       score = score.replace(floater, `${setScore}(${tb})${tail}`);
     }
+  }
+
+  const getSpacedTibreakSets = /(^|\s)(\d \d)\(/g;
+  for (const spacedTB of score.match(getSpacedTibreakSets) || []) {
+    const getSpacedTibreakSet = /(^|\s)(\d \d)\(/;
+    const [before, spacedScore] = spacedTB.match(getSpacedTibreakSet).slice(1);
+    score = score.replace(spacedTB, `${before}${spacedScore.split(' ').join('-')}(`);
   }
 
   return { score };
