@@ -1,4 +1,5 @@
 import { getAudit, getLoggingActive, resetLogging, setLoggingActive } from './src/global/state';
+import { dumpInvalid, getInvalid } from './src/functions/scoreParser/scoreParser';
 import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
 import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
@@ -24,7 +25,7 @@ it.skip('can process passing', () => {
 
   resetLogging();
   setLoggingActive(true);
-  setLoggingActive(false, 'dev');
+  setLoggingActive(false, 'errorlog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'sheetNames');
   setLoggingActive(false, 'noWinningSide');
@@ -60,8 +61,11 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const readDir = './examples/sheets/testing/working';
-  const writeDir = './examples/sheets/processed/IND';
+  // const readDir = './examples/sheets/testing/';
+  // const writeDir = `./examples/sheets/processed/testing`;
+  const year = '2022';
+  const readDir = `./examples/sheets/India/years/${year}`;
+  const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
   const writeMatchUps = true;
@@ -89,7 +93,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
-  setLoggingActive(false, 'dev');
+  setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
   setLoggingActive(false, 'invalidResult');
@@ -97,7 +101,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
-  setLoggingActive(false, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
+  setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
 
@@ -123,10 +127,25 @@ it('can process tests', () => {
 
   const auditLog = getAudit();
 
+  const invalidScores = getInvalid();
+  if (invalidScores?.length) {
+    const csvInvalid = utilities.JSON2CSV(invalidScores.map((score) => ({ score })));
+    writeFileSync(`${writeDir}/invalidScores.csv`, csvInvalid, 'UTF-8');
+    dumpInvalid();
+  }
+
   if (getLoggingActive('scoreAudit')) {
     const scoreAudit = auditLog.filter((item) => typeof item === 'object' && item.scoreString);
+    const uniqueMap = scoreAudit.reduce((unique, item) => {
+      const { scoreString } = item;
+      if (!unique[scoreString]) unique[scoreString] = { scoreString, count: 0 };
+      unique[scoreString].count += 1;
+      return unique;
+    }, {});
+    const csvUnique = utilities.JSON2CSV(Object.values(uniqueMap));
+    writeFileSync(`${writeDir}/uniqueScores.csv`, csvUnique, 'UTF-8');
     const csvScores = utilities.JSON2CSV(scoreAudit);
-    writeFileSync('./scratch/scoreParsing.csv', csvScores, 'UTF-8');
+    writeFileSync(`${writeDir}/scoreParsing.csv`, csvScores, 'UTF-8');
   }
 
   if (writeParticipants) {
@@ -134,12 +153,12 @@ it('can process tests', () => {
     const csvParticipants = utilities.JSON2CSV(participants, {
       columnAccessors: ['person.personId', 'participantName', 'person.standardFamilyName', 'person.standardGivenName']
     });
-    writeFileSync('./scratch/participants.json', JSON.stringify(participants), 'UTF-8');
-    writeFileSync('./scratch/participants.csv', csvParticipants, 'UTF-8');
+    writeFileSync(`${writeDir}/participants.json`, JSON.stringify(participants), 'UTF-8');
+    writeFileSync(`${writeDir}//participants.csv`, csvParticipants, 'UTF-8');
   }
 
   if (!isNaN(writeResultIndex))
-    writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
+    writeFileSync(`${writeDir}/fileResult.json`, JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
 
   // console.log(result.fileResults[0].sheetAnalysis[2].analysis.info);
 });

@@ -62,7 +62,7 @@ export function joinFloatingTiebreak({ score }) {
   if (parts.length === 2 && ['(', '['].some((punctuation) => parts[1].includes(punctuation))) {
     const stripped = strip(parts[0]);
     const scores = stripped.split('');
-    const diff = Math.abs(scores.reduce((a, b) => +a - +b));
+    const diff = Math.abs(scores.reduce((a, b) => +a - +b, 0));
     if (diff === 1) {
       parts[1] = bracketToParen(parts[1]);
       return { score: parts.join('') };

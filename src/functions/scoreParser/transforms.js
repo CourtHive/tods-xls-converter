@@ -9,45 +9,31 @@ import { containedSets } from './containedSets';
 import { sensibleSets } from './sensibleSets';
 import { superSquare } from './superSquare';
 import { getSuper } from './utilities';
+import { handleNumeric } from './handleNumeric';
+import { setBuilder } from './setBuilder';
 
 export function stringScore({ score }) {
   score = score.toString().toLowerCase();
+
   return { score };
 }
 
-export function handleNumeric({ score }) {
-  if (typeof score === 'number') {
-    score = score.toString().toLowerCase();
-
-    if (!(score.length % 2)) {
-      score = utilities
-        .chunkArray(score.split(''), 2)
-        .map((part) => part.join(''))
-        .join(' ');
-    } else {
-      score = parseSuper(score) || score;
-    }
-  }
-  return { score };
-}
-
-export function replaceOh({ score }) {
+export function replaceOh({ score, applied }) {
   if (typeof score !== 'string') return { score };
-  score = score
-    .toLowerCase()
-    .split(' ')
-    .map((part) => {
-      if (/^o[1-9]$/.test(part) || /^[1-9]o$/.test(part)) {
-        part = part.split('o').join('0');
-      }
-      return part;
-    })
-    .join(' ');
 
-  return { score };
+  if (score.toLowerCase().includes('o')) {
+    score = score
+      .toLowerCase()
+      .split(' ')
+      .map((part) => part.split('o').join('0'))
+      .join(' ');
+    applied.push('replaceOh');
+  }
+
+  return { score, applied };
 }
 
-export function separateScoreBlocks({ score }) {
+export function separateScoreBlocks({ score, applied }) {
   if (typeof score !== 'string') return { score };
   score = score
     .toLowerCase()
@@ -60,8 +46,10 @@ export function separateScoreBlocks({ score }) {
             .chunkArray(part.split(''), 2)
             .map((c) => c.join(''))
             .join(' ');
+          applied.push('separateScoreBlock');
         } else if (part.length === 3 && oneIndex >= 0) {
           const tiebreakScore = getSuper(part.split(''), oneIndex);
+          applied.push('getSuper');
           return tiebreakScore;
         }
       }
@@ -69,22 +57,27 @@ export function separateScoreBlocks({ score }) {
     })
     .join(' ');
 
-  return { score };
+  return { score, applied };
 }
 
-export function removeErroneous({ score }) {
+export function removeErroneous({ score, applied }) {
   if (typeof score !== 'string') return { score };
 
-  if (parseSuper(score)) return { score: parseSuper(score) };
+  if ([3, 4].includes(score.length) && parseSuper(score)) {
+    const superTie = parseSuper(score);
+    return { score: superTie };
+  }
 
   score = score
     .toLowerCase()
     .split(' ')
     .map((part) => {
       if (/^\d+$/.test(part) && part.length === 1) {
+        applied.push('removeErroneous1');
         return;
       }
       if (/^\d+$/.test(part) && part.length === 3) {
+        applied.push('removeErroneous2');
         return part.slice(0, 2);
       }
       return part;
@@ -92,22 +85,24 @@ export function removeErroneous({ score }) {
     .filter(Boolean)
     .join(' ');
 
-  return { score };
+  return { score, applied };
 }
 
-export function handleWalkover({ score }) {
+export function handleWalkover({ score, applied }) {
   if (['walkover', 'wo', 'w/o', 'w-o'].includes(score.toString().toLowerCase())) {
-    return { matchUpStatus: 'walkover', score: '' };
+    applied.push('handleWalkover');
+    return { matchUpStatus: 'walkover', score: '', applied };
   }
   return { score };
 }
 
-export function handleRetired({ score, profile }) {
+export function handleRetired({ score, profile, applied }) {
   score = score.toString().toLowerCase();
   const re = /^(.*\d+.*)(ret|con)+[A-Za-z ]*$/; // at least one digit
   if (re.test(score)) {
     const [leading] = score.match(re).slice(1);
-    return { score: leading.trim(), matchUpStatus: 'retired' };
+    applied.push('handleRetired');
+    return { score: leading.trim(), matchUpStatus: 'retired', applied };
   }
 
   const providerRetired = profile?.matchUpStatuses?.retired;
@@ -117,16 +112,19 @@ export function handleRetired({ score, profile }) {
   const retired = ['rtd', ...additionalRetired].find((ret) => score.endsWith(ret));
 
   if (retired) {
-    return { matchUpStatus: 'retired', score: score.replace(retired, '').trim() };
+    applied.push('handleRetired');
+    return { matchUpStatus: 'retired', score: score.replace(retired, '').trim(), applied };
   }
   return { score };
 }
 
 export function removeDanglingBits({ score, attributes }) {
+  if (score.endsWith(' am') || score.endsWith(' pm')) score = '';
+
+  score = score.replace(/[A-Za-z]+/g, '').trim();
   if (['.', ','].some((punctuation) => score.endsWith(punctuation))) {
     score = score.slice(0, score.length - 1);
   }
-  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) score = '';
 
   const targetPunctuation = '()/-'.split('').some((punctuation) => score.includes(punctuation));
   if (/ \d$/.test(score) && targetPunctuation) {
@@ -184,7 +182,17 @@ export function handleSpaceSeparator({ score }) {
     const sets = score.split(',').map((set) => set.trim());
     const isSpaced = (set) => /\d \d/.test(set);
     const spacedSets = sets.every(isSpaced);
-    if (spacedSets) score = sets.map((set) => set.replace(' ', '-')).join(' ');
+    if (spacedSets)
+      score = sets
+        .map((set) => {
+          const spaceSeparatedDigits = /\d+ \d+/g;
+          for (const ssd of set.match(spaceSeparatedDigits)) {
+            const [d1, d2] = ssd.match(/(\d+) (\d+)/).slice(1);
+            set = set.replace(ssd, `${d1}-${d2}`);
+          }
+          return set;
+        })
+        .join(' ');
   }
 
   if (score.includes(' ')) {
@@ -253,6 +261,7 @@ export const transforms = {
   sensibleSets: sensibleSets,
   stringScore: stringScore,
   superSquare: superSquare,
+  setBuilder: setBuilder,
   excisions: excisions,
   replaceOh: replaceOh
 };

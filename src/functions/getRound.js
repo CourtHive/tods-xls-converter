@@ -251,9 +251,6 @@ export function getRound({
         const sideString = matchUp.winningSide === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
         matchUp.score = { [sideString]: result };
         const { score: scoreString, matchUpStatus, isValid } = tidyScore({ score: result, profile });
-        if (!isValid) {
-          console.log('invalidScoreString:', result);
-        }
         if (matchUpStatus) matchUp.matchUpStatus = matchUpStatus;
         const outcome =
           isValid &&

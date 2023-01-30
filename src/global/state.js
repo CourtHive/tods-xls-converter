@@ -24,6 +24,10 @@ export function resetLogging() {
   loggingActive = {};
 }
 
+export function activeLogging() {
+  return loggingActive;
+}
+
 export function getLoggingActive(type = 'global') {
   return loggingActive[type] && (params[type] || true);
 }

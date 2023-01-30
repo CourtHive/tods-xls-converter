@@ -1,7 +1,9 @@
+import { dashMash } from './commonPatterns';
 import { standardSetComma, tiebreakSetComma } from './validPatterns';
 
-export function handleBracketSpacing({ score }) {
+export function handleBracketSpacing({ score, applied }) {
   if (score.includes('( ')) {
+    applied.push('removeParenSpacingAfterOpen');
     score = score
       .split('( ')
       .map((part) => part.trim())
@@ -9,6 +11,7 @@ export function handleBracketSpacing({ score }) {
   }
 
   if (score.includes(' )')) {
+    applied.push('removeParenSpacingBeforeClose');
     score = score
       .split(' )')
       .map((part) => part.trim())
@@ -21,11 +24,12 @@ export function handleBracketSpacing({ score }) {
       setsEndComma.forEach((commaEnd) => {
         score = score.replace(commaEnd, commaEnd.slice(0, commaEnd.length - 1) + ' ');
       });
+      applied.push('setsEndComma');
     }
   });
 
   // remove extraneous spaces
-  score = score.split(' ').filter(Boolean).join(' ');
+  score = score.split(' ').filter(Boolean).map(dashMash).join(' ');
 
-  return { score };
+  return { score, applied };
 }
