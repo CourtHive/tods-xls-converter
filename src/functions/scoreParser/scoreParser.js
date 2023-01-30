@@ -38,7 +38,7 @@ export function dumpInvalid() {
   invalid = [];
 }
 
-export function tidyScore({ score: incomingScore, stepLog, fullLog, profile }) {
+export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, identifier }) {
   let matchUpStatus, result, attributes;
   const modifications = [];
 
@@ -46,7 +46,13 @@ export function tidyScore({ score: incomingScore, stepLog, fullLog, profile }) {
 
   const doProcess = (methods) => {
     methods.forEach((method) => {
-      result = transforms[method]({ score, matchUpStatus, attributes, profile });
+      result = transforms[method]({
+        profile, // config object compatible with provider profiles
+        identifier, // optional identifier (used in test harness)
+        matchUpStatus,
+        attributes,
+        score
+      });
       const modified = result.score !== score;
       if (modified) {
         modifications.push({ method, score: result.score });

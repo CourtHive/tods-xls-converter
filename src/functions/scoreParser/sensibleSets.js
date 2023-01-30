@@ -83,6 +83,11 @@ export function sensibleSets({ score, matchUpStatus, attributes }) {
     score += ' 6-0';
   }
 
+  // if a side won the first two sets and there are more than 2 sets, trim the score
+  if (score.split(' ').length > 2 && Math.max(...setsWon) >= 2 && setWinners[0] === setWinners[1]) {
+    score = score.split(' ').slice(0, 2).join(' ');
+  }
+
   if (Math.max(...setsWon) > 2) {
     let counts = [0, 0];
     score = score

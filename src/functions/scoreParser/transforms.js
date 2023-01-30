@@ -9,25 +9,10 @@ import { containedSets } from './containedSets';
 import { sensibleSets } from './sensibleSets';
 import { superSquare } from './superSquare';
 import { getSuper } from './utilities';
+import { handleNumeric } from './handleNumeric';
 
 export function stringScore({ score }) {
   score = score.toString().toLowerCase();
-  return { score };
-}
-
-export function handleNumeric({ score }) {
-  if (typeof score === 'number') {
-    score = score.toString().toLowerCase();
-
-    if (!(score.length % 2)) {
-      score = utilities
-        .chunkArray(score.split(''), 2)
-        .map((part) => part.join(''))
-        .join(' ');
-    } else {
-      score = parseSuper(score) || score;
-    }
-  }
   return { score };
 }
 

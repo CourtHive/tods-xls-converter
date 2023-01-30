@@ -62,7 +62,8 @@ it.skip('can process passing', () => {
 
 it('can process tests', () => {
   // const readDir = './examples/sheets/testing/';
-  const year = '2020';
+  // const writeDir = `./examples/sheets/processed/testing`;
+  const year = '2022';
   const readDir = `./examples/sheets/India/years/${year}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;

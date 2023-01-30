@@ -3,17 +3,30 @@ import { instanceCount } from '../../utilities/convenience';
 import { isNumeric } from '../../utilities/identification';
 import { dashMash } from './commonPatterns';
 
-export function containedSets({ score, attributes }) {
-  if (typeof score !== 'string') return { score };
+export function containedSets({ score, attributes, identifier }) {
+  if (typeof score !== 'string') return { score, identifier };
 
   const withParens = new RegExp(/\([\d,/ ]+\)/g);
   const contained = score.match(withParens);
-  contained?.forEach((container) => {
-    let innards = container.match(/^\((.*)\)$/)[1];
-    let joined = dashJoin(innards);
-    let mashed = dashMash(joined);
+  for (const container of contained || []) {
+    const [innards] = container.match(/^\((.*)\)$/).slice(1);
+
+    // don't split double digits if they follow digits with diff 1
+    const before = score.split(container)[0];
+    const priorDigits = before.split(')').reverse()[0].replace(/\D/g, '');
+    if (innards.length === 2 && priorDigits?.length >= 2) {
+      const priorTwo = priorDigits
+        .slice(priorDigits.length - 2)
+        .split('')
+        .map((d) => parseInt(d));
+      const diff = Math.abs(priorTwo[0] - priorTwo[1]);
+      if (diff === 1) continue;
+    }
+
+    const joined = dashJoin(innards);
+    const mashed = dashMash(joined);
     score = score.replace(container, `(${mashed})`).trim();
-  });
+  }
 
   const withBrackets = new RegExp(/\[[\d,/ ]+\]/g);
   const bracketed = score.match(withBrackets);

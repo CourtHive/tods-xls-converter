@@ -11,6 +11,7 @@ dist
 .nvim*
 documentation/.docusaurus
 documentation/build
+examples/sheets
 package-lock.json
 *decoy*
 *.xls*

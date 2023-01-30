@@ -305,33 +305,35 @@ export function processDirectory({
     }
   }
 
-  if (writeMatchUps && writeDir) {
-    const filteredMatchUps = allMatchUps.filter((matchUp) => {
-      if (!matchUp.winningSide || matchUp.drawPositions.length !== 2) return false;
-
-      const participantIds = matchUp.sides
-        ?.flatMap(({ participant }) => participant?.individualParticipants || participant)
-        .filter(Boolean)
-        .map(({ participantId }) => participantId);
-      const allValidParticipantIds = participantIds.every((pid) => !pid?.startsWith('p-'));
-
-      return allValidParticipantIds && ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus);
-    });
-    writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
-  }
-
   const errorKeys = Object.keys(errorLog);
   const totalErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
+  const filteredMatchUps = allMatchUps.filter((matchUp) => {
+    if (!matchUp.winningSide || matchUp.drawPositions.length !== 2) return false;
 
-  if (logging)
-    console.log({
-      filesProcessed: fileNames.length,
-      errorTypes: errorKeys.length,
-      sheetsProcessed,
-      totalMatchUps,
-      totalErrors,
-      errorKeys
-    });
+    const participantIds = matchUp.sides
+      ?.flatMap(({ participant }) => participant?.individualParticipants || participant)
+      .filter(Boolean)
+      .map(({ participantId }) => participantId);
+    const allValidParticipantIds = participantIds.every((pid) => !pid?.startsWith('p-'));
+
+    return allValidParticipantIds && ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus);
+  });
+
+  const report = {
+    filesProcessed: fileNames.length,
+    sheetsProcessed,
+    exportedMatchUps: filteredMatchUps.length,
+    totalMatchUps,
+    errorTypes: errorKeys.length,
+    totalErrors,
+    errorKeys
+  };
+  if (logging) console.log(report);
+
+  if (writeMatchUps && writeDir) {
+    writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
+    writeFileSync(`${writeDir}/report.json`, JSON.stringify(report, null, 2), 'UTF-8');
+  }
 
   pushGlobalLog({
     method: 'processingComplete',

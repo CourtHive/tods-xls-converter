@@ -290,6 +290,5 @@ export function punctuationAdjustments({ score }) {
   }
 
   if (score.endsWith('()')) score = score.slice(0, score.length - 2);
-
   return { score };
 }
