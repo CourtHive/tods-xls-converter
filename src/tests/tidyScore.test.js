@@ -1,4 +1,4 @@
-import { tidyScore } from '../functions/scoreParser/scoreParser';
+import { getTransformations, tidyScore } from '../functions/scoreParser/scoreParser';
 import { expect, it } from 'vitest';
 
 const validPatterns = true;
@@ -495,50 +495,56 @@ const scores = [
   { score: '36 63 (10-5)', expectation: { score: '3-6 6-3 [10-5]' } },
   { score: `8--5`, expectation: { score: '8-5' } },
   { score: `9--0`, expectation: { score: '9-0' } },
-  { score: `6--1, 6--1`, expectation: { score: '6-1 6-1' } }
+  { score: `6--1, 6--1`, expectation: { score: '6-1 6-1' } },
+  { complete: true }
 ];
 
 let iteration = 0;
-it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expectation }) => {
-  iteration += 1;
+it.each(scores.slice(start, end || undefined))('can tidy scores', ({ score, expectation, complete }) => {
+  if (complete) {
+    const transformations = getTransformations();
+    console.log({ transformations });
+  } else {
+    iteration += 1;
 
-  const singleScore = end - start === 1;
-  if (singleScore) console.log({ score });
+    const singleScore = end - start === 1;
+    if (singleScore) console.log({ score });
 
-  const {
-    matchUpStatus,
-    modifications,
-    score: tidy,
-    attributes,
-    isValid
-  } = tidyScore({
-    profile: { matchUpStatuses: { retired: ['rtd', 'coceed'] } }, // misspelling
-    stepLog: singleScore,
-    iteration,
-    fullLog,
-    score
-  });
+    const {
+      matchUpStatus,
+      modifications,
+      score: tidy,
+      attributes,
+      isValid
+    } = tidyScore({
+      profile: { matchUpStatuses: { retired: ['rtd', 'coceed'] } }, // misspelling
+      stepLog: singleScore,
+      iteration,
+      fullLog,
+      score
+    });
 
-  let metExpectation;
-  if (expectation?.matchUpStatus) {
-    if (expectations) expect(matchUpStatus).toEqual(expectation.matchUpStatus);
-    metExpectation = true;
-  }
-
-  if (expectation?.score !== undefined) {
-    if (expectations) {
-      expect(tidy).toEqual(expectation.score);
-    } else if (tidy !== expectation.score) {
-      console.log('\r\nINCORRECT\r\n', { iteration, score, matchUpStatus, tidy, expectation });
+    let metExpectation;
+    if (expectation?.matchUpStatus) {
+      if (expectations) expect(matchUpStatus).toEqual(expectation.matchUpStatus);
+      metExpectation = true;
     }
-    metExpectation = true;
-  }
 
-  if ((validPatterns && !isValid) || singleScore) {
-    console.log({ isValid, score, tidy, modifications, attributes });
-  }
+    if (expectation?.score !== undefined) {
+      if (expectations) {
+        expect(tidy).toEqual(expectation.score);
+      } else if (tidy !== expectation.score) {
+        console.log('\r\nINCORRECT\r\n', { iteration, score, matchUpStatus, tidy, expectation });
+      }
+      metExpectation = true;
+    }
 
-  if (expectations && !metExpectation) {
-    console.log({ score, tidy, matchUpStatus });
+    if ((validPatterns && !isValid) || singleScore) {
+      console.log({ isValid, score, tidy, modifications, attributes });
+    }
+
+    if (expectations && !metExpectation) {
+      console.log({ score, tidy, matchUpStatus });
+    }
   }
 });

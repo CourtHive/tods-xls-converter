@@ -1,6 +1,7 @@
 import { isValidPattern } from './validPatterns';
 import { transforms } from './transforms';
 
+let transformations = {};
 let invalid = [];
 
 const processingOrder = [
@@ -39,9 +40,19 @@ export function dumpInvalid() {
   invalid = [];
 }
 
+export function getTransformations() {
+  return transformations;
+}
+export function resetTransformations() {
+  transformations = {};
+}
+
 export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, identifier }) {
-  let matchUpStatus, result, attributes;
-  const modifications = [];
+  let modifications = [],
+    matchUpStatus,
+    applied = [],
+    attributes,
+    result;
 
   let score = incomingScore;
 
@@ -52,6 +63,7 @@ export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, ide
         identifier, // optional identifier (used in test harness)
         matchUpStatus,
         attributes,
+        applied,
         score
       });
       const modified = result.score !== score;
@@ -69,6 +81,7 @@ export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, ide
 
       if (result.matchUpStatus) matchUpStatus = result.matchUpStatus;
       if (result.attributes) attributes = result.attributes;
+      if (result.applied) applied = result.applied;
       score = result.score;
     });
   };
@@ -91,6 +104,13 @@ export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, ide
       score = '';
     }
   }
+
+  applied.forEach((application) => {
+    if (!transformations[application]) {
+      transformations[application] = 0;
+    }
+    transformations[application] += 1;
+  });
 
   return { score, matchUpStatus: matchUpStatus?.toUpperCase(), modifications, isValid };
 }
