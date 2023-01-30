@@ -1,6 +1,8 @@
 import { isValidPattern } from './validPatterns';
 import { transforms } from './transforms';
 
+let invalid = [];
+
 const processingOrder = [
   'handleNumeric',
   'handleWalkover',
@@ -29,9 +31,18 @@ const processingOrder = [
 // secondPass is used to process only numbers which have been extracted from strings
 const secondPass = ['separateScoreBlocks', 'sensibleSets', 'superSquare'];
 
-export function tidyScore({ score, stepLog, fullLog, profile }) {
+export function getInvalid() {
+  return invalid;
+}
+export function dumpInvalid() {
+  invalid = [];
+}
+
+export function tidyScore({ score: incomingScore, stepLog, fullLog, profile }) {
   let matchUpStatus, result, attributes;
   const modifications = [];
+
+  let score = incomingScore;
 
   const doProcess = (methods) => {
     methods.forEach((method) => {
@@ -64,7 +75,10 @@ export function tidyScore({ score, stepLog, fullLog, profile }) {
     doProcess(secondPass);
 
     isValid = isValidPattern(score);
-    if (!isValid) score = '';
+    if (!isValid) {
+      invalid.push(incomingScore);
+      score = '';
+    }
   }
 
   return { score, matchUpStatus: matchUpStatus?.toUpperCase(), modifications, isValid };

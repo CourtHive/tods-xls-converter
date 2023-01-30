@@ -295,12 +295,17 @@ export function processDirectory({
   }
 
   if (writeMatchUps && writeDir) {
-    const filteredMatchUps = allMatchUps.filter(
-      (matchUp) =>
-        ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus) &&
-        matchUp.drawPositions.length === 2 &&
-        matchUp.winningSide
-    );
+    const filteredMatchUps = allMatchUps.filter((matchUp) => {
+      if (!matchUp.winningSide || matchUp.drawPositions.length !== 2) return false;
+
+      const participantIds = matchUp.sides
+        ?.flatMap(({ participant }) => participant?.individualParticipants || participant)
+        .filter(Boolean)
+        .map(({ participantId }) => participantId);
+      const allValidParticipantIds = participantIds.every((pid) => !pid?.startsWith('p-'));
+
+      return allValidParticipantIds && ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus);
+    });
     writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
   }
 

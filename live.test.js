@@ -1,4 +1,5 @@
 import { getAudit, getLoggingActive, resetLogging, setLoggingActive } from './src/global/state';
+import { dumpInvalid, getInvalid } from './src/functions/scoreParser/scoreParser';
 import { printGlobalLog, purgeGlobalLog } from './src/utilities/globalLog';
 import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
@@ -60,8 +61,10 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const readDir = './examples/sheets/testing/working';
-  const writeDir = './examples/sheets/processed/IND';
+  // const readDir = './examples/sheets/testing/working';
+  // const writeDir = './examples/sheets/processed/IND';
+  const readDir = './examples/sheets/India/years/2019';
+  const writeDir = './examples/sheets/processed/IND/2019';
   const writeTournamentRecords = false;
   const writeParticipants = false;
   const writeMatchUps = true;
@@ -97,7 +100,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide');
   setLoggingActive(false, 'participants');
-  setLoggingActive(false, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
+  setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
 
@@ -123,8 +126,23 @@ it('can process tests', () => {
 
   const auditLog = getAudit();
 
+  const invalidScores = getInvalid();
+  if (invalidScores?.length) {
+    const csvScores = utilities.JSON2CSV(invalidScores);
+    writeFileSync('./scratch/invalidScores.csv', csvScores, 'UTF-8');
+    dumpInvalid();
+  }
+
   if (getLoggingActive('scoreAudit')) {
     const scoreAudit = auditLog.filter((item) => typeof item === 'object' && item.scoreString);
+    const uniqueMap = scoreAudit.reduce((unique, item) => {
+      const { scoreString } = item;
+      if (!unique[scoreString]) unique[scoreString] = { scoreString, count: 0 };
+      unique[scoreString].count += 1;
+      return unique;
+    }, {});
+    const csvUnique = utilities.JSON2CSV(Object.values(uniqueMap));
+    writeFileSync('./scratch/uniqueScores.csv', csvUnique, 'UTF-8');
     const csvScores = utilities.JSON2CSV(scoreAudit);
     writeFileSync('./scratch/scoreParsing.csv', csvScores, 'UTF-8');
   }
