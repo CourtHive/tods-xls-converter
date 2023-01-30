@@ -5,6 +5,8 @@ import { isContained } from './utilities';
 export function punctuationAdjustments({ score }) {
   score = correctContainerMismatch(score);
 
+  score = score.replace(/\)\//g, ') / ');
+
   // convert (# - # ) => (#-#)
   const bwsg = /\(([\d- ]+)\)/g;
   const bws = /\(([\d- ]+)\)/;

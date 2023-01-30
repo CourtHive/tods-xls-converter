@@ -13,6 +13,7 @@ import { handleNumeric } from './handleNumeric';
 
 export function stringScore({ score }) {
   score = score.toString().toLowerCase();
+
   return { score };
 }
 
@@ -58,7 +59,10 @@ export function separateScoreBlocks({ score }) {
 export function removeErroneous({ score }) {
   if (typeof score !== 'string') return { score };
 
-  if (parseSuper(score)) return { score: parseSuper(score) };
+  if ([3, 4].includes(score.length) && parseSuper(score)) {
+    const superTie = parseSuper(score);
+    return { score: superTie };
+  }
 
   score = score
     .toLowerCase()
@@ -106,10 +110,12 @@ export function handleRetired({ score, profile }) {
 }
 
 export function removeDanglingBits({ score, attributes }) {
+  if (score.endsWith(' am') || score.endsWith(' pm')) score = '';
+
+  score = score.replace(/[A-Za-z]+/g, '').trim();
   if (['.', ','].some((punctuation) => score.endsWith(punctuation))) {
     score = score.slice(0, score.length - 1);
   }
-  if ([')', '('].includes(score) || score.endsWith(' am') || score.endsWith(' pm')) score = '';
 
   const targetPunctuation = '()/-'.split('').some((punctuation) => score.includes(punctuation));
   if (/ \d$/.test(score) && targetPunctuation) {

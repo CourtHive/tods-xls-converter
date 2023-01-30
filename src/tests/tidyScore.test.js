@@ -15,7 +15,17 @@ const scores = [
   // { score: '7567108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
 
+  { score: '8-7(11-9), shaurya', expectation: { score: '8-7(9)' } },
+  { score: '8-7(11-9)', expectation: { score: '8-7(9)' } },
+
   /*
+  { score: '(4-6)(7-5)10/2', expectation: { score: '' } },
+  { score: '(5-7)(6-4)10/4', expectation: { score: '' } },
+  { score: '(4-6)(7-6)8/6(6-4)', expectation: { score: '' } },
+  { score: '(6-3)(6-7)7/2(7-5)', expectation: { score: '' } },
+  { score: '(4-6)(7-5)10/2', expectation: { score: '' } },
+  { score: '(5-7)(6-4)10/4', expectation: { score: '' } },
+
   { score: '36641210', expectation: { score: '' } },
   { score: '46611513', expectation: { score: '' } },
   { score: '46621210', expectation: { score: '' } },
@@ -26,7 +36,9 @@ const scores = [
   { score: '64261210', expectation: { score: '' } },
   // should get caught by second pass
   { score: '75 36 12 10', expectation: { score: '' } },
-  { score: '1676(10)108', expectation: { score: '1-6 7-6(10) [10-8]' } },
+
+  // extract good sets and parse remainder?
+  { score: '7-5, 6, 4, 10-8', expectation: { score: '' } },
 
   // assembler... digitWalker
   { score: '36637675', expectation: { score: '3-6 6-3 7-6(5)' } },
@@ -34,10 +46,10 @@ const scores = [
   // mistyped ... ?
   { score: '66275', expectation: { score: '6-2 7-5' } },
 
-  { score: '6363 1', expectation: { score: '' } },
 
   // nonsense
-  { score: '67575', expectation: { score: '' } }, // discard final digit?
+  { score: '(6-5)7/0(0-6)(6-3)9/7', expectation: { score: '6-5(0) 0-6 6-3' } },
+  { score: '4-6, 6-0, -0', expectation: { score: '' } },
   { score: '6641210', expectation: { score: '' } },
   { score: '43442', expectation: { score: '' } },
   { score: '44042', expectation: { score: '' } },
@@ -45,24 +57,11 @@ const scores = [
   { score: '40471', expectation: { score: '' } },
   { score: '44446', expectation: { score: '' } },
 
-  { score: '4-6, 6-0, -0', expectation: { score: '' } },
-  { score: '7-6(5)/6-3', expectation: { score: '' } },
-  { score: '7-5, 6, 4, 10-8', expectation: { score: '' } },
-  { score: '6-2, -6, 2', expectation: { score: '' } },
-  { score: '6-2, 7, 5', expectation: { score: '' } },
-  { score: '6, 4-, 6, 4', expectation: { score: '' } },
+  { score: '67575', expectation: { score: '' } }, // discard final digit?
   { score: '(0-8)(6)', expectation: { score: '' } },
   { score: '6-3 -6 6-4', expectation: { score: '' } },
   { score: '7-6(3)/7-5', expectation: { score: '' } },
 
-  { score: '(6-5)7/0(0-6)(6-3)9/7', expectation: { score: '' } },
-  { score: '8-7(11-9), shaurya', expectation: { score: '' } },
-  { score: '(4-6)(7-5)10/2', expectation: { score: '' } },
-  { score: '(5-7)(6-4)10/4', expectation: { score: '' } },
-  { score: '(4-6)(7-6)8/6(6-4)', expectation: { score: '' } },
-  { score: '(6-3)(6-7)7/2(7-5)', expectation: { score: '' } },
-  { score: '(4-6)(7-5)10/2', expectation: { score: '' } },
-  { score: '(5-7)(6-4)10/4', expectation: { score: '' } },
   { score: '6-2, 6-7 (2-7)6-2)', expectation: { score: '' } },
   { score: '57, 76(1)10 6', expectation: { score: '' } },
   { score: '(4-6)(6-4)(7-6)7/2', expectation: { score: '' } },
@@ -226,6 +225,7 @@ const scores = [
   { score: '44751', expectation: { score: '' } },
 
   // trim invalid
+  { score: '6363 1', expectation: { score: '6-3 6-3' } },
   { score: '6375(4)', expectation: { score: '6-3 7-5' } }, // this set may have been 6-3 7-6(4), but oh well
   { score: '1/6, 6/7(3 7), 7/6(7, 4)', expectation: { score: '1-6 6-7(3)' } },
 
@@ -300,6 +300,11 @@ const scores = [
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
   { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
+  { score: '6, 4-, 6, 4', expectation: { score: '6-4 6-4' } },
+  { score: '6-2, 7, 5', expectation: { score: '6-2 7-5' } },
+  { score: '6-2, -6, 2', expectation: { score: '6-2 6-2' } },
+  { score: '7-6(5)/6-3', expectation: { score: '7-6(5) 6-3' } },
+  { score: '1676(10)108', expectation: { score: '1-6 7-6(10) [10-8]' } },
   { score: '(6-3) (1-6) (7-5)[1-7]', expectation: { score: '6-3 1-6 7-6(1)' } }, // 7-5 with tiebreak has been corrected
   { score: '61 26 10-13', expectation: { score: '6-1 2-6 [10-3]' } },
   { score: '5/4 [7-4], 5/4 [12-11]', expectation: { score: '5-4(4) 5-4(11)' } },
