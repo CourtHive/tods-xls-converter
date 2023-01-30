@@ -14,6 +14,7 @@ export function punctuationAdjustments({ score }) {
   }
 
   score = score.replace(/\)\//g, ') / ');
+  score = score.replace(/\/\)/g, ')');
 
   // convert (# - # ) => (#-#)
   const bwsg = /\(([\d- ]+)\)/g;
