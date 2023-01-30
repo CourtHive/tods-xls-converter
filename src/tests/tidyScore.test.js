@@ -12,9 +12,6 @@ const end = 0;
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
-  // { score: '7-6 2 3-6 6-3', expectation: { score: '7-6(2) 3-6 6-3' } },
-  // { score: '6, 4)(7, 5', expectation: { score: '6-4 7-5' } },
-
   /*
   { score: '6157108', expectation: { score: '6-1 5-7 [10-8]' } },
   { score: '1440119', expectation: { score: '' } },
@@ -149,6 +146,9 @@ const scores = [
   { score: '4 0, 4 o', expectation: { score: '' } },
   { score: '(2, 6)(7, 5)[7, 6](6, 4)', expectation: { score: '' } },
   */
+
+  // space separated tiebreak score
+  { score: '7-6 2 3-6 6-3', expectation: { score: '7-6(2) 3-6 6-3' } },
 
   // missing final set side score
   { score: '6 4, 6', expectation: { score: '6-4 6-0' } },
@@ -343,6 +343,7 @@ const scores = [
   { score: '(4/0) (4/0)', expectation: { score: '4-0 4-0' } },
 
   { score: '(9-8)(3)', expectation: { score: '9-8(3)' } }, //
+  { score: '6, 4)(7, 5', expectation: { score: '6-4 7-5' } },
   { score: '96-2, 6-4)', expectation: { score: '6-2 6-4' } }, // starts with a '9' instead of '('
   { score: '(6, 4)(7, 6)([10, 8]', expectation: { score: '6-4 7-6(8)' } }, // see dev notes on superSquare
   { score: '((6, 2)(7, 6)(2))', expectation: { score: '6-2 7-6(2)' } },

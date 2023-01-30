@@ -96,6 +96,16 @@ export function matchKnownPatterns({ score }) {
     failSafe += 1;
   }
 
+  const getFloatingTiebreaks = /(^|\s)7-6\s(\d+)\s/g;
+  const floatingTiebreaks = score.match(getFloatingTiebreaks);
+  if (floatingTiebreaks?.length) {
+    const getFloatingTiebreak = /(^|\s)7-6\s(\d+)\s/;
+    floatingTiebreaks.forEach((floater) => {
+      const tiebreakScore = floater.match(getFloatingTiebreak).slice(2)[0];
+      score = score.replace(floater, `7-6(${tiebreakScore}) `);
+    });
+  }
+
   let spaceSeparatedSets = score.match(/\d \d /);
   spaceSeparatedSets?.forEach((ss) => {
     const replacement = ss
