@@ -153,5 +153,15 @@ export function matchKnownPatterns({ score }) {
     score = newScore;
   }
 
+  // space separated match tiebreak
+  const spaceSeparatedSuper = /(.*)\s(1\d)\s(\d+)$/;
+  if (spaceSeparatedSuper.test(score)) {
+    const [start, s1, s2] = score.match(spaceSeparatedSuper).slice(1);
+    const digitCount = start.replace(/\D/g, '').length;
+    if (digitCount >= 4) {
+      score = start + ` ${s1}${s2}`;
+    }
+  }
+
   return { score };
 }
