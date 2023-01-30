@@ -15,12 +15,15 @@ const scores = [
   // { score: '7567108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
 
-  // space separated sets
-  { score: '7 6 (8 6)6 1', expectation: { score: '7-6(6) 6-1' } },
-  { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 6-2' } },
-  { score: '57, 76(1)10 6', expectation: { score: '5-7 7-6(1) [10-6]' } },
-
   /*
+  // recognize college pro set
+  { score: '8/7 7, 2', expectation: { score: '8-7(2)' } },
+  { score: '8/7 8, 6', expectation: { score: '8-7(6)' } },
+
+  // containedSets should remove parens
+  { score: '(9-8) 10', expectation: { score: '' } },
+  { score: '(9-8) 10-5', expectation: { score: '' } },
+  { score: '(9-8)10-5', expectation: { score: '' } },
 
   // recognize tiebreak score
   { score: '(6-3)(6-7)7/2(7-5)', expectation: { score: '' } },
@@ -67,19 +70,12 @@ const scores = [
   { score: '6-4, 1-6-1, 14-12', expectation: { score: '' } },
   { score: '6-3, 6-7(7-4)6-2', expectation: { score: '' } },
   { score: '6-7, (7-5)6-4, 6-0', expectation: { score: '' } },
-  { score: '(9-8)10-5', expectation: { score: '' } },
-  { score: '6/2, 6, 2', expectation: { score: '' } },
   { score: '6/4, 2/6, 7/6(8/6/)', expectation: { score: '' } },
   { score: '(6, 6 2)', expectation: { score: '' } },
   { score: '7 6( 7 5)', expectation: { score: '' } },
   { score: '4-6, 6-1- 7-6(5)', expectation: { score: '' } },
   { score: '9(7-3)', expectation: { score: '' } },
-  { score: '8/7 8, 6', expectation: { score: '' } },
-  { score: '8/7 7, 2', expectation: { score: '' } },
-  { score: '8/7 7, 2', expectation: { score: '' } },
-  { score: '6/0, 6, 0', expectation: { score: '' } },
   { score: '6/47/6(8)', expectation: { score: '' } },
-  { score: '6-3, 7, 5', expectation: { score: '' } },
   { score: '(6, 4)(, 6)(6, 4)', expectation: { score: '' } },
 
   { score: '(9, )', expectation: { score: '' } },
@@ -136,6 +132,18 @@ const scores = [
   // RETIRED is not specified but could be implied
   { score: '(2, 6)(7, 5)[7, 6](6, 4)', expectation: { score: '2-6 7-5 7-6(6-4)', matchUpStatus: 'RETIRED' } },
   */
+
+  { score: '9-8 10', expectation: { score: '9-8(10)' } },
+  { score: '7-6 10', expectation: { score: '7-6(10)' } },
+  { score: '7-6 1', expectation: { score: '7-6(1)' } },
+
+  { score: '6-3, 7, 5', expectation: { score: '6-3 7-5' } },
+  { score: '6/0, 6, 0', expectation: { score: '6-0 6-0' } },
+
+  // space separated sets
+  { score: '7 6 (8 6)6 1', expectation: { score: '7-6(6) 6-1' } },
+  { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 6-2' } },
+  { score: '57, 76(1)10 6', expectation: { score: '5-7 7-6(1) [10-6]' } },
 
   // replace(')#', ') #');
   { score: '6-2, 6-7 (2-7)6-2)', expectation: { score: '6-2 6-7(2) 6-2' } },
@@ -304,6 +312,7 @@ const scores = [
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
   { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
+  { score: '6/2, 6, 2', expectation: { score: '6-2 6-2' } },
   { score: '6, 4-, 6, 4', expectation: { score: '6-4 6-4' } },
   { score: '6-2, 7, 5', expectation: { score: '6-2 7-5' } },
   { score: '6-2, -6, 2', expectation: { score: '6-2 6-2' } },

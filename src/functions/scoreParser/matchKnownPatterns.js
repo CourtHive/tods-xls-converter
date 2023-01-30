@@ -163,5 +163,16 @@ export function matchKnownPatterns({ score }) {
     }
   }
 
+  // space separated set tiebreak
+  const spaceSeparatedSetTB = /(^|\s)(\d+-\d+)\s(\d+)(\s|$)/g;
+  for (const ssb of score.match(spaceSeparatedSetTB) || []) {
+    const [before, setScore, tb, after] = ssb.match(/(^|\s)(\d+-\d+)\s(\d+)(\s|$)/).slice(1);
+    const [s1, s2] = setScore.split('-').map((s) => parseInt(s));
+    const diff = Math.abs(s1 - s2);
+    if (diff === 1) {
+      score = score.replace(ssb, `${before}${setScore}(${tb})${after}`);
+    }
+  }
+
   return { score };
 }
