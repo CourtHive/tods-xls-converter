@@ -4,7 +4,7 @@ import { getWinningSide } from './getWinningSide';
 import { dashMash } from './commonPatterns';
 import { isDiffOne } from './utilities';
 
-export function sensibleSets({ score, matchUpStatus }) {
+export function sensibleSets({ score, matchUpStatus, attributes }) {
   const profile = [];
 
   let maxSetValue;
@@ -76,7 +76,12 @@ export function sensibleSets({ score, matchUpStatus }) {
     .filter(Boolean)
     .join(' ');
 
-  const { setsWon, setWinners } = getWinningSide(score);
+  const { setsWon, setWinners, totalSets } = getWinningSide(score);
+
+  // if there was a 6 removed from the end of the score and there is only one set...
+  if (totalSets === 1 && attributes?.removed === '6') {
+    score += ' 6-0';
+  }
 
   if (Math.max(...setsWon) > 2) {
     let counts = [0, 0];

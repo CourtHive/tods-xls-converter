@@ -12,13 +12,10 @@ const end = 0;
 // NEXT: new method to process sets and start to guess at matchUpFormat
 
 const scores = [
-  { score: '(9, 6)', expectation: { score: '9-6' } },
-  // { score: '(8, 6)', expectation: { score: '8-6' } },
   // { score: '7-6 2 3-6 6-3', expectation: { score: '7-6(2) 3-6 6-3' } },
   // { score: '6, 4)(7, 5', expectation: { score: '6-4 7-5' } },
 
   /*
-
   { score: '6157108', expectation: { score: '6-1 5-7 [10-8]' } },
   { score: '1440119', expectation: { score: '' } },
   { score: '1442108', expectation: { score: '' } },
@@ -153,6 +150,13 @@ const scores = [
   { score: '(2, 6)(7, 5)[7, 6](6, 4)', expectation: { score: '' } },
   */
 
+  // missing final set side score
+  { score: '6 4, 6', expectation: { score: '6-4 6-0' } },
+  { score: '6/2, 6', expectation: { score: '6-2 6-0' } },
+  // ensure missing final set side logic does not impact normal sets
+  { score: '(9, 6)', expectation: { score: '9-6' } },
+  { score: '(8, 6)', expectation: { score: '8-6' } },
+
   // test HAIL MARY
   { score: '7563', expectation: { score: '7-5 6-3' } },
   { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
@@ -169,10 +173,6 @@ const scores = [
 
   // TODO: integrity check set score for sanity
   { score: '(8-7) 6', expectation: { score: '8-7(6)' } }, // arguable that 6 is the tiebreak score
-
-  // missing final set side score
-  { score: '6/2, 6', expectation: { score: '6-2 6-0' } },
-  { score: '6 4, 6', expectation: { score: '6-4 6-0' } },
 
   // smashedSets
   { score: '(6/06/2)', expectation: { score: '6-0 6-2' } },
