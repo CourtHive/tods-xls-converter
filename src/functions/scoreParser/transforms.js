@@ -173,7 +173,17 @@ export function handleSpaceSeparator({ score }) {
     const sets = score.split(',').map((set) => set.trim());
     const isSpaced = (set) => /\d \d/.test(set);
     const spacedSets = sets.every(isSpaced);
-    if (spacedSets) score = sets.map((set) => set.replace(' ', '-')).join(' ');
+    if (spacedSets)
+      score = sets
+        .map((set) => {
+          const spaceSeparatedDigits = /\d+ \d+/g;
+          for (const ssd of set.match(spaceSeparatedDigits)) {
+            const [d1, d2] = ssd.match(/(\d+) (\d+)/).slice(1);
+            set = set.replace(ssd, `${d1}-${d2}`);
+          }
+          return set;
+        })
+        .join(' ');
   }
 
   if (score.includes(' ')) {

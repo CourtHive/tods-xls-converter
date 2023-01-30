@@ -15,16 +15,17 @@ const scores = [
   // { score: '7567108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
 
-  { score: '8-7(11-9), shaurya', expectation: { score: '8-7(9)' } },
-  { score: '8-7(11-9)', expectation: { score: '8-7(9)' } },
+  // space separated sets
+  { score: '7 6 (8 6)6 1', expectation: { score: '7-6(6) 6-1' } },
+  { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 6-2' } },
+  { score: '57, 76(1)10 6', expectation: { score: '5-7 7-6(1) [10-6]' } },
 
   /*
-  { score: '(4-6)(7-5)10/2', expectation: { score: '' } },
-  { score: '(5-7)(6-4)10/4', expectation: { score: '' } },
-  { score: '(4-6)(7-6)8/6(6-4)', expectation: { score: '' } },
+
+  // recognize tiebreak score
   { score: '(6-3)(6-7)7/2(7-5)', expectation: { score: '' } },
-  { score: '(4-6)(7-5)10/2', expectation: { score: '' } },
-  { score: '(5-7)(6-4)10/4', expectation: { score: '' } },
+  { score: '(4-6)(7-6)(8/6)(6-4)', expectation: { score: '' } },
+  { score: '(4-6)(7-6)8/6(6-4)', expectation: { score: '' } },
 
   { score: '36641210', expectation: { score: '' } },
   { score: '46611513', expectation: { score: '' } },
@@ -62,8 +63,6 @@ const scores = [
   { score: '6-3 -6 6-4', expectation: { score: '' } },
   { score: '7-6(3)/7-5', expectation: { score: '' } },
 
-  { score: '6-2, 6-7 (2-7)6-2)', expectation: { score: '' } },
-  { score: '57, 76(1)10 6', expectation: { score: '' } },
   { score: '(4-6)(6-4)(7-6)7/2', expectation: { score: '' } },
   { score: '6-4, 1-6-1, 14-12', expectation: { score: '' } },
   { score: '6-3, 6-7(7-4)6-2', expectation: { score: '' } },
@@ -137,6 +136,15 @@ const scores = [
   // RETIRED is not specified but could be implied
   { score: '(2, 6)(7, 5)[7, 6](6, 4)', expectation: { score: '2-6 7-5 7-6(6-4)', matchUpStatus: 'RETIRED' } },
   */
+
+  // replace(')#', ') #');
+  { score: '6-2, 6-7 (2-7)6-2)', expectation: { score: '6-2 6-7(2) 6-2' } },
+  { score: '6-2, 6-7 (2-7) 6-2)', expectation: { score: '6-2 6-7(2) 6-2' } },
+
+  { score: '(5-7)(6-4)10/4', expectation: { score: '5-7 6-4 [10-4]' } },
+  { score: '(4-6)(7-5)10/2', expectation: { score: '4-6 7-5 [10-2]' } },
+  { score: '8-7(11-9), shaurya', expectation: { score: '8-7(9)' } },
+  { score: '8-7(11-9)', expectation: { score: '8-7(9)' } },
 
   // match tiebreak variations
   { score: '57 60 106', expectation: { score: '5-7 6-0 [10-6]' } },
@@ -247,10 +255,6 @@ const scores = [
 
   // pattern /\d+,\s?\d/+\/\d+\s?\d+/
   { score: '4, 6/6, 1(10/5)', expectation: { score: '4-6 6-1 [10-5]' } },
-
-  // space separated sets
-  { score: '7 6, (7 4)6 2', expectation: { score: '7-6(4) 6-2' } },
-  { score: '7 6 (8 6)6 1', expectation: { score: '7-6(6) 6-1' } },
 
   // throw out equivalent sets when there is not 'RETIRED status
   { score: '4--2, 40-40', expectation: { score: '4-2' } },

@@ -5,6 +5,14 @@ import { isContained } from './utilities';
 export function punctuationAdjustments({ score }) {
   score = correctContainerMismatch(score);
 
+  const closeParenDigit = /\)(\d+)/g;
+  if (closeParenDigit.test(score)) {
+    for (const instance of score.match(closeParenDigit)) {
+      const replacement = instance.replace(')', ') ');
+      score = score.replace(instance, replacement);
+    }
+  }
+
   score = score.replace(/\)\//g, ') / ');
 
   // convert (# - # ) => (#-#)
