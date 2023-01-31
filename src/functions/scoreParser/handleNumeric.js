@@ -18,14 +18,28 @@ export function handleNumeric({ score, applied }) {
       const [s1, s2, tb] = numbers;
       score = `${s1}-${s2}(${tb})`;
       applied.push('numericTiebreakPattern1');
+    } else if (score.length === 4 && getDiff(numbers.slice(0, 2)) === 1) {
+      const [s1, s2, tb1, tb2] = numbers;
+      const tb = Math.min(tb1, tb2);
+      score = `${s1}-${s2}(${tb})`;
+      applied.push('numericTiebreakPattern2');
     } else if (score.length === 5 && getDiff(numbers.slice(0, 2)) === 1) {
       const [s1, s2, tb, s3, s4] = numbers;
       score = `${s1}-${s2}(${tb}) ${s3}-${s4}`;
-      applied.push('numericTiebreakPattern2');
+      applied.push('numericTiebreakPattern3');
     } else if (score.length === 5 && getDiff(numbers.slice(3)) === 1) {
       const [s1, s2, s3, s4, tb] = numbers;
       score = `${s1}-${s2} ${s3}-${s4}(${tb})`;
-      applied.push('numericTiebreakPattern3');
+      applied.push('numericTiebreakPattern4');
+    } else if (
+      score.length === 7 &&
+      getDiff(numbers.slice(0, 2)) === 1 &&
+      getDiff(numbers.slice(2, 4)) !== 1 &&
+      getDiff(numbers.slice(4, 6)) !== 1
+    ) {
+      const [s1, s2, tb, s3, s4, s5, s6] = numbers;
+      score = `${s1}-${s2}(${tb}) ${s3}-${s4} ${s5}-${s6}`;
+      applied.push('numericTiebreakPattern5');
     } else if (score.length === 7) {
       score = score.slice(0, 4) + ' ' + score.slice(4);
       applied.push('numericMatchTiebreakPattern');

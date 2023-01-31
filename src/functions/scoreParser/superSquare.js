@@ -4,6 +4,7 @@ import { getWinningSide } from './getWinningSide';
 export function superSquare({ score }) {
   const { setsTied, winningSide } = getWinningSide(score);
 
+  // when final set is (#) match tiebreak
   const finalSetMatchTiebreak = /\s\((\d+)\)$/;
   if (!winningSide && setsTied && finalSetMatchTiebreak.test(score)) {
     const lowTiebreakScore = score.match(finalSetMatchTiebreak).slice(1)[0];
@@ -33,6 +34,8 @@ export function superSquare({ score }) {
         diff = Math.abs(modifiedScores[0] - modifiedScores[1]);
         if (diff > 2) scores = modifiedScores;
       }
+      score = [...sets.slice(0, sets.length - 1), `[${scores.join('-')}]`].join(' ');
+    } else if (sets.length === 3 && maxSetScore >= 7 && diff > 2) {
       score = [...sets.slice(0, sets.length - 1), `[${scores.join('-')}]`].join(' ');
     }
   }
