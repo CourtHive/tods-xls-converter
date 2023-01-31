@@ -2,7 +2,7 @@ import { correctContainerMismatch } from './correctContainerMismatch';
 import { instanceCount } from '../../utilities/convenience';
 import { isContained } from './utilities';
 
-export function punctuationAdjustments({ score }) {
+export function punctuationAdjustments({ score, applied }) {
   score = correctContainerMismatch(score);
 
   const closeParenDigit = /\)(\d+)/g;
@@ -108,6 +108,16 @@ export function punctuationAdjustments({ score }) {
         // TODO: some logic to determine whether tiebreak value is expected
         score = score.replace(s, `(${digits})`);
       }
+    });
+  }
+
+  const slashComma = /\d\/\d\/,/g;
+  if (slashComma.test(score)) {
+    const sc = score.match(slashComma);
+    sc.forEach((s) => {
+      const [digits] = s.match(/(\d\/\d)\/,/).slice(1);
+      score = score.replace(s, `${digits},`);
+      applied.push('slashComma');
     });
   }
 
@@ -300,5 +310,5 @@ export function punctuationAdjustments({ score }) {
     }
   }
 
-  return { score };
+  return { score, applied };
 }

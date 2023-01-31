@@ -91,9 +91,8 @@ export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, ide
   let isValid = isValidPattern(score);
   if (!isValid) {
     // Hail Mary: extract only the numbers from the string
-    score = score.replace(/\D/g, '');
+    score = incomingScore.replace(/\D/g, '');
     if (attributes?.removed) {
-      score = score + attributes.removed;
       attributes.removed = undefined;
     }
     doProcess(secondPass);

@@ -17,6 +17,30 @@ const scores = [
   // { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
   /*
+  { score: '67(4)60107', expectation: { score: '6-7(4) 6-0 [10-7]' } },
+
+  // sensibleSets should recognize 762 as valid tiebreak
+  { score: '3 6 7 5 7 6(2)', expectation: { score: '' } },
+
+  // punctuation adjustments
+  { score: '(6-4)(6-7((5)(7-5)', expectation: { score: '' } },
+
+  // recognize missing Zero
+  { score: '(6, 4)(, 6)(6, 4)', expectation: { score: '' } },
+
+  // sensibleSets should recognize 2-3 correct sets and attempt to fix third
+  { score: '2-4, 5-494), 7-5', expectation: { score: '2-4 5-4(4) [7-5]' } },
+  { score: '6-3 -6 6-4', expectation: { score: '' } },
+  { score: '6-4, 1-6-1, 14-12', expectation: { score: '' } },
+  // sensibleSets should recognize 3 correct sets and discard the rest
+  { score: '6-1, 1-6, 1, 6-4', expectation: { score: '6-1 1-6 6-4' } },
+
+  // positioning(#-#)
+  { score: '1(6-3, 6-4)', expectation: { score: '6-3 6-4' } },
+
+  // (positioning) #-#
+  { score: '(6) 2-6, 6-4, 10-8', expectation: { score: '2-6 6-4 [10-8]' } },
+
   // implied 0
   { score: '9-', expectation: { score: '' } },
   { score: '6-', expectation: { score: '' } },
@@ -26,6 +50,7 @@ const scores = [
   { score: '6- 6-0', expectation: { score: '' } },
   { score: '(9, )', expectation: { score: '' } },
 
+  { score: '(8-4)(4)', expectation: { score: '' } },
 
   // containedSets should remove parens
   { score: '(9-8) 10', expectation: { score: '' } },
@@ -55,13 +80,7 @@ const scores = [
   { score: '7-5(7-6)10-8', expectation: { score: '' } },
 
   // digitWalker
-  { score: '36637675', expectation: { score: '3-6 6-3 7-6(5)' } },
-  { score: '4, 5(1) 4, 2 7, 3', expectation: { score: '4-5(1) 4-2 [7-3]' } },
   { score: '(4-6)(6-4)(7-6)7/2', expectation: { score: '' } },
-
-  // recognize college pro set
-  { score: '8/7 7, 2', expectation: { score: '8-7(2)' } },
-  { score: '8/7 8, 6', expectation: { score: '8-7(6)' } },
 
   // mistyped ... ?
   { score: '66275', expectation: { score: '6-2 7-5' } },
@@ -76,56 +95,38 @@ const scores = [
   { score: '40471', expectation: { score: '' } },
   { score: '44446', expectation: { score: '' } },
 
-  { score: '67575', expectation: { score: '' } }, // discard final digit?
+  { score: '9--7 (4)', expectation: { score: '' } },
   { score: '(0-8)(6)', expectation: { score: '' } },
-  { score: '6-3 -6 6-4', expectation: { score: '' } },
-
-  { score: '6-4, 1-6-1, 14-12', expectation: { score: '' } },
   { score: '(6, 6 2)', expectation: { score: '' } },
   { score: '9(7-3)', expectation: { score: '' } },
-  { score: '(6, 4)(, 6)(6, 4)', expectation: { score: '' } },
 
-  { score: '6-4, 6-7, (5-7)6-4', expectation: { score: '' } },
-  { score: '6-3, 6-7(6-8)10-5', expectation: { score: '' } },
-  { score: '7-6, 7-5(10-6)', expectation: { score: '' } },
-  { score: '75 36 12 10', expectation: { score: '' } },
   { score: '7-6, 6-3(5)', expectation: { score: '' } },
   { score: '6-4, (6)', expectation: { score: '' } },
-
-  { score: '2/6, 6/0/, 7/6(5)', expectation: { score: '' } },
-  { score: '(8/7-5)', expectation: { score: '' } },
-  { score: '(9/8-7)', expectation: { score: '' } },
-  { score: '6-2, 6, 1', expectation: { score: '' } },
-  { score: '6-3, 6, 2', expectation: { score: '' } },
 
   { score: '6--, 6--7(7/2), 6--3', expectation: { score: '' } },
   { score: '6-- 6--2', expectation: { score: '' } },
   { score: '6-', expectation: { score: '' } },
-  { score: '2-6, 7-5(10-8)6-2', expectation: { score: '' } },
-  { score: '4, 2 3, 5 7, 2', expectation: { score: '' } },
-  { score: '8, 7(3)', expectation: { score: '' } },
-  { score: '6-3, 6, 0', expectation: { score: '' } },
-  { score: '(8-4)(4)', expectation: { score: '' } },
-  { score: '((6, 4)(2, 6)[10, 3)', expectation: { score: '' } },
   { score: '6/, 6/2', expectation: { score: '' } },
   { score: '6-2, 7-5 (3)', expectation: { score: '' } },
   { score: '((-7)', expectation: { score: '' } },
-  { score: '(6-7 (2), 6-3, 6-7 (5))', expectation: { score: '' } },
-  { score: '3 6 7 5 7 6(2)', expectation: { score: '' } },
   { score: '- 1, - 1)', expectation: { score: '' } },
   { score: '- 5, - 6, -5)', expectation: { score: '' } },
   { score: '- 5, 4- 6, 7- 6)', expectation: { score: '' } },
   { score: '6-4 (2) 4-0', expectation: { score: '' } },
-  { score: '6 1 7 6 (5)', expectation: { score: '' } },
-  { score: '6 2 7 6 (5)', expectation: { score: '' } },
-  { score: '9--7 (4)', expectation: { score: '' } },
   { score: '(6)(6-2)', expectation: { score: '' } },
-  { score: '(6-4)(6-7((5)(7-5)', expectation: { score: '' } },
   { score: '(6-, 2-6, 10-5)', expectation: { score: '' } },
 
   // RETIRED is not specified but could be implied
   { score: '(2, 6)(7, 5)[7, 6](6, 4)', expectation: { score: '2-6 7-5 7-6(6-4)', matchUpStatus: 'RETIRED' } },
   */
+
+  // recognize 3rd set match tiebreak to 7
+  { score: '4, 2 3, 5 7, 2', expectation: { score: '4-2 3-5 [7-2]' } },
+  { score: '4, 5(1) 4, 2 7, 3', expectation: { score: '4-5(1) 4-2 [7-3]' } },
+
+  // recognize college pro set
+  { score: '8/7 8, 6', expectation: { score: '8-7(6)' } },
+  { score: '8/7 7, 2', expectation: { score: '8-7(2)' } },
 
   { score: '9-8 10', expectation: { score: '9-8(10)' } },
   { score: '7-6 10', expectation: { score: '7-6(10)' } },
@@ -309,6 +310,29 @@ const scores = [
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
   { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
+  { score: '36637675', expectation: { score: '3-6 6-3 7-6(5)' } },
+  { score: '(6-7 (2), 6-3, 6-7 (5))', expectation: { score: '6-7(2) 6-3 6-7(5)' } },
+  { score: '6 2 7 6 (5)', expectation: { score: '6-2 7-6(5)' } },
+  { score: '2/6, 6/0/, 7/6(5)', expectation: { score: '2-6 6-0 7-6(5)' } },
+  { score: '(8/7-5)', expectation: { score: '8-7(5)' } },
+  { score: '(9/8-7)', expectation: { score: '9-8(7)' } },
+  { score: '6-2, 6, 1', expectation: { score: '6-2 6-1' } },
+  { score: '6-3, 6, 2', expectation: { score: '6-3 6-2' } },
+  { score: '67575', expectation: { score: '6-7(5) 7-5' } },
+  { score: '75 36 12 10', expectation: { score: '7-5 3-6 [12-10]' } },
+  { score: '6-3, 6-7(6-8)10-5', expectation: { score: '6-3 6-7(6) [10-5]' } },
+  { score: '6-4, 6-7, (5-7)6-4', expectation: { score: '6-4 6-7(5) 6-4' } },
+  { score: '7-6, 7-5(10-6)', expectation: { score: '7-6 7-5' } }, // has to be good enough!
+  { score: '((6, 4)(2, 6)[10, 3)', expectation: { score: '6-4 2-6 [10-3]' } },
+  { score: '6-3, 6, 0', expectation: { score: '6-3 6-0' } },
+  { score: '2-6, 7-5(10-8)6-2', expectation: { score: '2-6 7-6(8) 6-2' } },
+  { score: '5, 7-6, 1-11, 9', expectation: { score: '5-7 6-1 [11-9]' } },
+  { score: '6, 4-3, 6-10, 8', expectation: { score: '6-4 3-6 [10-8]' } },
+  { score: '8, 7(4)', expectation: { score: '8-7(4)' } },
+  { score: '6-7(8)/7-6(9)/ 6-2', expectation: { score: '6-7(8) 7-6(9) 6-2' } },
+  { score: '46 75 6 3', expectation: { score: '4-6 7-5 6-3' } },
+  { score: '6 4 3 6 13 11', expectation: { score: '6-4 3-6 [13-11]' } },
+  { score: '46 76(12) 76 (2)', expectation: { score: '4-6 7-6(12) 7-6(2)' } },
   { score: '4-6, 6-1- 7-6(5)', expectation: { score: '4-6 6-1 7-6(5)' } },
   { score: '6-47-6(8)', expectation: { score: '6-4 7-6(8)' } },
   { score: '6/47/6(8)', expectation: { score: '6-4 7-6(8)' } },
