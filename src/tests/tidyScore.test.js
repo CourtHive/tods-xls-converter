@@ -19,6 +19,9 @@ const scores = [
   /*
   { score: '67(4)60107', expectation: { score: '6-7(4) 6-0 [10-7]' } },
 
+  // needs to recognize 3rd set match tiebreak to 7
+  { score: '4, 2 3, 5 7, 2', expectation: { score: '4-2 3-5 [7-2]' } },
+
   // sensibleSets should recognize 2-3 correct sets and attempt to fix third
   { score: '2-4, 5-494), 7-5', expectation: { score: '2-4 5-4(4) [7-5]' } },
   // sensibleSets should recognize 3 correct sets and discard the rest
@@ -39,6 +42,7 @@ const scores = [
   { score: '6- 6-0', expectation: { score: '' } },
   { score: '(9, )', expectation: { score: '' } },
 
+  { score: '(8-4)(4)', expectation: { score: '' } },
 
   // containedSets should remove parens
   { score: '(9-8) 10', expectation: { score: '' } },
@@ -114,12 +118,6 @@ const scores = [
   { score: '6--, 6--7(7/2), 6--3', expectation: { score: '' } },
   { score: '6-- 6--2', expectation: { score: '' } },
   { score: '6-', expectation: { score: '' } },
-  { score: '2-6, 7-5(10-8)6-2', expectation: { score: '' } },
-  { score: '4, 2 3, 5 7, 2', expectation: { score: '' } },
-  { score: '8, 7(3)', expectation: { score: '' } },
-  { score: '6-3, 6, 0', expectation: { score: '' } },
-  { score: '(8-4)(4)', expectation: { score: '' } },
-  { score: '((6, 4)(2, 6)[10, 3)', expectation: { score: '' } },
   { score: '6/, 6/2', expectation: { score: '' } },
   { score: '6-2, 7-5 (3)', expectation: { score: '' } },
   { score: '((-7)', expectation: { score: '' } },
@@ -322,6 +320,9 @@ const scores = [
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
   { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
+  { score: '((6, 4)(2, 6)[10, 3)', expectation: { score: '6-4 2-6 [10-3]' } },
+  { score: '6-3, 6, 0', expectation: { score: '6-3 6-0' } },
+  { score: '2-6, 7-5(10-8)6-2', expectation: { score: '2-6 7-6(8) 6-2' } },
   { score: '5, 7-6, 1-11, 9', expectation: { score: '5-7 6-1 [11-9]' } },
   { score: '6, 4-3, 6-10, 8', expectation: { score: '6-4 3-6 [10-8]' } },
   { score: '8, 7(4)', expectation: { score: '8-7(4)' } },
