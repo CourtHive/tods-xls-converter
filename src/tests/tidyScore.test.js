@@ -17,6 +17,19 @@ const scores = [
   // { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
   /*
+  { score: '67(4)60107', expectation: { score: '6-7(4) 6-0 [10-7]' } },
+
+  // sensibleSets should recognize 2-3 correct sets and attempt to fix third
+  { score: '2-4, 5-494), 7-5', expectation: { score: '2-4 5-4(4) [7-5]' } },
+  // sensibleSets should recognize 3 correct sets and discard the rest
+  { score: '6-1, 1-6, 1, 6-4', expectation: { score: '6-1 1-6 6-4' } },
+
+  // positioning(#-#)
+  { score: '1(6-3, 6-4)', expectation: { score: '6-3 6-4' } },
+
+  // (positioning) #-#
+  { score: '(6) 2-6, 6-4, 10-8', expectation: { score: '2-6 6-4 [10-8]' } },
+
   // implied 0
   { score: '9-', expectation: { score: '' } },
   { score: '6-', expectation: { score: '' } },
@@ -309,6 +322,13 @@ const scores = [
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
   { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
+  { score: '5, 7-6, 1-11, 9', expectation: { score: '5-7 6-1 [11-9]' } },
+  { score: '6, 4-3, 6-10, 8', expectation: { score: '6-4 3-6 [10-8]' } },
+  { score: '8, 7(4)', expectation: { score: '8-7(4)' } },
+  { score: '6-7(8)/7-6(9)/ 6-2', expectation: { score: '6-7(8) 7-6(9) 6-2' } },
+  { score: '46 75 6 3', expectation: { score: '4-6 7-5 6-3' } },
+  { score: '6 4 3 6 13 11', expectation: { score: '6-4 3-6 [13-11]' } },
+  { score: '46 76(12) 76 (2)', expectation: { score: '4-6 7-6(12) 7-6(2)' } },
   { score: '4-6, 6-1- 7-6(5)', expectation: { score: '4-6 6-1 7-6(5)' } },
   { score: '6-47-6(8)', expectation: { score: '6-4 7-6(8)' } },
   { score: '6/47/6(8)', expectation: { score: '6-4 7-6(8)' } },
