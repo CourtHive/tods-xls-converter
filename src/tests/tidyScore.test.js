@@ -28,8 +28,10 @@ const scores = [
   // recognize missing Zero
   { score: '(6, 4)(, 6)(6, 4)', expectation: { score: '' } },
 
-  // sensibleSets should recognize 2-3 correct sets and attempt to fix third
+  // match pattern #-#9#) => #-#(#)
   { score: '2-4, 5-494), 7-5', expectation: { score: '2-4 5-4(4) [7-5]' } },
+
+  // sensibleSets should recognize 2-3 correct sets and attempt to fix third
   { score: '6-3 -6 6-4', expectation: { score: '' } },
   { score: '6-4, 1-6-1, 14-12', expectation: { score: '' } },
   // sensibleSets should recognize 3 correct sets and discard the rest
