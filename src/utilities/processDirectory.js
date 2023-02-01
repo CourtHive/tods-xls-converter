@@ -34,7 +34,7 @@ export function processDirectory({
 }) {
   const isXLS = (fileName) => fileName.toLowerCase().split('.').reverse()[0].startsWith('xls');
   if (!existsSync(readDir)) {
-    console.log('no such directory');
+    console.log('no such directory', { readDir });
     return;
   }
   let fileNames = readdirSync(readDir).filter(isXLS).sort();
