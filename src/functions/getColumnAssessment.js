@@ -7,6 +7,7 @@ import { getRow } from './sheetAccess';
 export function getColumnAssessment({
   prospectColumnKeys,
   positionIndex,
+  filteredKeys,
   attributeMap,
   columnIndex,
   sheetType,
@@ -22,11 +23,17 @@ export function getColumnAssessment({
     (assessment, key) => {
       const { value, rawValue } = getCheckedValue({ profile, sheet, key });
       const row = getRow(key);
+      const rowKeys = filteredKeys.filter(
+        (rowKey) => getRow(rowKey) === row && getCheckedValue({ profile, sheet, key: rowKey }).value
+      );
+
+      const ignoreSingleValueRow = rowKeys.length === 1 && 'ABC'.split('').includes(column);
 
       const skip =
         profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) ||
         isSkipWord(rawValue, profile) ||
-        hiddenRows.includes(row);
+        hiddenRows.includes(row) ||
+        ignoreSingleValueRow;
 
       if (!skip) {
         if (onlyAlpha(rawValue, profile)) {

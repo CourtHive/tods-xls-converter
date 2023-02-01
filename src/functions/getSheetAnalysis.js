@@ -65,6 +65,7 @@ export const getSheetAnalysis = ({
     const { assessment, upperRowBound } = getColumnAssessment({
       prospectColumnKeys,
       positionIndex,
+      filteredKeys,
       attributeMap,
       columnIndex,
       sheetType,
