@@ -221,14 +221,14 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['0'],
-        valueRegex: '^([A-Za-z]+)$'
+        valueRegex: '^([A-Za-z ]+)$'
       },
       {
         attr: FIRST_NAME,
         skipWords: ['0'],
         header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
         limit: 1,
-        valueRegex: `^([A-Za-z]+)$`
+        valueRegex: `^([A-Za-z ]+)$`
       },
       {
         attr: PERSON_ID, // sometimes appears also in the Rank column
@@ -256,10 +256,9 @@ export const config = {
         required: true,
         skipWords: ['reg', 'umpire', '0', 'a/f', 'new id', 'app'],
         valueRegex: '(\\d{5,})[ A-Za-z]*$',
-        extract: true,
-        log: true
+        extract: true
       },
-      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z]*$' },
+      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z ]*$' },
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: CITY, header: ['city'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
