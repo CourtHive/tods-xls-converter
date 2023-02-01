@@ -5,7 +5,7 @@ const validPatterns = false;
 const expectations = false;
 const fullLog = true;
 const start = 0;
-const end = 0;
+const end = 1;
 
 // HIGHER ORDER PROCESSING
 // '64 67(7)' => '6-4 7-6(7)' recognize that there cannot be a winner unless 2nd set score is flipped
@@ -16,7 +16,33 @@ const scores = [
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
+  { score: '6 3 6 7(3) 6 0', expectation: { score: '6-3 6-7(3) 6-0' } }, // fix match known patterns!
+  { score: '3 6 7 5 7 6(2)', expectation: { score: '3-6 7-5 7-6(2)' } }, // fix match known patterns!
+  { score: '67(6)64106', expectation: { score: '6-7(6) 6-4 [10-6]' } },
+  { score: '[7/6 (4) 6/3 )', expectation: { score: '7-6(4) 6-3' } },
+  { score: '(6-1), (7-6(1))', expectation: { score: '6-1 7-6(1)' } },
   /*
+  "26, 76(13), 11-9"
+  "6-06, -0"
+  "7 6(5)5 7 6 3"
+  "4 6 7 5 7 6(5)"
+  "5 7 6 2 10-2"
+  "2 6 6 4 10-5"
+  "6 3, 5 7, 10-8"
+  "4 6, 6 4, 10-8"
+  "6 3, 2 6, 14-12"
+  "4 6, 6 4, 10-8"
+  "7-6 (10) 6-7 (6) 6-2"
+  "76-(2), 6-4"
+  "75 36 12 10"
+  "7-6(3)/6-3"
+  "(7-6(4)), (5-7), (6-2)"
+  "(4-1), (4-3(3))"
+  "(6-2), (7-6(2))"
+  "6, 2 7, 6(4)"
+  "4-5(5, 5-4(3), 11-9"
+  '1-6, 6-4, 2-0(CONS)'
+
   { score: '67(4)60107', expectation: { score: '6-7(4) 6-0 [10-7]' } },
 
   // sensibleSets should recognize 762 as valid tiebreak
@@ -36,6 +62,9 @@ const scores = [
   { score: '6-4, 1-6-1, 14-12', expectation: { score: '' } },
   // sensibleSets should recognize 3 correct sets and discard the rest
   { score: '6-1, 1-6, 1, 6-4', expectation: { score: '6-1 1-6 6-4' } },
+  { score: '6-436-4', expectation: { score: '6-4 6-4' } },
+  // should recognize that a middle incomplete set is won by side #1
+  "4-6, -2, 7-5" //
 
   // positioning(#-#)
   { score: '1(6-3, 6-4)', expectation: { score: '6-3 6-4' } },
@@ -312,6 +341,7 @@ const scores = [
   { score: '63 46 10 -4', expectation: { score: '6-3 4-6 [10-4]' } },
   { score: '63 46 10- 4', expectation: { score: '6-3 4-6 [10-4]' } },
 
+  { score: '5-4(7, 5-3', expectation: { score: '5-4(7) 5-3' } },
   { score: '36637675', expectation: { score: '3-6 6-3 7-6(5)' } },
   { score: '(6-7 (2), 6-3, 6-7 (5))', expectation: { score: '6-7(2) 6-3 6-7(5)' } },
   { score: '6 2 7 6 (5)', expectation: { score: '6-2 7-6(5)' } },
