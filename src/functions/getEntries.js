@@ -7,7 +7,7 @@ import { getCellValue, getRow } from './sheetAccess';
 import { getLoggingActive } from '../global/state';
 import { isBye } from '../utilities/convenience';
 
-import { MISSING_ID_COLUMN, MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
+import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
 import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
 import { SUCCESS } from '../constants/resultConstants';
 import {
@@ -45,12 +45,6 @@ export function getEntries({
   const idColumn = analysis.columnProfiles.find(
     ({ character, attribute }) => attribute === PERSON_ID || character === PERSON_ID
   )?.column;
-
-  const idColumnRequired = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.required;
-
-  if (!idColumn && idColumnRequired) {
-    return { error: MISSING_ID_COLUMN };
-  }
 
   // backfill personId column
   if (idColumn && !entryDetailColumns.includes(idColumn)) {
@@ -113,6 +107,7 @@ export function getEntries({
         boundaryIndex,
         columnProfile,
         positionRows,
+        idColumn,
         analysis,
         profile
       });
@@ -183,7 +178,7 @@ export function getEntries({
     entryDetailColumns?.length &&
     processDetailParticipants({ analysis, profile, detailParticipants, positionRows, entryDetailRows });
   if (detailResult?.error) return detailResult;
-  if (detailResult) return { boundaryIndex, ...detailResult };
+  if (detailResult) return { idColumn, boundaryIndex, ...detailResult };
 
   const participantCount = Object.values(rowParticipants).filter((participant) => !isBye(participant)).length;
   const drawSize = positionRefs.length;
@@ -262,7 +257,7 @@ export function getEntries({
     }
   }
 
-  return { ...SUCCESS, entries, boundaryIndex, participants, positionAssignments, seedAssignments };
+  return { ...SUCCESS, entries, boundaryIndex, participants, positionAssignments, seedAssignments, idColumn };
 }
 
 function getParticipant(details) {

@@ -71,6 +71,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
 
     const {
       participants: structureParticipants,
+      ignoredQualifyingMatchUpIds = [],
       structures = [],
       hasValues,
       analysis,
@@ -103,7 +104,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     const invalidResult = structureMatchUps.filter(({ result }) => invalidResults.includes(result));
     if (invalidResult.length && getLoggingActive('invalidResult')) console.log({ fileName, sheetName }, invalidResult);
 
-    const matchUpsCount = structureMatchUps?.length;
+    const matchUpsCount = (structureMatchUps?.length || 0) - (ignoredQualifyingMatchUpIds.length || 0);
     const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;
     const winningSideCount = structureMatchUps?.filter(({ winningSide }) => winningSide).length;
 

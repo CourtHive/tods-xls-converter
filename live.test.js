@@ -84,11 +84,11 @@ it('can process tests', () => {
 
   // sheet processing config
   const sheetTypes = [];
-  const sheetNumbers = [5];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 1;
+  const processLimit = 0;
   const startIndex = 0;
 
   resetLogging();

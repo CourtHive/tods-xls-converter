@@ -23,8 +23,9 @@ export function getColumnAssessment({
     (assessment, key) => {
       const { value, rawValue } = getCheckedValue({ profile, sheet, key });
       const row = getRow(key);
+      const consideredValue = (v) => v && !['0'].includes(v);
       const rowKeys = filteredKeys.filter(
-        (rowKey) => getRow(rowKey) === row && getCheckedValue({ profile, sheet, key: rowKey }).value
+        (rowKey) => getRow(rowKey) === row && consideredValue(getCheckedValue({ profile, sheet, key: rowKey }).value)
       );
 
       const ignoreSingleValueRow = rowKeys.length === 1 && 'ABC'.split('').includes(column);

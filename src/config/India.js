@@ -56,6 +56,7 @@ export const config = {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
     exciseWords: [
+      { regex: '^page \\d.*' },
       { regex: '.*\\d{2,}[ap]m' },
       { regex: `^q\\d$` },
       { regex: `^a/f$` }, // needs to be removed from id column
