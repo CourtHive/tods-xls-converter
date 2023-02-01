@@ -63,11 +63,13 @@ it.skip('can process passing', () => {
 it('can process tests', () => {
   // const readDir = './examples/sheets/testing/';
   // const writeDir = `./examples/sheets/processed/testing`;
-  const year = '2022';
-  const readDir = `./examples/sheets/India/years/${year}`;
+  const year = '2016';
+  const subDir = '/MISSING_SHEET_DEFINITION';
+  const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
+  const moveErrorFiles = !subDir;
   const writeMatchUps = true;
   let writeResultIndex;
 
@@ -112,6 +114,7 @@ it('can process tests', () => {
     includeWorkbooks: false,
     writeTournamentRecords,
     defaultProvider: 'IND',
+    moveErrorFiles,
     writeMatchUps,
     processLimit,
     sheetNumbers,
