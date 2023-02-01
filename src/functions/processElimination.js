@@ -11,10 +11,16 @@ import { processPreRound } from './processPreRound';
 import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
-import { INVALID_MATCHUPS_TOTAL, MISSING_ID_COLUMN, NO_RESULTS_FOUND } from '../constants/errorConditions';
 import { PERSON_ID, STATE, CITY } from '../constants/attributeConstants';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
+import {
+  INVALID_MATCHUPS_TOTAL,
+  MISSING_ID_COLUMN,
+  NO_PROGRESSED_PARTICIPANTS,
+  NO_RESULTS_FOUND,
+  POSITON_PROGRESSION
+} from '../constants/errorConditions';
 
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 
@@ -156,11 +162,16 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   // -------------------------------------------------------------------------------------------------
   // ACTION: profile all roundColumns to determine how many contain participants withConfidence
   // NOTE: for this check the FIRST ROUND PARTICIPANTS are always used
+  const noConfidenceValues = [];
   const columnsWithParticipants = Object.assign(
     {},
     ...roundColumns
       .map((targetColumn) => {
-        const { confidence: withConfidence, valuesCount } = getColumnParticipantConfidence({
+        const {
+          confidence: withConfidence,
+          targetColumnValues,
+          valuesCount
+        } = getColumnParticipantConfidence({
           confidenceThreshold,
           roundParticipants,
           targetColumn,
@@ -173,10 +184,20 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
         if (withConfidence.length && confidence > 0.3) {
           return { [targetColumn]: valuesCount };
+        } else {
+          const numericValues = targetColumnValues.filter((value) => {
+            const containsAlpha = /[A-Za-z]+/.test(value);
+            return !containsAlpha;
+          });
+          if (numericValues.length) noConfidenceValues.push(numericValues);
         }
       })
       .filter(Boolean)
   );
+
+  if (Object.values(columnsWithParticipants).length === 1) {
+    return noConfidenceValues.length ? { error: POSITON_PROGRESSION } : { warning: NO_PROGRESSED_PARTICIPANTS };
+  }
 
   const resultRounds = [];
   // -------------------------------------------------------------------------------------------------
@@ -261,6 +282,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const withDrawPositionsNotBye = matchUps.filter(
     ({ drawPositions, matchUpStatus }) => drawPositions?.length === 2 && matchUpStatus !== 'BYE'
   );
+
   if (withDrawPositionsNotBye.length && !resultsCount) {
     return { warning: NO_RESULTS_FOUND };
   }
