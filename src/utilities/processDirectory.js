@@ -11,6 +11,7 @@ const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
 
 export function processDirectory({
   writeTournamentRecords = false,
+  moveErrorFiles = false,
   writeMatchUps = false,
   writeDir = './',
   readDir = './',
@@ -267,7 +268,7 @@ export function processDirectory({
       });
     }
 
-    if (firstError) {
+    if (firstError && moveErrorFiles) {
       const fileDest = `${readDir}/${firstError}/${fileName}`;
       const result = moveSync(filePath, fileDest);
       if (result) console.log({ fileDest, result });
@@ -307,23 +308,49 @@ export function processDirectory({
 
   const errorKeys = Object.keys(errorLog);
   const totalErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
-  const filteredMatchUps = allMatchUps.filter((matchUp) => {
-    if (!matchUp.winningSide || matchUp.drawPositions.length !== 2) return false;
 
+  const filteredMatchUps = [];
+
+  let insufficientDrawPositions = 0;
+  let systemGeneratedIDs = 0;
+  let noWinningSide = 0;
+  let byeMatchUps = 0;
+  let walkovers = 0;
+
+  allMatchUps.forEach((matchUp) => {
     const participantIds = matchUp.sides
       ?.flatMap(({ participant }) => participant?.individualParticipants || participant)
       .filter(Boolean)
       .map(({ participantId }) => participantId);
-    const allValidParticipantIds = participantIds.every((pid) => !pid?.startsWith('p-'));
+    const allValidParticipantIds = participantIds?.every((pid) => !pid?.startsWith('p-'));
 
-    return allValidParticipantIds && ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus);
+    const { matchUpStatus } = matchUp;
+
+    if (!matchUp.winningSide) {
+      noWinningSide += 1;
+    } else if (matchUp.drawPositions.length !== 2) {
+      insufficientDrawPositions += 1;
+    } else if (!allValidParticipantIds) {
+      systemGeneratedIDs += 1;
+    } else if (matchUpStatus === BYE) {
+      byeMatchUps += 1;
+    } else if ([WALKOVER, DOUBLE_WALKOVER].includes(matchUpStatus)) {
+      walkovers += 1;
+    } else {
+      filteredMatchUps.push(matchUp);
+    }
   });
 
   const report = {
     filesProcessed: fileNames.length,
     sheetsProcessed,
-    exportedMatchUps: filteredMatchUps.length,
     totalMatchUps,
+    noWinningSide,
+    insufficientDrawPositions,
+    systemGeneratedIDs,
+    byeMatchUps,
+    walkovers,
+    exportedMatchUps: filteredMatchUps.length,
     errorTypes: errorKeys.length,
     totalErrors,
     errorKeys
