@@ -161,6 +161,7 @@ export const config = {
           'Name of Player',
           'family name',
           'family',
+          'player',
           'player name',
           'first name',
           'nationality',
@@ -210,6 +211,7 @@ export const config = {
         header: [
           'name',
           'surname',
+          'player',
           'player name',
           'players name',
           'last name',
@@ -222,7 +224,7 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['0'],
-        valueRegex: '^([A-Za-z ]+)$'
+        valueRegex: "^([A-Za-z'\\- ]+)$"
       },
       {
         attr: FIRST_NAME,
