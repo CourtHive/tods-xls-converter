@@ -5,9 +5,15 @@ import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
 
-import { MISSING_SHEET_DEFINITION } from './src/constants/errorConditions';
+import { MISSING_SHEET_DEFINITION, NO_POSITION_ROWS_FOUND } from './src/constants/errorConditions';
 
 setLoggingActive();
+
+// bogus function to reference potentially unused errorConditions
+// and thus to avoid linting complaints!
+export function foo() {
+  MISSING_SHEET_DEFINITION && NO_POSITION_ROWS_FOUND;
+}
 
 it.skip('can process passing', () => {
   const readDir = './examples/sheets/processing';
@@ -66,23 +72,23 @@ it('can process tests', () => {
   // const readDir = './examples/sheets/testing/';
   // const writeDir = `./examples/sheets/processed/testing`;
   const year = '2016';
-  const errorType = MISSING_SHEET_DEFINITION;
-  const subDir = errorType && `/${MISSING_SHEET_DEFINITION}`;
+  const errorType = NO_POSITION_ROWS_FOUND;
+  const subDir = errorType && `/${errorType}`;
   const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const moveErrorFiles = true;
+  const moveErrorFiles = false;
   const writeMatchUps = true;
   let writeResultIndex;
 
   // sheet processing config
   const sheetTypes = [];
-  const sheetNumbers = [];
+  const sheetNumbers = [5];
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 0;
+  const processLimit = 1;
   const startIndex = 0;
 
   resetLogging();
