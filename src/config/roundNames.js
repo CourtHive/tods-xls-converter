@@ -16,6 +16,7 @@ export const roundNames = [
   'quarter- finals',
   'quarterfinalists',
   'preqtrs',
+  'pre quarters',
   'pqtr',
   'qtrs',
   'pre quarter finals',
