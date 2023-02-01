@@ -1,7 +1,8 @@
 import { isSkipWord, onlyAlpha, onlyNumeric } from '../utilities/convenience';
 import { isNumeric, isScoreLike, isString } from '../utilities/identification';
-import { getCheckedValue } from './getCheckedValue';
 import { getColumnCharacter } from './getColumnCharacter';
+import { utilities } from 'tods-competition-factory';
+import { getCheckedValue } from './getCheckedValue';
 import { getRow } from './sheetAccess';
 
 export function getColumnAssessment({
@@ -28,7 +29,8 @@ export function getColumnAssessment({
         (rowKey) => getRow(rowKey) === row && consideredValue(getCheckedValue({ profile, sheet, key: rowKey }).value)
       );
 
-      const ignoreSingleValueRow = rowKeys.length === 1 && 'ABC'.split('').includes(column);
+      const ignoreSingleValueRow =
+        rowKeys.length === 1 && 'ABC'.split('').includes(column) && !utilities.isPowerOf2(prospectColumnKeys.length);
 
       const skip =
         profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) ||
