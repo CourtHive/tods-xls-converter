@@ -29,9 +29,14 @@ export function processDirectory({
   startIndex = 0,
   sheetNumbers,
   sheetTypes,
-  sheetLimit
+  sheetLimit,
+  errorType
 }) {
   const isXLS = (fileName) => fileName.toLowerCase().split('.').reverse()[0].startsWith('xls');
+  if (!existsSync(readDir)) {
+    console.log('no such directory');
+    return;
+  }
   let fileNames = readdirSync(readDir).filter(isXLS).sort();
   const workbookCount = fileNames.length;
 
@@ -256,8 +261,8 @@ export function processDirectory({
 
     let firstError;
     if (result.errorLog) {
-      const errorKeys = Object.keys(result.errorLog);
-      firstError = errorKeys[0];
+      const errorKeys = Object.keys(result.errorLog) || [];
+      firstError = errorKeys.filter((error) => error !== errorType)[0];
       errorKeys.forEach((key) => {
         const sheetNames = result.errorLog[key];
         if (!errorLog[key]) {
@@ -268,10 +273,16 @@ export function processDirectory({
       });
     }
 
-    if (firstError && moveErrorFiles) {
-      const fileDest = `${readDir}/${firstError}/${fileName}`;
-      const result = moveSync(filePath, fileDest);
-      if (result) console.log({ fileDest, result });
+    if (moveErrorFiles) {
+      if (firstError) {
+        const fileDest = `${readDir}/${firstError}/${fileName}`;
+        const result = moveSync(filePath, fileDest);
+        if (result) console.log({ fileDest, result });
+      } else if (!totalMatchUps) {
+        const fileDest = `${readDir}/No Results/${fileName}`;
+        const result = moveSync(filePath, fileDest);
+        if (result) console.log({ fileDest, result });
+      }
     }
 
     const tournamentRecord = tournamentEngine.getState().tournamentRecord;

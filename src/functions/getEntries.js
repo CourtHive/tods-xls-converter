@@ -7,7 +7,7 @@ import { getCellValue, getRow } from './sheetAccess';
 import { getLoggingActive } from '../global/state';
 import { isBye } from '../utilities/convenience';
 
-import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
+import { MISSING_ID_COLUMN, MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
 import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
 import { SUCCESS } from '../constants/resultConstants';
 import {
@@ -45,6 +45,12 @@ export function getEntries({
   const idColumn = analysis.columnProfiles.find(
     ({ character, attribute }) => attribute === PERSON_ID || character === PERSON_ID
   )?.column;
+
+  const idColumnRequired = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.required;
+
+  if (!idColumn && idColumnRequired) {
+    return { error: MISSING_ID_COLUMN };
+  }
 
   // backfill personId column
   if (idColumn && !entryDetailColumns.includes(idColumn)) {

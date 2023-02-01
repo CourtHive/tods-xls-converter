@@ -11,8 +11,8 @@ import { processPreRound } from './processPreRound';
 import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
+import { INVALID_MATCHUPS_TOTAL, NO_RESULTS_FOUND } from '../constants/errorConditions';
 import { PERSON_ID, STATE, CITY } from '../constants/attributeConstants';
-import { NO_RESULTS_FOUND } from '../constants/errorConditions';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
@@ -307,7 +307,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
         keyColors: { message: 'cyan', attributes: 'brightyellow' },
         message
       });
-      return { error: 'INVALID matchUpsTotal', context: { matchUpsCount } };
+      return { error: INVALID_MATCHUPS_TOTAL, context: { matchUpsCount } };
     }
   }
 
