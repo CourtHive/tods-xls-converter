@@ -30,9 +30,8 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
       const getRef = (searchDetails) => {
         const options = { tidy: true };
 
-        const cols = findValueRefs({ searchDetails, sheet, options, log: obj.log })
-          .filter((f) => getRow(f) === parseInt(headerRow))
-          .map(getCol);
+        const vRefs = findValueRefs({ searchDetails, sheet, options, log: obj.log });
+        const cols = vRefs.filter((f) => getRow(f) === parseInt(headerRow)).map(getCol);
 
         cols.forEach((col) => {
           const re = obj.valueRegex && new RegExp(obj.valueRegex);
