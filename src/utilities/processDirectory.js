@@ -7,6 +7,7 @@ import { writeTODS08CSV } from './writeTODS08CSV';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
 
+import { NO_RESULTS_FOUND } from '../constants/errorConditions';
 const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
 
 export function processDirectory({
@@ -279,7 +280,7 @@ export function processDirectory({
         const result = moveSync(filePath, fileDest);
         if (result) console.log({ fileDest, result });
       } else if (!totalMatchUps) {
-        const fileDest = `${readDir}/No Results/${fileName}`;
+        const fileDest = `${readDir}/${NO_RESULTS_FOUND}/${fileName}`;
         const result = moveSync(filePath, fileDest);
         if (result) console.log({ fileDest, result });
       }
@@ -319,6 +320,7 @@ export function processDirectory({
 
   const errorKeys = Object.keys(errorLog);
   const totalErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
+  const errorsByType = errorKeys.map((key) => ({ [key]: errorLog[key].length }));
 
   const filteredMatchUps = [];
 
@@ -337,15 +339,17 @@ export function processDirectory({
 
     const { matchUpStatus } = matchUp;
 
-    if (!matchUp.winningSide) {
+    if (matchUpStatus === BYE) {
+      byeMatchUps += 1;
+    } else if (matchUpStatus === DOUBLE_WALKOVER) {
+      walkovers += 1;
+    } else if (!matchUp.winningSide) {
       noWinningSide += 1;
     } else if (matchUp.drawPositions.length !== 2) {
       insufficientDrawPositions += 1;
     } else if (!allValidParticipantIds) {
       systemGeneratedIDs += 1;
-    } else if (matchUpStatus === BYE) {
-      byeMatchUps += 1;
-    } else if ([WALKOVER, DOUBLE_WALKOVER].includes(matchUpStatus)) {
+    } else if (matchUpStatus === WALKOVER) {
       walkovers += 1;
     } else {
       filteredMatchUps.push(matchUp);
@@ -364,7 +368,7 @@ export function processDirectory({
     exportedMatchUps: filteredMatchUps.length,
     errorTypes: errorKeys.length,
     totalErrors,
-    errorKeys
+    errorsByType
   };
   if (logging) console.log(report);
 
