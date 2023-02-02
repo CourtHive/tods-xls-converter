@@ -321,7 +321,7 @@ export function processDirectory({
 
   const errorKeys = Object.keys(errorLog);
   const totalErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
-  const errorsByType = errorKeys.map((key) => ({ [key]: errorLog[key].length }));
+  const errorsByType = Object.assign({}, ...errorKeys.map((key) => ({ [key]: errorLog[key].length })));
 
   const filteredMatchUps = [];
 
