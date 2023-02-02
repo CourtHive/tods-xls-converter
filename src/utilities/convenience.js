@@ -6,6 +6,17 @@ import { removeBits } from './transformers';
 import { POSITION } from '../constants/columnConstants';
 const { BYE } = matchUpStatusConstants;
 
+export function validConsecutiveNumbers(arr) {
+  if (!Array.isArray(arr)) return false;
+  const valid = Boolean(
+    arr.reduce((result, item) => {
+      if (!result && Number(item) === 1) return 1;
+      if (result + 1 === Number(item)) return Number(item);
+    }, false)
+  );
+  return valid;
+}
+
 export function indices(val, arr) {
   return arr.reduce((a, e, i) => {
     if (e === val) a.push(i);

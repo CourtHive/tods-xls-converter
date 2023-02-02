@@ -1,4 +1,4 @@
-import { isSkipWord, onlyAlpha, onlyNumeric } from '../utilities/convenience';
+import { isSkipWord, onlyAlpha, onlyNumeric, validConsecutiveNumbers } from '../utilities/convenience';
 import { isNumeric, isScoreLike, isString } from '../utilities/identification';
 import { getColumnCharacter } from './getColumnCharacter';
 import { utilities } from 'tods-competition-factory';
@@ -29,8 +29,9 @@ export function getColumnAssessment({
         (rowKey) => getRow(rowKey) === row && consideredValue(getCheckedValue({ profile, sheet, key: rowKey }).value)
       );
 
-      const ignoreSingleValueRow =
-        rowKeys.length === 1 && 'ABC'.split('').includes(column) && !utilities.isPowerOf2(prospectColumnKeys.length);
+      const singleValueRow = rowKeys.length === 1 && 'ABC'.split('').includes(column);
+      const ignoreSingleValueRow = singleValueRow && !utilities.isPowerOf2(prospectColumnKeys.length);
+      if (singleValueRow) assessment.singleValueRows.push(row);
 
       const skip =
         profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) ||
@@ -80,6 +81,7 @@ export function getColumnAssessment({
       allAlpha: truthiness,
       lastNumericValue: 0,
       scoreLikeCount: 0,
+      singleValueRows: [],
       keyMap: {},
       values: [],
       rows: [],
@@ -96,6 +98,28 @@ export function getColumnAssessment({
 
   // 1 is technically a powerOf2, but it is invalid for a drawSize
   if (assessment?.lastConsecutiveValue < 2) assessment.lastConsecutiveValue = undefined;
+
+  // determine whether position column contains erroneous values due to rows being deleted or hidden
+  if (assessment?.allNumeric && assessment.consecutiveNumbers && !utilities.isPowerOf2(assessment.values.length)) {
+    const trimmedRows = assessment.rows.filter((row) => !assessment.singleValueRows.includes(row));
+    if (utilities.isPowerOf2(trimmedRows.length)) {
+      const valuesToTrim = assessment.singleValueRows
+        .map((row) => assessment.values[assessment.rows.indexOf(row)])
+        .filter(Boolean);
+      const trimmedValues = assessment.values.filter((value) => !valuesToTrim.includes(value));
+      if (validConsecutiveNumbers(trimmedValues)) {
+        assessment.values = trimmedValues;
+        assessment.rows = trimmedRows;
+        assessment.lastConsecutiveValue = Math.max(...trimmedValues);
+        assessment.lastNumericValue = Math.max(...trimmedValues);
+        assessment.consecutiveNumbers = true;
+        assessment.singleValueRows.forEach((row) => {
+          const key = `${column}${row}`;
+          delete assessment.keyMap[key];
+        });
+      }
+    }
+  }
 
   // apply any character processing specified by profile
   if (profile.columnCharacter) {
