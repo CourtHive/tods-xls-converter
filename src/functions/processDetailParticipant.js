@@ -119,7 +119,6 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         if (detail.seedValue) seedValue = detail.seedValue;
         if (detail.entryStatus) entryStatus = profile.entryStatusMap?.[detail.entryStatus] || DIRECT_ACCEPTANCE;
 
-        const person = { standardFamilyName: lastName, standardGivenName: firstName, personId };
         const lastFirst = lastName && firstName && `${lastName}, ${firstName}`;
         const participantName = detail.participantName || lastFirst || lastName || firstName;
         if (!participantName) return;
@@ -134,6 +133,11 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         }
         const participantId =
           personId || (idAttributes.length && generateParticipantId({ attributes: idAttributes })?.participantId);
+        const person = {
+          standardFamilyName: lastName,
+          standardGivenName: firstName,
+          personId: personId || participantId
+        };
 
         const participant = {
           participantRole: COMPETITOR,

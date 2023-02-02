@@ -32,13 +32,12 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
-  const { positionProfile, maxPositionWithValues, maxPosition, maxPositionRow, maxValueRow } = getMaxPositionWithValues(
-    {
+  const { positionProfile, maxPositionWithValues, maxPosition, maxPositionRow, maxValueRow, valuesPerRow } =
+    getMaxPositionWithValues({
       columnProfiles,
       positionColumn,
       analysis
-    }
-  );
+    });
 
   const noValues = maxValueRow === -Infinity;
 
@@ -53,7 +52,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     return { analysis };
   };
 
-  if (!positionColumn) {
+  // there would need to be a large number of values per row to conclude no positions if no positionColumn is found
+  if (!positionColumn && valuesPerRow >= 2) {
     return { error: NO_POSITION_ROWS_FOUND };
   }
   if (noValues || !maxPositionWithValues || maxPositionWithValues < 2) return blankDraw();

@@ -202,7 +202,6 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: 'ignored', header: ['st'] },
       { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,3}$` },
@@ -254,12 +253,14 @@ export const config = {
           'first name',
           'city',
           'nationality',
-          'rank'
+          'rank',
+          'st'
         ],
         limit: 1,
         required: true,
-        skipWords: ['reg', 'umpire', '0', 'a/f', 'AF', 'new id', 'app'],
-        valueRegex: '(\\d{5,})[ A-Za-z]*$',
+        skipWords: ['reg', 'umpire', '0', 'a/f', 'AF', 'new id', 'app', 'new', 'applied'],
+        valueRegex: '[\\w-]*(\\d{5,})[ A-Za-z]*$',
+        valueMatchThreshold: 0.7,
         extract: true
       },
       { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z ]*$' },

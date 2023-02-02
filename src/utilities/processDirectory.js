@@ -112,7 +112,17 @@ export function processDirectory({
       const consideredParticipants = participantLog.participantType
         ? tournamentParticipants.filter(({ participantType }) => participantType === participantLog.participantType)
         : tournamentParticipants;
-      console.log(consideredParticipants, { participantsCount: consideredParticipants.length });
+
+      if (participantLog.idsOnly) {
+        const individualParticipantIds = consideredParticipants.flatMap((p) =>
+          p.participantType === 'INDIVIDUAL'
+            ? p.person?.personId
+            : p.individualParticipants.map((i) => i?.person?.personId)
+        );
+        console.log({ individualParticipantIds });
+      } else {
+        console.log(consideredParticipants, { participantsCount: consideredParticipants.length });
+      }
     }
 
     if (captureProcessedData) {

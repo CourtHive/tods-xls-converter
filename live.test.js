@@ -7,6 +7,7 @@ import { writeFileSync } from 'fs-extra';
 
 import {
   INVALID_MATCHUPS_TOTAL,
+  MISSING_ID_COLUMN,
   MISSING_NAMES,
   MISSING_SHEET_DEFINITION,
   NO_POSITION_ROWS_FOUND
@@ -17,7 +18,7 @@ setLoggingActive();
 // bogus function to reference potentially unused errorConditions
 // and thus to avoid linting complaints!
 export function foo() {
-  MISSING_SHEET_DEFINITION && NO_POSITION_ROWS_FOUND && MISSING_NAMES && INVALID_MATCHUPS_TOTAL;
+  MISSING_SHEET_DEFINITION && NO_POSITION_ROWS_FOUND && MISSING_NAMES && INVALID_MATCHUPS_TOTAL && MISSING_ID_COLUMN;
 }
 
 it.skip('can process passing', () => {
@@ -76,7 +77,7 @@ it('can process tests', () => {
   // const readDir = './examples/sheets/testing/';
   // const writeDir = `./examples/sheets/processed/testing`;
   const year = '2016';
-  const errorType = NO_POSITION_ROWS_FOUND;
+  const errorType = MISSING_ID_COLUMN;
   const subDir = errorType && `/${errorType}`;
   const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
@@ -92,8 +93,8 @@ it('can process tests', () => {
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 1;
-  const startIndex = 2;
+  const processLimit = 0;
+  const startIndex = 0;
 
   resetLogging();
   setLoggingActive(true);
@@ -107,7 +108,7 @@ it('can process tests', () => {
     pRank: false
   });
   setLoggingActive(false, 'columnFrequency');
-  setLoggingActive(false, 'columnProfiles', { index: undefined, column: 'D' });
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(true, 'errorLog');
@@ -117,7 +118,7 @@ it('can process tests', () => {
   setLoggingActive(false, 'matchUps', { roundNumber: 1, roundPosition: 8 });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only
-  setLoggingActive(false, 'participants', { participantType: 'PAIR' });
+  setLoggingActive(false, 'participants', { participantType: 'INDIVIDUAL', idsOnly: true });
   setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');

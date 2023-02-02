@@ -36,18 +36,27 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
         cols.forEach((col) => {
           const re = obj.valueRegex && new RegExp(obj.valueRegex);
           const skipWords = obj.skipWords || profile.skipWords || [];
-          const isValid =
+          let checked = 0;
+          const valueCheck =
             !re ||
             columnValues[col]?.every((value) => {
               const check = re.test(value);
-              return (
+              if (check) checked += 1;
+              const valid =
                 !value ||
                 skipWords.some(
                   (word) => word?.toString().toLowerCase() === tidyValue(value.toString()).toLowerCase()
                 ) ||
-                check
-              );
+                check;
+              return valid;
             });
+
+          const checkedPct = columnValues[col]?.length && checked / columnValues[col].length;
+          const validityThreshold = obj.valueMatchThreshold && checkedPct > obj.valueMatchThreshold;
+
+          // it is valid if there ISs a threshold which is met or if there IS NOT a threshold and valueCheck passes
+          // This is particularly relevant to PERSON_ID column resolution
+          const isValid = validityThreshold || (!obj.valueMatchThreshold && valueCheck);
 
           if (isValid) {
             extendColumnsMap({ columnsMap, ...obj, column: col });
