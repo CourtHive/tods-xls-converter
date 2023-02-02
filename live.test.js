@@ -96,7 +96,7 @@ it('can process tests', () => {
   const startIndex = 0;
 
   resetLogging();
-  setLoggingActive(true);
+  setLoggingActive(false);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
     roundNumbers: [2],
