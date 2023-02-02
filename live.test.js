@@ -15,19 +15,25 @@ import {
   NO_POSITION_ROWS_FOUND
 } from './src/constants/errorConditions';
 
+const NONE = '';
+
 setLoggingActive();
 
 // bogus function to reference potentially unused errorConditions
 // and thus to avoid linting complaints!
 export function foo() {
-  MISSING_SHEET_DEFINITION &&
+  const hoo =
+    MISSING_SHEET_DEFINITION &&
     NO_POSITION_ROWS_FOUND &&
     MISSING_NAMES &&
     INVALID_MATCHUPS_TOTAL &&
     MISSING_ID_COLUMN &&
-    ENTRIES_NOT_ON_POSITION_ROWS;
+    ENTRIES_NOT_ON_POSITION_ROWS &&
+    NONE;
 
-  RANKING;
+  const boo = RANKING;
+
+  return boo && hoo;
 }
 
 it.skip('can process passing', () => {
@@ -86,7 +92,7 @@ it('can process tests', () => {
   // const readDir = './examples/sheets/testing/';
   // const writeDir = `./examples/sheets/processed/testing`;
   const year = '2016';
-  const errorType = INVALID_MATCHUPS_TOTAL;
+  const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
   const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
@@ -102,8 +108,8 @@ it('can process tests', () => {
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 1;
-  const startIndex = 2;
+  const processLimit = 10;
+  const startIndex = 0;
 
   resetLogging();
   setLoggingActive(true);
@@ -116,7 +122,7 @@ it('can process tests', () => {
     sideWeights: true,
     pRank: false
   });
-  setLoggingActive(false, 'headerColumns', { attr: PERSON_ID, column: 'C' });
+  setLoggingActive(false, 'headerColumns', { attr: PERSON_ID, column: 'H' });
   setLoggingActive(false, 'columnFrequency');
   setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });

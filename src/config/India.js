@@ -267,7 +267,7 @@ export const config = {
         required: true,
         skipWords: ['reg', 'umpire', '0', 'a/f', 'AF', 'new id', 'app', 'new', 'applied'],
         valueRegex: '[\\w-]*(\\d{5,})[ A-Za-z]*$',
-        valueMatchThreshold: 0.7,
+        valueMatchThreshold: 0.45,
         extract: true
       },
       {

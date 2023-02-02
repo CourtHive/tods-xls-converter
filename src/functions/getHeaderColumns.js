@@ -22,6 +22,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   );
 
   const invalidValueColumns = [];
+  const duplicates = [];
 
   const logging = getLoggingActive('headerColumns');
 
@@ -59,7 +60,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
               check;
             return valid;
           });
-          const valueCheck = !re || validityTest.every((test) => test);
+          const valueCheck = !re || validityTest?.every((test) => test);
 
           const checkedPct = columnValues[col]?.length && checked / columnValues[col].length;
           const validityThreshold = obj.valueMatchThreshold && checkedPct > obj.valueMatchThreshold;
@@ -71,7 +72,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
           if (log) console.log({ checkedPct, validityThreshold, isValid, col });
 
           if (isValid) {
-            extendColumnsMap({ columnsMap, ...obj, column: col });
+            extendColumnsMap({ columnsMap, ...obj, column: col, duplicates });
           } else {
             invalidValueColumns.push(col);
           }
@@ -90,7 +91,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   const mappedColumns = invalidValueColumns.concat(utilities.unique(Object.values(columnsMap).flat()));
 
   const unmappedColumns = Object.keys(headerValueMap)
-    .filter((column) => !mappedColumns.includes(column))
+    .filter((column) => !mappedColumns.includes(column) && !duplicates.includes(column))
     .map((column) => headerValueMap[column]);
 
   if (unmappedColumns.length) {
@@ -108,13 +109,17 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   return columnsMap;
 }
 
-export function extendColumnsMap({ columnsMap, attr, column, limit }) {
+export function extendColumnsMap({ columnsMap, attr, column, limit, duplicates }) {
   if (Array.isArray(columnsMap[attr])) {
     columnsMap[attr].push(column);
     columnsMap[attr].sort();
   } else {
     if (columnsMap[attr]) {
-      if (!limit) columnsMap[attr] = [columnsMap[attr], column];
+      if (!limit) {
+        columnsMap[attr] = [columnsMap[attr], column];
+      } else if (duplicates) {
+        duplicates.push(column);
+      }
     } else {
       columnsMap[attr] = column;
     }

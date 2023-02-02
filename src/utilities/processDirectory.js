@@ -242,8 +242,7 @@ export function processDirectory({
 
       pushGlobalLog({
         method: 'notice',
-        color: 'brightred',
-        keyColors: { message: 'yellow', attributes: 'brightred', context: 'brightgreen', filedate: 'brightgreen' },
+        keyColors: { message: 'yellow', attributes: 'cyan', context: 'brightgreen', filedate: 'brightgreen' },
         message,
         contextDate,
         filedate

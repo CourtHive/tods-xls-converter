@@ -263,8 +263,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     const message = `results in multiple columns{ roundNumbers: ${consumedColumns.join(',')} }`;
     pushGlobalLog({
       method: 'notice',
-      color: 'brightyellow',
-      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      color: 'yellow',
+      keyColors: { message: 'cyan', attributes: 'yellow' },
       message
     });
   }
