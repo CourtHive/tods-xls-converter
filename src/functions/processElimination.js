@@ -204,7 +204,10 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   }
 
   if (Object.values(columnsWithParticipants).length === 1) {
-    return noConfidenceValues.length ? { error: POSITION_PROGRESSION } : { warning: NO_PROGRESSED_PARTICIPANTS };
+    if (noConfidenceValues.length) {
+      return { error: POSITION_PROGRESSION };
+    }
+    return { warning: NO_PROGRESSED_PARTICIPANTS };
   }
 
   const resultRounds = [];
