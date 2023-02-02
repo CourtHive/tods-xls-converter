@@ -1,3 +1,7 @@
+// TODO: can be handled with { text: 'qual', options: { startsWith: true }}
+// TODO: can be handled with { text: 'quarter', options: { startsWith: true }}
+// TODO: can be handled with { text: 'semi', options: { startsWith: true }}
+// TODO: can be handled with { text: 'final', options: { startsWith: true }}
 export const roundNames = [
   'round 1',
   'round 2',
