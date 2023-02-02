@@ -59,7 +59,12 @@ export function getEntries({
   const entryDetailColumnProfiles = entryDetailColumns.map(getColumnProfile).filter(Boolean);
 
   const positionRows = positionRefs.map(getRow).sort(utilities.numericSort);
-  let entryDetailRows = utilities.unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows));
+  const maxPositionRow = Math.max(...positionRows);
+  const minPositionRow = Math.min(...positionRows);
+  let entryDetailRows = utilities
+    .unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows))
+    .filter((row) => row >= minPositionRow && row <= maxPositionRow)
+    .sort(utilities.numericSort);
 
   if (entryDetailAttributes?.length) {
     for (const attribute of entryDetailAttributes) {
