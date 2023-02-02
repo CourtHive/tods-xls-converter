@@ -52,7 +52,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     return { analysis };
   };
 
-  if (noValues || maxPositionWithValues < 2) return blankDraw();
+  if (noValues || !maxPositionWithValues || maxPositionWithValues < 2) return blankDraw();
 
   let positionLimit;
   if (maxPositionWithValues < maxPosition) {
