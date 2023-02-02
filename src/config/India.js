@@ -204,7 +204,7 @@ export const config = {
     headerColumns: [
       { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
-      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,3}$` },
+      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,4}$` },
       {
         attr: SEED_VALUE,
         header: [{ text: 'seed', options: { startsWith: true } }, 'seed', 'seed no', 'sd', 'sd no', 'sd. no'],
@@ -246,6 +246,7 @@ export const config = {
           { text: 'reg no', startsWith: true },
           { text: 'state reg', startsWith: true },
           { text: 'reg', startsWith: true },
+          { text: 'registration', startsWith: true },
           { text: 'regn no', includes: true },
           { text: 'rect no', includes: true },
           'reg.no',
@@ -269,7 +270,14 @@ export const config = {
         valueMatchThreshold: 0.7,
         extract: true
       },
-      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z ]*$' },
+      {
+        attr: NATIONALITY,
+        header: ['nationality'],
+        limit: 1,
+        skipWords: ['0'],
+        valueRegex: '^[A-Za-z ]*$',
+        valueMatchThreshold: 0.2
+      },
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: CITY, header: ['city'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },

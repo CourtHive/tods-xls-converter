@@ -359,18 +359,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   }
 
   const idColumnRequired = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.required;
-  if (!matchUps.length && !idColumn && idColumnRequired) {
+  if (!idColumn && idColumnRequired) {
     return { error: MISSING_ID_COLUMN };
-  } else if (idColumnRequired && idColumn) {
-    const valueRegex = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.valueRegex;
-    if (valueRegex) {
-      const re = new RegExp(valueRegex);
-      const idValues = columnProfiles.find(({ column }) => column === idColumn)?.values;
-      const validValues = idValues.filter((value) => re.test(value));
-      if (!validValues.length) {
-        return { error: MISSING_ID_COLUMN };
-      }
-    }
   }
 
   // if stage is qualifying ignore all matchUps which don't have a winningSide or matchUpStatus

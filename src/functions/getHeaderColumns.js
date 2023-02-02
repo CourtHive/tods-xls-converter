@@ -4,6 +4,7 @@ import { findValueRefs, getCellValue, getCol, getRow } from './sheetAccess';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { tidyValue } from '../utilities/convenience';
 import { utilities } from 'tods-competition-factory';
+import { getLoggingActive } from '../global/state';
 
 // and adjusts when possible...
 export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
@@ -22,6 +23,8 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
 
   const invalidValueColumns = [];
 
+  const logging = getLoggingActive('headerColumns');
+
   if (profile.headerColumns) {
     // profile.headerColumns provides details for identifying which player attribute is found in which column
     profile.headerColumns.forEach((obj) => {
@@ -30,26 +33,33 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
       const getRef = (searchDetails) => {
         const options = { tidy: true };
 
+        const rowTolerance = (ref) => {
+          const row = getRow(ref);
+          const hRow = parseInt(headerRow);
+          const diff = Math.abs(row - hRow);
+          return diff <= 1;
+        };
         const vRefs = findValueRefs({ searchDetails, sheet, options, log: obj.log });
-        const cols = vRefs.filter((f) => getRow(f) === parseInt(headerRow)).map(getCol);
+        const cols = vRefs.filter(rowTolerance).map(getCol);
+
+        const log = logging?.attr === obj.attr;
+        if (log) console.log({ searchDetails, vRefs, cols, headerRow });
 
         cols.forEach((col) => {
           const re = obj.valueRegex && new RegExp(obj.valueRegex);
           const skipWords = obj.skipWords || profile.skipWords || [];
           let checked = 0;
-          const valueCheck =
-            !re ||
-            columnValues[col]?.every((value) => {
-              const check = re.test(value);
-              if (check) checked += 1;
-              const valid =
-                !value ||
-                skipWords.some(
-                  (word) => word?.toString().toLowerCase() === tidyValue(value.toString()).toLowerCase()
-                ) ||
-                check;
-              return valid;
-            });
+          const validityTest = columnValues[col]?.map((value) => {
+            const check = re?.test(value);
+            if (log && (!logging.column || logging.column === col)) console.log({ value, check });
+            if (check) checked += 1;
+            const valid =
+              !value ||
+              skipWords.some((word) => word?.toString().toLowerCase() === tidyValue(value.toString()).toLowerCase()) ||
+              check;
+            return valid;
+          });
+          const valueCheck = !re || validityTest.every((test) => test);
 
           const checkedPct = columnValues[col]?.length && checked / columnValues[col].length;
           const validityThreshold = obj.valueMatchThreshold && checkedPct > obj.valueMatchThreshold;
@@ -57,6 +67,8 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
           // it is valid if there ISs a threshold which is met or if there IS NOT a threshold and valueCheck passes
           // This is particularly relevant to PERSON_ID column resolution
           const isValid = validityThreshold || (!obj.valueMatchThreshold && valueCheck);
+
+          if (log) console.log({ checkedPct, validityThreshold, isValid, col });
 
           if (isValid) {
             extendColumnsMap({ columnsMap, ...obj, column: col });
