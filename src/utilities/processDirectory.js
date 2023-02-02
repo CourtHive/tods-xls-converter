@@ -312,7 +312,9 @@ export function processDirectory({
     }
 
     const auditLog = getAudit();
-    const singlePositions = auditLog.filter((item) => typeof item === 'object' && item.singlePositions);
+    const singlePositions = auditLog.filter(
+      (item) => typeof item === 'object' && item.singlePositions && item.fileName === fileName
+    );
     if (singlePositions.length) {
       filesWithSinglePositions.push({ fileName, singlePositions });
       // TODO: move file to subDirectory
@@ -373,6 +375,9 @@ export function processDirectory({
     totalErrors,
     errorsByType
   };
+  const auditLog = getAudit();
+  const additionalDraws = auditLog.map(({ additionalDraws }) => additionalDraws || 0).reduce((a, b) => a + b, 0);
+  if (additionalDraws) report.additionalDraws = additionalDraws;
   if (logging) console.log(report);
 
   if (writeMatchUps && writeDir) {
