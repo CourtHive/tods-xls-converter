@@ -82,7 +82,7 @@ it('can process tests', () => {
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const moveErrorFiles = false;
+  const moveErrorFiles = true;
   const writeMatchUps = true;
   let writeResultIndex;
 
@@ -92,8 +92,8 @@ it('can process tests', () => {
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 1;
-  const startIndex = 117;
+  const processLimit = 0;
+  const startIndex = 0;
 
   resetLogging();
   setLoggingActive(true);
