@@ -17,6 +17,7 @@ import { SUCCESS } from '../constants/resultConstants';
 import {
   INVALID_MATCHUPS_TOTAL,
   MISSING_ID_COLUMN,
+  NO_POSITION_ROWS_FOUND,
   NO_PROGRESSED_PARTICIPANTS,
   NO_RESULTS_FOUND,
   POSITON_PROGRESSION
@@ -52,6 +53,9 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     return { analysis };
   };
 
+  if (!positionColumn) {
+    return { error: NO_POSITION_ROWS_FOUND };
+  }
   if (noValues || !maxPositionWithValues || maxPositionWithValues < 2) return blankDraw();
 
   let positionLimit;
