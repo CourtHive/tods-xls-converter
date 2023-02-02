@@ -360,6 +360,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   const idColumnRequired = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.required;
   if (!idColumn && idColumnRequired) {
+    audit({ type: MISSING_ID_COLUMN, matchUpsCount: matchUps.length });
     return { error: MISSING_ID_COLUMN };
   }
 

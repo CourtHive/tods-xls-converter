@@ -8,7 +8,7 @@ import { writeTODS08CSV } from './writeTODS08CSV';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
 
-import { NO_RESULTS_FOUND } from '../constants/errorConditions';
+import { MISSING_ID_COLUMN, NO_RESULTS_FOUND } from '../constants/errorConditions';
 const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
 
 export function processDirectory({
@@ -376,7 +376,7 @@ export function processDirectory({
   const invalidScores = getInvalid();
   const report = {
     filesProcessed: fileNames.length,
-    sheetsProcessed,
+    sheetsSuccessfullyProcessed: sheetsProcessed,
     totalMatchUps,
     noWinningSide,
     insufficientDrawPositions,
@@ -392,6 +392,15 @@ export function processDirectory({
   const auditLog = getAudit();
   const additionalDraws = auditLog.map(({ additionalDraws }) => additionalDraws || 0).reduce((a, b) => a + b, 0);
   if (additionalDraws) report.additionalDraws = additionalDraws;
+  const sheetsMissingIdColumn = auditLog.filter(({ type }) => type === MISSING_ID_COLUMN);
+  const missingIdColumnMatchUps = sheetsMissingIdColumn
+    .map(({ matchUpsCount }) => matchUpsCount)
+    .reduce((a, b) => a + b, 0);
+  if (sheetsMissingIdColumn.length) {
+    report.sheetsMissingIdColumn = sheetsMissingIdColumn.length;
+    report.missingIdColumnMatchUps = missingIdColumnMatchUps;
+  }
+
   if (logging) console.log(report);
 
   if (writeMatchUps && writeDir) {
