@@ -1,5 +1,6 @@
 import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
 import { RESULT, ROUND } from '../constants/sheetElements';
+import { isNumeric } from '../utilities/identification';
 
 export function getRoundCharacter({ attributeMap, columnProfiles, columnProfile }) {
   const { scoreLikeCount, values, consecutiveNumbers } = columnProfile;
@@ -10,7 +11,7 @@ export function getRoundCharacter({ attributeMap, columnProfiles, columnProfile 
   if (columnProfiles && nameColumnAttributes.length) {
     const nameRound = nameColumnAttributes.some((attribute) => {
       const nameColumnProfile = columnProfiles.find((profile) => profile.attribute === attribute);
-      const consideredValues = values.filter(Boolean);
+      const consideredValues = values.filter((f) => f && !isNumeric(f));
 
       const isNameRound =
         consideredValues.length &&
