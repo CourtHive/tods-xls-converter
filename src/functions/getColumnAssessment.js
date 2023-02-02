@@ -1,12 +1,14 @@
 import { isSkipWord, onlyAlpha, onlyNumeric } from '../utilities/convenience';
 import { isNumeric, isScoreLike, isString } from '../utilities/identification';
-import { getCheckedValue } from './getCheckedValue';
 import { getColumnCharacter } from './getColumnCharacter';
+import { utilities } from 'tods-competition-factory';
+import { getCheckedValue } from './getCheckedValue';
 import { getRow } from './sheetAccess';
 
 export function getColumnAssessment({
   prospectColumnKeys,
   positionIndex,
+  filteredKeys,
   attributeMap,
   columnIndex,
   sheetType,
@@ -22,11 +24,19 @@ export function getColumnAssessment({
     (assessment, key) => {
       const { value, rawValue } = getCheckedValue({ profile, sheet, key });
       const row = getRow(key);
+      const consideredValue = (v) => v && !['0'].includes(v);
+      const rowKeys = filteredKeys.filter(
+        (rowKey) => getRow(rowKey) === row && consideredValue(getCheckedValue({ profile, sheet, key: rowKey }).value)
+      );
+
+      const ignoreSingleValueRow =
+        rowKeys.length === 1 && 'ABC'.split('').includes(column) && !utilities.isPowerOf2(prospectColumnKeys.length);
 
       const skip =
         profile.skipContains?.some((sv) => rawValue.toLowerCase().includes(sv)) ||
         isSkipWord(rawValue, profile) ||
-        hiddenRows.includes(row);
+        hiddenRows.includes(row) ||
+        ignoreSingleValueRow;
 
       if (!skip) {
         if (onlyAlpha(rawValue, profile)) {

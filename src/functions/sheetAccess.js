@@ -141,7 +141,9 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
       }
     };
 
-    if (objectSearchDetails.some(checkObjectDetail)) return true;
+    if (objectSearchDetails.some(checkObjectDetail)) {
+      return true;
+    }
 
     let matchFound;
 
@@ -157,7 +159,9 @@ export function findValueRefs({ searchDetails, sheet, options, mapValues }) {
       matchFound = textSearchDetails.some(equals);
     }
 
-    if (matchFound && mapValues) refMap[ref] = { value, transformedValue };
+    if (matchFound && mapValues) {
+      refMap[ref] = { value, transformedValue };
+    }
 
     return matchFound;
   });

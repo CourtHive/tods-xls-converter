@@ -12,9 +12,15 @@ import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
 import { PERSON_ID, STATE, CITY } from '../constants/attributeConstants';
-import { NO_RESULTS_FOUND } from '../constants/errorConditions';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
+import {
+  INVALID_MATCHUPS_TOTAL,
+  MISSING_ID_COLUMN,
+  NO_PROGRESSED_PARTICIPANTS,
+  NO_RESULTS_FOUND,
+  POSITON_PROGRESSION
+} from '../constants/errorConditions';
 
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 
@@ -66,6 +72,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   if (positionRefs?.length < maxPositionWithValues) return blankDraw();
   if (error) return { error, analysis };
 
+  let ignoredQualifyingMatchUpIds = [];
   const preRoundParticipants = [],
     ignoredMatchUps = [],
     participants = [],
@@ -123,6 +130,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     positionAssignments,
     seedAssignments,
     boundaryIndex,
+    idColumn,
     entries
   } = entryResult;
 
@@ -154,11 +162,16 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   // -------------------------------------------------------------------------------------------------
   // ACTION: profile all roundColumns to determine how many contain participants withConfidence
   // NOTE: for this check the FIRST ROUND PARTICIPANTS are always used
+  const noConfidenceValues = [];
   const columnsWithParticipants = Object.assign(
     {},
     ...roundColumns
       .map((targetColumn) => {
-        const { confidence: withConfidence, valuesCount } = getColumnParticipantConfidence({
+        const {
+          confidence: withConfidence,
+          targetColumnValues,
+          valuesCount
+        } = getColumnParticipantConfidence({
           confidenceThreshold,
           roundParticipants,
           targetColumn,
@@ -171,10 +184,24 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
         if (withConfidence.length && confidence > 0.3) {
           return { [targetColumn]: valuesCount };
+        } else {
+          const numericValues = targetColumnValues.filter((value) => {
+            const containsAlpha = /[A-Za-z]+/.test(value);
+            return !containsAlpha;
+          });
+          if (numericValues.length) noConfidenceValues.push(numericValues);
         }
       })
       .filter(Boolean)
   );
+
+  if (!participants.length || Object.values(columnsWithParticipants).length === 0) {
+    return blankDraw();
+  }
+
+  if (Object.values(columnsWithParticipants).length === 1) {
+    return noConfidenceValues.length ? { error: POSITON_PROGRESSION } : { warning: NO_PROGRESSED_PARTICIPANTS };
+  }
 
   const resultRounds = [];
   // -------------------------------------------------------------------------------------------------
@@ -259,6 +286,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const withDrawPositionsNotBye = matchUps.filter(
     ({ drawPositions, matchUpStatus }) => drawPositions?.length === 2 && matchUpStatus !== 'BYE'
   );
+
   if (withDrawPositionsNotBye.length && !resultsCount) {
     return { warning: NO_RESULTS_FOUND };
   }
@@ -307,7 +335,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
         keyColors: { message: 'cyan', attributes: 'brightyellow' },
         message
       });
-      return { error: 'INVALID matchUpsTotal', context: { matchUpsCount } };
+      return { error: INVALID_MATCHUPS_TOTAL, context: { matchUpsCount } };
     }
   }
 
@@ -326,11 +354,34 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     audit({ singlePositions: singlePositionMatchUps.length, fileName: analysis.fileName });
   }
 
+  const idColumnRequired = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.required;
+  if (!matchUps.length && !idColumn && idColumnRequired) {
+    return { error: MISSING_ID_COLUMN };
+  } else if (idColumnRequired && idColumn) {
+    const valueRegex = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.valueRegex;
+    if (valueRegex) {
+      const re = new RegExp(valueRegex);
+      const idValues = columnProfiles.find(({ column }) => column === idColumn)?.values;
+      const validValues = idValues.filter((value) => re.test(value));
+      if (!validValues.length) {
+        return { error: MISSING_ID_COLUMN };
+      }
+    }
+  }
+
+  // if stage is qualifying ignore all matchUps which don't have a winningSide or matchUpStatus
+  if (stage === QUALIFYING_STAGE) {
+    ignoredQualifyingMatchUpIds = matchUps
+      .filter(({ winningSide, matchUpStatus }) => !winningSide && !matchUpStatus)
+      .map(({ matchUpId }) => matchUpId);
+  }
+
   return {
+    matchUpsCount: matchUps.length,
+    ignoredQualifyingMatchUpIds,
     hasValues: true,
     ignoredMatchUps,
     seedAssignments,
-    matchUpsCount,
     participants,
     resultRounds, // currently unused
     structures,

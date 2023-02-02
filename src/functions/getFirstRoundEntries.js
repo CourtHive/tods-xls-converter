@@ -15,6 +15,7 @@ export function getFirstRoundEntries({
   boundaryIndex,
   columnProfile,
   positionRows,
+  idColumn,
   analysis,
   profile
 }) {
@@ -149,6 +150,7 @@ export function getFirstRoundEntries({
     seedAssignments,
     boundaryIndex,
     participants,
+    idColumn,
     entries,
     ...SUCCESS
   };

@@ -107,6 +107,7 @@ export function getEntries({
         boundaryIndex,
         columnProfile,
         positionRows,
+        idColumn,
         analysis,
         profile
       });
@@ -177,7 +178,7 @@ export function getEntries({
     entryDetailColumns?.length &&
     processDetailParticipants({ analysis, profile, detailParticipants, positionRows, entryDetailRows });
   if (detailResult?.error) return detailResult;
-  if (detailResult) return { boundaryIndex, ...detailResult };
+  if (detailResult) return { idColumn, boundaryIndex, ...detailResult };
 
   const participantCount = Object.values(rowParticipants).filter((participant) => !isBye(participant)).length;
   const drawSize = positionRefs.length;
@@ -256,7 +257,7 @@ export function getEntries({
     }
   }
 
-  return { ...SUCCESS, entries, boundaryIndex, participants, positionAssignments, seedAssignments };
+  return { ...SUCCESS, entries, boundaryIndex, participants, positionAssignments, seedAssignments, idColumn };
 }
 
 function getParticipant(details) {

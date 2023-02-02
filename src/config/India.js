@@ -56,6 +56,7 @@ export const config = {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
     exciseWords: [
+      { regex: '^page \\d.*' },
       { regex: '.*\\d{2,}[ap]m' },
       { regex: `^q\\d$` },
       { regex: `^a/f$` }, // needs to be removed from id column
@@ -160,6 +161,7 @@ export const config = {
           'Name of Player',
           'family name',
           'family',
+          'player',
           'player name',
           'first name',
           'nationality',
@@ -209,6 +211,7 @@ export const config = {
         header: [
           'name',
           'surname',
+          'player',
           'player name',
           'players name',
           'last name',
@@ -221,14 +224,14 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['0'],
-        valueRegex: '^([A-Za-z]+)$'
+        valueRegex: "^([A-Za-z'\\- ]+)$"
       },
       {
         attr: FIRST_NAME,
         skipWords: ['0'],
         header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
         limit: 1,
-        valueRegex: `^([A-Za-z]+)$`
+        valueRegex: `^([A-Za-z ]+)$`
       },
       {
         attr: PERSON_ID, // sometimes appears also in the Rank column
@@ -246,18 +249,19 @@ export const config = {
           'sl no',
           'itn no',
           'state',
+          'sate',
           'first name',
           'city',
           'nationality',
           'rank'
         ],
         limit: 1,
+        required: true,
         skipWords: ['reg', 'umpire', '0', 'a/f', 'new id', 'app'],
         valueRegex: '(\\d{5,})[ A-Za-z]*$',
-        extract: true,
-        log: true
+        extract: true
       },
-      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z]*$' },
+      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z ]*$' },
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: CITY, header: ['city'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },

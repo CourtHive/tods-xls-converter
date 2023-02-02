@@ -12,7 +12,7 @@ export function getCheckedValue({ profile, sheet, key }) {
     });
   }
 
-  const value = isNumeric(rawValue) ? parseFloat(rawValue) : rawValue;
+  const value = (isNumeric(rawValue) && parseFloat(rawValue)) || (rawValue !== 'undefined' ? rawValue : '');
 
   return { value, rawValue };
 }

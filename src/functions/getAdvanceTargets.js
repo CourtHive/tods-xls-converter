@@ -93,12 +93,16 @@ export function getAdvanceTargets(params) {
   // ACTION: check to see whether one of the advanced sides is a BYE
   // POSSIBILITY: checking for BYE after checking for sides with results to provide error checking
   if (byeAdvancement) {
+    let side;
     const advancedSide = consideredParticipants?.reduce((sideNumber, participant, index) => {
-      if (!participant.isByePosition) return index + 1;
+      if (!participant.isByePosition) {
+        side = { sideNumber, confidence: 1 };
+        return index + 1;
+      }
       return sideNumber;
     }, {});
 
-    return { columnsConsumed, advancedSide, confidence: 1 };
+    return { columnsConsumed, advancedSide, side, confidence: 1 };
   }
   // -------------------------------------------------------------------------------------------------
 

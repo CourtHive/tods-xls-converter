@@ -2,15 +2,18 @@ import { readdirSync, readFileSync, writeFileSync, existsSync, statSync, moveSyn
 import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
 import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { getAudit, getLoggingActive, getWorkbook } from '../global/state';
+import { getInvalid } from '../functions/scoreParser/scoreParser';
 import { processSheets } from '../functions/processSheets';
 import { writeTODS08CSV } from './writeTODS08CSV';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
 
+import { NO_RESULTS_FOUND } from '../constants/errorConditions';
 const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
 
 export function processDirectory({
   writeTournamentRecords = false,
+  moveErrorFiles = false,
   writeMatchUps = false,
   writeDir = './',
   readDir = './',
@@ -28,9 +31,14 @@ export function processDirectory({
   startIndex = 0,
   sheetNumbers,
   sheetTypes,
-  sheetLimit
+  sheetLimit,
+  errorType
 }) {
   const isXLS = (fileName) => fileName.toLowerCase().split('.').reverse()[0].startsWith('xls');
+  if (!existsSync(readDir)) {
+    console.log('no such directory', { readDir });
+    return;
+  }
   let fileNames = readdirSync(readDir).filter(isXLS).sort();
   const workbookCount = fileNames.length;
 
@@ -255,8 +263,8 @@ export function processDirectory({
 
     let firstError;
     if (result.errorLog) {
-      const errorKeys = Object.keys(result.errorLog);
-      firstError = errorKeys[0];
+      const errorKeys = Object.keys(result.errorLog) || [];
+      firstError = errorKeys.filter((error) => error !== errorType)[0];
       errorKeys.forEach((key) => {
         const sheetNames = result.errorLog[key];
         if (!errorLog[key]) {
@@ -267,10 +275,16 @@ export function processDirectory({
       });
     }
 
-    if (firstError) {
-      const fileDest = `${readDir}/${firstError}/${fileName}`;
-      const result = moveSync(filePath, fileDest);
-      if (result) console.log({ fileDest, result });
+    if (moveErrorFiles) {
+      if (firstError) {
+        const fileDest = `${readDir}/${firstError}/${fileName}`;
+        const result = moveSync(filePath, fileDest);
+        if (result) console.log({ fileDest, result });
+      } else if (!totalMatchUps) {
+        const fileDest = `${readDir}/${NO_RESULTS_FOUND}/${fileName}`;
+        const result = moveSync(filePath, fileDest);
+        if (result) console.log({ fileDest, result });
+      }
     }
 
     const tournamentRecord = tournamentEngine.getState().tournamentRecord;
@@ -307,32 +321,74 @@ export function processDirectory({
 
   const errorKeys = Object.keys(errorLog);
   const totalErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
-  const filteredMatchUps = allMatchUps.filter((matchUp) => {
-    if (!matchUp.winningSide || matchUp.drawPositions.length !== 2) return false;
+  const errorsByType = errorKeys.map((key) => ({ [key]: errorLog[key].length }));
 
+  const filteredMatchUps = [];
+
+  let insufficientDrawPositions = 0;
+  let systemGeneratedIDs = 0;
+  let noWinningSide = 0;
+  let byeMatchUps = 0;
+  let walkovers = 0;
+
+  allMatchUps.forEach((matchUp) => {
     const participantIds = matchUp.sides
       ?.flatMap(({ participant }) => participant?.individualParticipants || participant)
       .filter(Boolean)
       .map(({ participantId }) => participantId);
-    const allValidParticipantIds = participantIds.every((pid) => !pid?.startsWith('p-'));
+    const allValidParticipantIds = participantIds?.every((pid) => !pid?.startsWith('p-'));
 
-    return allValidParticipantIds && ![BYE, WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus);
+    const { matchUpStatus } = matchUp;
+
+    if (matchUpStatus === BYE) {
+      byeMatchUps += 1;
+    } else if (matchUpStatus === DOUBLE_WALKOVER) {
+      walkovers += 1;
+    } else if (!matchUp.winningSide) {
+      noWinningSide += 1;
+    } else if (matchUp.drawPositions.length !== 2) {
+      insufficientDrawPositions += 1;
+    } else if (!allValidParticipantIds) {
+      systemGeneratedIDs += 1;
+    } else if (matchUpStatus === WALKOVER) {
+      walkovers += 1;
+    } else {
+      filteredMatchUps.push(matchUp);
+    }
   });
 
+  const invalidScores = getInvalid();
   const report = {
     filesProcessed: fileNames.length,
     sheetsProcessed,
-    exportedMatchUps: filteredMatchUps.length,
     totalMatchUps,
+    noWinningSide,
+    insufficientDrawPositions,
+    systemGeneratedIDs,
+    byeMatchUps,
+    walkovers,
+    exportedMatchUps: filteredMatchUps.length,
+    invalidScores: invalidScores.length,
     errorTypes: errorKeys.length,
     totalErrors,
-    errorKeys
+    errorsByType
   };
   if (logging) console.log(report);
 
   if (writeMatchUps && writeDir) {
     writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
-    writeFileSync(`${writeDir}/report.json`, JSON.stringify(report, null, 2), 'UTF-8');
+
+    report.timeStamp = new Date().toISOString();
+    if (errorType) report.errorType = errorType;
+
+    const reportFile = `${writeDir}/report.json`;
+    const existingReport = existsSync(reportFile) && readFileSync(reportFile, 'UTF-8');
+    const existingJSON = existingReport && JSON.parse(existingReport);
+    const existingReportValue = existingJSON && (Array.isArray(existingJSON) ? existingJSON : [existingJSON]);
+    if (existingReportValue) existingReportValue.push(report);
+    const reportValue = existingReportValue || [report];
+    const reportString = JSON.stringify(reportValue, null, 2);
+    writeFileSync(`${writeDir}/report.json`, reportString, 'UTF-8');
   }
 
   pushGlobalLog({

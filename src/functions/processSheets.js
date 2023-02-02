@@ -71,6 +71,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
 
     const {
       participants: structureParticipants,
+      ignoredQualifyingMatchUpIds = [],
       structures = [],
       hasValues,
       analysis,
@@ -103,7 +104,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     const invalidResult = structureMatchUps.filter(({ result }) => invalidResults.includes(result));
     if (invalidResult.length && getLoggingActive('invalidResult')) console.log({ fileName, sheetName }, invalidResult);
 
-    const matchUpsCount = structureMatchUps?.length;
+    const matchUpsCount = (structureMatchUps?.length || 0) - (ignoredQualifyingMatchUpIds.length || 0);
     const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;
     const winningSideCount = structureMatchUps?.filter(({ winningSide }) => winningSide).length;
 
@@ -150,7 +151,6 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'brightyellow' } });
     } else {
       const method = `processSheet ${sheetNumber}`;
-      // const drawSize = positionAssignments.length;
       const leader = {
         method,
         keyColors: {
@@ -205,22 +205,21 @@ export function processSheet({
 
   const { hasValues, sheetDefinition } = identifySheet({ sheetName, sheet, profile });
 
-  const sheetType = sheetDefinition?.type;
+  const sheetType = sheetDefinition?.type || 'UNKNOWN';
   const skipped = sheetTypes.length && sheetType && !sheetTypes.includes(sheetType);
   if (!hasValues?.length || skipped) {
     return { analysis: { skipped }, sheetType, hasValues, ...SUCCESS };
   }
 
-  if (sheetDefinition) {
-    const method = `processSheet ${sheetNumber}`;
-    pushGlobalLog({
-      method,
-      keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
-      type: sheetType,
-      sheetName
-    });
-  } else {
-    return { error: MISSING_SHEET_DEFINITION };
+  const method = `processSheet ${sheetNumber}`;
+  pushGlobalLog({
+    method,
+    keyColors: { sheetName: 'brightcyan', type: 'brightmagenta' },
+    type: sheetType,
+    sheetName
+  });
+  if (!sheetDefinition) {
+    return { warning: MISSING_SHEET_DEFINITION };
   }
 
   const { cellRefs, info } = extractInfo({ profile, sheet, infoClass: sheetDefinition.infoClass });

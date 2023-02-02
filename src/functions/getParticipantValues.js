@@ -64,7 +64,8 @@ export function getParticipantValues(participant, roundNumber, roundPosition, lo
   if (doublesFirstNames.length > 1) {
     const combinations = [];
     joiners.forEach((joiner) => {
-      combinations.push(doublesFirstNames.join(joiner));
+      const validFirstNames = doublesFirstNames.filter(Boolean).length;
+      validFirstNames && combinations.push(doublesFirstNames.join(joiner));
       allNames[0].forEach((name, i) => {
         combinations.push([name, allNames[1][i]].join(joiner));
       });
