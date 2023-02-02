@@ -85,7 +85,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
     const message = `Unknown Header Columns`;
     pushGlobalLog({
       method: 'warning',
-      color: 'brightred',
+      color: 'yellow',
       keyColors: { message: 'brightyellow', columns: 'cyan' },
       message,
       headerRow,
