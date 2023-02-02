@@ -1,9 +1,19 @@
-import { isSkipWord, onlyAlpha, onlyNumeric, validConsecutiveNumbers } from '../utilities/convenience';
 import { isNumeric, isScoreLike, isString } from '../utilities/identification';
 import { getColumnCharacter } from './getColumnCharacter';
+import { pushGlobalLog } from '../utilities/globalLog';
 import { utilities } from 'tods-competition-factory';
 import { getCheckedValue } from './getCheckedValue';
+import { audit } from '../global/state';
 import { getRow } from './sheetAccess';
+import {
+  getValidConsecutiveRanges,
+  isSkipWord,
+  onlyAlpha,
+  onlyNumeric,
+  validConsecutiveNumbers
+} from '../utilities/convenience';
+
+import { POSITION } from '../constants/columnConstants';
 
 export function getColumnAssessment({
   prospectColumnKeys,
@@ -119,6 +129,39 @@ export function getColumnAssessment({
         });
       }
     }
+  }
+
+  if (column === 'A' && !assessment.consecutiveNumbers && utilities.isPowerOf2(assessment.lastConsecutiveValue)) {
+    const { consecutiveRanges } = getValidConsecutiveRanges(assessment.values);
+    const primaryRange = consecutiveRanges[0];
+    const secondaryRanges = consecutiveRanges.slice(1);
+    const lastPrimary = primaryRange[primaryRange.length - 1];
+    const lastIndex = lastPrimary.index;
+    assessment.values = assessment.values.slice(0, lastIndex + 1);
+    assessment.rows = assessment.rows.slice(0, lastIndex + 1);
+    assessment.lastNumericValue = lastPrimary.value;
+    assessment.secondaryRanges = secondaryRanges;
+    assessment.consecutiveNumbers = true;
+    assessment.containsAlpha = false;
+    assessment.attribute = POSITION;
+    assessment.scoreLikeCount = 0;
+    assessment.allNumeric = true;
+
+    const lastRow = Math.max(...assessment.rows);
+    for (const key of Object.keys(assessment.keyMap)) {
+      const row = getRow(key);
+      if (row > lastRow) delete assessment.keyMap[key];
+    }
+
+    audit({ additionalDraws: secondaryRanges.length });
+
+    const message = 'Mutiple Draws in Sheet';
+    pushGlobalLog({
+      method: 'notice',
+      color: 'brightred',
+      keyColors: { message: 'brightred', attributes: 'brightmagenta' },
+      message
+    });
   }
 
   // apply any character processing specified by profile
