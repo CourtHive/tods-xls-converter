@@ -95,6 +95,7 @@ export function getRound({
       const lengthGreaterThanOne = (value) => value.toString().length > 1;
       // remove all values which are duplicated across columns
       columnValues = columnValues.map((row) => [row[0], row[1].filter((v) => !row[0].includes(v))]);
+      // NOTE: not handling situations where doubles participants span two rows
       subsequentCount = columnValues.reduce(
         (count, row) => {
           count[0] += row[0].filter(lengthGreaterThanOne).length;
@@ -113,6 +114,7 @@ export function getRound({
     // is less than or equal to the expected number of values (roundParticipants * 2)
     // which is the number of participants and the number of results for each advancing participant
     const considerTwo =
+      !subsequentCount[0] ||
       subsequentCount.reduce((a, b) => a + b, 0) <= roundParticipants.flat().length + foldedFinalAddition;
 
     const log = getLoggingActive('columnValues');
