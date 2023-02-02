@@ -244,6 +244,7 @@ export const config = {
           { regex: 'itn$' },
           { text: 'aita', startsWith: true },
           { text: 'reg no', startsWith: true },
+          { text: 'state reg', startsWith: true },
           { text: 'reg', startsWith: true },
           { text: 'regn no', includes: true },
           { text: 'rect no', includes: true },
