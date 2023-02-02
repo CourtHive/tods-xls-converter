@@ -205,7 +205,12 @@ export const config = {
       { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,3}$` },
-      { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `^\\d{0,2}$` },
+      {
+        attr: SEED_VALUE,
+        header: [{ text: 'seed', options: { startsWith: true } }, 'seed', 'seed no', 'sd', 'sd no', 'sd. no'],
+        limit: 1,
+        valueRegex: `^\\d{0,2}$`
+      },
       {
         attr: LAST_NAME,
         header: [
