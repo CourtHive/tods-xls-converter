@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync, statSync, moveSyn
 import { matchUpStatusConstants, tournamentEngine, utilities } from 'tods-competition-factory';
 import { generateDrawId, generateEventId, generateTournamentId } from './hashing';
 import { getAudit, getLoggingActive, getWorkbook } from '../global/state';
+import { getInvalid } from '../functions/scoreParser/scoreParser';
 import { processSheets } from '../functions/processSheets';
 import { writeTODS08CSV } from './writeTODS08CSV';
 import { loadWorkbook } from '../global/loader';
@@ -356,6 +357,7 @@ export function processDirectory({
     }
   });
 
+  const invalidScores = getInvalid();
   const report = {
     filesProcessed: fileNames.length,
     sheetsProcessed,
@@ -366,6 +368,7 @@ export function processDirectory({
     byeMatchUps,
     walkovers,
     exportedMatchUps: filteredMatchUps.length,
+    invalidScores: invalidScores.length,
     errorTypes: errorKeys.length,
     totalErrors,
     errorsByType
@@ -374,7 +377,18 @@ export function processDirectory({
 
   if (writeMatchUps && writeDir) {
     writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
-    writeFileSync(`${writeDir}/report.json`, JSON.stringify(report, null, 2), 'UTF-8');
+
+    report.timeStamp = new Date().toISOString();
+    if (errorType) report.errorType = errorType;
+
+    const reportFile = `${writeDir}/report.json`;
+    const existingReport = existsSync(reportFile) && readFileSync(reportFile, 'UTF-8');
+    const existingJSON = existingReport && JSON.parse(existingReport);
+    const existingReportValue = existingJSON && (Array.isArray(existingJSON) ? existingJSON : [existingJSON]);
+    if (existingReportValue) existingReportValue.push(report);
+    const reportValue = existingReportValue || [report];
+    const reportString = JSON.stringify(reportValue, null, 2);
+    writeFileSync(`${writeDir}/report.json`, reportString, 'UTF-8');
   }
 
   pushGlobalLog({
