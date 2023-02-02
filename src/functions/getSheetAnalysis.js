@@ -119,7 +119,11 @@ export const getSheetAnalysis = ({
       profile.rows.every((row) => priorProfile.rows.includes(row));
     const subsequentColumn = columnKeys[keyIndex + 1];
     const subsequentProfile = columnProfiles.find(({ column }) => column === subsequentColumn);
-    if (repeatValues && subsequentProfile?.values?.length) {
+    if (
+      repeatValues &&
+      subsequentProfile?.values?.length &&
+      ![priorProfile.attribute, priorProfile.character].includes(POSITION)
+    ) {
       const message = `Repeated Round Values`;
       pushGlobalLog({
         method: 'notice',
@@ -128,6 +132,7 @@ export const getSheetAnalysis = ({
         message,
         column: profile.column
       });
+      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5', { repeatValues });
       profile.values = [];
     }
   });
