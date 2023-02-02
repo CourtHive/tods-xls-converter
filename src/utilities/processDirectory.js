@@ -107,8 +107,13 @@ export function processDirectory({
       return individualParticipants || [];
     });
     tournamentParticipants.push(...individualParticipants);
-    if (getLoggingActive('participants'))
-      console.log(tournamentParticipants, { participantsCount: tournamentParticipants.length });
+    const participantLog = getLoggingActive('participants');
+    if (participantLog) {
+      const consideredParticipants = participantLog.participantType
+        ? tournamentParticipants.filter(({ participantType }) => participantType === participantLog.participantType)
+        : tournamentParticipants;
+      console.log(consideredParticipants, { participantsCount: consideredParticipants.length });
+    }
 
     if (captureProcessedData) {
       Object.assign(allParticipantsMap, participantsMap);
