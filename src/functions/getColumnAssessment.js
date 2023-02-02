@@ -174,6 +174,7 @@ export function getColumnAssessment({
       // derive the rows for surrounding values and check for row with values between the two
       // if present, add the missing value and the missing row
       // when all missingNumbers have been addressed successfully, check for valid positionRows
+      let rowsAdded = 0;
       for (const missingNumber of missingNumbers) {
         const adjacent = [missingNumber - 1, missingNumber + 1].filter((number) => number);
         const relevantRows = adjacent.map((number) => {
@@ -188,11 +189,26 @@ export function getColumnAssessment({
               return row > relevantRows[0] && row < relevantRows[1] ? row : undefined;
             })
             .filter(Boolean);
-          console.log({ missingNumber, possibleRows });
+          const midRow = relevantRows[0] + (relevantRows[1] - relevantRows[0]) / 2;
+          const missingRow = possibleRows.includes(midRow) && midRow;
+          if (missingRow) {
+            assessment.values.push(missingNumber);
+            assessment.values.sort(utilities.numericSort);
+            assessment.rows.push(utilities.missingRow);
+            assessment.rows.sort();
+            assessment.keyMap[`A${missingRow}`] = missingNumber;
+            rowsAdded += 1;
+          }
         }
       }
 
-      console.log({ missingNumbers });
+      if (rowsAdded) {
+        if (validConsecutiveNumbers(assessment.values)) {
+          assessment.consecutiveNumbers = true;
+          assessment.scoreLikeCount = 0;
+          assessment.attribute = POSITION;
+        }
+      }
     }
   }
 
