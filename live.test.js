@@ -76,14 +76,14 @@ it('can process tests', () => {
   // const readDir = './examples/sheets/testing/';
   // const writeDir = `./examples/sheets/processed/testing`;
   const year = '2016';
-  const errorType = '';
+  const errorType = NO_POSITION_ROWS_FOUND;
   const subDir = errorType && `/${errorType}`;
   const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const moveErrorFiles = true;
-  const writeMatchUps = true;
+  const moveErrorFiles = false;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   // sheet processing config
@@ -92,14 +92,14 @@ it('can process tests', () => {
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 0;
-  const startIndex = 0;
+  const processLimit = 1;
+  const startIndex = 2;
 
   resetLogging();
-  setLoggingActive(false);
+  setLoggingActive(true);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
-    roundNumbers: [2],
+    roundNumbers: [1],
     roundPositions: [2],
     participantValues: true,
     potentialValues: true,
@@ -107,17 +107,17 @@ it('can process tests', () => {
     pRank: false
   });
   setLoggingActive(false, 'columnFrequency');
-  setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: 'D' });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
   setLoggingActive(false, 'invalidResult');
-  setLoggingActive(false, 'matchUps', { roundNumber: undefined, roundPosition: undefined });
+  setLoggingActive(false, 'matchUps', { roundNumber: 1, roundPosition: 8 });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only
-  setLoggingActive(false, 'participants');
+  setLoggingActive(false, 'participants', { participantType: 'PAIR' });
   setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
