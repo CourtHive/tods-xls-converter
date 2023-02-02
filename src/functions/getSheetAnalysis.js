@@ -132,7 +132,7 @@ export const getSheetAnalysis = ({
         message,
         column: profile.column
       });
-      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5', { repeatValues });
+      console.log({ repeatValues, fileName, sheetName });
       profile.values = [];
     }
   });
