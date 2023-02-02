@@ -55,6 +55,7 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
+    replaceWords: [{ value: '-bye-', replacement: 'bye' }],
     exciseWords: [
       { regex: '^page \\d.*' },
       { regex: '.*\\d{2,}[ap]m' },
@@ -224,14 +225,14 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['0'],
-        valueRegex: "^([A-Za-z'\\- ]+)$"
+        valueRegex: "^([A-Za-z\\.'\\- ]+)$"
       },
       {
         attr: FIRST_NAME,
         skipWords: ['0'],
         header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
         limit: 1,
-        valueRegex: `^([A-Za-z ]+)$`
+        valueRegex: `^([A-Za-z\\.'\\- ]+)$`
       },
       {
         attr: PERSON_ID, // sometimes appears also in the Rank column
