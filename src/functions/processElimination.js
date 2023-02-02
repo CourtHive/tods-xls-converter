@@ -20,7 +20,7 @@ import {
   NO_POSITION_ROWS_FOUND,
   NO_PROGRESSED_PARTICIPANTS,
   NO_RESULTS_FOUND,
-  POSITON_PROGRESSION
+  POSITION_PROGRESSION
 } from '../constants/errorConditions';
 
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
@@ -204,7 +204,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   }
 
   if (Object.values(columnsWithParticipants).length === 1) {
-    return noConfidenceValues.length ? { error: POSITON_PROGRESSION } : { warning: NO_PROGRESSED_PARTICIPANTS };
+    return noConfidenceValues.length ? { error: POSITION_PROGRESSION } : { warning: NO_PROGRESSED_PARTICIPANTS };
   }
 
   const resultRounds = [];
