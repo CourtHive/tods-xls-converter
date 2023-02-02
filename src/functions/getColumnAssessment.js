@@ -133,35 +133,67 @@ export function getColumnAssessment({
 
   if (column === 'A' && !assessment.consecutiveNumbers && utilities.isPowerOf2(assessment.lastConsecutiveValue)) {
     const { consecutiveRanges } = getValidConsecutiveRanges(assessment.values);
-    const primaryRange = consecutiveRanges[0];
-    const secondaryRanges = consecutiveRanges.slice(1);
-    const lastPrimary = primaryRange[primaryRange.length - 1];
-    const lastIndex = lastPrimary.index;
-    assessment.values = assessment.values.slice(0, lastIndex + 1);
-    assessment.rows = assessment.rows.slice(0, lastIndex + 1);
-    assessment.lastNumericValue = lastPrimary.value;
-    assessment.secondaryRanges = secondaryRanges;
-    assessment.consecutiveNumbers = true;
-    assessment.containsAlpha = false;
-    assessment.attribute = POSITION;
-    assessment.scoreLikeCount = 0;
-    assessment.allNumeric = true;
+    if (consecutiveRanges?.length) {
+      const primaryRange = consecutiveRanges[0];
+      const secondaryRanges = consecutiveRanges.slice(1);
+      const lastPrimary = primaryRange[primaryRange.length - 1];
+      const lastIndex = lastPrimary.index;
+      assessment.values = assessment.values.slice(0, lastIndex + 1);
+      assessment.rows = assessment.rows.slice(0, lastIndex + 1);
+      assessment.lastNumericValue = lastPrimary.value;
+      assessment.secondaryRanges = secondaryRanges;
+      assessment.consecutiveNumbers = true;
+      assessment.containsAlpha = false;
+      assessment.attribute = POSITION;
+      assessment.scoreLikeCount = 0;
+      assessment.allNumeric = true;
 
-    const lastRow = Math.max(...assessment.rows);
-    for (const key of Object.keys(assessment.keyMap)) {
-      const row = getRow(key);
-      if (row > lastRow) delete assessment.keyMap[key];
+      const lastRow = Math.max(...assessment.rows);
+      for (const key of Object.keys(assessment.keyMap)) {
+        const row = getRow(key);
+        if (row > lastRow) delete assessment.keyMap[key];
+      }
+
+      audit({ additionalDraws: secondaryRanges.length });
+
+      const message = 'Mutiple Draws in Sheet';
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightred',
+        keyColors: { message: 'brightred', attributes: 'brightmagenta' },
+        message
+      });
+    } else {
+      const getMissingNumbers = (a, l = true) =>
+        Array.from(Array(Math.max(...a)).keys())
+          .map((n, i) => (a.indexOf(i) < 0 && (!l || i > Math.min(...a)) ? i : null))
+          .filter((f) => f);
+      const missingNumbers = getMissingNumbers(assessment.values);
+      // for each missing value check that surrounding value are present in assessment.values
+      // e.g. for 17 check for the presence of 16, 18
+      // derive the rows for surrounding values and check for row with values between the two
+      // if present, add the missing value and the missing row
+      // when all missingNumbers have been addressed successfully, check for valid positionRows
+      for (const missingNumber of missingNumbers) {
+        const adjacent = [missingNumber - 1, missingNumber + 1].filter((number) => number);
+        const relevantRows = adjacent.map((number) => {
+          const index = assessment.values.indexOf(number);
+          const row = assessment.rows[index];
+          return row;
+        });
+        if (relevantRows.length === 2) {
+          const possibleRows = filteredKeys
+            .map((key) => {
+              const row = getRow(key);
+              return row > relevantRows[0] && row < relevantRows[1] ? row : undefined;
+            })
+            .filter(Boolean);
+          console.log({ missingNumber, possibleRows });
+        }
+      }
+
+      console.log({ missingNumbers });
     }
-
-    audit({ additionalDraws: secondaryRanges.length });
-
-    const message = 'Mutiple Draws in Sheet';
-    pushGlobalLog({
-      method: 'notice',
-      color: 'brightred',
-      keyColors: { message: 'brightred', attributes: 'brightmagenta' },
-      message
-    });
   }
 
   // apply any character processing specified by profile
