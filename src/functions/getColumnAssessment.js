@@ -168,14 +168,17 @@ export function getColumnAssessment({
         Array.from(Array(Math.max(...a)).keys())
           .map((n, i) => (a.indexOf(i) < 0 && (!l || i > Math.min(...a)) ? i : null))
           .filter((f) => f);
-      const missingNumbers = assessment.values?.length > 2 && getMissingNumbers(assessment.values);
+      const missingNumbers =
+        assessment.values?.length > 2 &&
+        assessment.values.every((value) => isNumeric(value)) &&
+        getMissingNumbers(assessment.values);
       // for each missing value check that surrounding value are present in assessment.values
       // e.g. for 17 check for the presence of 16, 18
       // derive the rows for surrounding values and check for row with values between the two
       // if present, add the missing value and the missing row
       // when all missingNumbers have been addressed successfully, check for valid positionRows
       let rowsAdded = 0;
-      for (const missingNumber of missingNumbers) {
+      for (const missingNumber of missingNumbers || []) {
         const adjacent = [missingNumber - 1, missingNumber + 1].filter((number) => number);
         const relevantRows = adjacent.map((number) => {
           const index = assessment.values.indexOf(number);
