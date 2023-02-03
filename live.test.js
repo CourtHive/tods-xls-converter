@@ -91,16 +91,20 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  // const readDir = './examples/sheets/testing/';
-  // const writeDir = `./examples/sheets/processed/testing`;
-  const year = '2022';
   const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
-  const readDir = `./examples/sheets/India/years/${year}${subDir}`;
-  const writeDir = `./examples/sheets/processed/IND/${year}`;
+  const year = '2022';
+  if (subDir || year) {
+    // do nothing!
+  }
+
+  const readDir = './examples/sheets/testing/';
+  const writeDir = `./examples/sheets/processed/testing`;
+  // const readDir = `./examples/sheets/India/years/${year}${subDir}`;
+  // const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
-  const writeParticipants = true;
-  const moveErrorFiles = true;
+  const writeParticipants = false;
+  const moveErrorFiles = false;
   const writeMatchUps = true;
   let writeResultIndex;
 
@@ -114,11 +118,11 @@ it('can process tests', () => {
   const startIndex = 0;
 
   resetLogging();
-  setLoggingActive(false);
+  setLoggingActive(true);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
     roundNumbers: [2],
-    roundPositions: [1],
+    roundPositions: [4],
     participantValues: true,
     potentialValues: true,
     sideWeights: true,
@@ -132,7 +136,6 @@ it('can process tests', () => {
   setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
-  setLoggingActive(false, 'invalidResult');
   setLoggingActive(false, 'matchUps', { roundNumber: 2, roundPosition: 1 });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only

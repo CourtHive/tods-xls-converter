@@ -72,6 +72,7 @@ export function processDirectory({
   const resultValues = [];
   const allMatchUps = [];
   const fileResults = {};
+  const warningLog = {};
   const errorLog = {};
 
   let tournamentRecords = [];
@@ -289,6 +290,18 @@ export function processDirectory({
       });
     }
 
+    if (result.warningLog) {
+      const warningKeys = Object.keys(result.warningLog) || [];
+      warningKeys.forEach((key) => {
+        const sheetNames = result.warningLog[key];
+        if (!warningLog[key]) {
+          warningLog[key] = [{ fileName, sheetNames }];
+        } else {
+          warningLog[key].push({ fileName, sheetNames });
+        }
+      });
+    }
+
     if (moveErrorFiles) {
       if (firstError) {
         const fileDest = `${readDir}/${firstError}/${fileName}`;
@@ -336,8 +349,24 @@ export function processDirectory({
   }
 
   const errorKeys = Object.keys(errorLog);
-  const totalErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
+  const totalErrors = errorKeys
+    .map((key) => {
+      const sheetsCount = errorLog[key].flatMap(({ sheetNames }) => sheetNames?.length || 0).reduce((a, b) => a + b, 0);
+      return sheetsCount || errorLog[key].length;
+    })
+    .reduce((a, b) => a + b, 0);
   const errorsByType = Object.assign({}, ...errorKeys.map((key) => ({ [key]: errorLog[key].length })));
+
+  const warningKeys = Object.keys(warningLog);
+  const totalWarnings = warningKeys
+    .map((key) => {
+      const sheetsCount = warningLog[key]
+        .flatMap(({ sheetNames }) => sheetNames?.length || 0)
+        .reduce((a, b) => a + b, 0);
+      return sheetsCount || warningLog[key].length;
+    })
+    .reduce((a, b) => a + b, 0);
+  const warningsByType = Object.assign({}, ...warningKeys.map((key) => ({ [key]: warningLog[key].length })));
 
   const filteredMatchUps = [];
 
@@ -373,21 +402,26 @@ export function processDirectory({
     }
   });
 
+  const notExportedCount = byeMatchUps + walkovers + noWinningSide + insufficientDrawPositions + systemGeneratedIDs;
+
   const invalidScores = getInvalid();
   const report = {
     filesProcessed: fileNames.length,
     sheetsSuccessfullyProcessed: sheetsProcessed,
-    totalMatchUps,
-    noWinningSide,
     insufficientDrawPositions,
     systemGeneratedIDs,
+    noWinningSide,
     byeMatchUps,
     walkovers,
     exportedMatchUps: filteredMatchUps.length,
+    notExportedCount,
+    totalMatchUps,
     invalidScores: invalidScores.length,
     errorTypes: errorKeys.length,
+    filesWithErrorsByType: errorsByType,
     totalErrors,
-    errorsByType
+    filesWithWarningsByType: warningsByType,
+    totalWarnings
   };
   const auditLog = getAudit();
   const additionalDraws = auditLog.map(({ additionalDraws }) => additionalDraws || 0).reduce((a, b) => a + b, 0);

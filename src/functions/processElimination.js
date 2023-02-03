@@ -20,7 +20,8 @@ import {
   NO_POSITION_ROWS_FOUND,
   NO_PROGRESSED_PARTICIPANTS,
   NO_RESULTS_FOUND,
-  POSITION_PROGRESSION
+  POSITION_PROGRESSION,
+  SINGLE_POSITION_MATCHUPS
 } from '../constants/errorConditions';
 
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
@@ -41,13 +42,14 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   const noValues = maxValueRow === -Infinity;
 
-  const blankDraw = () => {
+  const blankDraw = (context) => {
     const message = 'Blank Draw';
     pushGlobalLog({
       method: 'notice',
       color: 'cyan',
-      keyColors: { message: 'brightblue', attributes: 'cyan' },
-      message
+      keyColors: { message: 'brightblue', attributes: 'cyan', context: 'blue' },
+      message,
+      context
     });
     return { analysis };
   };
@@ -56,7 +58,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   if (!positionColumn && valuesPerRow >= 2) {
     return { error: NO_POSITION_ROWS_FOUND };
   }
-  if (noValues || !maxPositionWithValues || maxPositionWithValues < 2) return blankDraw();
+  if (noValues || !maxPositionWithValues || maxPositionWithValues < 2) return blankDraw('no values');
 
   let positionLimit;
   if (maxPositionWithValues < maxPosition) {
@@ -73,7 +75,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     avoidRows
   });
 
-  if (positionRefs?.length < maxPositionWithValues) return blankDraw();
+  if (positionRefs?.length < maxPositionWithValues) return blankDraw('no positions');
   if (error) return { error, analysis };
 
   let ignoredQualifyingMatchUpIds = [];
@@ -200,14 +202,15 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   );
 
   if (!participants.length || Object.values(columnsWithParticipants).length === 0) {
-    return blankDraw();
+    return blankDraw('no participants');
   }
 
-  if (Object.values(columnsWithParticipants).length === 1) {
-    if (noConfidenceValues.length) {
-      return { error: POSITION_PROGRESSION };
+  if (!Object.values(columnsWithParticipants).length) {
+    console.log({ columnsWithParticipants });
+    if (participants.length && noConfidenceValues.length) {
+      return { error: POSITION_PROGRESSION, participants };
     }
-    return { warning: NO_PROGRESSED_PARTICIPANTS };
+    return { warning: NO_PROGRESSED_PARTICIPANTS, participants };
   }
 
   const resultRounds = [];
@@ -348,8 +351,10 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   const singlePositionMatchUps = matchUps.filter(({ drawPositions }) => drawPositions.length === 1);
 
+  let warning;
   if (singlePositionMatchUps.length) {
     const message = `Single position matchUps`;
+    warning = SINGLE_POSITION_MATCHUPS;
     pushGlobalLog({
       method: '!!!!!!',
       color: 'brightyellow',
@@ -387,6 +392,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     matchUps,
     analysis,
     entries,
+    warning,
     links
   };
 }
