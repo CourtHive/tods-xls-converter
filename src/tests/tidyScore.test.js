@@ -17,11 +17,19 @@ const scores = [
   // { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
   /*
+  { score: '6367(3)60', expectation: { score: '6-3 6-7(3) 6-0' } }, // fix match known patterns!
   { score: '6 3 6 7(3) 6 0', expectation: { score: '6-3 6-7(3) 6-0' } }, // fix match known patterns!
-  { score: '3 6 7 5 7 6(2)', expectation: { score: '3-6 7-5 7-6(2)' } }, // fix match known patterns!
+
   { score: '67(6)64106', expectation: { score: '6-7(6) 6-4 [10-6]' } },
+  { score: '3 6 7 5 7 6(2)', expectation: { score: '3-6 7-5 7-6(2)' } }, // fix match known patterns!
+  { score: '7 6(5)5 7 6 3', expectation: { score: '' } }, // fix match known patterns!
+  { score: '5 7 6 2 10-2', expectation: { score: '' } }, // fix match known patterns!
+  { score: '2 6 6 4 10-5', expectation: { score: '' } }, // fix match known patterns!
+
   { score: '[7/6 (4) 6/3 )', expectation: { score: '7-6(4) 6-3' } },
   { score: '(6-1), (7-6(1))', expectation: { score: '6-1 7-6(1)' } },
+  */
+  /*
   "6-4, (6)" => '6-4 7-6(6)'
   "(6-1), (7-6(1))"
   "(6-4), (7-6(8))"
@@ -41,13 +49,6 @@ const scores = [
   "67(6)64106"
   "45(5)42108"
   "67(7)61101"
-
-  "7 6(5)5 7 6 3"
-  "4 6 7 5 7 6(5)"
-  "5 7 6 2 10-2"
-  "2 6 6 4 10-5"
-  "3 6 7 5 7 6(2)"
-  "6 3 6 7(3) 6 0"
 
   "6, 2 7, 6(4)"
   "6, 4 7, 6(6)"
