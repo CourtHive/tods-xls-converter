@@ -252,7 +252,7 @@ export function getRound({
       if (matchUp.winningSide && result && ![WALKOVER, DOUBLE_WALKOVER].includes(matchUp.matchUpStatus)) {
         const sideString = matchUp.winningSide === 2 ? 'scoreStringSide2' : 'scoreStringSide1';
         matchUp.score = { [sideString]: result };
-        const { score: scoreString, matchUpStatus, isValid } = tidyScore({ score: result, profile });
+        const { score: scoreString, matchUpStatus, isValid } = tidyScore({ score: result, profile, ...analysis });
         if (matchUpStatus) matchUp.matchUpStatus = matchUpStatus;
         const outcome =
           isValid &&

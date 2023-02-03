@@ -47,7 +47,7 @@ export function resetTransformations() {
   transformations = {};
 }
 
-export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, identifier }) {
+export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, identifier, fileName, sheetName }) {
   let modifications = [],
     matchUpStatus,
     applied = [],
@@ -99,7 +99,7 @@ export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, ide
 
     isValid = isValidPattern(score);
     if (!isValid) {
-      invalid.push(incomingScore);
+      invalid.push({ score, fileName, sheetName });
       score = '';
     }
   }
