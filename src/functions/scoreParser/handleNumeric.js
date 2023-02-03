@@ -51,16 +51,14 @@ export function handleNumeric({ score, applied }) {
         const winner = s1 > s2 ? 1 : 2;
         return diff > 1 && winner;
       });
+      const allWinners = chunkCharacter.reduce((a, b) => a && b);
 
-      if (
-        chunkCharacter[0] !== undefined &&
-        chunkCharacter[1] !== undefined &&
-        chunkCharacter[0] !== chunkCharacter[1]
-      ) {
+      if (chunkCharacter[0] && chunkCharacter[1] && chunkCharacter[0] !== chunkCharacter[1]) {
         score = [chunks.slice(0, 2).join(' '), chunks.slice(2).join('-')].join(' ');
         applied.push('numeric3rdSetTiebreakPattern');
-      } else {
+      } else if (allWinners) {
         score = chunks.join(' ');
+        applied.push('chunkSplit');
       }
     } else {
       score = parseSuper(score) || score;
