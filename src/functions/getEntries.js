@@ -255,8 +255,8 @@ export function getEntries({
 
     if (roundValues.length) {
       const error = NO_PARTICIPANTS_FOUND;
-      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
-      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } }, 'error');
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'brightred' } });
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'brightred' } }, 'error');
 
       return { error };
     }

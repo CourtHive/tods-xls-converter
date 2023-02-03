@@ -223,7 +223,7 @@ export const getSheetAnalysis = ({
     const maxColumnFrequency = Math.max(...Object.values(columnFrequency));
     const maxFrequencyColumn = Object.keys(columnFrequency).find((key) => columnFrequency[key] === maxColumnFrequency);
     let nominatedNameColumn = potentialNameColumnProfiless.find(({ column }) => column === maxFrequencyColumn);
-    if (!nominatedNameColumn && roundColumns[0].column === maxFrequencyColumn) {
+    if (!nominatedNameColumn && roundColumns?.[0]?.column === maxFrequencyColumn) {
       nominatedNameColumn = roundColumns[0];
       const message = `First Round Column is Name Column`;
       pushGlobalLog({

@@ -80,11 +80,11 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       structures = [],
       hasValues,
       analysis,
+      warnings,
       context,
       entries,
       error
     } = result;
-    let warning = result.warning;
     const drawSize = structures?.[structures.length - 1]?.positionAssignments.length;
 
     const invalidParticipant = structureParticipants?.find(({ participantName }) =>
@@ -107,9 +107,9 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     );
 
     const scoresCount = structureMatchUps.map(({ score }) => score?.scoreStringSide1).filter(Boolean).length;
-    if (!scoresCount) {
+    if (structureMatchUps.length && !scoresCount) {
       const message = NO_RESULTS_FOUND;
-      if (!warning) warning = message;
+      warnings.push(message);
       pushGlobalLog({
         keyColors: { message: 'yellow', attributes: 'brightyellow' },
         method: 'warning',
@@ -152,21 +152,24 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       }
     }
 
+    if (warnings?.length) {
+      warnings.forEach((warning) => {
+        if (logging) console.log({ warning });
+        pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'brightyellow' } });
+        if (!warningLog[warning]) {
+          warningLog[warning] = [sheetName];
+        } else {
+          warningLog[warning].push(sheetName);
+        }
+      });
+    }
     if (error) {
       if (logging) console.log({ error });
-      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' }, ...context });
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'brightred' }, ...context });
       if (!errorLog[error]) {
         errorLog[error] = [sheetName];
       } else {
         errorLog[error].push(sheetName);
-      }
-    } else if (warning) {
-      if (logging) console.log({ warning });
-      pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'brightyellow' } });
-      if (!warningLog[warning]) {
-        warningLog[warning] = [sheetName];
-      } else {
-        warningLog[warning].push(sheetName);
       }
     } else {
       const method = `processSheet ${sheetNumber}`;
@@ -238,7 +241,7 @@ export function processSheet({
     sheetName
   });
   if (!sheetDefinition) {
-    return { warning: MISSING_SHEET_DEFINITION };
+    return { warnings: [MISSING_SHEET_DEFINITION] };
   }
 
   const { cellRefs, info } = extractInfo({ profile, sheet, infoClass: sheetDefinition.infoClass });

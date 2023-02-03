@@ -96,6 +96,20 @@ export const config = {
     rowDefinitions: [
       {
         type: HEADER,
+        id: 'summary',
+        elements: ['name', 'point', 'lost in round', { text: 'total point', options: { startsWith: true } }],
+        rows: 1,
+        minimumElements: 3
+      },
+      {
+        type: HEADER,
+        id: 'result',
+        elements: ['lost in round'],
+        rows: 1,
+        minimumElements: 1
+      },
+      {
+        type: HEADER,
         id: 'signup',
         elements: [
           'practice courts',
@@ -284,6 +298,14 @@ export const config = {
       { attr: ROUND, header: [...roundNames] }
     ],
     sheetDefinitions: [
+      {
+        type: INFORMATION,
+        rowIds: ['result']
+      },
+      {
+        type: INFORMATION,
+        rowIds: ['summary']
+      },
       {
         type: PARTICIPANTS,
         rowIds: ['playersList']
