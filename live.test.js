@@ -12,7 +12,8 @@ import {
   MISSING_ID_COLUMN,
   MISSING_NAMES,
   MISSING_SHEET_DEFINITION,
-  NO_POSITION_ROWS_FOUND
+  NO_POSITION_ROWS_FOUND,
+  POSITION_PROGRESSION
 } from './src/constants/errorConditions';
 
 const NONE = '';
@@ -29,6 +30,7 @@ export function foo() {
     INVALID_MATCHUPS_TOTAL &&
     MISSING_ID_COLUMN &&
     ENTRIES_NOT_ON_POSITION_ROWS &&
+    POSITION_PROGRESSION &&
     NONE;
 
   const boo = RANKING;
@@ -41,7 +43,7 @@ it.skip('can process passing', () => {
   const writeDir = './examples/sheets/processed/CR';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = true;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   const sheetTypes = []; // e.g. ROUND_ROBIN
@@ -91,15 +93,15 @@ it.skip('can process passing', () => {
 it('can process tests', () => {
   // const readDir = './examples/sheets/testing/';
   // const writeDir = `./examples/sheets/processed/testing`;
-  const year = '2016';
+  const year = '2022';
   const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
   const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
-  const writeParticipants = false;
-  const moveErrorFiles = false;
-  const writeMatchUps = false;
+  const writeParticipants = true;
+  const moveErrorFiles = true;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   // sheet processing config
@@ -108,11 +110,11 @@ it('can process tests', () => {
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 10;
+  const processLimit = 0;
   const startIndex = 0;
 
   resetLogging();
-  setLoggingActive(true);
+  setLoggingActive(false);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
     roundNumbers: [2],
@@ -165,7 +167,7 @@ it('can process tests', () => {
 
     const invalidScores = getInvalid();
     if (invalidScores?.length) {
-      const csvInvalid = utilities.JSON2CSV(invalidScores.map((score) => ({ score })));
+      const csvInvalid = utilities.JSON2CSV(invalidScores);
       writeFileSync(`${writeDir}/invalidScores.csv`, csvInvalid, 'UTF-8');
       dumpInvalid();
     }
