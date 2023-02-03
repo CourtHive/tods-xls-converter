@@ -16,21 +16,20 @@ const scores = [
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
-  { score: '634 61', expectation: { score: '' } },
-  /*
-  { score: '6367(3)60', expectation: { score: '6-3 6-7(3) 6-0' } }, // fix match known patterns!
-  { score: '6 3 6 7(3) 6 0', expectation: { score: '6-3 6-7(3) 6-0' } }, // fix match known patterns!
-
+  { score: '5 7 6 2 10-2', expectation: { score: '5-7 6-2 [10-2]' } },
+  { score: '2 6 6 4 10-5', expectation: { score: '2-6 6-4 [10-5]' } },
+  { score: '3 6 7 5 7 6(2)', expectation: { score: '3-6 7-5 7-6(2)' } },
   { score: '67(6)64106', expectation: { score: '6-7(6) 6-4 [10-6]' } },
-  { score: '3 6 7 5 7 6(2)', expectation: { score: '3-6 7-5 7-6(2)' } }, // fix match known patterns!
-  { score: '7 6(5)5 7 6 3', expectation: { score: '' } }, // fix match known patterns!
-  { score: '5 7 6 2 10-2', expectation: { score: '' } }, // fix match known patterns!
-  { score: '2 6 6 4 10-5', expectation: { score: '' } }, // fix match known patterns!
+  { score: '6 3 6 7(3) 6 0', expectation: { score: '6-3 6-7(3) 6-0' } },
+  { score: '6367(3)60', expectation: { score: '6-3 6-7(3) 6-0' } },
 
+  /*
+  { score: '7 6(5)5 7 6 3', expectation: { score: '7-6(5) 5-7 6-3' } }, // fix handleNumeric
+  */
+
+  /*
   { score: '[7/6 (4) 6/3 )', expectation: { score: '7-6(4) 6-3' } },
   { score: '(6-1), (7-6(1))', expectation: { score: '6-1 7-6(1)' } },
-  */
-  /*
   "6-4, (6)" => '6-4 7-6(6)'
   "(6-1), (7-6(1))"
   "(6-4), (7-6(8))"
@@ -298,6 +297,7 @@ const scores = [
   { score: ' 6-, 6-4', expectation: { score: '6-0 6-4' } },
 
   // discard invalid
+  { score: '634 61', expectation: { score: '' } },
   { score: '44751', expectation: { score: '' } },
 
   // trim invalid
