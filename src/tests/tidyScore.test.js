@@ -16,16 +16,14 @@ const scores = [
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
+  // { score: '7 6(5)5 7 6 3', expectation: { score: '7-6(5) 5-7 6-3' } }, // fix handleNumeric
+
   { score: '5 7 6 2 10-2', expectation: { score: '5-7 6-2 [10-2]' } },
   { score: '2 6 6 4 10-5', expectation: { score: '2-6 6-4 [10-5]' } },
   { score: '3 6 7 5 7 6(2)', expectation: { score: '3-6 7-5 7-6(2)' } },
   { score: '67(6)64106', expectation: { score: '6-7(6) 6-4 [10-6]' } },
   { score: '6 3 6 7(3) 6 0', expectation: { score: '6-3 6-7(3) 6-0' } },
   { score: '6367(3)60', expectation: { score: '6-3 6-7(3) 6-0' } },
-
-  /*
-  { score: '7 6(5)5 7 6 3', expectation: { score: '7-6(5) 5-7 6-3' } }, // fix handleNumeric
-  */
 
   /*
   { score: '[7/6 (4) 6/3 )', expectation: { score: '7-6(4) 6-3' } },

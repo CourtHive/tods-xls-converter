@@ -16,20 +16,19 @@ export function handleNumeric({ score, applied, matchUpStatus }) {
   if (typeof score === 'number' || allNumeric) {
     score = score.toString().toLowerCase();
     if (allNumeric) score = onlyNumbers.join('');
-    const numbers = score.split('').map((n) => parseInt(n));
+    // const numbers = score.split('').map((n) => parseInt(n));
+    const numbers = allNumeric ? onlyNumbers.map((n) => parseInt(n)) : score.split('').map((n) => parseInt(n));
 
     const { sets } = setBuilder({ score });
     if (sets) {
       //console.log({ sets });
     }
 
-    /*
-    if (numbers.length === 7) {
-      console.log(getDiff(numbers.slice(0, 2)));
-      console.log(getDiff(numbers.slice(2, 4)));
-      console.log(getDiff(numbers.slice(4, 6)));
+    if (numbers.length === 6) {
+      // console.log(getDiff(numbers.slice(0, 2)));
+      // console.log(getDiff(numbers.slice(2, 4)));
+      // console.log(getDiff(numbers.slice(4, 6)));
     }
-    */
 
     if (score.length === 3 && getDiff(numbers.slice(0, 2)) === 1) {
       const [s1, s2, tb] = numbers;
@@ -71,8 +70,8 @@ export function handleNumeric({ score, applied, matchUpStatus }) {
         applied.push('numericTiebreakPattern6');
       } else if (
         getDiff(numbers.slice(0, 2)) === 1 &&
-        getDiff(numbers.slice(2, 4)) > 1 &&
-        getDiff(numbers.slice(4, 6)) > 1
+        getDiff(numbers.slice(3, 5)) > 1 &&
+        getDiff(numbers.slice(5, 7)) > 1
       ) {
         const [s1, s2, tb, s3, s4, s5, s6] = numbers;
         score = `${s1}-${s2}(${tb}) ${s3}-${s4} ${s5}-${s6}`;
