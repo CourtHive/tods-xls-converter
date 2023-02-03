@@ -1,6 +1,7 @@
 import { utilities } from 'tods-competition-factory';
 import { instanceCount } from '../../utilities/convenience';
 import { isNumeric } from '../../utilities/identification';
+import { setBuilder } from './setBuilder';
 import { parseSuper } from './transforms';
 
 export function handleNumeric({ score, applied, matchUpStatus }) {
@@ -16,6 +17,11 @@ export function handleNumeric({ score, applied, matchUpStatus }) {
     score = score.toString().toLowerCase();
     if (allNumeric) score = onlyNumbers.join('');
     const numbers = score.split('').map((n) => parseInt(n));
+
+    const { sets } = setBuilder({ score });
+    if (sets) {
+      //console.log({ sets });
+    }
 
     /*
     if (numbers.length === 7) {
