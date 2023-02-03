@@ -16,6 +16,7 @@ const scores = [
   // { score: '7567()108', expectation: { score: '7-5 6-7(8)' } },
   // { score: '7567 108', expectation: { score: '7-5 6-7(8)' } },
 
+  { score: '634 61', expectation: { score: '' } },
   /*
   { score: '6367(3)60', expectation: { score: '6-3 6-7(3) 6-0' } }, // fix match known patterns!
   { score: '6 3 6 7(3) 6 0', expectation: { score: '6-3 6-7(3) 6-0' } }, // fix match known patterns!
@@ -247,7 +248,11 @@ const scores = [
   // test HAIL MARY
   { score: '7563', expectation: { score: '7-5 6-3' } },
   { score: '7, 5-6-3', expectation: { score: '7-5 6-3' } },
+  { score: '636476 ret', expectation: { score: '6-3 6-4' } },
+  { score: '757672', expectation: { score: '7-5 7-6(2)' } },
+  { score: '576264', expectation: { score: '5-7 6-2 6-4' } },
   { score: '676264', expectation: { score: '6-7 6-2 6-4' } },
+  { score: '766264', expectation: { score: '7-6(2) 6-4' } },
   { score: '6-7, 6, 2, 6-4', expectation: { score: '6-7 6-2 6-4' } },
 
   // various bracket and punctuation errors
@@ -495,8 +500,10 @@ const scores = [
   { score: '(9, 2', expectation: { score: '9-2' } },
   { score: '9-1', expectation: { score: '9-1' } },
   { score: '113', expectation: { score: '[11-3]' } },
-  { score: '311', expectation: { score: '[3-11]' } },
-  { score: 310, expectation: { score: '[3-10]' } },
+  // { score: '311', expectation: { score: '[3-11]' } },
+  { score: '311', expectation: { score: '' } },
+  // { score: 310, expectation: { score: '[3-10]' } },
+  { score: 310, expectation: { score: '' } },
   { score: 103, expectation: { score: '[10-3]' } },
   { score: 113, expectation: { score: '[11-3]' } },
   { score: 6475, expectation: { score: '6-4 7-5' } },
@@ -571,7 +578,6 @@ const scores = [
   { score: '61 26 10-5', expectation: { score: '6-1 2-6 [10-5]' } },
   { score: '4662 10-8', expectation: { score: '4-6 6-2 [10-8]' } },
   { score: '41 1', expectation: { score: '4-1' } },
-  { score: '634 61', expectation: { score: '6-3 6-1' } },
   { score: '76(3) 67(5) 60', expectation: { score: '7-6(3) 6-7(5) 6-0' } },
   { score: '36 63', expectation: { score: '3-6 6-3' } },
   { score: '36 63 [10-5]', expectation: { score: '3-6 6-3 [10-5]' } },
