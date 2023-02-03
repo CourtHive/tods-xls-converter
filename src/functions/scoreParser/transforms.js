@@ -3,7 +3,6 @@ import { handleBracketSpacing } from './handleBracketSpacing';
 import { joinFloatingTiebreak } from './joinFloatingTiebreak';
 import { isNumeric } from '../../utilities/identification';
 import { matchKnownPatterns } from './matchKnownPatterns';
-import { utilities } from 'tods-competition-factory';
 import { properTiebreak } from './properTiebreak';
 import { containedSets } from './containedSets';
 import { sensibleSets } from './sensibleSets';
