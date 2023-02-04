@@ -182,6 +182,8 @@ export const config = {
           'sl no',
           'sr no',
           'member id',
+          'Per-Quarters',
+          'a.i.t.a reg',
           'aita reg no',
           'reg no.',
           'reg.no',
@@ -214,7 +216,11 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 's.r.no', 'sl.no', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
+      {
+        attr: POSITION,
+        header: ['#', 'Sl #', 's.r.no', 'sl.no', 'sr. no', 'sr no', 'srno', 'sno', 'sino', 's.n'],
+        valueRegex: '^\\d{1,3}$'
+      },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,4}$` },
       {
@@ -233,10 +239,12 @@ export const config = {
           'name of the player',
           'name of player',
           'player name',
+          'playeers name',
           'players name',
           'last name',
           'family name',
           'family',
+          'full name',
           'familiy name',
           'famlily name',
           { text: 'family name', includes: true },
@@ -250,7 +258,7 @@ export const config = {
       {
         attr: FIRST_NAME,
         skipWords: ['0'],
-        header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
+        header: ['first name', 'fiirst name', 'fisrt name', 'given name', { text: 'first name', startsWith: true }],
         limit: 1,
         valueRegex: `^([A-Za-z\\.'\\-\\/ ]+)$`
       },
@@ -259,6 +267,7 @@ export const config = {
         header: [
           { regex: 'itn$' },
           { text: 'aita', startsWith: true },
+          { text: 'a.i.t.a', startsWith: true },
           { text: 'reg no', startsWith: true },
           { text: 'state reg', startsWith: true },
           { text: 'reg', startsWith: true },
@@ -299,7 +308,13 @@ export const config = {
       { attr: DISTRICT, header: ['dist'], limit: 1 },
       {
         attr: ROUND,
-        header: ['quaters', { text: 'querter', options: { startsWith: true } }, ...roundNames]
+        header: [
+          'first rd',
+          { text: ' rd', options: { endsWith: true } },
+          { text: 'quarter', options: { startsWith: true } },
+          { text: 'querter', options: { startsWith: true } },
+          ...roundNames
+        ]
       }
     ],
     sheetDefinitions: [
