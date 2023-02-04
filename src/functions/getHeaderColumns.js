@@ -69,8 +69,6 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
           // This is particularly relevant to PERSON_ID column resolution
           const isValid = validityThreshold || (!obj.valueMatchThreshold && valueCheck);
 
-          if (log) console.log({ checkedPct, validityThreshold, isValid, col });
-
           if (isValid) {
             extendColumnsMap({ columnsMap, ...obj, column: col, duplicates });
           } else {
