@@ -33,7 +33,8 @@ export const roundNames = [
   'q f',
   's f',
   'sf',
-  's/f'
+  's/f',
+  'qty final'
   /*
   'qtr final',
   'qtr',
