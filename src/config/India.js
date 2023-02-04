@@ -125,9 +125,7 @@ export const config = {
         elements: [
           `player's list`,
           { text: 'acceptance list', options: { startsWith: true } },
-          { text: 'no show', options: { includes: true } },
-          { text: 'late withdrawal', options: { startsWith: true } },
-          { text: 'no show', options: { endsWith: true } }
+          { text: 'late withdrawal', options: { startsWith: true } }
         ],
         rows: 1,
         minimumElements: 1
@@ -216,7 +214,7 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
+      { attr: POSITION, header: ['#', 's.r.no', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,4}$` },
       {
@@ -243,14 +241,14 @@ export const config = {
         ],
         limit: 1,
         skipWords: ['0'],
-        valueRegex: "^([A-Za-z\\.'\\- ]+)$"
+        valueRegex: "^([A-Za-z\\.'\\-\\/ ]+)$"
       },
       {
         attr: FIRST_NAME,
         skipWords: ['0'],
         header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
         limit: 1,
-        valueRegex: `^([A-Za-z\\.'\\- ]+)$`
+        valueRegex: `^([A-Za-z\\.'\\-\\/ ]+)$`
       },
       {
         attr: PERSON_ID, // sometimes appears also in the Rank column
@@ -349,10 +347,6 @@ export const config = {
       {
         type: INFORMATION,
         rowIds: ['tournamentInfo', 'tournamentOrganization']
-      },
-      {
-        type: PARTICIPANTS,
-        rowIds: ['doublesParticipants']
       }
     ],
     tournamentInfo: [],
@@ -519,7 +513,7 @@ export const config = {
         columnProfile.character = PERSON_ID;
         return columnProfile.character;
       }
-      if (!columnProfile.attribute && allNumeric && greatestLength === 1) {
+      if (!columnProfile.attribute && allNumeric && greatestLength === 1 && columnProfile.column !== 'A') {
         columnProfile.values = [];
         columnProfile.character = 'ignore';
         columnProfile.keyMap = {};
