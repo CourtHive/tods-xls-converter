@@ -28,6 +28,8 @@ export const roundNames = [
   'preqtrs',
   */
   'pqtr',
+  'pq',
+  'pqf',
   'qf',
   'q/f',
   'q f',
