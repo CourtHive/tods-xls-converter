@@ -33,7 +33,7 @@ export function foo() {
     POSITION_PROGRESSION &&
     NONE;
 
-  const boo = RANKING;
+  const boo = RANKING && PERSON_ID;
 
   return boo && hoo;
 }
@@ -105,12 +105,12 @@ it('can process tests', () => {
   const writeTournamentRecords = false;
   const writeParticipants = false;
   const moveErrorFiles = false;
-  const writeMatchUps = true;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   // sheet processing config
   const sheetTypes = [];
-  const sheetNumbers = [];
+  const sheetNumbers = [2];
   const sheetLimit = 0;
 
   // workbook processing config
@@ -128,9 +128,9 @@ it('can process tests', () => {
     sideWeights: true,
     pRank: false
   });
-  setLoggingActive(false, 'headerColumns', { attr: PERSON_ID, column: 'H' });
+  setLoggingActive(true, 'headerColumns', { attr: 'round', column: 'A' });
   setLoggingActive(false, 'columnFrequency');
-  setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: 'A' });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(true, 'errorLog');
