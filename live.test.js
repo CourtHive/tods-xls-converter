@@ -91,9 +91,9 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const errorType = POSITION_PROGRESSION;
+  const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
-  const year = '2019';
+  const year = '2017';
   if (subDir || year) {
     // do nothing!
   }
@@ -103,9 +103,9 @@ it('can process tests', () => {
   const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
-  const writeParticipants = false;
-  const moveErrorFiles = false;
-  const writeMatchUps = false;
+  const writeParticipants = true;
+  const moveErrorFiles = true;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   // sheet processing config
@@ -118,7 +118,7 @@ it('can process tests', () => {
   const startIndex = 0;
 
   resetLogging();
-  setLoggingActive(true);
+  setLoggingActive(false);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
     roundNumbers: [1],
