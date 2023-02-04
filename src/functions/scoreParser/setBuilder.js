@@ -2,9 +2,20 @@ import { isNumeric } from '../../utilities/identification';
 
 export function setBuilder({ score }) {
   const chars = score.split('');
-  let set = [undefined, undefined];
-  // let tiebreak = '';
   const sets = [];
+  let set;
+
+  const resetSet = () => (set = [undefined, undefined, undefined]);
+  const completeSet = () => {
+    let joinedSet = `${set[0]}-${set[1]}`;
+    if (set[2]) joinedSet += ` (${set[2]})`;
+    resetSet();
+    set.push(set);
+    return joinedSet;
+  };
+  resetSet();
+
+  // let tiebreak = '';
 
   const getDiff = () => {
     return set[0] !== undefined && set[1] !== undefined && Math.abs(parseInt(set[0]) - parseInt(set[1]));
@@ -13,8 +24,9 @@ export function setBuilder({ score }) {
   while (chars.length) {
     const char = chars.shift();
     const digit = isNumeric(char) && parseInt(char);
+    const twoSetScores = set[0] !== undefined && set[1] !== undefined;
 
-    if (digit) {
+    if (isNumeric(digit)) {
       if (set[0] === undefined) {
         set[0] = digit;
         continue;
@@ -22,15 +34,24 @@ export function setBuilder({ score }) {
       if (set[1] === undefined) {
         set[1] = digit;
         if (getDiff() > 1) {
-          sets.push(set.join('-'));
+          sets.push(completeSet());
+          set = [undefined, undefined];
           continue;
         }
+      }
+      if (twoSetScores && chars.length === 1 && isNumeric(chars[0])) {
+        const lastChar = chars.pop();
+        set[0] = set[0].toString() + set[1].toString();
+        set[1] = lastChar;
+        sets.push(completeSet());
+        set = [undefined, undefined];
+      }
+      if (twoSetScores && getDiff() === 1) {
+        // is a set tiebreak
       }
       // const diff = getDiff();
     }
   }
 
-  console.log({ sets });
-
-  return { score };
+  return { sets };
 }

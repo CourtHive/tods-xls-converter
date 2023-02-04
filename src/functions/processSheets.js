@@ -8,13 +8,17 @@ import { getSheetAnalysis } from './getSheetAnalysis';
 import { identifySheet } from './identifySheet';
 import { extractInfo } from './extractInfo';
 
-import { MISSING_SHEET_DEFINITION, MISSING_WORKBOOK, UNKNOWN_WORKBOOK_TYPE } from '../constants/errorConditions';
+import {
+  MISSING_SHEET_DEFINITION,
+  MISSING_WORKBOOK,
+  NO_RESULTS_FOUND,
+  UNKNOWN_WORKBOOK_TYPE
+} from '../constants/errorConditions';
 import { KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
 import { SUCCESS } from '../constants/resultConstants';
 
 const { PAIR } = participantConstants;
 
-const invalidResults = ['76(3) 67(5) 60'];
 const invalidNames = [];
 
 export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTypes, processStructures } = {}) {
@@ -47,6 +51,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
   const sheetAnalysis = {};
   const participants = {};
   const resultValues = [];
+  const warningLog = {};
   const errorLog = {};
 
   let totalMatchUps = 0;
@@ -75,9 +80,9 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       structures = [],
       hasValues,
       analysis,
+      warnings,
       context,
       entries,
-      warning,
       error
     } = result;
     const drawSize = structures?.[structures.length - 1]?.positionAssignments.length;
@@ -101,8 +106,17 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
     );
 
-    const invalidResult = structureMatchUps.filter(({ result }) => invalidResults.includes(result));
-    if (invalidResult.length && getLoggingActive('invalidResult')) console.log({ fileName, sheetName }, invalidResult);
+    const scoresCount = structureMatchUps.map(({ score }) => score?.scoreStringSide1).filter(Boolean).length;
+    if (structureMatchUps.length && !scoresCount) {
+      const message = NO_RESULTS_FOUND;
+      warnings.push(message);
+      pushGlobalLog({
+        keyColors: { message: 'yellow', attributes: 'brightyellow' },
+        method: 'warning',
+        color: 'yellow',
+        message
+      });
+    }
 
     const matchUpsCount = (structureMatchUps?.length || 0) - (ignoredQualifyingMatchUpIds.length || 0);
     const twoDrawPositionsCount = structureMatchUps?.filter(({ drawPositions }) => drawPositions?.length === 2).length;
@@ -138,17 +152,25 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
       }
     }
 
+    if (warnings?.length) {
+      warnings.forEach((warning) => {
+        if (logging) console.log({ warning });
+        pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'brightyellow' } });
+        if (!warningLog[warning]) {
+          warningLog[warning] = [sheetName];
+        } else {
+          warningLog[warning].push(sheetName);
+        }
+      });
+    }
     if (error) {
       if (logging) console.log({ error });
-      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' }, ...context });
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'brightred' }, ...context });
       if (!errorLog[error]) {
         errorLog[error] = [sheetName];
       } else {
         errorLog[error].push(sheetName);
       }
-    } else if (warning) {
-      if (logging) console.log({ warning });
-      pushGlobalLog({ method: 'warning', color: 'yellow', warning, keyColors: { warning: 'brightyellow' } });
     } else {
       const method = `processSheet ${sheetNumber}`;
       const leader = {
@@ -189,7 +211,7 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     totalMatchUps
   });
 
-  return { sheetAnalysis, errorLog, resultValues, skippedResults, participants, totalMatchUps, ...SUCCESS };
+  return { sheetAnalysis, errorLog, warningLog, resultValues, skippedResults, participants, totalMatchUps, ...SUCCESS };
 }
 
 export function processSheet({
@@ -219,7 +241,7 @@ export function processSheet({
     sheetName
   });
   if (!sheetDefinition) {
-    return { warning: MISSING_SHEET_DEFINITION };
+    return { warnings: [MISSING_SHEET_DEFINITION] };
   }
 
   const { cellRefs, info } = extractInfo({ profile, sheet, infoClass: sheetDefinition.infoClass });

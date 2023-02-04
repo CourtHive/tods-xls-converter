@@ -84,49 +84,10 @@ export function getColumnCharacter({
 
   const { character: roundCharacter } = getRoundCharacter({ attributeMap, columnProfiles, columnProfile });
 
-  if (!columnProfile.character) columnProfile.character = roundCharacter;
-
-  /*
-  let hasNameValue;
-  const attributes = Object.values(attributeMap);
-  const nameColumnAttributes = attributes.filter((attribute) => [FIRST_NAME, LAST_NAME].includes(attribute));
-  if (columnProfiles && nameColumnAttributes.length) {
-    const nameRound = nameColumnAttributes.some((attribute) => {
-      const nameColumnProfile = columnProfiles.find((profile) => profile.attribute === attribute);
-      const consideredValues = values.filter(Boolean);
-
-      const isNameRound =
-        consideredValues.length &&
-        consideredValues.every((value) => {
-          const isNameValue = nameColumnProfile?.values?.includes(value);
-          if (isNameValue) hasNameValue = true;
-          return isNameValue;
-        });
-      return isNameRound;
-    });
-    if (nameRound) {
-      const character = ROUND;
-      columnProfile.character = character;
-      return { character };
-    }
+  if (!columnProfile.character && roundCharacter) {
+    columnProfile.character = roundCharacter;
+    return { character: columnProfile.character };
   }
-
-  const { character, attribute } = columnProfile;
-
-  const singleDigitValues = values.some((value) => value.toString().length === 1);
-
-  // need to add additional safeguards here so that result column is not before any of the idAttribute columns
-  if (
-    scoreLikeCount &&
-    !hasNameValue &&
-    !character &&
-    (!attribute || attribute === ROUND) &&
-    !consecutiveNumbers &&
-    !singleDigitValues
-  ) {
-    columnProfile.character = RESULT;
-  }
-  */
 
   return { character: columnProfile.character };
 }

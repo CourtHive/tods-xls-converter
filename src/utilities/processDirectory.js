@@ -8,7 +8,7 @@ import { writeTODS08CSV } from './writeTODS08CSV';
 import { loadWorkbook } from '../global/loader';
 import { pushGlobalLog } from './globalLog';
 
-import { NO_RESULTS_FOUND } from '../constants/errorConditions';
+import { MISSING_ID_COLUMN, NO_RESULTS_FOUND } from '../constants/errorConditions';
 const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
 
 export function processDirectory({
@@ -72,6 +72,7 @@ export function processDirectory({
   const resultValues = [];
   const allMatchUps = [];
   const fileResults = {};
+  const warningLog = {};
   const errorLog = {};
 
   let tournamentRecords = [];
@@ -107,8 +108,23 @@ export function processDirectory({
       return individualParticipants || [];
     });
     tournamentParticipants.push(...individualParticipants);
-    if (getLoggingActive('participants'))
-      console.log(tournamentParticipants, { participantsCount: tournamentParticipants.length });
+    const participantLog = getLoggingActive('participants');
+    if (participantLog) {
+      const consideredParticipants = participantLog.participantType
+        ? tournamentParticipants.filter(({ participantType }) => participantType === participantLog.participantType)
+        : tournamentParticipants;
+
+      if (participantLog.idsOnly) {
+        const individualParticipantIds = consideredParticipants.flatMap((p) =>
+          p.participantType === 'INDIVIDUAL'
+            ? p.person?.personId
+            : p.individualParticipants.map((i) => i?.person?.personId)
+        );
+        console.log({ individualParticipantIds });
+      } else {
+        console.log(consideredParticipants, { participantsCount: consideredParticipants.length });
+      }
+    }
 
     if (captureProcessedData) {
       Object.assign(allParticipantsMap, participantsMap);
@@ -227,8 +243,7 @@ export function processDirectory({
 
       pushGlobalLog({
         method: 'notice',
-        color: 'brightred',
-        keyColors: { message: 'yellow', attributes: 'brightred', context: 'brightgreen', filedate: 'brightgreen' },
+        keyColors: { message: 'yellow', attributes: 'cyan', context: 'brightgreen', filedate: 'brightgreen' },
         message,
         contextDate,
         filedate
@@ -275,6 +290,18 @@ export function processDirectory({
       });
     }
 
+    if (result.warningLog) {
+      const warningKeys = Object.keys(result.warningLog) || [];
+      warningKeys.forEach((key) => {
+        const sheetNames = result.warningLog[key];
+        if (!warningLog[key]) {
+          warningLog[key] = [{ fileName, sheetNames }];
+        } else {
+          warningLog[key].push({ fileName, sheetNames });
+        }
+      });
+    }
+
     if (moveErrorFiles) {
       if (firstError) {
         const fileDest = `${readDir}/${firstError}/${fileName}`;
@@ -312,7 +339,9 @@ export function processDirectory({
     }
 
     const auditLog = getAudit();
-    const singlePositions = auditLog.filter((item) => typeof item === 'object' && item.singlePositions);
+    const singlePositions = auditLog.filter(
+      (item) => typeof item === 'object' && item.singlePositions && item.fileName === fileName
+    );
     if (singlePositions.length) {
       filesWithSinglePositions.push({ fileName, singlePositions });
       // TODO: move file to subDirectory
@@ -320,8 +349,24 @@ export function processDirectory({
   }
 
   const errorKeys = Object.keys(errorLog);
-  const totalErrors = errorKeys.map((key) => errorLog[key].length).reduce((a, b) => a + b, 0);
-  const errorsByType = errorKeys.map((key) => ({ [key]: errorLog[key].length }));
+  const totalErrors = errorKeys
+    .map((key) => {
+      const sheetsCount = errorLog[key].flatMap(({ sheetNames }) => sheetNames?.length || 0).reduce((a, b) => a + b, 0);
+      return sheetsCount || errorLog[key].length;
+    })
+    .reduce((a, b) => a + b, 0);
+  const errorsByType = Object.assign({}, ...errorKeys.map((key) => ({ [key]: errorLog[key].length })));
+
+  const warningKeys = Object.keys(warningLog);
+  const totalWarnings = warningKeys
+    .map((key) => {
+      const sheetsCount = warningLog[key]
+        .flatMap(({ sheetNames }) => sheetNames?.length || 0)
+        .reduce((a, b) => a + b, 0);
+      return sheetsCount || warningLog[key].length;
+    })
+    .reduce((a, b) => a + b, 0);
+  const warningsByType = Object.assign({}, ...warningKeys.map((key) => ({ [key]: warningLog[key].length })));
 
   const filteredMatchUps = [];
 
@@ -357,22 +402,43 @@ export function processDirectory({
     }
   });
 
+  const notExportedCount = byeMatchUps + walkovers + noWinningSide + insufficientDrawPositions + systemGeneratedIDs;
+
   const invalidScores = getInvalid();
   const report = {
     filesProcessed: fileNames.length,
-    sheetsProcessed,
-    totalMatchUps,
-    noWinningSide,
+    sheetsSuccessfullyProcessed: sheetsProcessed,
     insufficientDrawPositions,
     systemGeneratedIDs,
+    noWinningSide,
     byeMatchUps,
     walkovers,
     exportedMatchUps: filteredMatchUps.length,
+    notExportedCount,
+    totalMatchUps,
     invalidScores: invalidScores.length,
     errorTypes: errorKeys.length,
+    filesWithErrorsByType: errorsByType,
     totalErrors,
-    errorsByType
+    filesWithWarningsByType: warningsByType,
+    totalWarnings
   };
+  const auditLog = getAudit();
+  const additionalDraws = auditLog.map(({ additionalDraws }) => additionalDraws || 0).reduce((a, b) => a + b, 0);
+  if (additionalDraws) report.additionalDraws = additionalDraws;
+  const sheetsMissingIdColumn = auditLog.filter(({ type }) => type === MISSING_ID_COLUMN);
+  const missingIdColumnMatchUps = sheetsMissingIdColumn
+    .map(({ matchUpsCount }) => matchUpsCount)
+    .reduce((a, b) => a + b, 0);
+  if (sheetsMissingIdColumn.length) {
+    report.sheetsMissingIdColumn = sheetsMissingIdColumn.length;
+    report.missingIdColumnMatchUps = missingIdColumnMatchUps;
+  }
+  const unknownColumns = utilities.unique(auditLog.flatMap(({ unmappedColumns }) => unmappedColumns).filter(Boolean));
+  if (unknownColumns) {
+    report.unknownColumns = unknownColumns;
+  }
+
   if (logging) console.log(report);
 
   if (writeMatchUps && writeDir) {

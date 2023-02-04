@@ -15,9 +15,9 @@ export function getParticipantValues(participant, roundNumber, roundPosition, lo
     pValues.push(standardFamilyName);
     pValues.push(standardGivenName);
     // handle multiple last names where only one of the last names is progressed
-    const splitFamilyName = standardFamilyName.split(' ');
+    const splitFamilyName = (standardFamilyName || standardGivenName).split(' ');
 
-    if (standardGivenName?.split(' ').length > 1) {
+    if (standardFamilyName && standardGivenName?.split(' ').length > 1) {
       pValues.push(standardGivenName.split(' ')[0]);
     }
 

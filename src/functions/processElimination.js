@@ -1,5 +1,5 @@
+import { drawDefinitionConstants, drawEngine, utilities } from 'tods-competition-factory';
 import { getColumnParticipantConfidence } from './getColumnParticipantConfidence';
-import { drawDefinitionConstants, utilities } from 'tods-competition-factory';
 import { getMaxPositionWithValues } from './getMaxPositionWithValues';
 import { getRoundParticipants } from './getRoundParticipants';
 import { getPositionColumn } from '../utilities/convenience';
@@ -12,14 +12,17 @@ import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
 import { PERSON_ID, STATE, CITY } from '../constants/attributeConstants';
+import { RESULT, ROUND } from '../constants/sheetElements';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import {
   INVALID_MATCHUPS_TOTAL,
   MISSING_ID_COLUMN,
+  NO_POSITION_ROWS_FOUND,
   NO_PROGRESSED_PARTICIPANTS,
   NO_RESULTS_FOUND,
-  POSITON_PROGRESSION
+  POSITION_PROGRESSION,
+  SINGLE_POSITION_MATCHUPS
 } from '../constants/errorConditions';
 
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
@@ -31,28 +34,33 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   const preRoundColumn = columnProfiles.find(({ character }) => character === PRE_ROUND)?.column;
   const { positionColumn } = getPositionColumn(analysis.columnProfiles);
 
-  const { positionProfile, maxPositionWithValues, maxPosition, maxPositionRow, maxValueRow } = getMaxPositionWithValues(
-    {
+  const { positionProfile, maxPositionWithValues, maxPosition, maxPositionRow, maxValueRow, valuesPerRow } =
+    getMaxPositionWithValues({
       columnProfiles,
       positionColumn,
       analysis
-    }
-  );
+    });
 
   const noValues = maxValueRow === -Infinity;
 
-  const blankDraw = () => {
+  const blankDraw = (context) => {
     const message = 'Blank Draw';
     pushGlobalLog({
       method: 'notice',
       color: 'cyan',
-      keyColors: { message: 'brightblue', attributes: 'cyan' },
-      message
+      keyColors: { message: 'brightblue', attributes: 'cyan', context: 'blue' },
+      message,
+      context
     });
     return { analysis };
   };
 
-  if (noValues || maxPositionWithValues < 2) return blankDraw();
+  // there would need to be a large number of values per row to conclude no positions if no positionColumn is found
+  if (!positionColumn && valuesPerRow >= 2) {
+    return { error: NO_POSITION_ROWS_FOUND };
+  }
+
+  if (noValues || !maxPositionWithValues || maxPositionWithValues < 2) return blankDraw('no values');
 
   let positionLimit;
   if (maxPositionWithValues < maxPosition) {
@@ -69,7 +77,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     avoidRows
   });
 
-  if (positionRefs?.length < maxPositionWithValues) return blankDraw();
+  if (positionRefs?.length < maxPositionWithValues) return blankDraw('no positions');
   if (error) return { error, analysis };
 
   let ignoredQualifyingMatchUpIds = [];
@@ -77,8 +85,9 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     ignoredMatchUps = [],
     participants = [],
     structures = [],
-    matchUps = [],
     links = [];
+
+  let matchUps = [];
 
   // *. If preRound, use `preRoundParticipantRows` and positionRefs[0] to see whether there are progressed participants and set first roundNumber column
   //    - preRound is roundNumber: 0, first round of structure is roundNumber: 1
@@ -145,9 +154,10 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   let roundParticipants = getRoundParticipants({ positionAssignments, participants: firstRoundParticipants }) || [];
 
+  let boundaryIndexColumn;
   // if positionAssignments have been determined then push an additional round for processing
   if (positionAssignments.length) {
-    const boundaryIndexColumn = analysis.columnProfiles[boundaryIndex].column;
+    boundaryIndexColumn = analysis.columnProfiles[boundaryIndex].column;
     if (!roundColumns.includes(boundaryIndexColumn)) {
       roundColumns.unshift(boundaryIndexColumn);
     }
@@ -196,11 +206,27 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   );
 
   if (!participants.length || Object.values(columnsWithParticipants).length === 0) {
-    return blankDraw();
+    return blankDraw('no participants');
   }
 
-  if (Object.values(columnsWithParticipants).length === 1) {
-    return noConfidenceValues.length ? { error: POSITON_PROGRESSION } : { warning: NO_PROGRESSED_PARTICIPANTS };
+  const roundAttributeColumns = columnProfiles
+    .filter(
+      ({ column, attribute, character }) =>
+        (columns.indexOf(column) > boundaryIndex && attribute === ROUND) ||
+        character === RESULT ||
+        (!attribute && character === ROUND)
+    )
+    .map(({ column }) => column);
+
+  const playerAdvancement = roundAttributeColumns.filter((column) =>
+    Object.keys(columnsWithParticipants).includes(column)
+  ).length;
+
+  if (!playerAdvancement) {
+    if (participants.length && noConfidenceValues.length) {
+      return { error: POSITION_PROGRESSION, participants };
+    }
+    return { warnings: [NO_PROGRESSED_PARTICIPANTS], participants };
   }
 
   const resultRounds = [];
@@ -259,8 +285,8 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     const message = `results in multiple columns{ roundNumbers: ${consumedColumns.join(',')} }`;
     pushGlobalLog({
       method: 'notice',
-      color: 'brightyellow',
-      keyColors: { message: 'cyan', attributes: 'brightyellow' },
+      color: 'yellow',
+      keyColors: { message: 'cyan', attributes: 'yellow' },
       message
     });
   }
@@ -288,7 +314,51 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   );
 
   if (withDrawPositionsNotBye.length && !resultsCount) {
-    return { warning: NO_RESULTS_FOUND };
+    return { warnings: [NO_RESULTS_FOUND] };
+  }
+
+  Object.assign(analysis, {
+    preRoundParticipantRows,
+    positionProgression,
+    positionRefs
+  });
+
+  const matchUpsCount = matchUps.length;
+
+  let warnings = [];
+  if (utilities.isPowerOf2(maxPositionWithValues)) {
+    const roundCounts = [];
+    let roundCount = maxPositionWithValues / 2;
+    while (roundCount >= 1) {
+      roundCounts.push(roundCount);
+      roundCount = roundCount / 2;
+    }
+    const roundTotals = roundCounts.reduce(
+      (totals, count) => totals.concat((totals[totals.length - 1] || 0) + count),
+      []
+    );
+
+    if (matchUpsCount && !roundTotals.includes(matchUpsCount)) {
+      const result = drawEngine.getRoundMatchUps({ matchUps });
+      const validRounds = result.roundNumbers.filter(
+        (roundNumber, i) => result.roundProfile[roundNumber].matchUpsCount === roundCounts[i]
+      );
+      const validMatchUps = matchUps.filter(({ roundNumber }) => validRounds.includes(roundNumber));
+      const message = `matchUpsTotal indicates incomplete round: ${matchUpsCount}`;
+      pushGlobalLog({
+        method: '!!!!!!',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow' },
+        message
+      });
+
+      if (validMatchUps.length) {
+        matchUps = validMatchUps;
+        warnings.push(INVALID_MATCHUPS_TOTAL);
+      } else {
+        return { error: INVALID_MATCHUPS_TOTAL, context: { matchUpsCount } };
+      }
+    }
   }
 
   const matchUpIds = matchUps?.map(({ matchUpId }) => matchUpId);
@@ -307,42 +377,11 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   };
   structures.push(structure);
 
-  Object.assign(analysis, {
-    preRoundParticipantRows,
-    positionProgression,
-    positionRefs
-  });
-
-  const matchUpsCount = matchUps.length;
-
-  if (utilities.isPowerOf2(maxPositionWithValues)) {
-    const roundCounts = [];
-    let roundCount = maxPositionWithValues / 2;
-    while (roundCount >= 1) {
-      roundCounts.push(roundCount);
-      roundCount = roundCount / 2;
-    }
-    const roundTotals = roundCounts.reduce(
-      (totals, count) => totals.concat((totals[totals.length - 1] || 0) + count),
-      []
-    );
-
-    if (matchUpsCount && !roundTotals.includes(matchUpsCount)) {
-      const message = `matchUpsTotal indicates incomplete round: ${matchUpsCount}`;
-      pushGlobalLog({
-        method: '!!!!!!',
-        color: 'brightyellow',
-        keyColors: { message: 'cyan', attributes: 'brightyellow' },
-        message
-      });
-      return { error: INVALID_MATCHUPS_TOTAL, context: { matchUpsCount } };
-    }
-  }
-
   const singlePositionMatchUps = matchUps.filter(({ drawPositions }) => drawPositions.length === 1);
 
   if (singlePositionMatchUps.length) {
     const message = `Single position matchUps`;
+    warnings.push(SINGLE_POSITION_MATCHUPS);
     pushGlobalLog({
       method: '!!!!!!',
       color: 'brightyellow',
@@ -355,18 +394,9 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   }
 
   const idColumnRequired = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.required;
-  if (!matchUps.length && !idColumn && idColumnRequired) {
+  if (!idColumn && idColumnRequired) {
+    audit({ type: MISSING_ID_COLUMN, matchUpsCount: matchUps.length });
     return { error: MISSING_ID_COLUMN };
-  } else if (idColumnRequired && idColumn) {
-    const valueRegex = profile.headerColumns.find(({ attr }) => attr === PERSON_ID)?.valueRegex;
-    if (valueRegex) {
-      const re = new RegExp(valueRegex);
-      const idValues = columnProfiles.find(({ column }) => column === idColumn)?.values;
-      const validValues = idValues.filter((value) => re.test(value));
-      if (!validValues.length) {
-        return { error: MISSING_ID_COLUMN };
-      }
-    }
   }
 
   // if stage is qualifying ignore all matchUps which don't have a winningSide or matchUpStatus
@@ -388,6 +418,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     ...SUCCESS,
     matchUps,
     analysis,
+    warnings,
     entries,
     links
   };

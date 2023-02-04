@@ -7,7 +7,7 @@ import { getCellValue, getRow } from './sheetAccess';
 import { getLoggingActive } from '../global/state';
 import { isBye } from '../utilities/convenience';
 
-import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
+import { MISSING_NAMES, NO_PARTICIPANTS_FOUND, NO_ROUND_COLUMNS_IDENTIFIED } from '../constants/errorConditions';
 import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
 import { SUCCESS } from '../constants/resultConstants';
 import {
@@ -59,7 +59,12 @@ export function getEntries({
   const entryDetailColumnProfiles = entryDetailColumns.map(getColumnProfile).filter(Boolean);
 
   const positionRows = positionRefs.map(getRow).sort(utilities.numericSort);
-  let entryDetailRows = utilities.unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows));
+  const maxPositionRow = Math.max(...positionRows);
+  const minPositionRow = Math.min(...positionRows);
+  let entryDetailRows = utilities
+    .unique(entryDetailColumnProfiles.flatMap(({ rows }) => rows))
+    .filter((row) => row >= minPositionRow && row <= maxPositionRow)
+    .sort(utilities.numericSort);
 
   if (entryDetailAttributes?.length) {
     for (const attribute of entryDetailAttributes) {
@@ -242,7 +247,7 @@ export function getEntries({
 
   if (!participants?.length) {
     if (!analysis.columns?.round) {
-      return { error: 'NO ROUND COLUMNS IDENTIFIED' };
+      return { error: NO_ROUND_COLUMNS_IDENTIFIED };
     }
     const roundValues = analysis.columns.round
       .flatMap((roundColumn) => analysis.columnProfiles.find((column) => column === roundColumn)?.values)
@@ -250,8 +255,8 @@ export function getEntries({
 
     if (roundValues.length) {
       const error = NO_PARTICIPANTS_FOUND;
-      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } });
-      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'red' } }, 'error');
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'brightred' } });
+      pushGlobalLog({ method: 'error', color: 'brightred', error, keyColors: { error: 'brightred' } }, 'error');
 
       return { error };
     }

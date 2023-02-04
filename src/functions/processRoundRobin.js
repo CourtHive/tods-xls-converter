@@ -207,7 +207,7 @@ export function getRoundRobinValues(analysis, profile, sheet) {
           matchUpStatus: normalizedMatchUpStatus,
           score: scoreString,
           isValid
-        } = tidyScore({ score: result, profile });
+        } = tidyScore({ score: result, profile, ...analysis });
         const resultIsMatchOutcome =
           result &&
           onlyAlpha(result, profile) &&

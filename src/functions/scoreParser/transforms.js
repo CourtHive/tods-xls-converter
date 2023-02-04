@@ -3,7 +3,6 @@ import { handleBracketSpacing } from './handleBracketSpacing';
 import { joinFloatingTiebreak } from './joinFloatingTiebreak';
 import { isNumeric } from '../../utilities/identification';
 import { matchKnownPatterns } from './matchKnownPatterns';
-import { utilities } from 'tods-competition-factory';
 import { properTiebreak } from './properTiebreak';
 import { containedSets } from './containedSets';
 import { sensibleSets } from './sensibleSets';
@@ -42,12 +41,12 @@ export function separateScoreBlocks({ score, applied }) {
       if (/^\d+$/.test(part) && part.length > 2) {
         const oneIndex = part.indexOf('1');
         if (!(part.length % 2)) {
-          part = utilities
-            .chunkArray(part.split(''), 2)
-            .map((c) => c.join(''))
-            .join(' ');
-          applied.push('separateScoreBlock');
-        } else if (part.length === 3 && oneIndex >= 0) {
+          const { score: xPart, applied: app } = handleNumeric({ score: part, applied: [] });
+          if (xPart !== part) {
+            part = xPart;
+            applied.push(...app);
+          }
+        } else if (part.length === 3 && oneIndex === 0) {
           const tiebreakScore = getSuper(part.split(''), oneIndex);
           applied.push('getSuper');
           return tiebreakScore;
@@ -75,10 +74,6 @@ export function removeErroneous({ score, applied }) {
       if (/^\d+$/.test(part) && part.length === 1) {
         applied.push('removeErroneous1');
         return;
-      }
-      if (/^\d+$/.test(part) && part.length === 3) {
-        applied.push('removeErroneous2');
-        return part.slice(0, 2);
       }
       return part;
     })
@@ -225,7 +220,7 @@ export function parseSuper(score) {
   const numbers = score.split('');
   const allNumeric = numbers.every((n) => !isNaN(n));
 
-  if (allNumeric && score.length === 3 && oneIndex >= 0 && oneIndex < 2) {
+  if (allNumeric && score.length === 3 && oneIndex === 0) {
     const superTiebreak = getSuper(numbers, oneIndex);
     if (superTiebreak) return superTiebreak;
   }

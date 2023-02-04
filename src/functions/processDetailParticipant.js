@@ -6,6 +6,7 @@ import { getPairParticipant } from './getPairParticipant';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { normalizeDiacritics } from 'normalize-text';
 
+import { ENTRIES_NOT_ON_POSITION_ROWS, POSITION_ROW_OFFSET_ERROR } from '../constants/errorConditions';
 import { PERSON_ID } from '../constants/attributeConstants';
 import { SUCCESS } from '../constants/resultConstants';
 
@@ -41,11 +42,11 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
       if (offsets.length !== 1) {
         // console.log('some kind of error', analysis.fileName, analysis.sheetName, { positionRows, entryDetailRows });
         // ACTION: check whether there is an offset
-        return { error: 'positionRows offset error' };
+        return { error: POSITION_ROW_OFFSET_ERROR };
       }
     } else {
       // console.log('some kind of error', analysis.fileName, analysis.sheetName, { positionRows, entryDetailRows });
-      return { error: 'entryDetails not on positionRows' };
+      return { error: ENTRIES_NOT_ON_POSITION_ROWS };
     }
   }
 
@@ -118,7 +119,6 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         if (detail.seedValue) seedValue = detail.seedValue;
         if (detail.entryStatus) entryStatus = profile.entryStatusMap?.[detail.entryStatus] || DIRECT_ACCEPTANCE;
 
-        const person = { standardFamilyName: lastName, standardGivenName: firstName, personId };
         const lastFirst = lastName && firstName && `${lastName}, ${firstName}`;
         const participantName = detail.participantName || lastFirst || lastName || firstName;
         if (!participantName) return;
@@ -133,6 +133,11 @@ export function processDetailParticipants({ analysis, profile, detailParticipant
         }
         const participantId =
           personId || (idAttributes.length && generateParticipantId({ attributes: idAttributes })?.participantId);
+        const person = {
+          standardFamilyName: lastName,
+          standardGivenName: firstName,
+          personId: personId || participantId
+        };
 
         const participant = {
           participantRole: COMPETITOR,

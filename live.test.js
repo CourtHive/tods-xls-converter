@@ -5,19 +5,37 @@ import { processDirectory } from './src/utilities/processDirectory';
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
 
+import { PERSON_ID, RANKING } from './src/constants/attributeConstants';
 import {
+  ENTRIES_NOT_ON_POSITION_ROWS,
   INVALID_MATCHUPS_TOTAL,
+  MISSING_ID_COLUMN,
   MISSING_NAMES,
   MISSING_SHEET_DEFINITION,
-  NO_POSITION_ROWS_FOUND
+  NO_POSITION_ROWS_FOUND,
+  POSITION_PROGRESSION
 } from './src/constants/errorConditions';
+
+const NONE = '';
 
 setLoggingActive();
 
 // bogus function to reference potentially unused errorConditions
 // and thus to avoid linting complaints!
 export function foo() {
-  MISSING_SHEET_DEFINITION && NO_POSITION_ROWS_FOUND && MISSING_NAMES && INVALID_MATCHUPS_TOTAL;
+  const hoo =
+    MISSING_SHEET_DEFINITION &&
+    NO_POSITION_ROWS_FOUND &&
+    MISSING_NAMES &&
+    INVALID_MATCHUPS_TOTAL &&
+    MISSING_ID_COLUMN &&
+    ENTRIES_NOT_ON_POSITION_ROWS &&
+    POSITION_PROGRESSION &&
+    NONE;
+
+  const boo = RANKING && PERSON_ID;
+
+  return boo && hoo;
 }
 
 it.skip('can process passing', () => {
@@ -25,7 +43,7 @@ it.skip('can process passing', () => {
   const writeDir = './examples/sheets/processed/CR';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = true;
+  const writeMatchUps = false;
   let writeResultIndex;
 
   const sheetTypes = []; // e.g. ROUND_ROBIN
@@ -73,15 +91,19 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
+  const errorType = NONE;
+  const subDir = errorType && `/${errorType}`;
+  const year = '2016';
+  if (subDir || year) {
+    // do nothing!
+  }
+
   // const readDir = './examples/sheets/testing/';
   // const writeDir = `./examples/sheets/processed/testing`;
-  const year = '2016';
-  const errorType = '';
-  const subDir = errorType && `/${errorType}`;
   const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
-  const writeParticipants = false;
+  const writeParticipants = true;
   const moveErrorFiles = true;
   const writeMatchUps = true;
   let writeResultIndex;
@@ -96,16 +118,17 @@ it('can process tests', () => {
   const startIndex = 0;
 
   resetLogging();
-  setLoggingActive(true);
+  setLoggingActive(false);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
-    roundNumbers: [2],
+    roundNumbers: [1],
     roundPositions: [2],
     participantValues: true,
     potentialValues: true,
     sideWeights: true,
     pRank: false
   });
+  setLoggingActive(false, 'headerColumns', { attr: 'round', column: 'A' });
   setLoggingActive(false, 'columnFrequency');
   setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
@@ -113,11 +136,10 @@ it('can process tests', () => {
   setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
-  setLoggingActive(false, 'invalidResult');
-  setLoggingActive(false, 'matchUps', { roundNumber: undefined, roundPosition: undefined });
+  setLoggingActive(false, 'matchUps', { roundNumber: 1, roundPosition: undefined });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only
-  setLoggingActive(false, 'participants');
+  setLoggingActive(false, 'participants', { participantType: undefined, idsOnly: false });
   setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
@@ -148,7 +170,7 @@ it('can process tests', () => {
 
     const invalidScores = getInvalid();
     if (invalidScores?.length) {
-      const csvInvalid = utilities.JSON2CSV(invalidScores.map((score) => ({ score })));
+      const csvInvalid = utilities.JSON2CSV(invalidScores);
       writeFileSync(`${writeDir}/invalidScores.csv`, csvInvalid, 'UTF-8');
       dumpInvalid();
     }

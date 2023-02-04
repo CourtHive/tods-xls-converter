@@ -55,6 +55,7 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
+    replaceWords: [{ value: '-bye-', replacement: 'bye' }],
     exciseWords: [
       { regex: '^page \\d.*' },
       { regex: '.*\\d{2,}[ap]m' },
@@ -95,6 +96,20 @@ export const config = {
     rowDefinitions: [
       {
         type: HEADER,
+        id: 'summary',
+        elements: ['name', 'point', 'lost in round', { text: 'total point', options: { startsWith: true } }],
+        rows: 1,
+        minimumElements: 3
+      },
+      {
+        type: HEADER,
+        id: 'result',
+        elements: ['lost in round'],
+        rows: 1,
+        minimumElements: 1
+      },
+      {
+        type: HEADER,
         id: 'signup',
         elements: [
           'practice courts',
@@ -110,9 +125,7 @@ export const config = {
         elements: [
           `player's list`,
           { text: 'acceptance list', options: { startsWith: true } },
-          { text: 'no show', options: { includes: true } },
-          { text: 'late withdrawal', options: { startsWith: true } },
-          { text: 'no show', options: { endsWith: true } }
+          { text: 'late withdrawal', options: { startsWith: true } }
         ],
         rows: 1,
         minimumElements: 1
@@ -169,6 +182,8 @@ export const config = {
           'sl no',
           'sr no',
           'member id',
+          'Per-Quarters',
+          'a.i.t.a reg',
           'aita reg no',
           'reg no.',
           'reg.no',
@@ -201,45 +216,62 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: 'ignored', header: ['st'] },
-      { attr: POSITION, header: ['#', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
+      {
+        attr: POSITION,
+        header: ['#', 'Sl #', 's.r.no', 'sl.no', 'sr. no', 'sr no', 'srno', 'sno', 'sino', 's.n'],
+        valueRegex: '^\\d{1,3}$'
+      },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
-      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,3}$` },
-      { attr: SEED_VALUE, header: ['seed', 'seed no', 'sd', 'sd no', 'sd. no'], limit: 1, valueRegex: `^\\d{0,2}$` },
+      { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,4}$` },
+      {
+        attr: SEED_VALUE,
+        header: [{ text: 'seed', options: { startsWith: true } }, 'seed', 'seed no', 'sd', 'sd no', 'sd. no'],
+        limit: 1,
+        valueRegex: `^\\d{0,2}$`
+      },
       {
         attr: LAST_NAME,
         header: [
           'name',
           'surname',
           'player',
+          "player's nae",
+          'name of the player',
+          'name of player',
           'player name',
+          'playeers name',
           'players name',
           'last name',
           'family name',
           'family',
+          'full name',
           'familiy name',
           'famlily name',
+          { text: 'family name', includes: true },
           { text: 'players', includes: true },
           'round 1'
         ],
         limit: 1,
         skipWords: ['0'],
-        valueRegex: "^([A-Za-z'\\- ]+)$"
+        valueRegex: "^([A-Za-z\\.'\\-\\/ ]+)$"
       },
       {
         attr: FIRST_NAME,
         skipWords: ['0'],
-        header: ['first name', 'fiirst name', 'fisrt name', 'given name'],
+        header: ['first name', 'fiirst name', 'fisrt name', 'given name', { text: 'first name', startsWith: true }],
         limit: 1,
-        valueRegex: `^([A-Za-z ]+)$`
+        valueRegex: `^([A-Za-z\\.'\\-\\/ ]+)$`
       },
       {
         attr: PERSON_ID, // sometimes appears also in the Rank column
         header: [
           { regex: 'itn$' },
           { text: 'aita', startsWith: true },
+          { text: 'a.i.t.a', startsWith: true },
           { text: 'reg no', startsWith: true },
+          { text: 'state reg', startsWith: true },
           { text: 'reg', startsWith: true },
+          { text: 'registration', startsWith: true },
           { text: 'regn no', includes: true },
           { text: 'rect no', includes: true },
           'reg.no',
@@ -253,21 +285,47 @@ export const config = {
           'first name',
           'city',
           'nationality',
-          'rank'
+          'rank',
+          'st'
         ],
         limit: 1,
         required: true,
-        skipWords: ['reg', 'umpire', '0', 'a/f', 'new id', 'app'],
-        valueRegex: '(\\d{5,})[ A-Za-z]*$',
+        skipWords: ['reg', 'umpire', '0', 'a/f', 'AF', 'new id', 'app', 'new', 'applied'],
+        valueRegex: '[\\w-]*(\\d{5,})[ A-Za-z]*$',
+        valueMatchThreshold: 0.45,
         extract: true
       },
-      { attr: NATIONALITY, header: ['nationality'], limit: 1, valueRegex: '^[A-Za-z ]*$' },
+      {
+        attr: NATIONALITY,
+        header: ['nationality'],
+        limit: 1,
+        skipWords: ['0'],
+        valueRegex: '^[A-Za-z ]*$',
+        valueMatchThreshold: 0.2
+      },
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: CITY, header: ['city'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
-      { attr: ROUND, header: [...roundNames] }
+      {
+        attr: ROUND,
+        header: [
+          'first rd',
+          { text: ' rd', options: { endsWith: true } },
+          { text: 'quarter', options: { startsWith: true } },
+          { text: 'querter', options: { startsWith: true } },
+          ...roundNames
+        ]
+      }
     ],
     sheetDefinitions: [
+      {
+        type: INFORMATION,
+        rowIds: ['result']
+      },
+      {
+        type: INFORMATION,
+        rowIds: ['summary']
+      },
       {
         type: PARTICIPANTS,
         rowIds: ['playersList']
@@ -311,10 +369,6 @@ export const config = {
       {
         type: INFORMATION,
         rowIds: ['tournamentInfo', 'tournamentOrganization']
-      },
-      {
-        type: PARTICIPANTS,
-        rowIds: ['doublesParticipants']
       }
     ],
     tournamentInfo: [],
@@ -462,7 +516,7 @@ export const config = {
       return state?.toLowerCase() === 'india' ? '' : state;
     },
     columnCharacter: ({ columnProfile }) => {
-      const { values } = columnProfile;
+      const { values, allNumeric, greatestLength } = columnProfile;
       const allProgressionKeys = values.every(
         (value) => typeof value === 'string' && ['a', 'b', 'as', 'bs'].includes(value.toLowerCase())
       );
@@ -479,6 +533,13 @@ export const config = {
       );
       if (potentialPersonId && possiblePersonId) {
         columnProfile.character = PERSON_ID;
+        return columnProfile.character;
+      }
+      if (!columnProfile.attribute && allNumeric && greatestLength === 1 && columnProfile.column !== 'A') {
+        columnProfile.values = [];
+        columnProfile.character = 'ignore';
+        columnProfile.keyMap = {};
+        columnProfile.rows = [];
         return columnProfile.character;
       }
     },

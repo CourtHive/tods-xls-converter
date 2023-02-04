@@ -47,7 +47,7 @@ export function resetTransformations() {
   transformations = {};
 }
 
-export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, identifier }) {
+export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, identifier, fileName, sheetName }) {
   let modifications = [],
     matchUpStatus,
     applied = [],
@@ -91,7 +91,7 @@ export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, ide
   let isValid = isValidPattern(score);
   if (!isValid) {
     // Hail Mary: extract only the numbers from the string
-    score = incomingScore.replace(/\D/g, '');
+    score = incomingScore.toString().replace(/\D/g, '');
     if (attributes?.removed) {
       attributes.removed = undefined;
     }
@@ -99,7 +99,7 @@ export function tidyScore({ score: incomingScore, stepLog, fullLog, profile, ide
 
     isValid = isValidPattern(score);
     if (!isValid) {
-      invalid.push(incomingScore);
+      invalid.push({ score, fileName, sheetName });
       score = '';
     }
   }

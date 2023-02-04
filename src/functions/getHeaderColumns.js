@@ -1,6 +1,7 @@
 // function confirms that header columns are in expected position
 
 import { findValueRefs, getCellValue, getCol, getRow } from './sheetAccess';
+import { audit, getLoggingActive } from '../global/state';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { tidyValue } from '../utilities/convenience';
 import { utilities } from 'tods-competition-factory';
@@ -21,6 +22,9 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   );
 
   const invalidValueColumns = [];
+  const duplicates = [];
+
+  const logging = getLoggingActive('headerColumns');
 
   if (profile.headerColumns) {
     // profile.headerColumns provides details for identifying which player attribute is found in which column
@@ -30,27 +34,43 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
       const getRef = (searchDetails) => {
         const options = { tidy: true };
 
+        const rowTolerance = (ref) => {
+          const row = getRow(ref);
+          const hRow = parseInt(headerRow);
+          const diff = Math.abs(row - hRow);
+          return diff <= 1;
+        };
         const vRefs = findValueRefs({ searchDetails, sheet, options, log: obj.log });
-        const cols = vRefs.filter((f) => getRow(f) === parseInt(headerRow)).map(getCol);
+        const cols = vRefs.filter(rowTolerance).map(getCol);
+
+        const log = logging?.attr === obj.attr;
+        if (log) console.log({ searchDetails, vRefs, cols, headerRow });
 
         cols.forEach((col) => {
           const re = obj.valueRegex && new RegExp(obj.valueRegex);
           const skipWords = obj.skipWords || profile.skipWords || [];
-          const isValid =
-            !re ||
-            columnValues[col]?.every((value) => {
-              const check = re.test(value);
-              return (
-                !value ||
-                skipWords.some(
-                  (word) => word?.toString().toLowerCase() === tidyValue(value.toString()).toLowerCase()
-                ) ||
-                check
-              );
-            });
+          let checked = 0;
+          const validityTest = columnValues[col]?.map((value) => {
+            const check = re?.test(value);
+            if (log && (!logging.column || logging.column === col)) console.log({ value, check });
+            if (check) checked += 1;
+            const valid =
+              !value ||
+              skipWords.some((word) => word?.toString().toLowerCase() === tidyValue(value.toString()).toLowerCase()) ||
+              check;
+            return valid;
+          });
+          const valueCheck = !re || validityTest?.every((test) => test);
+
+          const checkedPct = columnValues[col]?.length && checked / columnValues[col].length;
+          const validityThreshold = obj.valueMatchThreshold && checkedPct > obj.valueMatchThreshold;
+
+          // it is valid if there ISs a threshold which is met or if there IS NOT a threshold and valueCheck passes
+          // This is particularly relevant to PERSON_ID column resolution
+          const isValid = validityThreshold || (!obj.valueMatchThreshold && valueCheck);
 
           if (isValid) {
-            extendColumnsMap({ columnsMap, ...obj, column: col });
+            extendColumnsMap({ columnsMap, ...obj, column: col, duplicates });
           } else {
             invalidValueColumns.push(col);
           }
@@ -69,14 +89,15 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   const mappedColumns = invalidValueColumns.concat(utilities.unique(Object.values(columnsMap).flat()));
 
   const unmappedColumns = Object.keys(headerValueMap)
-    .filter((column) => !mappedColumns.includes(column))
+    .filter((column) => !mappedColumns.includes(column) && !duplicates.includes(column))
     .map((column) => headerValueMap[column]);
 
   if (unmappedColumns.length) {
+    audit({ unmappedColumns });
     const message = `Unknown Header Columns`;
     pushGlobalLog({
       method: 'warning',
-      color: 'brightred',
+      color: 'yellow',
       keyColors: { message: 'brightyellow', columns: 'cyan' },
       message,
       headerRow,
@@ -87,13 +108,17 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
   return columnsMap;
 }
 
-export function extendColumnsMap({ columnsMap, attr, column, limit }) {
+export function extendColumnsMap({ columnsMap, attr, column, limit, duplicates }) {
   if (Array.isArray(columnsMap[attr])) {
     columnsMap[attr].push(column);
     columnsMap[attr].sort();
   } else {
     if (columnsMap[attr]) {
-      if (!limit) columnsMap[attr] = [columnsMap[attr], column];
+      if (!limit) {
+        columnsMap[attr] = [columnsMap[attr], column];
+      } else if (duplicates) {
+        duplicates.push(column);
+      }
     } else {
       columnsMap[attr] = column;
     }

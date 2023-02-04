@@ -11,6 +11,13 @@ export function getCheckedValue({ profile, sheet, key }) {
       }
     });
   }
+  if (profile.replaceWords) {
+    profile.replaceWords.forEach(({ value, replacement }) => {
+      if (rawValue.toLowerCase() === value) {
+        rawValue = replacement;
+      }
+    });
+  }
 
   const value = (isNumeric(rawValue) && parseFloat(rawValue)) || (rawValue !== 'undefined' ? rawValue : '');
 

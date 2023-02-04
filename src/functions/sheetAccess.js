@@ -65,7 +65,11 @@ export function getRow(reference) {
 }
 
 export function getCol(reference) {
-  return reference ? reference[0] : undefined;
+  if (reference) {
+    const col = reference.match(/^([A-Z]+)/)?.slice(1)[0];
+    return col;
+  }
+  return undefined;
 }
 
 export function findRegexRefs({ regex, sheet, profile }) {

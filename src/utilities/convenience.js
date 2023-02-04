@@ -6,6 +6,49 @@ import { removeBits } from './transformers';
 import { POSITION } from '../constants/columnConstants';
 const { BYE } = matchUpStatusConstants;
 
+export function validConsecutiveNumbers(arr) {
+  if (!Array.isArray(arr)) return false;
+  const valid = Boolean(
+    arr.reduce((result, item) => {
+      if (!result && Number(item) === 1) return 1;
+      if (result + 1 === Number(item)) return Number(item);
+    }, false)
+  );
+  return valid;
+}
+
+export function getValidConsecutiveRanges(arr) {
+  const consecutiveRanges = [];
+  if (!Array.isArray(arr)) return consecutiveRanges;
+  let consecutiveRange = [];
+  let lastValue;
+  arr.forEach((item, index) => {
+    if (!isNumeric(item)) {
+      if (consecutiveRange.length) {
+        if (utilities.isPowerOf2(lastValue)) consecutiveRanges.push(consecutiveRange);
+        consecutiveRange = [];
+        lastValue = undefined;
+      }
+    }
+    if (!lastValue && Number(item) === 1) {
+      const value = 1;
+      consecutiveRange.push({ value, index });
+      lastValue = value;
+    } else if (Number(item) === lastValue + 1) {
+      const value = Number(item);
+      consecutiveRange.push({ value, index });
+      lastValue = value;
+    } else {
+      consecutiveRange = [];
+      lastValue = undefined;
+    }
+  });
+  if (consecutiveRange.length && utilities.isPowerOf2(lastValue)) {
+    consecutiveRanges.push(consecutiveRange);
+  }
+  return { consecutiveRanges };
+}
+
 export function indices(val, arr) {
   return arr.reduce((a, e, i) => {
     if (e === val) a.push(i);

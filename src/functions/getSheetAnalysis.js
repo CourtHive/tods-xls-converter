@@ -119,7 +119,11 @@ export const getSheetAnalysis = ({
       profile.rows.every((row) => priorProfile.rows.includes(row));
     const subsequentColumn = columnKeys[keyIndex + 1];
     const subsequentProfile = columnProfiles.find(({ column }) => column === subsequentColumn);
-    if (repeatValues && subsequentProfile?.values?.length) {
+    if (
+      repeatValues &&
+      subsequentProfile?.values?.length &&
+      ![priorProfile.attribute, priorProfile.character].includes(POSITION)
+    ) {
       const message = `Repeated Round Values`;
       pushGlobalLog({
         method: 'notice',
@@ -128,6 +132,7 @@ export const getSheetAnalysis = ({
         message,
         column: profile.column
       });
+      console.log({ repeatValues, fileName, sheetName });
       profile.values = [];
     }
   });
@@ -214,9 +219,20 @@ export const getSheetAnalysis = ({
 
   if (!columns[LAST_NAME]) {
     const potentialNameColumnProfiless = columnProfiles.filter(({ character, attribute }) => !character && !attribute);
+    const roundColumns = columnProfiles.filter(({ attribute }) => attribute === 'round');
     const maxColumnFrequency = Math.max(...Object.values(columnFrequency));
     const maxFrequencyColumn = Object.keys(columnFrequency).find((key) => columnFrequency[key] === maxColumnFrequency);
-    const nominatedNameColumn = potentialNameColumnProfiless.find(({ column }) => column === maxFrequencyColumn);
+    let nominatedNameColumn = potentialNameColumnProfiless.find(({ column }) => column === maxFrequencyColumn);
+    if (maxFrequencyColumn && !nominatedNameColumn && roundColumns?.[0]?.column === maxFrequencyColumn) {
+      nominatedNameColumn = roundColumns[0];
+      const message = `First Round Column is Name Column`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightgreen',
+        keyColors: { message: 'brightgreen', attributes: 'green' },
+        message
+      });
+    }
     if (nominatedNameColumn) {
       if (nominatedNameColumn.values.length > 1) {
         nominatedNameColumn.attribute = LAST_NAME;
@@ -227,7 +243,7 @@ export const getSheetAnalysis = ({
         pushGlobalLog({
           method: 'notice',
           color: 'brightgreen',
-          keyColors: { message: 'brightgreen', attributes: 'magenta', column: 'brightgreen' },
+          keyColors: { message: 'brightgreen', attributes: 'green', column: 'brightgreen' },
           message,
           column: maxFrequencyColumn
         });
