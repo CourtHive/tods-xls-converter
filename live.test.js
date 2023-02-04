@@ -91,17 +91,17 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const errorType = NONE;
+  const errorType = POSITION_PROGRESSION;
   const subDir = errorType && `/${errorType}`;
-  const year = '2022';
+  const year = '2019';
   if (subDir || year) {
     // do nothing!
   }
 
-  const readDir = './examples/sheets/testing/';
-  const writeDir = `./examples/sheets/processed/testing`;
-  // const readDir = `./examples/sheets/India/years/${year}${subDir}`;
-  // const writeDir = `./examples/sheets/processed/IND/${year}`;
+  // const readDir = './examples/sheets/testing/';
+  // const writeDir = `./examples/sheets/processed/testing`;
+  const readDir = `./examples/sheets/India/years/${year}${subDir}`;
+  const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
   const moveErrorFiles = false;
@@ -121,8 +121,8 @@ it('can process tests', () => {
   setLoggingActive(true);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
-    roundNumbers: [2],
-    roundPositions: [4],
+    roundNumbers: [1],
+    roundPositions: [2],
     participantValues: true,
     potentialValues: true,
     sideWeights: true,
@@ -130,13 +130,13 @@ it('can process tests', () => {
   });
   setLoggingActive(false, 'headerColumns', { attr: 'round', column: 'A' });
   setLoggingActive(false, 'columnFrequency');
-  setLoggingActive(false, 'columnProfiles', { index: undefined, column: 'A' });
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
-  setLoggingActive(false, 'matchUps', { roundNumber: 2, roundPosition: 1 });
+  setLoggingActive(false, 'matchUps', { roundNumber: 1, roundPosition: undefined });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only
   setLoggingActive(false, 'participants', { participantType: undefined, idsOnly: false });
