@@ -8,8 +8,10 @@ const getDirectories = (source) =>
     .filter((item) => item.isDirectory())
     .map((item) => item.name);
 
+const unique = (arr) => arr.filter((item, i, s) => s.lastIndexOf(item) === i);
+
 const directories = getDirectories(rootDir);
-const aggregate = { errorsByType: {} };
+const aggregate = {};
 
 for (const directory of directories) {
   const targetDirectory = `${rootDir}/${directory}`;
@@ -21,17 +23,27 @@ for (const directory of directories) {
       const latestReport = report.pop();
       for (const key of Object.keys(latestReport)) {
         const type = typeof latestReport[key];
-        if (type === 'number') {
+        if (Array.isArray(latestReport[key])) {
+          if (!aggregate[key]) aggregate[key] = [];
+          aggregate[key].push(...latestReport[key]);
+        } else if (type === 'number') {
           if (!aggregate[key]) aggregate[key] = 0;
           aggregate[key] += latestReport[key];
-        } else if (type === 'object' && key === 'errorsByType') {
+        } else if (type === 'object') {
           for (const error of Object.keys(latestReport[key])) {
+            if (!aggregate[key]) aggregate[key] = {};
             if (!aggregate[key][error]) aggregate[key][error] = 0;
             aggregate[key][error] += latestReport[key][error];
           }
         }
       }
     }
+  }
+}
+
+for (const key of Object.keys(aggregate)) {
+  if (Array.isArray(aggregate[key])) {
+    aggregate[key] = unique(aggregate[key].map((v) => v.toLowerCase())).sort();
   }
 }
 
