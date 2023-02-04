@@ -28,6 +28,9 @@ const scores = [
   /*
   { score: '[7/6 (4) 6/3 )', expectation: { score: '7-6(4) 6-3' } },
   { score: '(6-1), (7-6(1))', expectation: { score: '6-1 7-6(1)' } },
+  { score: '1&2', expectation: { score: '6-1 6-2' } },
+  { score: '3&3&2', expectation: { score: '6-3 3-6 6-2' } },
+  { score: '5&3&(7&1)', expectation: { score: '7-5 3-6 [7-1]' } },
   "6-4, (6)" => '6-4 7-6(6)'
   "(6-1), (7-6(1))"
   "(6-4), (7-6(8))"
