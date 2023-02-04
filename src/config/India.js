@@ -520,7 +520,6 @@ export const config = {
         return columnProfile.character;
       }
       if (!columnProfile.attribute && allNumeric && greatestLength === 1) {
-        console.log('ignore', columnProfile.column);
         columnProfile.values = [];
         columnProfile.character = 'ignore';
         columnProfile.keyMap = {};
