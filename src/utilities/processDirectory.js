@@ -434,6 +434,10 @@ export function processDirectory({
     report.sheetsMissingIdColumn = sheetsMissingIdColumn.length;
     report.missingIdColumnMatchUps = missingIdColumnMatchUps;
   }
+  const unknownColumns = utilities.unique(auditLog.flatMap(({ unmappedColumns }) => unmappedColumns).filter(Boolean));
+  if (unknownColumns) {
+    report.unknownColumns = unknownColumns;
+  }
 
   if (logging) console.log(report);
 
