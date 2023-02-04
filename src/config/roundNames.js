@@ -1,10 +1,10 @@
 export const roundNames = [
-  { text: 'quart', options: { startsWith: true } },
+  { text: 'quar', options: { startsWith: true } },
   { text: 'qtr', options: { startsWith: true } },
   { text: 'final', options: { startsWith: true } },
   { text: 'semi', options: { startsWith: true } },
   { text: 'qual', options: { startsWith: true } },
-  { text: 'round', options: { startsWith: true } },
+  { text: 'round', options: { includes: true } },
   { text: 'winner', options: { startsWith: true } },
   { text: 'pre', options: { startsWith: true } },
   '1st rd',
@@ -29,6 +29,9 @@ export const roundNames = [
   */
   'pqtr',
   'qf',
+  'q/f',
+  'q f',
+  's f',
   'sf',
   's/f'
   /*
