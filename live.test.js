@@ -110,7 +110,7 @@ it('can process tests', () => {
 
   // sheet processing config
   const sheetTypes = [];
-  const sheetNumbers = [2];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   // workbook processing config
@@ -128,7 +128,7 @@ it('can process tests', () => {
     sideWeights: true,
     pRank: false
   });
-  setLoggingActive(true, 'headerColumns', { attr: 'round', column: 'A' });
+  setLoggingActive(false, 'headerColumns', { attr: 'round', column: 'A' });
   setLoggingActive(false, 'columnFrequency');
   setLoggingActive(false, 'columnProfiles', { index: undefined, column: 'A' });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
