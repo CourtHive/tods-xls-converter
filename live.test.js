@@ -93,7 +93,7 @@ it.skip('can process passing', () => {
 it('can process tests', () => {
   const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
-  const year = '2017';
+  const year = '2016';
   if (subDir || year) {
     // do nothing!
   }
