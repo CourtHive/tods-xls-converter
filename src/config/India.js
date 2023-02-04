@@ -500,7 +500,7 @@ export const config = {
       return state?.toLowerCase() === 'india' ? '' : state;
     },
     columnCharacter: ({ columnProfile }) => {
-      const { values } = columnProfile;
+      const { values, allNumeric, greatestLength } = columnProfile;
       const allProgressionKeys = values.every(
         (value) => typeof value === 'string' && ['a', 'b', 'as', 'bs'].includes(value.toLowerCase())
       );
@@ -517,6 +517,14 @@ export const config = {
       );
       if (potentialPersonId && possiblePersonId) {
         columnProfile.character = PERSON_ID;
+        return columnProfile.character;
+      }
+      if (!columnProfile.attribute && allNumeric && greatestLength === 1) {
+        console.log('ignore', columnProfile.column);
+        columnProfile.values = [];
+        columnProfile.character = 'ignore';
+        columnProfile.keyMap = {};
+        columnProfile.rows = [];
         return columnProfile.character;
       }
     },
