@@ -7,7 +7,7 @@ import { getCellValue, getRow } from './sheetAccess';
 import { getLoggingActive } from '../global/state';
 import { isBye } from '../utilities/convenience';
 
-import { MISSING_NAMES, NO_PARTICIPANTS_FOUND } from '../constants/errorConditions';
+import { MISSING_NAMES, NO_PARTICIPANTS_FOUND, NO_ROUND_COLUMNS_IDENTIFIED } from '../constants/errorConditions';
 import { POLICY_SEEDING_ITF } from '../assets/seedingPolicy';
 import { SUCCESS } from '../constants/resultConstants';
 import {
@@ -247,7 +247,7 @@ export function getEntries({
 
   if (!participants?.length) {
     if (!analysis.columns?.round) {
-      return { error: 'NO ROUND COLUMNS IDENTIFIED' };
+      return { error: NO_ROUND_COLUMNS_IDENTIFIED };
     }
     const roundValues = analysis.columns.round
       .flatMap((roundColumn) => analysis.columnProfiles.find((column) => column === roundColumn)?.values)
