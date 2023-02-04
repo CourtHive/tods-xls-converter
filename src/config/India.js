@@ -214,7 +214,7 @@ export const config = {
       }
     ],
     headerColumns: [
-      { attr: POSITION, header: ['#', 's.r.no', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
+      { attr: POSITION, header: ['#', 's.r.no', 'sl.no', 'sr. no', 'sr no', 'sno', 's.n'], valueRegex: '^\\d{1,3}$' },
       { attr: ENTRY_STATUS, header: { text: 'st', equals: true }, limit: 1 },
       { attr: RANKING, header: ['rank', 'co-rank'], limit: 1, valueRegex: `^\\d{0,4}$` },
       {
@@ -229,6 +229,7 @@ export const config = {
           'name',
           'surname',
           'player',
+          'name of the player',
           'player name',
           'players name',
           'last name',
@@ -293,7 +294,10 @@ export const config = {
       { attr: STATE, header: ['state'], limit: 1 },
       { attr: CITY, header: ['city'], limit: 1 },
       { attr: DISTRICT, header: ['dist'], limit: 1 },
-      { attr: ROUND, header: [...roundNames] }
+      {
+        attr: ROUND,
+        header: ['quaters', { text: 'querter', options: { startsWith: true } }, ...roundNames]
+      }
     ],
     sheetDefinitions: [
       {
