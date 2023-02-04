@@ -38,6 +38,8 @@ export function getColumnAssessment({
       const rowKeys = filteredKeys.filter(
         (rowKey) => getRow(rowKey) === row && consideredValue(getCheckedValue({ profile, sheet, key: rowKey }).value)
       );
+      const charLength = value.toString().length;
+      if (charLength > assessment.greatestLength) assessment.greatestLength = charLength;
 
       const singleValueRow = rowKeys.length === 1 && 'ABC'.split('').includes(column);
       const ignoreSingleValueRow = singleValueRow && !utilities.isPowerOf2(prospectColumnKeys.length);
@@ -92,6 +94,7 @@ export function getColumnAssessment({
       lastNumericValue: 0,
       scoreLikeCount: 0,
       singleValueRows: [],
+      greatestLength: 0,
       keyMap: {},
       values: [],
       rows: [],
