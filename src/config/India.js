@@ -229,7 +229,9 @@ export const config = {
           'name',
           'surname',
           'player',
+          "player's nae",
           'name of the player',
+          'name of player',
           'player name',
           'players name',
           'last name',
@@ -237,6 +239,7 @@ export const config = {
           'family',
           'familiy name',
           'famlily name',
+          { text: 'family name', includes: true },
           { text: 'players', includes: true },
           'round 1'
         ],
