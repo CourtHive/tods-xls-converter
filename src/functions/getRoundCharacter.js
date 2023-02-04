@@ -1,6 +1,7 @@
+import { isNumeric } from '../utilities/identification';
+
 import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
 import { RESULT, ROUND } from '../constants/sheetElements';
-import { isNumeric } from '../utilities/identification';
 
 export function getRoundCharacter({ attributeMap, columnProfiles, columnProfile }) {
   const { scoreLikeCount, values, consecutiveNumbers } = columnProfile;
