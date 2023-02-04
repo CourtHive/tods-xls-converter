@@ -12,6 +12,7 @@ import { getEntries } from './getEntries';
 import { getRound } from './getRound';
 
 import { PERSON_ID, STATE, CITY } from '../constants/attributeConstants';
+import { RESULT, ROUND } from '../constants/sheetElements';
 import { PRE_ROUND } from '../constants/columnConstants';
 import { SUCCESS } from '../constants/resultConstants';
 import {
@@ -58,6 +59,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   if (!positionColumn && valuesPerRow >= 2) {
     return { error: NO_POSITION_ROWS_FOUND };
   }
+
   if (noValues || !maxPositionWithValues || maxPositionWithValues < 2) return blankDraw('no values');
 
   let positionLimit;
@@ -152,9 +154,10 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   let roundParticipants = getRoundParticipants({ positionAssignments, participants: firstRoundParticipants }) || [];
 
+  let boundaryIndexColumn;
   // if positionAssignments have been determined then push an additional round for processing
   if (positionAssignments.length) {
-    const boundaryIndexColumn = analysis.columnProfiles[boundaryIndex].column;
+    boundaryIndexColumn = analysis.columnProfiles[boundaryIndex].column;
     if (!roundColumns.includes(boundaryIndexColumn)) {
       roundColumns.unshift(boundaryIndexColumn);
     }
@@ -206,8 +209,20 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     return blankDraw('no participants');
   }
 
-  if (!Object.values(columnsWithParticipants).length) {
-    console.log({ columnsWithParticipants });
+  const roundAttributeColumns = columnProfiles
+    .filter(
+      ({ column, attribute, character }) =>
+        (columns.indexOf(column) > boundaryIndex && attribute === ROUND) ||
+        character === RESULT ||
+        (!attribute && character === ROUND)
+    )
+    .map(({ column }) => column);
+
+  const playerAdvancement = roundAttributeColumns.filter((column) =>
+    Object.keys(columnsWithParticipants).includes(column)
+  ).length;
+
+  if (!playerAdvancement) {
     if (participants.length && noConfidenceValues.length) {
       return { error: POSITION_PROGRESSION, participants };
     }
