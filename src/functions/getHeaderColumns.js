@@ -1,10 +1,10 @@
 // function confirms that header columns are in expected position
 
 import { findValueRefs, getCellValue, getCol, getRow } from './sheetAccess';
+import { audit, getLoggingActive } from '../global/state';
 import { pushGlobalLog } from '../utilities/globalLog';
 import { tidyValue } from '../utilities/convenience';
 import { utilities } from 'tods-competition-factory';
-import { getLoggingActive } from '../global/state';
 
 // and adjusts when possible...
 export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
@@ -93,6 +93,7 @@ export function getHeaderColumns({ sheet, profile, headerRow, columnValues }) {
     .map((column) => headerValueMap[column]);
 
   if (unmappedColumns.length) {
+    audit({ unmappedColumns });
     const message = `Unknown Header Columns`;
     pushGlobalLog({
       method: 'warning',
