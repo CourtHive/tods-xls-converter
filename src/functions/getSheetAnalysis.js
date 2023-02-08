@@ -1,4 +1,5 @@
-import { hasNumeric, isNumeric, isScoreLike, isString } from '../utilities/identification';
+// import { hasNumeric, isNumeric, isScoreLike, isString } from '../utilities/identification';
+import { hasNumeric, isNumeric, isString } from '../utilities/identification';
 import { extendColumnsMap, getHeaderColumns } from './getHeaderColumns';
 import { getColumnAssessment } from './getColumnAssessment';
 import { getCol, getRow, keyRowSort } from './sheetAccess';
@@ -104,36 +105,6 @@ export const getSheetAnalysis = ({
     if (character && !columns[character]) {
       if (!columnProfile.character) columnProfile.character = character;
       extendColumnsMap({ columnsMap: columns, attribute: character, column: columnProfile.column });
-    }
-  });
-
-  columnProfiles.forEach((profile) => {
-    const keyIndex = columnKeys.indexOf(profile.column);
-    const priorColumn = columnKeys[keyIndex - 1];
-    const priorProfile = columnProfiles.find(({ column }) => column === priorColumn);
-    const consideredValues = priorProfile?.values.filter((value) => !isScoreLike(value));
-    const repeatValues =
-      consideredValues?.length &&
-      profile.values.every((value) => consideredValues.includes(value)) &&
-      profile.values.length < consideredValues.length / 2 &&
-      profile.rows.every((row) => priorProfile.rows.includes(row));
-    const subsequentColumn = columnKeys[keyIndex + 1];
-    const subsequentProfile = columnProfiles.find(({ column }) => column === subsequentColumn);
-    if (
-      repeatValues &&
-      subsequentProfile?.values?.length &&
-      ![priorProfile.attribute, priorProfile.character].includes(POSITION)
-    ) {
-      const message = `Repeated Round Values`;
-      pushGlobalLog({
-        method: 'notice',
-        color: 'brightyellow',
-        keyColors: { message: 'cyan', attributes: 'brightyellow', column: 'brightred' },
-        message,
-        column: profile.column
-      });
-      console.log({ repeatValues, fileName, sheetName });
-      profile.values = [];
     }
   });
 
@@ -250,6 +221,41 @@ export const getSheetAnalysis = ({
       }
     }
   }
+
+  /*
+  columnProfiles.forEach((profile) => {
+    const keyIndex = columnKeys.indexOf(profile.column);
+    const priorColumn = columnKeys[keyIndex - 1];
+    const priorProfile = columnProfiles.find(({ column }) => column === priorColumn);
+    const consideredValues = priorProfile?.values.filter((value) => !isScoreLike(value));
+    const repeatValues =
+      consideredValues?.length &&
+      profile.values.every((value) => consideredValues.includes(value)) &&
+      profile.values.length < consideredValues.length / 2 &&
+      profile.rows.every((row) => priorProfile.rows.includes(row));
+    const subsequentColumn = columnKeys[keyIndex + 1];
+    const subsequentProfile = columnProfiles.find(({ column }) => column === subsequentColumn);
+    if (
+      repeatValues &&
+      subsequentProfile?.values?.length &&
+      ![priorProfile.attribute, priorProfile.character].includes(POSITION)
+    ) {
+      const message = `Repeated Round Values`;
+      pushGlobalLog({
+        method: 'notice',
+        color: 'brightyellow',
+        keyColors: { message: 'cyan', attributes: 'brightyellow', column: 'brightred' },
+        message,
+        column: profile.column
+      });
+      console.log(
+        { column: profile.column, priorColumn, subsequentColumn, repeatValues, fileName, sheetName, consideredValues },
+        profile.values
+      );
+      profile.values = [];
+    }
+  });
+  */
 
   const result = {
     potentialResultValues,

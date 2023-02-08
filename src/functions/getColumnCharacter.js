@@ -22,7 +22,8 @@ export function getColumnCharacter({
     containsAlpha,
     allNumeric,
     values,
-    column
+    column,
+    rows
   } = columnProfile;
 
   if (columnProfile.character) return { character: columnProfile.character };
@@ -79,7 +80,10 @@ export function getColumnCharacter({
     const numericMap = values.map(isNumeric);
     const lastNumeric = numericMap.lastIndexOf(true);
     const firstAlpha = numericMap.indexOf(false);
-    if (firstAlpha > lastNumeric) columnProfile.values = values.slice(firstAlpha);
+    if (firstAlpha > lastNumeric) {
+      columnProfile.values = values.slice(firstAlpha);
+      columnProfile.rows = rows.slice(firstAlpha);
+    }
   }
 
   const { character: roundCharacter } = getRoundCharacter({ attributeMap, columnProfiles, columnProfile });
