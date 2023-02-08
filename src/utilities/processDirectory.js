@@ -17,6 +17,7 @@ export function processDirectory({
   writeMatchUps = false,
   writeDir = './',
   readDir = './',
+  writeXLSX,
 
   useFileCreationDate = true,
   tournamentContext = {},
@@ -442,7 +443,7 @@ export function processDirectory({
   if (logging) console.log(report);
 
   if (writeMatchUps && writeDir) {
-    writeTODS08CSV({ matchUps: filteredMatchUps, writeDir });
+    writeTODS08CSV({ matchUps: filteredMatchUps, writeDir, writeXLSX });
 
     report.timeStamp = new Date().toISOString();
     if (errorType) report.errorType = errorType;

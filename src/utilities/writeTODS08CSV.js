@@ -1,8 +1,10 @@
 import { utilities } from 'tods-competition-factory';
 import { writeFileSync } from 'fs-extra';
+import { utils, writeFile } from 'xlsx';
+
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
-export function writeTODS08CSV({ matchUps, writeDir }) {
+export function writeTODS08CSV({ matchUps, writeDir, writeXLSX }) {
   const getPerspectiveScoreString = (matchUp) => {
     const { score, winningSide } = matchUp;
     matchUp.perspectiveScoreString =
@@ -93,6 +95,15 @@ export function writeTODS08CSV({ matchUps, writeDir }) {
       'Side2Player2'
     ]
   };
-  const csvMatchUps = utilities.JSON2CSV(matchUps, config);
-  writeFileSync(`${writeDir}/matchUps.csv`, csvMatchUps, 'UTF-8');
+
+  if (writeXLSX) {
+    const flatJSONmatchUps = utilities.JSON2CSV(matchUps, { ...config, returnTransformedJSON: true });
+    const worksheet = utils.json_to_sheet(flatJSONmatchUps);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'matchUps');
+    writeFile(workbook, `${writeDir}/matchUps.xlsx`, { compression: true });
+  } else {
+    const csvMatchUps = utilities.JSON2CSV(matchUps, config);
+    writeFileSync(`${writeDir}/matchUps.csv`, csvMatchUps, 'UTF-8');
+  }
 }
