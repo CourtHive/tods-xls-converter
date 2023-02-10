@@ -92,7 +92,7 @@
     "hash-sum": "^2.0.0",
     "node-xlsx": "^0.21.0",
     "normalize-text": "^2.4.1",
-    "tods-competition-factory": "0.436.2",
+    "tods-competition-factory": "0.438.0",
     "xlsx": "0.18.5"
   },
   "lint-staged": {
