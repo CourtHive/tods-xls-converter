@@ -16,7 +16,7 @@ export function getRound({
   columnsWithParticipants,
   subsequentColumnLimit,
   confidenceThreshold,
-  positionProgression,
+  roundRows,
   roundParticipants,
   pairedRowNumbers,
   roundColumns,
@@ -176,7 +176,7 @@ export function getRound({
       if (finalMatchUp) {
         const relevantColumns = roundColumns.slice(columnIndex - 1).reverse();
         potentialValues = relevantColumns.map((relevantColumn, relevantIndex) => {
-          const relevantProgression = positionProgression[positionProgression.length - relevantIndex - 1].flat();
+          const relevantProgression = roundRows[roundRows.length - relevantIndex - 1].flat();
           const pairCount = relevantProgression.length / 2;
           const relevantPair = relevantProgression.slice(pairCount - 1, pairCount + 1);
 

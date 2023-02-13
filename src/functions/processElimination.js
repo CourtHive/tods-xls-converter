@@ -69,7 +69,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     avoidRows.push(...positionAvoidanceRange);
   }
 
-  const { positionRefs, positionProgression, preRoundParticipantRows, error } = getPositionRefs({
+  const { positionRefs, roundRows, preRoundParticipantRows, error } = getPositionRefs({
     columnProfiles,
     positionColumn,
     preRoundColumn,
@@ -233,13 +233,13 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
   // -------------------------------------------------------------------------------------------------
 
   while (columnIndex < roundColumns.length) {
-    const pairedRowNumbers = positionProgression[roundNumber - 1];
+    const pairedRowNumbers = roundRows[roundNumber - 1];
     if (pairedRowNumbers) {
       const result = getRound({
         columnsWithParticipants,
         subsequentColumnLimit,
         confidenceThreshold,
-        positionProgression,
+        roundRows,
         roundParticipants,
         pairedRowNumbers,
         participants,
@@ -319,7 +319,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
 
   Object.assign(analysis, {
     preRoundParticipantRows,
-    positionProgression,
+    roundRows,
     positionRefs
   });
 
