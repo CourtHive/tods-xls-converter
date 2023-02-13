@@ -91,7 +91,7 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const errorType = NONE;
+  const errorType = POSITION_PROGRESSION;
   const subDir = errorType && `/${errorType}`;
   const year = '2022';
   if (subDir || year) {
@@ -105,13 +105,13 @@ it('can process tests', () => {
   const writeTournamentRecords = false;
   const writeParticipants = false;
   const moveErrorFiles = false;
-  const writeMatchUps = true;
+  const writeMatchUps = false;
   const writeXLSX = false; // optional output for matchUps; if true then now .csv output is produced
   let writeResultIndex;
 
   // sheet processing config
   const sheetTypes = [];
-  const sheetNumbers = [];
+  const sheetNumbers = [5];
   const sheetLimit = 0;
 
   // workbook processing config

@@ -85,14 +85,14 @@
     "rollup-plugin-terser": "7.0.2",
     "typescript": "^4.9.4",
     "vite": "^4.0.3",
-    "vitest": "0.28.3"
+    "vitest": "0.28.4"
   },
   "dependencies": {
     "fast-fuzzy": "^1.12.0",
     "hash-sum": "^2.0.0",
     "node-xlsx": "^0.21.0",
     "normalize-text": "^2.4.1",
-    "tods-competition-factory": "0.438.0",
+    "tods-competition-factory": "0.439.0",
     "xlsx": "0.18.5"
   },
   "lint-staged": {
