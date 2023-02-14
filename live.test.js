@@ -104,8 +104,8 @@ it('can process tests', () => {
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const moveErrorFiles = true;
-  const writeMatchUps = true;
+  const moveErrorFiles = false;
+  const writeMatchUps = false;
   const writeXLSX = false; // optional output for matchUps; if true then now .csv output is produced
   let writeResultIndex;
 
@@ -115,7 +115,7 @@ it('can process tests', () => {
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 0;
+  const processLimit = 100;
   const startIndex = 0;
 
   resetLogging();
