@@ -12,9 +12,14 @@ export function getCheckedValue({ profile, sheet, key }) {
     });
   }
   if (profile.replaceWords) {
-    profile.replaceWords.forEach(({ value, replacement }) => {
-      if (rawValue.toLowerCase() === value) {
+    profile.replaceWords.forEach(({ regex, value, replacement }) => {
+      if (value && rawValue.toLowerCase() === value) {
         rawValue = replacement;
+      } else if (regex) {
+        const re = new RegExp(regex);
+        if (re.test(rawValue.toString().toLowerCase())) {
+          rawValue = replacement;
+        }
       }
     });
   }
