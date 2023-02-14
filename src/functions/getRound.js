@@ -1,5 +1,5 @@
 import { matchUpStatusConstants, mocksEngine, utilities } from 'tods-competition-factory';
-import { getPotentialResult, isScoreLike } from '../utilities/identification';
+import { getPotentialResult, isNumeric, isScoreLike } from '../utilities/identification';
 import { getParticipantValues } from './getParticipantValues';
 import { audit, getLoggingActive } from '../global/state';
 import { generateMatchUpId } from '../utilities/hashing';
@@ -16,13 +16,14 @@ export function getRound({
   columnsWithParticipants,
   subsequentColumnLimit,
   confidenceThreshold,
-  roundRows,
+  positionProgression,
   roundParticipants,
   pairedRowNumbers,
   roundColumns,
   columnIndex,
   roundNumber,
   isPreRound,
+  roundRows,
   analysis,
   profile
 }) {
@@ -35,7 +36,9 @@ export function getRound({
   const providerWalkover = tidyLower(profile.matchUpStatuses?.walkover || WALKOVER);
   const providerDoubleWalkover = tidyLower(profile.matchUpStatuses?.doubleWalkover || DOUBLE_WALKOVER);
 
+  const indexedParticipantsAdvancing = {};
   const advancingParticipants = [];
+  const advancingPositions = [];
   const participantDetails = [];
   const matchUps = [];
 
@@ -59,7 +62,7 @@ export function getRound({
     // ACTION: pre-process subsequent column values to determine if any results are combined with advancing participant
     // TODO: consider proactively characterizing all values to facilitate meta analysis before pulling values
     const potentialResults = [];
-    let columnValues = pairedRowNumbers.map((pair) => {
+    let columnValues = pairedRowNumbers.map((pair, columnIndex) => {
       let start = pair[0];
       let end = pair[1] + 1;
       if (analysis.separationFactor > 2) {
@@ -72,7 +75,6 @@ export function getRound({
       }
 
       const rowRange = utilities.generateRange(start, end);
-      // if (roundNumber === 1) console.log({ pair, rowRange });
       let pv = relevantSubsequentColumns.map((relevantColumn) => {
         const keyMap = analysis.columnProfiles.find(({ column }) => column === relevantColumn).keyMap;
         return Object.keys(keyMap)
@@ -81,9 +83,9 @@ export function getRound({
       });
       const pr = pv[0]
         ?.map((value) => {
-          const { leader, potentialResult } = getPotentialResult(value);
+          const { leader: potentialPosition, potentialResult } = getPotentialResult(value, roundNumber);
 
-          return leader && potentialResult;
+          return potentialPosition && potentialResult && { columnIndex, potentialPosition, potentialResult };
         })
         .filter(Boolean);
       if (pr?.length) potentialResults.push(pr);
@@ -109,6 +111,69 @@ export function getRound({
         [0, 0, 0]
       );
     }
+
+    // START: Position Progression
+    const pairedPotentialPositions = roundParticipants.map((pair) => pair.map(({ drawPosition }) => drawPosition));
+    const allPotentialPositions = pairedPotentialPositions.flat();
+    const ppMap = columnValues
+      .map((column, columnIndex) => {
+        let potentialPosition;
+        let potentialResult;
+        column.forEach((values, consumedIndex) => {
+          const ptp = values.find((v) => allPotentialPositions.includes(v));
+          if (ptp && !potentialPosition) {
+            //        if (consumedIndex > columnsConsumed) columnsConsumed = consumedIndex;
+            potentialPosition = ptp;
+          }
+          const ptr = values.find((v) => !allPotentialPositions.includes(v));
+          if (ptr && isScoreLike(ptr) && !potentialResult) {
+            //        if (consumedIndex > columnsConsumed) columnsConsumed = consumedIndex;
+            potentialResult = ptr;
+          }
+        });
+        if (potentialPosition) return [{ potentialPosition, potentialResult, columnIndex }];
+      })
+      .filter(Boolean);
+
+    // integrity check for pure progressed positions (not mashed with scores)
+    const progressedPositions = ppMap.flat().map(({ potentialPosition }) => potentialPosition);
+    const isSorted = (arr) => arr.every((v, i, a) => !i || a[i - 1] <= v);
+    const validProgressedPositions = progressedPositions.length && isSorted(progressedPositions);
+    if (validProgressedPositions) potentialResults.push(...ppMap);
+
+    // must be sorted in case those pushed by ppMap are out of order
+    potentialResults.sort((a, b) => a[0]?.columnIndex - b[0]?.columnIndex);
+
+    const potentialPositions = potentialResults
+      .map((potential) => {
+        const potentialPosition = potential[0]?.potentialPosition;
+        if (isNumeric(potentialPosition)) return potentialPosition;
+      })
+      .filter(Boolean);
+    const validPotentialPositions = pairedPotentialPositions.filter(
+      (pairedPositions, i) => !potentialPositions[i] || pairedPositions.includes(potentialPositions[i])
+    );
+    const advancingPotentialPositions = [];
+    if (validPotentialPositions.length) {
+      let lastPotentialPosition = 0;
+      potentialPositions.forEach((pp) => {
+        // do not accept positions which are out of order
+        // next potentialPositions must be greater than the previous
+        if (pp > lastPotentialPosition) {
+          lastPotentialPosition = pp;
+          advancingPotentialPositions.push(pp);
+        }
+      });
+    }
+
+    advancingPotentialPositions.forEach((pos) => {
+      const positionIndex = potentialResults.flat().find((r) => r.potentialPosition === pos)?.columnIndex;
+      if (positionIndex !== undefined)
+        indexedParticipantsAdvancing[positionIndex] = roundParticipants
+          .flat()
+          .find(({ drawPosition }) => drawPosition === pos);
+    });
+    // END: Position Progression
 
     // considerTwo recognizes when the total of the values in two subsequent columns
     // is less than or equal to the expected number of values (roundParticipants * 2)
@@ -163,7 +228,12 @@ export function getRound({
     // ACTION: process all roundPositions
     pairedRowNumbers?.forEach((_, pairIndex) => {
       const consideredParticipants = roundParticipants?.[pairIndex]?.filter(Boolean);
-      if (!consideredParticipants) return;
+      if (!consideredParticipants) {
+        advancingParticipants.push({});
+        return;
+      }
+
+      let advancingParticipant;
 
       const isBye = consideredParticipants?.find(({ isByePosition }) => isByePosition);
       let potentialValues = columnValues[pairIndex];
@@ -172,11 +242,10 @@ export function getRound({
 
       const roundPosition = pairIndex + 1;
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      // ACTION: if column contains one matchUp (final) then consider value may occur in prior or current colummn
-      if (finalMatchUp) {
+      const finalMatchUpPotentialValues = () => {
         const relevantColumns = roundColumns.slice(columnIndex - 1).reverse();
         potentialValues = relevantColumns.map((relevantColumn, relevantIndex) => {
-          const relevantProgression = roundRows[roundRows.length - relevantIndex - 1].flat();
+          const relevantProgression = roundRows[roundRows.length - relevantIndex - 1]?.flat() || [];
           const pairCount = relevantProgression.length / 2;
           const relevantPair = relevantProgression.slice(pairCount - 1, pairCount + 1);
 
@@ -191,7 +260,9 @@ export function getRound({
             .filter((key) => pairRange.includes(getRow(key)))
             .map((key) => keyMap[key]);
         });
-      }
+      };
+      // ACTION: if column contains one matchUp (final) then consider value may occur in prior or current colummn
+      if (finalMatchUp) finalMatchUpPotentialValues();
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
       const advanceTargets = getAdvanceTargets({
@@ -219,11 +290,8 @@ export function getRound({
 
       if (advancedSide) {
         if (roundParticipants?.length) {
-          const advancingParticipant = consideredParticipants[advancedSide - 1];
-          advancingParticipants.push(advancingParticipant);
+          advancingParticipant = consideredParticipants[advancedSide - 1];
         }
-      } else {
-        advancingParticipants.push({});
       }
 
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -300,6 +368,7 @@ export function getRound({
         matchUps.push(matchUp);
       }
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      advancingParticipants.push(advancingParticipant || {});
     });
     // -------------------------------------------------------------------------------------------------
   }
