@@ -8,20 +8,21 @@ import { getSheetAnalysis } from './getSheetAnalysis';
 import { identifySheet } from './identifySheet';
 import { extractInfo } from './extractInfo';
 
+import { KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
+import { SUCCESS } from '../constants/resultConstants';
 import {
   MISSING_SHEET_DEFINITION,
   MISSING_WORKBOOK,
   NO_RESULTS_FOUND,
   UNKNOWN_WORKBOOK_TYPE
 } from '../constants/errorConditions';
-import { KNOCKOUT, ROUND_ROBIN, INDETERMINATE } from '../constants/sheetTypes';
-import { SUCCESS } from '../constants/resultConstants';
 
 const { PAIR } = participantConstants;
 
 const invalidNames = [];
 
-export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTypes, processStructures } = {}) {
+export function processSheets({ fileName, config = {} } = {}) {
+  const { sheetLimit, sheetNumbers = [] } = config;
   const { workbook, workbookType } = getWorkbook();
   const logging = getLoggingActive('dev');
 
@@ -65,12 +66,11 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
     if (getLoggingActive('sheetNames')) console.log({ sheetName, sheetNumber });
 
     const result = processSheet({
-      processStructures,
       sheetNumber,
-      sheetTypes,
       sheetName,
       fileName,
       workbook,
+      config,
       profile
     });
 
@@ -214,16 +214,9 @@ export function processSheets({ sheetLimit, sheetNumbers = [], fileName, sheetTy
   return { sheetAnalysis, errorLog, warningLog, resultValues, skippedResults, participants, totalMatchUps, ...SUCCESS };
 }
 
-export function processSheet({
-  processStructures,
-  sheetTypes = [],
-  sheetNumber,
-  sheetName,
-  fileName,
-  workbook,
-  profile
-}) {
+export function processSheet({ sheetNumber, sheetName, fileName, workbook, config, profile }) {
   const sheet = workbook.Sheets[sheetName];
+  const { sheetTypes = [], processStructures } = config;
 
   const { hasValues, sheetDefinition } = identifySheet({ sheetName, sheet, profile });
 
@@ -271,16 +264,19 @@ export function processSheet({
   if (sheetDefinition.type === KNOCKOUT) {
     return processElimination({
       analysis,
+      config,
       ...props
     });
   } else if (sheetDefinition.type === ROUND_ROBIN) {
     return processRoundRobin({
       analysis,
+      config,
       ...props
     });
   } else if (sheetDefinition.type === INDETERMINATE) {
     return processIndeterminate({
       analysis,
+      config,
       ...props
     });
   } else {
