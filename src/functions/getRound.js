@@ -294,9 +294,11 @@ export function getRound({
         }
       }
 
+      const drawPositions = consideredParticipants?.map(({ drawPosition }) => drawPosition).filter(Boolean);
       if (!advancedSide && (potentialPositions.length || advancingPotentialPositions.length)) {
-        advancingParticipant = indexedParticipantsAdvancing[pairIndex];
-        if (advancingParticipant) {
+        const drawPosition = indexedParticipantsAdvancing[pairIndex]?.drawPosition;
+        if (drawPosition && drawPositions.includes(drawPosition)) {
+          advancingParticipant = indexedParticipantsAdvancing[pairIndex];
           advancingPositions.push(advancingParticipant.drawPosition);
           advancedSide = consideredParticipants.reduce((advanced, considered, index) => {
             return advancingPositions.includes(considered.drawPosition) ? index + 1 : advanced;
@@ -308,21 +310,11 @@ export function getRound({
             const potentialScore = potentialValues.flat().find((v) => v !== advancedPosition && isScoreLike(v));
             result = potentialScore;
           }
-          console.log({
-            isBye,
-            consideredParticipants,
-            advancingParticipant,
-            advancedSide,
-            result,
-            fileName: analysis.fileName,
-            sheetName: analysis.sheetName
-          });
         }
       }
 
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       // ACTION: construct matchUp object; determine matchUpStatus and winningSide
-      const drawPositions = consideredParticipants?.map(({ drawPosition }) => drawPosition).filter(Boolean);
       const matchUp = { roundNumber, roundPosition, drawPositions };
 
       if (isBye) {
