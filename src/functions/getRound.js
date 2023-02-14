@@ -83,7 +83,7 @@ export function getRound({
       });
       const pr = pv[0]
         ?.map((value) => {
-          const { leader: potentialPosition, potentialResult } = getPotentialResult(value, roundNumber);
+          const { potentialPosition, potentialResult } = getPotentialResult(value, roundNumber);
 
           return potentialPosition && potentialResult && { columnIndex, potentialPosition, potentialResult };
         })
