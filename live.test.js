@@ -91,7 +91,7 @@ it.skip('can process passing', () => {
 });
 
 it('can process tests', () => {
-  const errorType = POSITION_PROGRESSION;
+  const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
   const year = '2022';
   if (subDir || year) {
@@ -104,22 +104,22 @@ it('can process tests', () => {
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const moveErrorFiles = false;
-  const writeMatchUps = false;
+  const moveErrorFiles = true;
+  const writeMatchUps = true;
   const writeXLSX = false; // optional output for matchUps; if true then now .csv output is produced
   let writeResultIndex;
 
   // sheet processing config
   const sheetTypes = [];
-  const sheetNumbers = [5];
+  const sheetNumbers = [];
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 1;
+  const processLimit = 0;
   const startIndex = 0;
 
   resetLogging();
-  setLoggingActive(true);
+  setLoggingActive(false);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
     roundNumbers: [1],

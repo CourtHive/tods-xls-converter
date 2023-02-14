@@ -69,6 +69,7 @@ export const config = {
     ],
     skipWords: [
       // all behave as startsWith
+      'ww',
       'winner',
       'a/f',
       'winner;',
