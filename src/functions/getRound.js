@@ -119,15 +119,13 @@ export function getRound({
       .map((column, columnIndex) => {
         let potentialPosition;
         let potentialResult;
-        column.forEach((values, consumedIndex) => {
+        column.forEach((values) => {
           const ptp = values.find((v) => allPotentialPositions.includes(v));
           if (ptp && !potentialPosition) {
-            //        if (consumedIndex > columnsConsumed) columnsConsumed = consumedIndex;
             potentialPosition = ptp;
           }
           const ptr = values.find((v) => !allPotentialPositions.includes(v));
           if (ptr && isScoreLike(ptr) && !potentialResult) {
-            //        if (consumedIndex > columnsConsumed) columnsConsumed = consumedIndex;
             potentialResult = ptr;
           }
         });
@@ -265,32 +263,60 @@ export function getRound({
       if (finalMatchUp) finalMatchUpPotentialValues();
       // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-      const advanceTargets = getAdvanceTargets({
-        providerDoubleWalkover,
-        consideredParticipants,
-        confidenceThreshold,
-        providerWalkover,
-        potentialValues,
-        roundPosition,
-        roundNumber,
-        analysis,
-        profile
-      });
-      if (advanceTargets.columnsConsumed > columnsConsumed) {
-        columnsConsumed = advanceTargets.columnsConsumed;
+      if (!positionProgression) {
+        const advanceTargets = getAdvanceTargets({
+          providerDoubleWalkover,
+          consideredParticipants,
+          confidenceThreshold,
+          providerWalkover,
+          potentialValues,
+          roundPosition,
+          roundNumber,
+          analysis,
+          profile
+        });
+        if (advanceTargets.columnsConsumed > columnsConsumed) {
+          columnsConsumed = advanceTargets.columnsConsumed;
+        }
+
+        ({ advancedSide, result } = advanceTargets);
+
+        if (finalMatchUp && (!advancedSide || !result)) {
+          // console.log({ finalRound, consideredParticipants, potentialValues });
+          // console.log({ finalMatchUp }, 'No Result');
+          // console.log({ sheetName: analysis.sheetName, pairedRowNumbers, potentialValues });
+        }
+
+        if (advancedSide) {
+          if (roundParticipants?.length) {
+            advancingParticipant = consideredParticipants[advancedSide - 1];
+          }
+        }
       }
 
-      ({ advancedSide, result } = advanceTargets);
-
-      if (finalMatchUp && (!advancedSide || !result)) {
-        // console.log({ finalRound, consideredParticipants, potentialValues });
-        // console.log({ finalMatchUp }, 'No Result');
-        // console.log({ sheetName: analysis.sheetName, pairedRowNumbers, potentialValues });
-      }
-
-      if (advancedSide) {
-        if (roundParticipants?.length) {
-          advancingParticipant = consideredParticipants[advancedSide - 1];
+      if (!advancedSide && (potentialPositions.length || advancingPotentialPositions.length)) {
+        advancingParticipant = indexedParticipantsAdvancing[pairIndex];
+        if (advancingParticipant) {
+          advancingPositions.push(advancingParticipant.drawPosition);
+          advancedSide = consideredParticipants.reduce((advanced, considered, index) => {
+            return advancingPositions.includes(considered.drawPosition) ? index + 1 : advanced;
+          }, undefined);
+          const advancedPosition = advancedSide && consideredParticipants[advancedSide - 1].drawPosition;
+          result = potentialResults.find((r) => r[0]?.potentialPosition === advancedPosition)?.[0]?.potentialResult;
+          if (finalRound && !result) {
+            finalMatchUpPotentialValues();
+            const potentialScore = potentialValues.flat().find((v) => v !== advancedPosition && isScoreLike(v));
+            result = potentialScore;
+          }
+          console.log({
+            isBye,
+            consideredParticipants,
+            advancingParticipant,
+            advancedSide,
+            result,
+            fileName: analysis.fileName,
+            sheetName: analysis.sheetName
+          });
         }
       }
 
@@ -301,6 +327,11 @@ export function getRound({
 
       if (isBye) {
         matchUp.matchUpStatus = BYE;
+        const consideredToAdvance = consideredParticipants.find((p) => !p.isByePosition);
+        // handle positionProgression scenarios where no valid drawPosition is found
+        if (consideredToAdvance && !advancingPositions.includes(consideredToAdvance?.drawPosition)) {
+          advancingParticipant = consideredToAdvance;
+        }
       } else if (result === providerDoubleWalkover?.toLowerCase()) {
         matchUp.matchUpStatus = DOUBLE_WALKOVER;
       } else if ([providerWalkover, WALKOVER, 'w/o'].map((w) => (w || '').toLowerCase()).includes(result)) {
