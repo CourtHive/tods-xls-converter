@@ -31,15 +31,15 @@ export function getPotentialResult(value) {
   let isPotential = isScoreLike(potentialResult) && digitsCount(potentialResult) > 1;
 
   const stringValue = value?.toString().toLowerCase();
-  const splitter = stringValue.indexOf(':') ? ':' : ' ';
-  const lastPart = stringValue.split(splitter).reverse()[0];
+  const splitter = stringValue?.indexOf(':') ? ':' : ' ';
+  const lastPart = stringValue?.split(splitter).reverse()[0];
 
   if (['walkover', 'wo', 'w/o'].includes(lastPart)) {
     potentialResult = 'WALKOVER';
     isPotential = true;
   }
 
-  const potentialPosition = /^\d+$/.test(splitValue?.[0]) ? parseInt(splitValue[0]) : '';
+  const potentialPosition = splitValue && /^\d+$/.test(splitValue[0]) ? parseInt(splitValue[0]) : '';
 
   return { potentialPosition, potentialResult: isPotential && potentialResult };
 }
