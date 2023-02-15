@@ -27,7 +27,7 @@ import {
 
 const { QUALIFYING: QUALIFYING_STAGE, MAIN } = drawDefinitionConstants;
 
-export function processElimination({ profile, analysis, sheet, confidenceThreshold = 0.7 }) {
+export function processElimination({ profile, analysis, sheet, confidenceThreshold = 0.7, config }) {
   const { columnProfiles, avoidRows } = analysis;
   analysis.drawType = 'SINGLE_ELIMINATION';
 
@@ -222,11 +222,22 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     Object.keys(columnsWithParticipants).includes(column)
   ).length;
 
+  let positionProgression;
   if (!playerAdvancement) {
     if (participants.length && noConfidenceValues.length) {
-      return { error: POSITION_PROGRESSION, participants };
+      if (!config.progressedPositions) {
+        return { error: POSITION_PROGRESSION, participants };
+      } else {
+        positionProgression = true;
+        pushGlobalLog({
+          method: 'notice',
+          keyColors: { message: 'green', attributes: 'cyan' },
+          message: 'Position Progression'
+        });
+      }
+    } else {
+      return { warnings: [NO_PROGRESSED_PARTICIPANTS], participants };
     }
-    return { warnings: [NO_PROGRESSED_PARTICIPANTS], participants };
   }
 
   const resultRounds = [];
@@ -239,13 +250,14 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
         columnsWithParticipants,
         subsequentColumnLimit,
         confidenceThreshold,
-        roundRows,
+        positionProgression,
         roundParticipants,
         pairedRowNumbers,
         participants,
         roundColumns,
         columnIndex,
         roundNumber,
+        roundRows,
         analysis,
         profile
       });

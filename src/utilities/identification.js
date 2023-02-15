@@ -14,10 +14,12 @@ export function excludeSingleDigits(value) {
 }
 export function splitValueOnFirstDigit(value) {
   if (!value) return;
-  const parts = value.toString().toLowerCase().split(' ');
-  const firstDigitPart = parts.find((part) => /\d/.test(part));
+  const parts = value.toString().toLowerCase().split(' ').filter(Boolean);
+  const firstDigitPart = parts.find((part) => /\d+/.test(part));
   const firstDigitIndex = parts.indexOf(firstDigitPart);
-  return [parts.slice(0, firstDigitIndex).join(' '), parts.slice(firstDigitIndex).join(' ')];
+  return parts.length >= 2
+    ? [parts.slice(0, firstDigitIndex + 1).join(' '), parts.slice(firstDigitIndex + 1).join(' ')]
+    : undefined;
 }
 export function digitsCount(value) {
   return (value.match(/\d/g) || []).length;
@@ -28,12 +30,16 @@ export function getPotentialResult(value) {
 
   let isPotential = isScoreLike(potentialResult) && digitsCount(potentialResult) > 1;
 
-  const lastPart = value?.toString().toLowerCase().split(' ').reverse()[0];
+  const stringValue = value?.toString().toLowerCase();
+  const splitter = stringValue?.indexOf(':') ? ':' : ' ';
+  const lastPart = stringValue?.split(splitter).reverse()[0];
 
   if (['walkover', 'wo', 'w/o'].includes(lastPart)) {
     potentialResult = 'WALKOVER';
     isPotential = true;
   }
 
-  return { leader: splitValue?.[0], potentialResult: isPotential && potentialResult };
+  const potentialPosition = splitValue && /^\d+$/.test(splitValue[0]) ? parseInt(splitValue[0]) : '';
+
+  return { potentialPosition, potentialResult: isPotential && potentialResult };
 }
