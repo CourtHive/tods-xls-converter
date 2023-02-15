@@ -1,6 +1,6 @@
 import { isNumeric } from '../utilities/identification';
 
-import { FIRST_NAME, LAST_NAME } from '../constants/attributeConstants';
+import { FIRST_NAME, LAST_NAME, PERSON_ID } from '../constants/attributeConstants';
 import { RESULT, ROUND } from '../constants/sheetElements';
 
 export function getRoundCharacter({ attributeMap, columnProfiles, columnProfile }) {
@@ -15,6 +15,7 @@ export function getRoundCharacter({ attributeMap, columnProfiles, columnProfile 
       const consideredValues = values.filter((f) => f && !isNumeric(f));
 
       const isNameRound =
+        ![PERSON_ID].includes(columnProfile.attribute) &&
         consideredValues.length &&
         consideredValues.every((value) => {
           const isNameValue = nameColumnProfile?.values?.includes(value);

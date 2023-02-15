@@ -55,7 +55,10 @@ export const config = {
   profile: {
     providerId: 'IND-0123',
     identifierType: 'NationalID',
-    replaceWords: [{ value: '-bye-', replacement: 'bye' }],
+    replaceWords: [
+      { value: '-bye-', replacement: 'bye' },
+      { regex: '^bye', replacement: 'bye' }
+    ],
     exciseWords: [
       { regex: '^page \\d.*' },
       { regex: '.*\\d{2,}[ap]m' },
@@ -69,6 +72,7 @@ export const config = {
     ],
     skipWords: [
       // all behave as startsWith
+      'ww',
       'winner',
       'a/f',
       'winner;',
@@ -290,7 +294,7 @@ export const config = {
         ],
         limit: 1,
         required: true,
-        skipWords: ['reg', 'umpire', '0', 'a/f', 'AF', 'new id', 'app', 'new', 'applied'],
+        skipWords: ['reg', 'umpire', '0', 'a/f', 'AF', 'new id', 'app', 'new', 'bye', 'applied'],
         valueRegex: '[\\w-]*(\\d{5,})[ A-Za-z]*$',
         valueMatchThreshold: 0.45,
         extract: true
@@ -516,7 +520,7 @@ export const config = {
       return state?.toLowerCase() === 'india' ? '' : state;
     },
     columnCharacter: ({ columnProfile }) => {
-      const { values, allNumeric, greatestLength } = columnProfile;
+      const { values, allNumeric, greatestLength, lastNumericValue } = columnProfile;
       const allProgressionKeys = values.every(
         (value) => typeof value === 'string' && ['a', 'b', 'as', 'bs'].includes(value.toLowerCase())
       );
@@ -535,7 +539,12 @@ export const config = {
         columnProfile.character = PERSON_ID;
         return columnProfile.character;
       }
-      if (!columnProfile.attribute && allNumeric && greatestLength === 1 && columnProfile.column !== 'A') {
+      if (
+        !columnProfile.attribute &&
+        allNumeric &&
+        (greatestLength === 1 || lastNumericValue === '0') &&
+        columnProfile.column !== 'A'
+      ) {
         columnProfile.values = [];
         columnProfile.character = 'ignore';
         columnProfile.keyMap = {};

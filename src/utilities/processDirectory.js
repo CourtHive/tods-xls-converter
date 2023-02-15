@@ -11,30 +11,25 @@ import { pushGlobalLog } from './globalLog';
 import { MISSING_ID_COLUMN, NO_RESULTS_FOUND } from '../constants/errorConditions';
 const { BYE, WALKOVER, DOUBLE_WALKOVER } = matchUpStatusConstants;
 
-export function processDirectory({
-  writeTournamentRecords = false,
-  moveErrorFiles = false,
-  writeMatchUps = false,
-  writeDir = './',
-  readDir = './',
-  writeXLSX,
+export function processDirectory(config) {
+  const {
+    writeTournamentRecords = false,
+    moveErrorFiles = false,
+    writeMatchUps = false,
+    writeDir = './',
+    readDir = './',
+    writeXLSX,
 
-  useFileCreationDate = true,
-  tournamentContext = {},
-  matchUpContext = {},
+    useFileCreationDate = true,
+    tournamentContext = {},
+    matchUpContext = {},
 
-  defaultProvider,
+    captureProcessedData = true,
+    includeWorkbooks,
+    processLimit = 0,
+    startIndex = 0
+  } = config;
 
-  captureProcessedData = true,
-  processStructures = true,
-  includeWorkbooks,
-  processLimit = 0,
-  startIndex = 0,
-  sheetNumbers,
-  sheetTypes,
-  sheetLimit,
-  errorType
-}) {
   const isXLS = (fileName) => fileName.toLowerCase().split('.').reverse()[0].startsWith('xls');
   if (!existsSync(readDir)) {
     console.log('no such directory', { readDir });
@@ -88,10 +83,10 @@ export function processDirectory({
     const buf = readFileSync(filePath);
     const stat = statSync(filePath);
 
-    let result = loadWorkbook(buf, index, defaultProvider);
+    let result = loadWorkbook(buf, index, config.defaultProvider);
     const { workbookType } = result;
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
-    result = processSheets({ fileName, sheetNumbers, sheetLimit, sheetTypes, processStructures });
+    result = processSheets({ fileName, config });
 
     const processedSheets = Object.values(result.sheetAnalysis).filter(
       ({ hasValues, analysis }) => hasValues && !analysis?.skipped
@@ -280,7 +275,7 @@ export function processDirectory({
     let firstError;
     if (result.errorLog) {
       const errorKeys = Object.keys(result.errorLog) || [];
-      firstError = errorKeys.filter((error) => error !== errorType)[0];
+      firstError = errorKeys.filter((error) => error !== config?.errorType)[0];
       errorKeys.forEach((key) => {
         const sheetNames = result.errorLog[key];
         if (!errorLog[key]) {
@@ -446,7 +441,7 @@ export function processDirectory({
     writeTODS08CSV({ matchUps: filteredMatchUps, writeDir, writeXLSX });
 
     report.timeStamp = new Date().toISOString();
-    if (errorType) report.errorType = errorType;
+    if (config.errorType) report.errorType = config.errorType;
 
     const reportFile = `${writeDir}/report.json`;
     const existingReport = existsSync(reportFile) && readFileSync(reportFile, 'UTF-8');

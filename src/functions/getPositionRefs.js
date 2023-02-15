@@ -25,8 +25,8 @@ export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn
     .filter(Boolean);
 
   if (!missingPositions) {
-    const positionProgression = getPositionProgression(allRows);
-    return { positionRefs: knownRows.map(getRef), positionProgression };
+    const roundRows = getRoundRows(allRows);
+    return { positionRefs: knownRows.map(getRef), roundRows };
   }
 
   // difference between knownRows and keyedRows is that keyedRows could include non-numeric (preRound) values
@@ -42,22 +42,22 @@ export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn
   const allRows = [...knownRows, ...missingPositionRows].sort(utilities.numericSort);
 
   const preRoundParticipantRows = keyedRows.filter((row) => !knownRows.includes(row));
-  const positionProgression = getPositionProgression(allRows);
+  const roundRows = getRoundRows(allRows);
 
-  return { positionRefs: allRows.map(getRef), positionProgression, preRoundParticipantRows };
+  return { positionRefs: allRows.map(getRef), roundRows, preRoundParticipantRows };
 }
 
-function getPositionProgression(rows) {
-  const positionProgression = [];
+function getRoundRows(rows) {
+  const roundRows = [];
   let pairedRows = utilities.chunkArray(rows, 2);
-  positionProgression.push(pairedRows);
+  roundRows.push(pairedRows);
   while (pairedRows.length > 1) {
     const nextColumn = pairedRows.map(getMidPoint);
     pairedRows = utilities.chunkArray(nextColumn, 2);
-    positionProgression.push(pairedRows);
+    roundRows.push(pairedRows);
   }
 
-  return positionProgression;
+  return roundRows;
 }
 
 function getMidPoint(rows) {
