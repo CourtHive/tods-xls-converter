@@ -93,7 +93,7 @@ it.skip('can process passing', () => {
 it('can process tests', () => {
   const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
-  const year = '2022';
+  const year = '2016';
   if (subDir || year) {
     // do nothing!
   }
@@ -104,9 +104,9 @@ it('can process tests', () => {
   const writeDir = `./examples/sheets/processed/IND/${year}`;
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const moveErrorFiles = false;
-  const writeMatchUps = false;
-  const writeXLSX = false; // optional output for matchUps; if true then now .csv output is produced
+  const moveErrorFiles = true;
+  const writeMatchUps = true;
+  const writeXLSX = false; // optional output for matchUps; if true then no .csv output is produced
   let writeResultIndex;
 
   // sheet processing config
@@ -115,11 +115,11 @@ it('can process tests', () => {
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 100;
+  const processLimit = 0;
   const startIndex = 0;
 
   resetLogging();
-  setLoggingActive(true);
+  setLoggingActive(false);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
     roundNumbers: [1],
@@ -148,7 +148,7 @@ it('can process tests', () => {
   const config = {
     captureProcessedData: true, // set to false to bulk process > 200 files
     // tournamentContext: { startDate: '2022-06-06' },
-    // progressedPositions: true, // Boolean whether or not to check for positions progressed rather than participant names
+    progressedPositions: true, // Boolean whether or not to check for positions progressed rather than participant names
     processStructures: true,
     includeWorkbooks: false,
     writeTournamentRecords,
