@@ -56,7 +56,8 @@ const genderIdentifiers = [
   { searchText: 'femenino', gender: FEMALE }
 ];
 
-const organization = 'FEDERACION COSTARRICENSE DE TENIS';
+// const organization = 'FEDERACION COSTARRICENSE DE TENIS';
+const organization = 'CR';
 export const config = {
   organization,
   mustContainSheetNames: [],
