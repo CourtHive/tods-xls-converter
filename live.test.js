@@ -38,12 +38,12 @@ export function foo() {
   return boo && hoo;
 }
 
-it.skip('can process passing', () => {
-  const readDir = './examples/sheets/processing';
-  const writeDir = './examples/sheets/processed/CR';
+it.only('can process passing', () => {
+  const readDir = './examples/sheets/CostaRica/final';
+  const writeDir = './examples/sheets/processed/CR/final';
   const writeTournamentRecords = false;
   const writeParticipants = false;
-  const writeMatchUps = false;
+  const writeMatchUps = true;
   let writeResultIndex;
 
   const sheetTypes = []; // e.g. ROUND_ROBIN
@@ -62,8 +62,12 @@ it.skip('can process passing', () => {
   setLoggingActive(false, 'invalidResult');
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'matchUps');
-  const result = processDirectory({
+  const config = {
+    processStructures: true,
     writeTournamentRecords,
+    defaultProvider: 'CR',
+    writeParticipants,
+    writeResultIndex,
     writeMatchUps,
     processLimit,
     sheetNumbers,
@@ -72,8 +76,10 @@ it.skip('can process passing', () => {
     sheetTypes,
     writeDir,
     readDir
-  });
-  if (result);
+  };
+  const result = processDirectory(config);
+  if (result) processResult({ result, config });
+  /*
   printGlobalLog();
   purgeGlobalLog();
   console.log('PASSED', Object.keys(result));
@@ -88,9 +94,10 @@ it.skip('can process passing', () => {
   }
   if (!isNaN(writeResultIndex))
     writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
+    */
 });
 
-it('can process tests', () => {
+it.skip('can process tests', () => {
   const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
   const year = '2016';
