@@ -88,10 +88,12 @@ export function processDirectory(config) {
     const additionalContent = includeWorkbooks ? getWorkbook() : {};
     result = processSheets({ fileName, config });
 
-    const processedSheets = Object.values(result.sheetAnalysis).filter(
-      ({ hasValues, analysis }) => hasValues && !analysis?.skipped
-    ).length;
-    sheetsProcessed += processedSheets;
+    if (result.sheetAnalysis) {
+      const processedSheets = Object.values(result.sheetAnalysis).filter(
+        ({ hasValues, analysis }) => hasValues && !analysis?.skipped
+      ).length;
+      sheetsProcessed += processedSheets;
+    }
 
     if (captureProcessedData) {
       fileResults[index] = { fileName, ...result, ...additionalContent };
