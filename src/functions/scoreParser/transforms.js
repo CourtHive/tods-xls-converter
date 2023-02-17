@@ -12,7 +12,7 @@ import { handleNumeric } from './handleNumeric';
 import { setBuilder } from './setBuilder';
 
 export function stringScore({ score }) {
-  score = score.toString().toLowerCase();
+  score = score?.toString().toLowerCase() || '';
 
   return { score };
 }
@@ -84,7 +84,7 @@ export function removeErroneous({ score, applied }) {
 }
 
 export function handleWalkover({ score, applied }) {
-  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score.toString().toLowerCase())) {
+  if (['walkover', 'wo', 'w/o', 'w-o'].includes(score?.toString().toLowerCase())) {
     applied.push('handleWalkover');
     return { matchUpStatus: 'walkover', score: '', applied };
   }
@@ -92,7 +92,7 @@ export function handleWalkover({ score, applied }) {
 }
 
 export function handleRetired({ score, profile, applied }) {
-  score = score.toString().toLowerCase();
+  score = score?.toString().toLowerCase();
   const re = /^(.*\d+.*)(ret|con)+[A-Za-z ]*$/; // at least one digit
   if (re.test(score)) {
     const [leading] = score.match(re).slice(1);
@@ -104,11 +104,11 @@ export function handleRetired({ score, profile, applied }) {
   const additionalRetired = Array.isArray(providerRetired) ? providerRetired : [providerRetired].filter(Boolean);
 
   // accommodate other variations
-  const retired = ['rtd', ...additionalRetired].find((ret) => score.endsWith(ret));
+  const retired = ['rtd', ...additionalRetired].find((ret) => score?.endsWith(ret));
 
   if (retired) {
     applied.push('handleRetired');
-    return { matchUpStatus: 'retired', score: score.replace(retired, '').trim(), applied };
+    return { matchUpStatus: 'retired', score: score?.replace(retired, '').trim(), applied };
   }
   return { score };
 }

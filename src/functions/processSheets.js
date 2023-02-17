@@ -19,8 +19,6 @@ import {
 
 const { PAIR } = participantConstants;
 
-const invalidNames = [];
-
 export function processSheets({ fileName, config = {} } = {}) {
   const { sheetLimit, sheetNumbers = [] } = config;
   const { workbook, workbookType } = getWorkbook();
@@ -80,16 +78,12 @@ export function processSheets({ fileName, config = {} } = {}) {
       structures = [],
       hasValues,
       analysis,
-      warnings,
+      warnings = [],
       context,
       entries,
       error
     } = result;
-    const drawSize = structures?.[structures.length - 1]?.positionAssignments.length;
-
-    const invalidParticipant = structureParticipants?.find(({ participantName }) =>
-      invalidNames.includes(participantName)
-    );
+    const drawSize = structures?.[structures.length - 1]?.positionAssignments?.length;
 
     const participantTypes = structureParticipants?.reduce((types, participant) => {
       const participantType = participant.participantType;
@@ -98,9 +92,6 @@ export function processSheets({ fileName, config = {} } = {}) {
     }, []);
 
     const isDoubles = participantTypes?.includes(PAIR);
-
-    if (invalidParticipant)
-      console.log({ sheetName, fileName }, invalidParticipant?.individualParticipants || invalidParticipant);
 
     const structureMatchUps = structures?.flatMap(
       (structure) => structure?.matchUps || structure?.structures?.flatMap(({ matchUps }) => matchUps)
@@ -183,7 +174,7 @@ export function processSheets({ fileName, config = {} } = {}) {
           format: 'brightmagenta'
         }
       };
-      const format = isDoubles ? 'D' : participantTypes ? 'S' : undefined;
+      const format = (isDoubles && 'D') || participantTypes ? 'S' : undefined;
       const attrs = format
         ? {
             ...leader,

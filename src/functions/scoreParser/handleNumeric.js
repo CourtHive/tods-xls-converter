@@ -6,10 +6,10 @@ import { parseSuper } from './transforms';
 
 export function handleNumeric({ score, applied, matchUpStatus }) {
   const onlyNumbers = score
-    .toString()
+    ?.toString()
     // .replace(/\(|\)|\s/g, '')
     .split('');
-  const allNumeric = onlyNumbers.every((d) => isNumeric(d));
+  const allNumeric = onlyNumbers?.every((d) => isNumeric(d));
 
   const getDiff = (values) => Math.abs(values[0] - values[1]);
 

@@ -88,10 +88,8 @@ export const getSheetAnalysis = ({
     return assessment;
   };
 
-  let columnProfiles = columnKeys
-    .sort()
-    .map(assessColumn)
-    .filter(({ values }) => values?.length);
+  columnKeys.sort();
+  let columnProfiles = columnKeys.map(assessColumn).filter(({ values }) => values?.length);
 
   // post-process columnProfiles
   columnProfiles.forEach((columnProfile, columnIndex) => {

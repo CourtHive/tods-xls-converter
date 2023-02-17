@@ -103,8 +103,7 @@ export function writeTODS08CSV({ matchUps, writeDir, writeXLSX }) {
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, worksheet, 'matchUps');
     writeFile(workbook, `${writeDir}/matchUps.xlsx`, { compression: true });
-  } else {
-    const csvMatchUps = utilities.JSON2CSV(matchUps, config);
-    writeFileSync(`${writeDir}/matchUps.csv`, csvMatchUps, 'UTF-8');
   }
+  const csvMatchUps = utilities.JSON2CSV(matchUps, config);
+  writeFileSync(`${writeDir}/matchUps.csv`, csvMatchUps, 'UTF-8');
 }

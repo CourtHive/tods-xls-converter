@@ -51,13 +51,31 @@ it.only('can process passing', () => {
 
   resetLogging();
   setLoggingActive(true);
-  setLoggingActive(false, 'errorlog');
+  setLoggingActive(false, 'singlePositions');
+  setLoggingActive(false, 'advanceTargets', {
+    roundNumbers: [1],
+    roundPositions: [2],
+    participantValues: true,
+    potentialValues: true,
+    sideWeights: true,
+    pRank: false
+  });
+  setLoggingActive(false, 'headerColumns', { attr: 'round', column: 'A' });
+  setLoggingActive(false, 'columnFrequency');
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
+  setLoggingActive(false, 'columnValues', { roundNumber: 1 });
+  setLoggingActive(false, 'detail'); // globalLog notices
+  setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
-  setLoggingActive(false, 'sheetNames');
-  setLoggingActive(false, 'noWinningSide');
-  setLoggingActive(false, 'invalidResult');
+  setLoggingActive(false, 'finalPositions');
+  setLoggingActive(false, 'matchUps', { roundNumber: 2, roundPosition: undefined });
+  setLoggingActive(false, 'multipleResults');
+  setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only
+  setLoggingActive(false, 'participants', { participantType: undefined, idsOnly: false });
+  setLoggingActive(true, 'scoreAudit');
   setLoggingActive(false, 'scores');
-  setLoggingActive(false, 'matchUps');
+  setLoggingActive(false, 'sheetNames');
+
   const config = {
     writeTournamentRecords: false,
     writeResultIndex: undefined,
@@ -145,7 +163,7 @@ it.skip('can process tests', () => {
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only
   setLoggingActive(false, 'participants', { participantType: undefined, idsOnly: false });
-  setLoggingActive(true, 'scoreAudit'); // when true writes to ./scratch/scoreParsing
+  setLoggingActive(true, 'scoreAudit');
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'sheetNames');
 

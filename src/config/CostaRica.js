@@ -56,7 +56,7 @@ const genderIdentifiers = [
   { searchText: 'femenino', gender: FEMALE }
 ];
 
-// const organization = 'FEDERACION COSTARRICENSE DE TENIS';
+const orgName = 'FEDERACION COSTARRICENSE DE TENIS';
 const organization = 'CR';
 export const config = {
   organization,
@@ -175,6 +175,7 @@ export const config = {
         type: HEADER,
         id: 'roundRobinParticipants',
         elements: ['1', '2', '3', '4'],
+        extractColumns: true,
         minimumElements: 3,
         rows: 1
       },
@@ -196,7 +197,8 @@ export const config = {
       {
         type: HEADER,
         id: 'federationHeader',
-        elements: [{ text: organization, options: { startsWith: true } }],
+        elements: [{ text: orgName, options: { startsWith: true } }],
+        extractColumns: true,
         minimumElements: 1,
         rows: 1
       },
@@ -399,5 +401,5 @@ export const config = {
     });
     return potentials;
   },
-  identifiers: [organization, { text: 'COSTARRICENSE', includes: true }]
+  identifiers: [orgName, { text: 'COSTARRICENSE', includes: true }]
 };
