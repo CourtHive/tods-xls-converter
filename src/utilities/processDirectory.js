@@ -25,6 +25,7 @@ export function processDirectory(config) {
     matchUpContext = {},
 
     captureProcessedData = true,
+    requireProviderIds,
     includeWorkbooks,
     processLimit = 0,
     startIndex = 0
@@ -391,7 +392,7 @@ export function processDirectory(config) {
       noWinningSide += 1;
     } else if (matchUp.drawPositions.length !== 2) {
       insufficientDrawPositions += 1;
-    } else if (!allValidParticipantIds) {
+    } else if (requireProviderIds && !allValidParticipantIds) {
       systemGeneratedIDs += 1;
     } else if (matchUpStatus === WALKOVER) {
       walkovers += 1;
