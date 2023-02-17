@@ -5,6 +5,7 @@ import { getRow } from './sheetAccess';
 
 import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
+import { ROUND } from '../constants/sheetElements';
 
 export function getColumnCharacter({
   columnProfiles,
@@ -60,13 +61,14 @@ export function getColumnCharacter({
 
   // preRound and position columns cannot occur beyond 4th column
   if (
-    !columnProfile.attribute &&
+    (!columnProfile.attribute || (columnProfile.attribute === ROUND && columnIndex <= 2)) &&
     (sheetType === ROUND_ROBIN ? allNumeric : knockOutCheck) &&
     positionIndex === undefined &&
     columnIndex < 4 &&
     numericCheck
   ) {
     const character = containsAlpha ? PRE_ROUND : POSITION;
+    columnProfile.attribute = undefined; // handle preRound identified as ROUND
     columnProfile.character = character;
     if (!attributeMap[column]) attributeMap[column] = character;
     const upperRowBound = character === POSITION && Math.max(...columnProfile.rows);
