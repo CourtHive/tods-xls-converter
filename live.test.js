@@ -41,10 +41,6 @@ export function foo() {
 it.only('can process passing', () => {
   const readDir = './examples/sheets/CostaRica/final';
   const writeDir = './examples/sheets/processed/CR/final';
-  const writeTournamentRecords = false;
-  const writeParticipants = false;
-  const writeMatchUps = true;
-  let writeResultIndex;
 
   const sheetTypes = []; // e.g. ROUND_ROBIN
   const sheetNumbers = [];
@@ -63,12 +59,13 @@ it.only('can process passing', () => {
   setLoggingActive(false, 'scores');
   setLoggingActive(false, 'matchUps');
   const config = {
+    writeTournamentRecords: false,
+    writeResultIndex: undefined,
+    writeParticipants: true,
     processStructures: true,
-    writeTournamentRecords,
     defaultProvider: 'CR',
-    writeParticipants,
-    writeResultIndex,
-    writeMatchUps,
+    writeMatchUps: true,
+    writeXLSX: true,
     processLimit,
     sheetNumbers,
     startIndex,
@@ -156,6 +153,7 @@ it.skip('can process tests', () => {
     captureProcessedData: true, // set to false to bulk process > 200 files
     // tournamentContext: { startDate: '2022-06-06' },
     progressedPositions: true, // Boolean whether or not to check for positions progressed rather than participant names
+    requireProviderIds: true,
     processStructures: true,
     includeWorkbooks: false,
     writeTournamentRecords,
