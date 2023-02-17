@@ -1,7 +1,7 @@
-export function getMaxPositionWithValues({ columnProfiles, positionColumn, analysis }) {
+export function getMaxPositionWithValues({ columnProfiles, positionColumn, preRoundColumn, analysis }) {
   const roundColumns = analysis.columns.round || [];
 
-  const positionProfile = columnProfiles.find(({ column }) => column === positionColumn);
+  const positionProfile = columnProfiles.find(({ column }) => column === positionColumn || column === preRoundColumn);
   const positionRows = positionProfile?.rows || [];
 
   // valuesColumns are participantDetail columns... some providers do not have them.
