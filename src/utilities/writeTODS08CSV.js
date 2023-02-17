@@ -15,7 +15,8 @@ export function writeTODS08CSV({ matchUps, writeDir, writeXLSX }) {
 
   const getFirstChar = (value) => value?.slice(0, 1);
   const config = {
-    delimiter: '"',
+    delimiter: `"`,
+    columnJoiner: `|`,
     includeTransformAccessors: true, // will include columnTransoforms in columnAccessors; otherwise [] value will return all columns
     columnAccessors: [],
     columnTransform: {
