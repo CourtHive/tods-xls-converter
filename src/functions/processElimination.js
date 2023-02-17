@@ -38,6 +38,7 @@ export function processElimination({ profile, analysis, sheet, confidenceThresho
     getMaxPositionWithValues({
       columnProfiles,
       positionColumn,
+      preRoundColumn,
       analysis
     });
 
