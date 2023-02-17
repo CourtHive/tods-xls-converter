@@ -46,6 +46,10 @@ export function getColumnResults({
 
     value = getNonBracketedValue(value) || '';
     isDoubleWalkover = isDoubleWalkover || value === providerDoubleWalkover.toLowerCase();
+    const scoreLike = isLikeScore(value);
+    if (!scoreLike && profile.participantProcessor) {
+      value = profile.participantProcessor(value);
+    }
 
     const sideWeights = !isDoubleWalkover
       ? consideredParticipants?.map((participant, index) => {
@@ -61,8 +65,6 @@ export function getColumnResults({
     const side = sideWeights?.reduce((side, weight) => (weight.confidence > side.confidence ? weight : side), {
       confidence: 0
     });
-
-    const scoreLike = isLikeScore(value);
 
     return { value, scoreLike, side, potentialResult };
   };

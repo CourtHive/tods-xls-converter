@@ -392,6 +392,10 @@ export const config = {
         const dateString = [year, month, day].join('-');
         return dateString;
       }
+    },
+    participantProcessor: (participant) => {
+      const value = participant.replace(/\(.*\)/, '');
+      return value;
     }
   },
   sheetNameMatcher: (sheetNames) => {
