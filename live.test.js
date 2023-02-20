@@ -53,8 +53,8 @@ it.only('can process passing', () => {
   setLoggingActive(true);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
-    roundNumbers: [1],
-    roundPositions: [2],
+    roundNumbers: [2],
+    roundPositions: [4],
     participantValues: true,
     potentialValues: true,
     sideWeights: true,
@@ -62,13 +62,13 @@ it.only('can process passing', () => {
   });
   setLoggingActive(false, 'headerColumns', { attr: 'round', column: 'A' });
   setLoggingActive(false, 'columnFrequency');
-  setLoggingActive(false, 'columnProfiles', { index: undefined, column: undefined });
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: 'A' });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
-  setLoggingActive(false, 'matchUps', { roundNumber: 2, roundPosition: undefined });
+  setLoggingActive(false, 'matchUps', { roundNumber: 6, roundPosition: undefined });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only
   setLoggingActive(false, 'participants', { participantType: undefined, idsOnly: false });

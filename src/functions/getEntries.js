@@ -40,7 +40,11 @@ export function getEntries({
 
   const attributeColumns = Object.keys(analysis.columns).filter(Boolean);
   const entryDetailAttributes = ENTRY_DETAILS.filter((attribute) => attributeColumns.includes(attribute));
-  const entryDetailColumns = entryDetailAttributes.flatMap((attribute) => analysis.columns[attribute]).sort();
+
+  // TODO: this should be provider configuarble
+  const entryDetailColumns = preRoundParticipants?.length
+    ? []
+    : entryDetailAttributes.flatMap((attribute) => analysis.columns[attribute]).sort();
 
   const idColumn = analysis.columnProfiles.find(
     ({ character, attribute }) => attribute === PERSON_ID || character === PERSON_ID
@@ -66,7 +70,7 @@ export function getEntries({
     .filter((row) => row >= minPositionRow && row <= maxPositionRow)
     .sort(utilities.numericSort);
 
-  if (entryDetailAttributes?.length) {
+  if (entryDetailAttributes?.length && !preRoundParticipants?.length) {
     for (const attribute of entryDetailAttributes) {
       const attributeColumn = analysis.columns[attribute];
       if (Array.isArray(attributeColumn)) {

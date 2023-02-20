@@ -34,11 +34,15 @@ export function getPositionRefs({ columnProfiles, positionColumn, preRoundColumn
     .map(getRow)
     .filter((row) => !avoidRows.includes(row));
 
-  const minRow = Math.min(...keyedRows);
-  const maxRow = Math.max(...keyedRows);
-  const rowDifference = maxRow - minRow;
-  const rowStep = rowDifference / (lastPosition - 1);
-  const missingPositionRows = missingPositions.map((position) => (position - 1) * rowStep + minRow);
+  const missingPositionRows = utilities
+    .chunkArray(
+      keyedRows.filter((row) => !knownRows.includes(row)),
+      2
+    )
+    .map((pair) => {
+      const diff = pair[1] - pair[0];
+      return diff === 2 ? pair[0] + 1 : pair[0] + Math.round(diff / 2);
+    });
   const allRows = [...knownRows, ...missingPositionRows].sort(utilities.numericSort);
 
   const preRoundParticipantRows = keyedRows.filter((row) => !knownRows.includes(row));

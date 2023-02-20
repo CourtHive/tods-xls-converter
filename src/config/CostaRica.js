@@ -76,6 +76,7 @@ export const config = {
       // TODO: introduce { regex } // which would be an exact match
       'final',
       'medalla',
+      'cariari',
       'campeon',
       'subcampeon',
       ...categories, // use regex
