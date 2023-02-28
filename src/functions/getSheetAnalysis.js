@@ -20,7 +20,7 @@ import {
 } from '../utilities/convenience';
 
 import { LAST_NAME } from '../constants/attributeConstants';
-import { POSITION } from '../constants/columnConstants';
+import { POSITION, PRE_ROUND } from '../constants/columnConstants';
 import { ROUND_ROBIN } from '../constants/sheetTypes';
 
 export const getSheetAnalysis = ({
@@ -58,6 +58,7 @@ export const getSheetAnalysis = ({
   });
 
   let positionIndex;
+  let positionPotentials;
 
   const assessColumn = (column, columnIndex) => {
     const isColumnKey = (key) => getCol(key) === column;
@@ -77,6 +78,10 @@ export const getSheetAnalysis = ({
 
     if (assessment.character === POSITION) positionIndex = columnIndex;
 
+    // preRounds can sometimes occur BEFORE the positioning column
+    if (assessment.character === 'positionPotentials') positionPotentials = true;
+    if (assessment.character === 'position' && column === 'B' && columnKeys.includes('A')) positionPotentials = true;
+
     if (upperRowBound) {
       const upperBoundAdd = sheetType === ROUND_ROBIN ? 2 : 1; // TODO: provider config
       const avoidRange = utilities.generateRange(upperRowBound + upperBoundAdd, rowRange.to);
@@ -91,6 +96,48 @@ export const getSheetAnalysis = ({
   columnKeys.sort();
   let columnProfiles = columnKeys.map(assessColumn).filter(({ values }) => values?.length);
 
+  // when there are positionPotentials and column A contains non-numeric values
+  // combine columns B and A...
+  if (positionPotentials && columnKeys.includes('A')) {
+    const columnA = columnProfiles.find(({ column }) => column === 'A');
+    if (columnA.containsNumeric === false) {
+      const columnB = columnProfiles.find(({ column }) => column === 'B');
+      const rows = utilities.unique(columnA.rows.concat(columnB.rows)).sort(utilities.numericSort);
+      const keyMap = {};
+      const values = [];
+      const rowstoremove = [];
+      let alphaCount = 0;
+
+      rows.forEach((row) => {
+        const aKey = `A${row}`;
+        const value = columnA.keyMap[aKey] || columnB.keyMap[`B${row}`];
+
+        if (isNumeric(value) && alphaCount === 1) {
+          rowstoremove.push(row);
+        } else if (isNumeric(value) && alphaCount === 2) {
+          alphaCount = 0;
+        } else if (!isNumeric(value)) {
+          if (alphaCount < 2) {
+            alphaCount += 1;
+          } else {
+            alphaCount = 1;
+          }
+        }
+
+        if (!rowstoremove.includes(row)) {
+          values.push(value);
+          keyMap[aKey] = value;
+        }
+      });
+
+      columnA.rows = rows.filter((row) => !rowstoremove.includes(row));
+      columnA.values = values;
+      columnA.keyMap = keyMap;
+      columnA.character = PRE_ROUND;
+      columnProfiles = columnProfiles.filter(({ column }) => column !== 'B');
+    }
+  }
+
   // post-process columnProfiles
   columnProfiles.forEach((columnProfile, columnIndex) => {
     const { character } = getRoundCharacter({
@@ -104,6 +151,7 @@ export const getSheetAnalysis = ({
       if (!columnProfile.character) columnProfile.character = character;
       extendColumnsMap({ columnsMap: columns, attribute: character, column: columnProfile.column });
     }
+    columnProfile.columnIndex = columnIndex;
   });
 
   const log = getLoggingActive('columnProfiles');
