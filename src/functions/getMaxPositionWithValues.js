@@ -1,13 +1,22 @@
 export function getMaxPositionWithValues({ columnProfiles, positionColumn, preRoundColumn, analysis }) {
   const roundColumns = analysis.columns.round || [];
 
+  const minRoundIndex = Math.min(
+    ...columnProfiles.filter(({ column }) => roundColumns.includes(column)).map(({ columnIndex }) => columnIndex)
+  );
+
   const positionProfile = columnProfiles.find(({ column }) => column === positionColumn || column === preRoundColumn);
   const positionRows = positionProfile?.rows || [];
 
   // valuesColumns are participantDetail columns... some providers do not have them.
   const valuesColumns = columnProfiles.filter(
-    ({ column, character }) => column !== positionColumn && !roundColumns.includes(column) && character !== 'result'
+    ({ column, character, columnIndex }) =>
+      column !== positionColumn &&
+      !roundColumns.includes(column) &&
+      character !== 'result' &&
+      columnIndex < minRoundIndex
   );
+
   const maxValueRow = Math.max(...valuesColumns.flatMap(({ rows }) => rows), 0);
   const maxPositionRow = Math.max(...positionRows.filter((row) => !maxValueRow || row <= maxValueRow));
   const valuesCount = valuesColumns.flatMap((c) => c.values).length;
