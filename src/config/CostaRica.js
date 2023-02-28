@@ -29,6 +29,7 @@ const roundNames = [
   'campeon',
   'ganador',
   'ganadora',
+  'ganadores',
   'clasificados',
   'clasificadas'
 ];
@@ -119,11 +120,13 @@ export const config = {
       { text: 'sede', startsWith: true },
       { text: 'ano', startsWith: true },
       { text: 'principal', includes: true },
+      { text: ' pm', includes: true }, // time strings
       { text: 'lluvia', exact: true },
       { text: 'sencillos', includes: true },
       { text: 'nacionales', includes: true },
       // clubs
-      { text: 'ota', startsWith: true },
+      { text: 'ota', exact: true },
+      { text: 'cnt ', startsWith: true },
       { text: 'la paz', startsWith: true },
       { text: 'cnt la paz', startsWith: true },
       { text: 'club ', startsWith: true },
