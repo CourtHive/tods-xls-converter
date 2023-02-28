@@ -50,11 +50,11 @@ it.only('can process passing', () => {
   const startIndex = 0;
 
   resetLogging();
-  setLoggingActive(true);
+  setLoggingActive(false);
   setLoggingActive(false, 'singlePositions');
   setLoggingActive(false, 'advanceTargets', {
-    roundNumbers: [2],
-    roundPositions: [4],
+    roundNumbers: [1],
+    roundPositions: [3],
     participantValues: true,
     potentialValues: true,
     sideWeights: true,
@@ -62,13 +62,13 @@ it.only('can process passing', () => {
   });
   setLoggingActive(false, 'headerColumns', { attr: 'round', column: 'A' });
   setLoggingActive(false, 'columnFrequency');
-  setLoggingActive(false, 'columnProfiles', { index: undefined, column: 'A' });
+  setLoggingActive(false, 'columnProfiles', { index: undefined, column: 'C' });
   setLoggingActive(false, 'columnValues', { roundNumber: 1 });
   setLoggingActive(false, 'detail'); // globalLog notices
   setLoggingActive(true, 'errorLog');
   setLoggingActive(false, 'fileNames');
   setLoggingActive(false, 'finalPositions');
-  setLoggingActive(false, 'matchUps', { roundNumber: 6, roundPosition: undefined });
+  setLoggingActive(false, 'matchUps', { roundNumber: 1, roundPosition: undefined });
   setLoggingActive(false, 'multipleResults');
   setLoggingActive(false, 'noWinningSide'); // currently ROUND_ROBIN only
   setLoggingActive(false, 'participants', { participantType: undefined, idsOnly: false });
@@ -94,22 +94,6 @@ it.only('can process passing', () => {
   };
   const result = processDirectory(config);
   if (result) processResult({ result, config });
-  /*
-  printGlobalLog();
-  purgeGlobalLog();
-  console.log('PASSED', Object.keys(result));
-
-  if (writeParticipants) {
-    const participants = result.participants.filter(({ participantType }) => participantType === 'INDIVIDUAL');
-    const csvParticipants = utilities.JSON2CSV(participants, {
-      columnAccessors: ['participantId', 'participantName', 'person.standardFamilyName', 'person.standardGivenName']
-    });
-    writeFileSync('./scratch/participants.json', JSON.stringify(participants), 'UTF-8');
-    writeFileSync('./scratch/participants.csv', csvParticipants, 'UTF-8');
-  }
-  if (!isNaN(writeResultIndex))
-    writeFileSync('./scratch/fileResult.json', JSON.stringify(result.fileResults[writeResultIndex]), 'UTF-8');
-    */
 });
 
 it.skip('can process tests', () => {
