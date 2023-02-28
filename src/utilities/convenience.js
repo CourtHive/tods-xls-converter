@@ -125,6 +125,11 @@ export const withoutQualifyingDesignator = (value, qualifyingIdentifiers = []) =
 // ensure that the key is of the form [A-Z][#], not 'AA1', for example
 export const keyHasSingleAlpha = (key) => key && key.length > 1 && isNumeric(key[1]);
 
+export const getMissingNumbers = (a, l = true) =>
+  Array.from(Array(Math.max(...a)).keys())
+    .map((n, i) => (a.indexOf(i) < 0 && (!l || i > Math.min(...a)) ? i : null))
+    .filter((f) => f);
+
 function getSkipOptions(skipObj) {
   const { text, ...options } = skipObj;
   if (text);
