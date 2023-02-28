@@ -6,6 +6,7 @@ import { getCheckedValue } from './getCheckedValue';
 import { audit } from '../global/state';
 import { getRow } from './sheetAccess';
 import {
+  getMissingNumbers,
   getValidConsecutiveRanges,
   isSkipWord,
   onlyAlpha,
@@ -64,6 +65,10 @@ export function getColumnAssessment({
             if (stillConsecutive) assessment.lastConsecutiveValue = value;
             assessment.consecutiveNumbers = stillConsecutive;
           }
+          if (assessment.numericProgression) {
+            const stillProgressing = parseFloat(value) > assessment.lastNumericValue;
+            assessment.numericProgression = stillProgressing;
+          }
           assessment.lastNumericValue = value;
         } else if (value) {
           assessment.allNumeric = false;
@@ -88,6 +93,7 @@ export function getColumnAssessment({
     {
       attribute: attributeMap[column],
       consecutiveNumbers: truthiness,
+      numericProgression: truthiness,
       containsNumeric: false,
       allNumeric: truthiness,
       allAlpha: truthiness,
@@ -107,6 +113,7 @@ export function getColumnAssessment({
     assessment.lastConsecutiveValue = undefined;
     assessment.lastNumericValue = undefined;
     assessment.consecutiveNumbers = false;
+    assessment.numericProgression = false;
   }
 
   // 1 is technically a powerOf2, but it is invalid for a drawSize
@@ -167,10 +174,6 @@ export function getColumnAssessment({
         message
       });
     } else {
-      const getMissingNumbers = (a, l = true) =>
-        Array.from(Array(Math.max(...a)).keys())
-          .map((n, i) => (a.indexOf(i) < 0 && (!l || i > Math.min(...a)) ? i : null))
-          .filter((f) => f);
       const missingNumbers =
         assessment.values?.length > 2 &&
         assessment.values.every((value) => isNumeric(value)) &&
@@ -216,6 +219,16 @@ export function getColumnAssessment({
         }
       }
     }
+  }
+
+  if (
+    column === 'B' &&
+    assessment.numericProgression &&
+    !assessment.consecutiveNumbers &&
+    assessment.allNumeric &&
+    utilities.isPowerOf2(assessment.lastNumericValue)
+  ) {
+    assessment.character = 'positionPotentials';
   }
 
   // apply any character processing specified by profile
