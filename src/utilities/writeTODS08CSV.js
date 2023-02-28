@@ -16,7 +16,7 @@ export function writeTODS08CSV({ matchUps, writeDir, writeXLSX }) {
   const getFirstChar = (value) => value?.slice(0, 1);
   const config = {
     delimiter: `"`,
-    columnJoiner: `|`,
+    columnJoiner: `,`,
     includeTransformAccessors: true, // will include columnTransoforms in columnAccessors; otherwise [] value will return all columns
     columnAccessors: [],
     columnTransform: {
@@ -98,7 +98,11 @@ export function writeTODS08CSV({ matchUps, writeDir, writeXLSX }) {
   };
 
   if (writeXLSX) {
-    const flatJSONmatchUps = utilities.JSON2CSV(matchUps, { ...config, returnTransformedJSON: true });
+    const flatJSONmatchUps = utilities.JSON2CSV(matchUps, {
+      ...config,
+      returnTransformedJSON: true,
+      columnJoiner: '|'
+    });
     const worksheet = utils.json_to_sheet(flatJSONmatchUps);
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, worksheet, 'matchUps');
