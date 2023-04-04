@@ -14,8 +14,8 @@ dependencies:
     specifier: ^2.4.1
     version: 2.4.1
   tods-competition-factory:
-    specifier: 0.447.0
-    version: 0.447.0
+    specifier: 0.465.0
+    version: 0.465.0
   xlsx:
     specifier: 0.18.5
     version: 0.18.5
@@ -6561,8 +6561,8 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /tods-competition-factory@0.447.0:
-    resolution: {integrity: sha512-M41PLRhEbY3Riu+Sz7tkLpA6EXpd4dcO3/KH/CG8O4jtOJXjfbiySlPgt9hS3O89cZpVtnJ+TPLLn2/vM55vug==}
+  /tods-competition-factory@0.465.0:
+    resolution: {integrity: sha512-qUCS+liOyI/VaaJ6iqTFsmH65odsN7t5hN45sFD/PbWp53tTkVLejxz9FGXDVqPZ+RejxoVh5cwGESs9eVxVLw==}
     dev: false
 
   /trim-newlines@3.0.1:
