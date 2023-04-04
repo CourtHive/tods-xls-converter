@@ -38,7 +38,7 @@ export function foo() {
   return boo && hoo;
 }
 
-it.only('can process passing', () => {
+it.skip('can process passing', () => {
   const readDir = './examples/sheets/CostaRica/final';
   const writeDir = './examples/sheets/processed/CR/final';
 
@@ -94,10 +94,10 @@ it.only('can process passing', () => {
     */
 });
 
-it.skip('can process tests', () => {
+it.only('can process tests', () => {
   const errorType = NONE;
   const subDir = errorType && `/${errorType}`;
-  const year = '2016';
+  const year = '2023';
   if (subDir || year) {
     // do nothing!
   }
@@ -119,7 +119,7 @@ it.skip('can process tests', () => {
   const sheetLimit = 0;
 
   // workbook processing config
-  const processLimit = 100;
+  const processLimit = 0;
   const startIndex = 0;
 
   resetLogging();
