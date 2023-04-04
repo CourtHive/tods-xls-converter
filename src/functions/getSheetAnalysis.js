@@ -100,7 +100,7 @@ export const getSheetAnalysis = ({
   // combine columns B and A...
   if (positionPotentials && columnKeys.includes('A')) {
     const columnA = columnProfiles.find(({ column }) => column === 'A');
-    if (columnA.containsNumeric === false) {
+    if (columnA?.containsNumeric === false) {
       const columnB = columnProfiles.find(({ column }) => column === 'B');
       const rows = utilities.unique(columnA.rows.concat(columnB.rows)).sort(utilities.numericSort);
       const keyMap = {};
