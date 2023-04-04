@@ -23,7 +23,7 @@ specifiers:
   eslint-plugin-prettier: ^4.2.1
   esm: ^3.2.25
   fast-fuzzy: ^1.12.0
-  fs-extra: 11.1.0
+  fs-extra: 11.1.1
   hash-sum: ^2.0.0
   husky: 8.0.3
   lint-staged: 13.2.0
@@ -72,7 +72,7 @@ devDependencies:
   eslint-plugin-import: 2.26.0_tqyj5ytb5g6r5ett7xxedhk6eq
   eslint-plugin-prettier: 4.2.1_kl4pe43v5b43npmso5hoplpbyi
   esm: 3.2.25
-  fs-extra: 11.1.0
+  fs-extra: 11.1.1
   husky: 8.0.3
   lint-staged: 13.2.0
   np: 7.6.3
@@ -3835,8 +3835,8 @@ packages:
       universalify: 2.0.0
     dev: true
 
-  /fs-extra/11.1.0:
-    resolution: {integrity: sha512-0rcTq621PD5jM/e0a3EJoGC/1TC5ZBCERW82LQuwfGnCa1V8w7dpYH1yNu+SLb6E5dkeCBzKEyLGlFrnr+dUyw==}
+  /fs-extra/11.1.1:
+    resolution: {integrity: sha512-MGIE4HOvQCeUCzmlHs0vXpih4ysz4wg9qiSAu6cd42lVwPbTM1TjV7RusoyQqMmk/95gdQZX72u+YW+c3eEpFQ==}
     engines: {node: '>=14.14'}
     dependencies:
       graceful-fs: 4.2.10
