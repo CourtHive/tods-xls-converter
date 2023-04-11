@@ -295,7 +295,7 @@ export const config = {
         limit: 1,
         required: true,
         skipWords: ['reg', 'umpire', '0', 'a/f', 'AF', 'new id', 'app', 'new', 'bye', 'applied'],
-        valueRegex: '[\\w-]*(\\d{5,})[ A-Za-z]*$',
+        valueRegex: '[A-Za-z-]*(\\d{5,})[ A-Za-z]*$',
         valueMatchThreshold: 0.45,
         extract: true
       },
