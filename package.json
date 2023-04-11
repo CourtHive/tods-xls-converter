@@ -78,7 +78,7 @@
     "lint-staged": "13.2.1",
     "np": "7.7.0",
     "prettier": "^2.8.1",
-    "rimraf": "4.4.1",
+    "rimraf": "5.0.0",
     "rollup": "^3.8.1",
     "rollup-plugin-esbuild": "5.0.0",
     "rollup-plugin-exclude-dependencies-from-bundle": "^1.1.23",
