@@ -39,8 +39,8 @@ export function foo() {
 }
 
 it.only('can process passing', () => {
-  const readDir = './examples/sheets/CostaRica/final';
-  const writeDir = './examples/sheets/processed/CR/final';
+  const readDir = './examples/sheets/Processing';
+  const writeDir = './examples/sheets/processed/CR/JSON';
 
   const sheetTypes = []; // e.g. ROUND_ROBIN
   const sheetNumbers = [];
@@ -77,7 +77,7 @@ it.only('can process passing', () => {
   setLoggingActive(false, 'sheetNames');
 
   const config = {
-    writeTournamentRecords: false,
+    writeTournamentRecords: true,
     writeResultIndex: undefined,
     writeParticipants: true,
     processStructures: true,
@@ -108,8 +108,8 @@ it.skip('can process tests', () => {
   // const writeDir = `./examples/sheets/processed/testing`;
   const readDir = `./examples/sheets/India/years/${year}${subDir}`;
   const writeDir = `./examples/sheets/processed/IND/${year}`;
-  const writeTournamentRecords = false;
-  const writeParticipants = false;
+  const writeTournamentRecords = true;
+  const writeParticipants = true;
   const moveErrorFiles = false;
   const writeMatchUps = true;
   const writeXLSX = false; // optional output for matchUps; if true then no .csv output is produced
