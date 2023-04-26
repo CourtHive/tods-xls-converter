@@ -313,7 +313,7 @@ export function processDirectory(config) {
       }
     }
 
-    const r = tournamentEngine.getMatchUpDependencies();
+    tournamentEngine.getMatchUpDependencies();
     const tournamentRecord = tournamentEngine.getState().tournamentRecord;
 
     if (captureProcessedData) {
