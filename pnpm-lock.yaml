@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   fast-fuzzy:
     specifier: ^1.12.0
@@ -14,8 +18,8 @@ dependencies:
     specifier: ^2.4.1
     version: 2.4.1
   tods-competition-factory:
-    specifier: 0.468.0
-    version: 0.468.0
+    specifier: 0.512.8
+    version: 0.512.8
   xlsx:
     specifier: 0.18.5
     version: 0.18.5
@@ -6608,8 +6612,9 @@ packages:
       is-number: 7.0.0
     dev: true
 
-  /tods-competition-factory@0.468.0:
-    resolution: {integrity: sha512-BBDwejGWpd3TL/DYyTCv01/y64LhsiO+5JjeUEIYQQC13Tre3fZvPR/1aBo8X3bTAzTqbNdLY1UeMCbH0IjOhw==}
+  /tods-competition-factory@0.512.8:
+    resolution: {integrity: sha512-hnlUa8kInIIR6od28CjVr5TWWE+a2+sCgCzq82Cwsv/kcPfUGBaCjtkIvLVr9R0j3pEDSdxwX36/Ku1BsBnE1Q==}
+    engines: {node: '>=16.16.0 < 19'}
     dev: false
 
   /trim-newlines@3.0.1:
